@@ -7,6 +7,9 @@ from . import ClassyCriterion, build_criterion, register_criterion
 class SumArbitraryLoss(ClassyCriterion):
     """
     Sums a collection of (weighted) torch.nn losses.
+
+    NOTE: this applies all the losses to the same output and does not support
+    taking a list of outputs as input.
     """
 
     def __init__(self, config):
