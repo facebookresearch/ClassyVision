@@ -70,11 +70,6 @@ class ClassyState:
 
     @property
     def num_batches_per_phase(self):
-        if isinstance(self.dataloaders[self.phase_type].dataset, IterableDataset):
-            return (
-                len(self.dataloaders[self.phase_type].dataset)
-                // self.get_global_batchsize()
-            )
         return len(self.data_iterator)
 
     @property

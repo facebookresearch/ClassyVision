@@ -66,7 +66,9 @@ def train_step(state, hooks, use_gpu, local_variables=None):
             isinstance(local_variables["sample"], dict)
             and "input" in local_variables["sample"]
             and "target" in local_variables["sample"]
-        ), "Returned sample is not a map with 'input' and 'target' keys"
+        ), "Returned sample [{}] is not a map with 'input' and 'target' keys".format(
+            local_variables["sample"]
+        )
 
     run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_sample.name)
 
