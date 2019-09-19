@@ -2,7 +2,7 @@
     "name": "classy_vision",
     "num_phases": 90,
     "criterion": {
-        "name": "sum_cross_entropy"
+        "name": "CrossEntropyLoss"
     },
     "dataset": {
         "train": {

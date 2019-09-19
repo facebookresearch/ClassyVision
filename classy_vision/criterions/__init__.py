@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import torch
+import torch.nn.modules.loss as torch_losses
 from classy_vision.generic.registry_utils import import_all_modules
 
 from .classy_criterion import ClassyCriterion
@@ -15,7 +17,27 @@ CRITERION_CLASS_NAMES = set()
 
 
 def build_criterion(config):
-    return CRITERION_REGISTRY[config["name"]](config)
+    """
+    Builds a criterion, first searching for it in the registry and then in
+    torch.nn.modules.loss.
+    """
+    assert "name" in config, f"name not provided for criterion: {config}"
+    name = config["name"]
+    if name in CRITERION_REGISTRY:
+        return CRITERION_REGISTRY[name](config)
+
+    # the name should be available in torch.nn.modules.loss
+    assert hasattr(torch_losses, name), (
+        f"{name} isn't a registered criterion"
+        ", nor is it available in torch.nn.modules.loss"
+    )
+    args = config.copy()
+    del args["name"]
+    if "weight" in args:
+        # if we are passing weights, we need to change the weights from a list
+        # to a tensor
+        args["weight"] = torch.tensor(args["weight"], dtype=torch.float)
+    return getattr(torch_losses, name)(**args)
 
 
 def register_criterion(name):

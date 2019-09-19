@@ -11,7 +11,7 @@ from classy_vision.trainer import ClassyTrainer
 class TestParamSchedulerIntegration(unittest.TestCase):
     def _get_config(self):
         return {
-            "criterion": {"name": "sum_cross_entropy"},
+            "criterion": {"name": "CrossEntropyLoss"},
             "dataset": {
                 "train": {
                     "name": "synthetic_image",
