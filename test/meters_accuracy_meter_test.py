@@ -4,11 +4,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from test.generic.meter_test_utils import ClassificationMeterTest
+
 import torch
 from classy_vision import meters
 from classy_vision.meters.accuracy_meter import AccuracyMeter
-
-from .generic.meter_test_utils import ClassificationMeterTest
 
 
 class TestAccuracyMeter(ClassificationMeterTest):

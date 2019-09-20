@@ -112,10 +112,6 @@ class TestClassyDataset(unittest.TestCase):
         state = self.dataset1.get_classy_state()
         self.assertEqual(state["config"], DUMMY_CONFIG)
         self.assertEqual(
-            str(state["state"]["dataset_type"]),
-            "<class 'test.dataset_classy_dataset_test.TestDataset'>",
-        )
-        self.assertEqual(
             state["wrapped_state"], self.dataset1.dataset.get_classy_state()
         )
 
