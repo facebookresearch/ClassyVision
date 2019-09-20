@@ -120,6 +120,13 @@ class ClassyDataset(Dataset):
     def __len__(self):
         return len(self.dataset)
 
+    def get_batchsize_per_replica(self):
+        # this searches for batchsize_per_replica in self and then in self.dataset
+        return getattr(self, "batchsize_per_replica", 1)
+
+    def get_global_batchsize(self):
+        return self.get_batchsize_per_replica() * get_world_size()
+
     def get_classy_state(self):
         """Get state for object (e.g. shuffle)"""
         return {

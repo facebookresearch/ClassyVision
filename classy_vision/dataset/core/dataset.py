@@ -7,7 +7,10 @@
 
 class Dataset(object):
     """
-        Base dataset class.
+    Base dataset class.
+
+    NOTE: Attribute accesses are passed on to self.dataset (if it exists), if
+          not found in self.
     """
 
     # TODO: Should `dataset.func(*args, **kwargs)` change itself?
