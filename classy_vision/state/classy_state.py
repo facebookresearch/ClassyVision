@@ -149,12 +149,10 @@ class ClassyState:
     # abstraction
     def get_batchsize_per_replica(self):
         # TODO(T47573564) - cleaner abstraction
-        return getattr(
-            self.dataloaders[self.phase_type].dataset, "batchsize_per_replica", 1
-        )
+        return self.dataloaders[self.phase_type].dataset.get_batchsize_per_replica()
 
     def get_global_batchsize(self):
-        return self.get_batchsize_per_replica() * get_world_size()
+        return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
 
     def get_total_samples_trained_this_phase(self):
         # TODO(T47573564) - cleaner abstraction
