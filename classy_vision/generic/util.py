@@ -38,6 +38,13 @@ def is_pos_float(number):
     return type(number) == float and number >= 0.0
 
 
+def is_pos_int_list(l):
+    """
+    Returns True if a list contains positive integers
+    """
+    return type(l) == list and all(is_pos_int(n) for n in l)
+
+
 def is_long_tensor(tensor):
     """
     Returns True if a tensor is a long tensor.
