@@ -9,7 +9,7 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_args, get_test_task_config
 
-from classy_vision.hooks.loss_lr_meter_logging_hook import LossLrMeterLoggingHook
+from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.tasks import setup_task
 
 

@@ -11,7 +11,7 @@ import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
 from classy_vision.generic.util import load_checkpoint
-from classy_vision.hooks.checkpoint_hook import CheckpointHook
+from classy_vision.hooks import CheckpointHook
 from classy_vision.tasks import setup_task
 
 

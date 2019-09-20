@@ -9,7 +9,7 @@ import logging
 from typing import Any, Callable, Dict, List, Union
 
 import torch
-from classy_vision.hooks.classy_hook import ClassyHook, ClassyHookFunctions
+from classy_vision.hooks import ClassyHook, ClassyHookFunctions
 from classy_vision.state.classy_state import ClassyState
 
 from .distributed_util import all_reduce_mean

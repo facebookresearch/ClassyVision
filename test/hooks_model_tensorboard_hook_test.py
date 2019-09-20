@@ -8,7 +8,7 @@ import unittest
 import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task, get_test_model_configs
 
-from classy_vision.hooks.model_tensorboard_hook import ModelTensorboardHook
+from classy_vision.hooks import ModelTensorboardHook
 from classy_vision.models import build_model
 from tensorboardX import SummaryWriter
 

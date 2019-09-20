@@ -7,7 +7,7 @@
 import torch
 from classy_vision.generic.classy_trainer_common import run_hooks, train_step
 from classy_vision.generic.distributed_util import barrier
-from classy_vision.hooks.classy_hook import ClassyHook, ClassyHookFunctions
+from classy_vision.hooks import ClassyHook, ClassyHookFunctions
 from classy_vision.state.classy_state import ClassyState
 
 
