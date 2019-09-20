@@ -7,8 +7,8 @@
 """Various test loaders."""
 
 import os
-import unittest
 import random
+import unittest
 from itertools import chain
 
 
