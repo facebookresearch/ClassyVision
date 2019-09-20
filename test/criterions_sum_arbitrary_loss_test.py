@@ -16,19 +16,19 @@ from classy_vision.criterions import (
 from classy_vision.criterions.sum_arbitrary_loss import SumArbitraryLoss
 
 
-@register_criterion("mock_1")
+@register_criterion("mock_a")
 class MockCriterion1(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(1.0)
 
 
-@register_criterion("mock_2")
+@register_criterion("mock_b")
 class MockCriterion2(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(2.0)
 
 
-@register_criterion("mock_3")
+@register_criterion("mock_c")
 class MockCriterion3(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(3.0)
@@ -39,7 +39,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
         return {
             "name": "sum_arbitrary",
             "weights": [1.0, 1.0, 1.0],
-            "losses": [{"name": "mock_1"}, {"name": "mock_2"}, {"name": "mock_3"}],
+            "losses": [{"name": "mock_a"}, {"name": "mock_b"}, {"name": "mock_c"}],
         }
 
     def _get_outputs(self):
@@ -67,7 +67,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
         # Verify changing losses works
         new_config = config.copy()
         new_config.update(
-            {"losses": [{"name": "mock_1"}, {"name": "mock_2"}], "weights": [1.0, 1.0]}
+            {"losses": [{"name": "mock_a"}, {"name": "mock_b"}], "weights": [1.0, 1.0]}
         )
         crit = SumArbitraryLoss(new_config)
         self.assertAlmostEqual(crit(outputs, targets).item(), 1.0 + 2.0)

@@ -6,11 +6,10 @@
 
 import sys
 import unittest
+from test.generic.utils import make_torch_deterministic
 
 from classy_vision.dataset import build_dataset, get_available_splits
 from classy_vision.dataset.classy_dataset import ClassyDataset
-
-from .generic.utils import make_torch_deterministic
 
 
 # list of datasets expected to be present:
