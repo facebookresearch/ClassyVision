@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Copyright (c) Facebook, Inc. and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 from .backfill_async_dataset_iterator import _BackfillAsyncDatasetIterator
 from .base_async_dataset_iterator import _BaseAsyncDatasetIterator
 from .dataset_iterator import DatasetIterator
