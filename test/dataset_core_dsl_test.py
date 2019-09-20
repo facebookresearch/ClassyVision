@@ -8,6 +8,13 @@ import copy
 import random
 import sys
 import unittest
+from test.generic.merge_dataset import MergeDataset
+from test.generic.utils import (
+    compare_batches,
+    compare_datasets,
+    create_test_dataset,
+    make_torch_deterministic,
+)
 
 import torch
 from classy_vision.dataset.core import (
@@ -18,14 +25,6 @@ from classy_vision.dataset.core import (
 )
 from classy_vision.dataset.core.async_dataset_iterator import AsyncDatasetIterator
 from classy_vision.dataset.core.dataset_iterator import DatasetIterator
-
-from .generic.merge_dataset import MergeDataset
-from .generic.utils import (
-    compare_batches,
-    compare_datasets,
-    create_test_dataset,
-    make_torch_deterministic,
-)
 
 
 # tensor sizes for which to run tests:
