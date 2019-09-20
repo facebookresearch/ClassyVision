@@ -9,28 +9,26 @@ from setuptools import setup, find_packages
 import sys
 
 if sys.version_info < (3, 6):
-    sys.exit('Sorry, Python >=3.6 is required for Classy Vision.')
+    sys.exit("Sorry, Python >=3.6 is required for Classy Vision.")
 
-with open('README.md', encoding="utf8") as f:
+with open("README.md", encoding="utf8") as f:
     readme = f.read()
 
-with open('LICENSE') as f:
+with open("LICENSE") as f:
     license = f.read()
 
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     reqs = f.read()
 
 setup(
-    name='ClassyVision',
-    version='0.1.0',
-    description='An end-to-end computer vision framework.',
+    name="ClassyVision",
+    version="0.1.0",
+    description="An end-to-end computer vision framework.",
     long_description=readme,
-    url='TBD',
+    url="TBD",
     license=license,
-    python_requires='>=3.6',
-    packages=find_packages(
-        exclude=('configs', 'tests')
-    ),
-    install_requires=reqs.strip().split('\n'),
+    python_requires=">=3.6",
+    packages=find_packages(exclude=("configs", "tests")),
+    install_requires=reqs.strip().split("\n"),
     include_package_data=True,
 )
