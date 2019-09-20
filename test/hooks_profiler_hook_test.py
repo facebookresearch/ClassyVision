@@ -8,7 +8,7 @@ import unittest
 import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task
 
-from classy_vision.hooks.profiler_hook import ProfilerHook
+from classy_vision.hooks import ProfilerHook
 
 
 class TestProfilerHook(unittest.TestCase):

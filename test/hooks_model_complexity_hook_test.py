@@ -8,7 +8,7 @@ import re
 import unittest
 from test.generic.config_utils import get_test_classy_task, get_test_model_configs
 
-from classy_vision.hooks.model_complexity_hook import ModelComplexityHook
+from classy_vision.hooks import ModelComplexityHook
 from classy_vision.models import build_model
 
 

@@ -12,7 +12,7 @@ from itertools import product
 from test.generic.config_utils import get_test_classy_task
 
 from classy_vision.generic.perf_stats import PerfStats
-from classy_vision.hooks.time_metrics_hook import TimeMetricsHook
+from classy_vision.hooks import TimeMetricsHook
 
 
 class TestTimeMetricsHook(unittest.TestCase):

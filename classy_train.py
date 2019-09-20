@@ -16,14 +16,16 @@ from classy_vision.generic.distributed_util import (
 )
 from classy_vision.generic.opts import parse_train_arguments
 from classy_vision.generic.util import load_checkpoint, load_json
-from classy_vision.hooks.checkpoint_hook import CheckpointHook
-from classy_vision.hooks.loss_lr_meter_logging_hook import LossLrMeterLoggingHook
-from classy_vision.hooks.model_complexity_hook import ModelComplexityHook
-from classy_vision.hooks.model_tensorboard_hook import ModelTensorboardHook
-from classy_vision.hooks.profiler_hook import ProfilerHook
-from classy_vision.hooks.progress_bar_hook import ProgressBarHook
-from classy_vision.hooks.time_metrics_hook import TimeMetricsHook
-from classy_vision.hooks.visdom_hook import VisdomHook
+from classy_vision.hooks import (
+    CheckpointHook,
+    LossLrMeterLoggingHook,
+    ModelComplexityHook,
+    ModelTensorboardHook,
+    ProfilerHook,
+    ProgressBarHook,
+    TimeMetricsHook,
+    VisdomHook,
+)
 from classy_vision.tasks import setup_task
 from classy_vision.trainer import ClassyTrainer
 

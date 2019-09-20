@@ -9,7 +9,7 @@ import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task
 
 import progressbar
-from classy_vision.hooks.progress_bar_hook import ProgressBarHook
+from classy_vision.hooks import ProgressBarHook
 
 
 class TestProgressBarHook(unittest.TestCase):

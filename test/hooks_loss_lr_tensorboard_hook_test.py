@@ -12,7 +12,7 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_args, get_test_task_config
 
-from classy_vision.hooks.loss_lr_tensorboard_hook import LossLrTensorboardHook
+from classy_vision.hooks import LossLrTensorboardHook
 from classy_vision.tasks import setup_task
 from tensorboardX import SummaryWriter
 

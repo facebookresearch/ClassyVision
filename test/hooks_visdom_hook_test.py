@@ -10,7 +10,7 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_args, get_test_task_config
 
-from classy_vision.hooks.visdom_hook import VisdomHook
+from classy_vision.hooks import VisdomHook
 from classy_vision.tasks import setup_task
 from visdom import Visdom
 
