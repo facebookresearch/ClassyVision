@@ -31,4 +31,5 @@ setup(
     packages=find_packages(exclude=("configs", "tests")),
     install_requires=reqs.strip().split("\n"),
     include_package_data=True,
+    test_suite="test.suites.unittests",
 )
