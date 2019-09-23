@@ -98,7 +98,7 @@ class TestOptimizer(ABC):
         opt2 = build_optimizer(config, mock_classy_vision_model)
         self.assertTrue(isinstance(opt1, self._instance_to_test()))
         opt2.set_classy_state(state)
-        self.assertEqual(opt1.optimizer_config, opt2.optimizer_config)
+        self.assertEqual(opt1.parameters, opt2.parameters)
         for i in range(len(opt1.optimizer.param_groups[0]["params"])):
             self.assertTrue(
                 torch.allclose(

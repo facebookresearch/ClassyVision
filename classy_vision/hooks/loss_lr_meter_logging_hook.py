@@ -64,7 +64,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         loss = sum(state.losses) / (batches * state.get_batchsize_per_replica())
 
         # Optimizer LR for the phase
-        optimizer_lr = state.optimizer.optimizer_config["lr"]
+        optimizer_lr = state.optimizer.lr
 
         log_strs = [
             "Rank: {}, {} phase: {}, processed batches: {}".format(

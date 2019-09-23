@@ -74,11 +74,11 @@ class ClassyOptimizer(object):
         return self._optimizer
 
     @property
-    def optimizer_config(self):
+    def parameters(self):
         """
         Return a kwarg dictionary that will be used to override optimizer
         args stored in checkpoints. This allows us to load a checkpoint and
-        resume training using a different set of optimizer args, e.g., with a
+        resume training using a different set of parameters, e.g., with a
         different learning rate.
         """
         return {"lr": self.lr}
@@ -87,14 +87,11 @@ class ClassyOptimizer(object):
         """
         Return the optimizer's state dict.
         """
-        return {
-            "optim": self.optimizer.state_dict(),
-            "optimizer_config": self.optimizer_config,
-        }
+        return {"optim": self.optimizer.state_dict(), "parameters": self.parameters}
 
     def set_classy_state(self, state):
         self.optimizer.load_state_dict(state["optim"])
-        for param_name, param_value in state["optimizer_config"].items():
+        for param_name, param_value in state["parameters"].items():
             setattr(self, param_name, param_value)
 
     def backward(self, loss):
@@ -123,7 +120,7 @@ class ClassyOptimizer(object):
     def _update_schedule(self, where):
         self.lr = self._lr_scheduler(where)
         for group in self.optimizer.param_groups:
-            group.update(self.optimizer_config)
+            group.update(self.parameters)
 
         # Here there's an assumption that pytorch optimizer maintain the order of
         # param_groups and batch_norm param_group is 0th param_group as initially
