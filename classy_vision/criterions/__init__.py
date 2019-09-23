@@ -28,7 +28,7 @@ def build_criterion(config):
     assert "name" in config, f"name not provided for criterion: {config}"
     name = config["name"]
     if name in CRITERION_REGISTRY:
-        return CRITERION_REGISTRY[name](config)
+        return CRITERION_REGISTRY[name].from_config(config)
 
     # the name should be available in torch.nn.modules.loss
     assert hasattr(torch_losses, name), (

@@ -8,13 +8,16 @@ from torch.nn.modules.loss import _WeightedLoss
 
 
 class ClassyCriterion(_WeightedLoss):
-    def __init__(self, config):
+    def __init__(self):
         """
         Classy Criterion constructor. This stores the criterion config for
         future access and constructs the basic criterion object.
         """
         super(ClassyCriterion, self).__init__()
-        self._config = config
+
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError()
 
     def forward(self, output, target):
         """

@@ -20,6 +20,10 @@ class MockCriterion1(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(1.0)
 
+    @classmethod
+    def from_config(cls, config):
+        return cls()
+
 
 class TestMultiOutputSumLoss(unittest.TestCase):
     def test_multi_output_sum_loss(self):
