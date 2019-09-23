@@ -60,7 +60,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             },
         }
 
-    def _build_state(self, num_phases):
+    def _build_task(self, num_phases):
         config = self._get_config()
         config["optimizer"]["num_epochs"] = num_phases
         task = ClassyVisionTask(
@@ -76,12 +76,11 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             pin_memory=False,
         )
 
-        state = task.build_initial_state()
-        self.assertTrue(state is not None)
-        return state
+        self.assertTrue(task is not None)
+        return task
 
     def test_param_scheduler_epoch(self):
-        state = self._build_state(num_phases=3)
+        task = self._build_task(num_phases=3)
 
         where_list = []
 
@@ -91,15 +90,15 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.EPOCH
-        state.optimizer._lr_scheduler = mock
+        task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer()
-        trainer.run(state, hooks=[], use_gpu=False)
+        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer.train(task)
 
         self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
 
     def test_param_scheduler_step(self):
-        state = self._build_state(num_phases=3)
+        task = self._build_task(num_phases=3)
 
         where_list = []
 
@@ -109,10 +108,10 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.STEP
-        state.optimizer._lr_scheduler = mock
+        task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer()
-        trainer.run(state, hooks=[], use_gpu=False)
+        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer.train(task)
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.
         self.assertEqual(where_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
