@@ -75,7 +75,7 @@ class LossLrTensorboardHook(ClassyHook):
             # Only need to log the average loss during the test phase
             return
 
-        learning_rate_val = state.optimizer.optimizer_config["lr"]
+        learning_rate_val = state.optimizer.hyperparameters["lr"]
 
         self.learning_rates.append(learning_rate_val)
         self.wall_times.append(time.time())

@@ -111,7 +111,7 @@ class TestVisdomHook(unittest.TestCase):
                 )
                 self.assertAlmostEqual(
                     visdom_hook.metrics[lr_key][-1],
-                    state.optimizer.optimizer_config["lr"],
+                    state.optimizer.hyperparameters["lr"],
                     places=4,
                 )
 
