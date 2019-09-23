@@ -32,41 +32,41 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
         # No warmup - shouldn't raise an exception
         no_warmup_config = copy.deepcopy(config)
         del no_warmup_config["warmup"]
-        StepWithFixedGammaParamScheduler(no_warmup_config)
+        StepWithFixedGammaParamScheduler.from_config(no_warmup_config)
 
         # Invalid warmup config
         bad_config = copy.deepcopy(config)
         bad_config["warmup"] = {"init_lr": 1}
         with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler(bad_config)
+            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid num epochs
         bad_config = copy.deepcopy(config)
         bad_config["num_epochs"] = -1
         with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler(bad_config)
+            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid num_decays
         bad_config["num_decays"] = 0
         with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler(bad_config)
+            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid base_lr
         bad_config = copy.deepcopy(config)
         bad_config["base_lr"] = -0.01
         with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler(bad_config)
+            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid gamma
         bad_config = copy.deepcopy(config)
         bad_config["gamma"] = [2]
         with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler(bad_config)
+            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):
         config = self._get_valid_config()
 
-        scheduler = StepWithFixedGammaParamScheduler(config)
+        scheduler = StepWithFixedGammaParamScheduler.from_config(config)
         schedule = [
             scheduler(epoch_num / self._num_epochs)
             for epoch_num in range(self._num_epochs)
