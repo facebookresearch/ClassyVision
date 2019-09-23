@@ -72,13 +72,7 @@ class SGD(ClassyOptimizer):
         )
 
     @property
-    def optimizer_config(self):
-        """
-        Return a kwarg dictionary that will be used to override optimizer
-        args stored in checkpoints. This allows us to load a checkpoint and
-        resume training using a different set of optimizer args, e.g., with a
-        different learning rate.
-        """
+    def hyperparameters(self):
         return {
             "lr": self.lr,
             "momentum": self.momentum,
