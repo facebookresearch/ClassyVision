@@ -28,26 +28,26 @@ class TestStepScheduler(unittest.TestCase):
         bad_config = copy.deepcopy(config)
         bad_config["num_epochs"] = -1
         with self.assertRaises(AssertionError):
-            StepParamScheduler(bad_config)
+            StepParamScheduler.from_config(bad_config)
 
         # Invalid Values
         bad_config["num_epochs"] = config["num_epochs"]
         del bad_config["values"]
         with self.assertRaises(AssertionError):
-            StepParamScheduler(bad_config)
+            StepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = {"a": "b"}
         with self.assertRaises(AssertionError):
-            StepParamScheduler(bad_config)
+            StepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = []
         with self.assertRaises(AssertionError):
-            StepParamScheduler(bad_config)
+            StepParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):
         config = self._get_valid_config()
 
-        scheduler = StepParamScheduler(config)
+        scheduler = StepParamScheduler.from_config(config)
         schedule = [
             scheduler(epoch_num / self._num_epochs)
             for epoch_num in range(self._num_epochs)

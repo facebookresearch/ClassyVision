@@ -22,14 +22,18 @@ class CosineDecayParamScheduler(ClassyParamScheduler):
       num_epochs = 120
     """
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, base_lr, min_lr):
+        super().__init__()
+        self._base_lr = base_lr
+        self._min_lr = min_lr
+
+    @classmethod
+    def from_config(cls, config):
         assert (
             "base_lr" in config and "min_lr" in config
         ), "Cosine decay scheduler requires a base_lr and a min_lr"
 
-        self._base_lr = config["base_lr"]
-        self._min_lr = config["min_lr"]
+        return cls(base_lr=config["base_lr"], min_lr=config["min_lr"])
 
     def __call__(self, where: float):
         return self._min_lr + 0.5 * (self._base_lr - self._min_lr) * (
