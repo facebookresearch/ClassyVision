@@ -26,6 +26,7 @@ class AccuracyMeter(ClassyMeter):
         assert isinstance(topk, list), "topk must be a list"
         assert len(topk) > 0, "topk list should have at least one element"
         assert [is_pos_int(x) for x in topk], "each value in topk must be >= 1"
+
         self._topk = topk
         self._state_unsynced = False
 
@@ -42,6 +43,10 @@ class AccuracyMeter(ClassyMeter):
 
         # Initialize all values properly
         self.reset()
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(topk=config["topk"])
 
     @property
     def name(self):

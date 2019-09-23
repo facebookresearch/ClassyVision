@@ -171,10 +171,8 @@ class ClassyVisionTask(object):
         """
         Returns meters for task.
         """
-        return [
-            build_meter(meter_name, meter_args)
-            for meter_name, meter_args in self.meter_config.items()
-        ]
+        configs = [{"name": name, **args} for name, args in self.meter_config.items()]
+        return [build_meter(config) for config in configs]
 
     def _update_classy_state(self, state, classy_state_dict=None):
         """

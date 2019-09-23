@@ -13,7 +13,7 @@ from classy_vision.meters.accuracy_meter import AccuracyMeter
 
 class TestAccuracyMeter(ClassificationMeterTest):
     def test_accuracy_meter_registry(self):
-        accuracy_meter = meters.build_meter("accuracy", {"topk": [1, 2]})
+        accuracy_meter = meters.build_meter({"name": "accuracy", "topk": [1, 2]})
         self.assertTrue(isinstance(accuracy_meter, AccuracyMeter))
 
     def test_single_meter_update_and_reset(self):

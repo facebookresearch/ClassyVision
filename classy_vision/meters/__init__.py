@@ -17,8 +17,8 @@ FILE_ROOT = Path(__file__).parent
 METER_REGISTRY = {}
 
 
-def build_meter(name, meter_args):
-    return METER_REGISTRY[name](**meter_args)
+def build_meter(config):
+    return METER_REGISTRY[config["name"]].from_config(config)
 
 
 def register_meter(name):
