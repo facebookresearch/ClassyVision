@@ -42,6 +42,13 @@ class ClassyVisionTask(object):
         self.pin_memory = pin_memory
         self.test_only = test_only
 
+        self.dataloaders = self.build_dataloaders()
+        self.phases = self._build_phases()
+        self.model = self._build_model()
+        self.criterion = self._build_criterion()
+        self.optimizer = build_optimizer(self.optimizer_config, self.model)
+        self.meters = self._build_meters()
+
     @classmethod
     def setup_task(cls, config, args, local_rank=None, **kwargs):
         """
@@ -192,41 +199,18 @@ class ClassyVisionTask(object):
             checkpoint is None or "classy_state_dict" in checkpoint
         ), "Checkpoint does not contain classy_state_dict"
 
-        dataloaders = self.build_dataloaders()
-        # TODO (aadcock): Add a task validator that verifies that the
-        # dataloader provides samples in a format the task type
-        # understands (example type: single frame classification)
-        # self.validate_input(dataloader.sample_output_shape())
-        # self.validate_output(dataloader.target_output_shape())
-        phases = self._build_phases()
-
-        model = self._build_model()
-        # TODO (changhan): Add a model.validate(dataloader.sample_output_shape())
-
-        criterion = self._build_criterion()
-        # TODO (aadcock): Add a criterion.validate(
-        #   model.output_shape(), dataloader.target_output_shape())
-
-        optimizer = build_optimizer(self.optimizer_config, model)
-
-        meters = self._build_meters()
-        # TODO: (namangoyal) Uncomment after Model and
-        #       dataloader abstractions are added.
-        # for meter in meters:
-        #     meter.validate(model.output_shape(), dataloader.target_output_shape())
-
-        state = ClassyState(
+        self.state = ClassyState(
             self,
-            phases,
-            phases[0]["train"],
-            dataloaders,
-            model,
-            criterion,
-            meters,
-            optimizer,
+            self.phases,
+            self.phases[0]["train"],
+            self.dataloaders,
+            self.model,
+            self.criterion,
+            self.meters,
+            self.optimizer,
         )
 
         classy_state_dict = (
             None if checkpoint is None else checkpoint.get("classy_state_dict")
         )
-        return self._update_classy_state(state, classy_state_dict)
+        return self._update_classy_state(self.state, classy_state_dict)
