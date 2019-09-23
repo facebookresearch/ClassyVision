@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import torch
+
 from . import ClassyCriterion, build_criterion, register_criterion
 
 
@@ -16,14 +18,11 @@ class SumArbitraryLoss(ClassyCriterion):
     taking a list of outputs as input.
     """
 
-    def __init__(self, config):
-        super(SumArbitraryLoss, self).__init__(config)
-        # assertions:
+    @classmethod
+    def from_config(cls, config):
         assert (
             type(config["losses"]) == list and len(config["losses"]) > 0
         ), "losses must be a list of registered losses with length > 0"
-        if config["weights"] is None:
-            config["weights"] = [1.0] * len(config["losses"])
         assert type(config["weights"]) == list and len(config["weights"]) == len(
             config["losses"]
         ), "weights must be None or a list and have same length as losses"
@@ -36,9 +35,15 @@ class SumArbitraryLoss(ClassyCriterion):
             isinstance(loss_module, ClassyCriterion) for loss_module in loss_modules
         ), "All losses must be registered, valid ClassyCriterions"
 
-        # create class:
-        self.losses = loss_modules
-        self.weights = config["weights"]
+        return cls(losses=loss_modules, weights=config.get("weights", None))
+
+    def __init__(self, losses, weights=None):
+        super().__init__()
+        if weights is None:
+            weights = torch.ones((len(losses)))
+
+        self.losses = losses
+        self.weights = weights
 
     def forward(self, prediction, target):
         for idx, loss in enumerate(self.losses):

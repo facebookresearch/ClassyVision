@@ -21,17 +21,29 @@ class MockCriterion1(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(1.0)
 
+    @classmethod
+    def from_config(cls, config):
+        return cls()
+
 
 @register_criterion("mock_b")
 class MockCriterion2(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(2.0)
 
+    @classmethod
+    def from_config(cls, config):
+        return cls()
+
 
 @register_criterion("mock_c")
 class MockCriterion3(ClassyCriterion):
     def forward(self, pred, target):
         return torch.tensor(3.0)
+
+    @classmethod
+    def from_config(cls, config):
+        return cls()
 
 
 class TestSumArbitraryLoss(unittest.TestCase):
@@ -59,7 +71,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
 
     def test_sum_arbitrary(self):
         config = self._get_config()
-        crit = SumArbitraryLoss(config)
+        crit = SumArbitraryLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), 1.0 + 2.0 + 3.0)
@@ -69,13 +81,13 @@ class TestSumArbitraryLoss(unittest.TestCase):
         new_config.update(
             {"losses": [{"name": "mock_a"}, {"name": "mock_b"}], "weights": [1.0, 1.0]}
         )
-        crit = SumArbitraryLoss(new_config)
+        crit = SumArbitraryLoss.from_config(new_config)
         self.assertAlmostEqual(crit(outputs, targets).item(), 1.0 + 2.0)
 
         # Verify changing weights works
         new_config = config.copy()
         new_config.update({"weights": [1.0, 2.0, 3.0]})
-        crit = SumArbitraryLoss(new_config)
+        crit = SumArbitraryLoss.from_config(new_config)
         self.assertAlmostEqual(
             crit(outputs, targets).item(), 1.0 + 2.0 * 2.0 + 3.0 * 3.0
         )

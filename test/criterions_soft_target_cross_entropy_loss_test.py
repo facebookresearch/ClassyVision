@@ -40,7 +40,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
 
     def test_soft_target_cross_entropy(self):
         config = self._get_config()
-        crit = SoftTargetCrossEntropyLoss(config)
+        crit = SoftTargetCrossEntropyLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), self._get_loss())
@@ -57,7 +57,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
             "reduction": "mean",
             "normalize_targets": None,
         }
-        crit = SoftTargetCrossEntropyLoss(config)
+        crit = SoftTargetCrossEntropyLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), 11.0219593)
@@ -70,7 +70,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
     def test_ignore_row(self):
         # If a sample has no valid targets, it should be ignored in the reduction.
         config = self._get_config()
-        crit = SoftTargetCrossEntropyLoss(config)
+        crit = SoftTargetCrossEntropyLoss.from_config(config)
         outputs = torch.tensor([[1.0, 7.0, 0.0, 0.0, 2.0], [4.0, 2.0, 1.0, 6.0, 0.5]])
         targets = torch.tensor([[1, 0, 0, 0, 1], [-1, -1, -1, -1, -1]])
         self.assertAlmostEqual(crit(outputs, targets).item(), self._get_loss())
