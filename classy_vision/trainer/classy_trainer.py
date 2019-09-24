@@ -12,43 +12,50 @@ from classy_vision.state.classy_state import ClassyState
 
 
 class ClassyTrainer:
-    def run(self, state, hooks, use_gpu):
+    def __init__(self, hooks, use_gpu):
+        assert isinstance(hooks, list)
+        assert all(isinstance(hook, ClassyHook) for hook in hooks)
+
+        self.hooks = hooks
+        self.use_gpu = use_gpu
+
+    def train(self, task):
         """
         Runs training phases, phases are generated from the config.
         """
 
-        # assertions:
+        state = task.build_initial_state()
         assert isinstance(state, ClassyState)
-        if hooks is None:
-            hooks = []
-        assert isinstance(hooks, list)
-        assert all(isinstance(hook, ClassyHook) for hook in hooks)
 
         if torch.distributed.is_available() and torch.distributed.is_initialized():
             state.init_distributed_data_parallel_model()
 
         local_variables = {}
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_start.name)
+        run_hooks(state, local_variables, self.hooks, ClassyHookFunctions.on_start.name)
 
         while not state.done_training():
             state.advance_phase()
 
             # Start phase hooks
             run_hooks(
-                state, local_variables, hooks, ClassyHookFunctions.on_phase_start.name
+                state,
+                local_variables,
+                self.hooks,
+                ClassyHookFunctions.on_phase_start.name,
             )
             while True:
                 # Process next sample
                 try:
-                    state = train_step(state, hooks, use_gpu, local_variables)
+                    state = train_step(state, self.hooks, self.use_gpu, local_variables)
                 except StopIteration:
                     break
 
             barrier()
             run_hooks(
-                state, local_variables, hooks, ClassyHookFunctions.on_phase_end.name
+                state,
+                local_variables,
+                self.hooks,
+                ClassyHookFunctions.on_phase_end.name,
             )
 
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_end.name)
-
-        return state
+        run_hooks(state, local_variables, self.hooks, ClassyHookFunctions.on_end.name)
