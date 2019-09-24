@@ -51,7 +51,7 @@ class ClassyVisionTask(object):
         self.meters = self._build_meters()
 
     @classmethod
-    def setup_task(cls, config, args, local_rank=None, **kwargs):
+    def setup_task(cls, config, args, **kwargs):
         """
         Setup the task using config. Validate that models / datasets /
         losses / meters are compatible
@@ -70,8 +70,6 @@ class ClassyVisionTask(object):
             config["machine"]["device"] == "gpu" and torch.cuda.device_count() > 1
         )
 
-        if config["machine"]["device"] == "gpu":
-            config["local_rank"] = local_rank
         return cls.from_config(config)
 
     @classmethod

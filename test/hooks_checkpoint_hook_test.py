@@ -29,7 +29,7 @@ class TestCheckpointHook(unittest.TestCase):
         """
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = setup_task(config, args)
         state = task.build_initial_state()
 
         local_variables = {}
@@ -80,7 +80,7 @@ class TestCheckpointHook(unittest.TestCase):
         """
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = setup_task(config, args)
         state = task.build_initial_state()
 
         local_variables = {}

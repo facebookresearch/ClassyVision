@@ -71,7 +71,7 @@ def get_test_args():
 def get_test_classy_task():
     config = get_test_task_config()
     args = get_test_args()
-    task = setup_task(config, args, local_rank=0)
+    task = setup_task(config, args)
     return task
 
 
