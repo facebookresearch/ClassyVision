@@ -6,7 +6,7 @@
 
 import torch
 from classy_vision.generic.classy_trainer_common import run_hooks, train_step
-from classy_vision.generic.distributed_util import barrier
+from classy_vision.generic.distributed_util import barrier, is_distributed_training_run
 from classy_vision.hooks import ClassyHook, ClassyHookFunctions
 from classy_vision.state.classy_state import ClassyState
 
@@ -27,7 +27,7 @@ class ClassyTrainer:
         state = task.build_initial_state()
         assert isinstance(state, ClassyState)
 
-        if torch.distributed.is_available() and torch.distributed.is_initialized():
+        if is_distributed_training_run():
             state.init_distributed_data_parallel_model()
 
         local_variables = {}

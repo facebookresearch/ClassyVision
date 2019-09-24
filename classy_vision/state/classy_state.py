@@ -7,13 +7,10 @@
 import copy
 import logging
 
-import torch
-import torch.distributed as dist
 from classy_vision.generic.distributed_util import (
-    get_world_size,
     init_distributed_data_parallel_model,
+    is_distributed_training_run,
 )
-from torch.utils.data import IterableDataset
 
 
 class ClassyState:
@@ -89,9 +86,7 @@ class ClassyState:
     @property
     def model(self):
         return (
-            self.distributed_model
-            if torch.distributed.is_available() and torch.distributed.is_initialized()
-            else self.base_model
+            self.distributed_model if is_distributed_training_run() else self.base_model
         )
 
     @property
