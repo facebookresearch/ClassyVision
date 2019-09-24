@@ -83,7 +83,7 @@ def main(args):
     # Load checkpoint, if available
     checkpoint = load_checkpoint(args.checkpoint_folder, args.device)
 
-    state = task.build_initial_state(checkpoint)
+    task.set_checkpoint(checkpoint)
 
     hooks = [LossLrMeterLoggingHook(), ModelComplexityHook(), TimeMetricsHook()]
     if not args.skip_tensorboard:
@@ -101,8 +101,8 @@ def main(args):
     if args.visdom_server != "":
         hooks.append(VisdomHook(args.visdom_server, args.visdom_port))
 
-    trainer = ClassyTrainer()
-    trainer.run(state, hooks, args.device == "gpu")
+    trainer = ClassyTrainer(hooks, args.device == "gpu")
+    trainer.train(task)
 
 
 # run all the things:

@@ -42,6 +42,7 @@ class ClassyVisionTask(object):
         self.pin_memory = pin_memory
         self.test_only = test_only
 
+        self.checkpoint = None
         self.dataloaders = self.build_dataloaders()
         self.phases = self._build_phases()
         self.model = self._build_model()
@@ -191,14 +192,16 @@ class ClassyVisionTask(object):
             ), "Update classy state from checkpoint was unsuccessful."
         return state
 
-    def build_initial_state(self, checkpoint=None):
-        """
-        Creates initial state using config.
-        """
+    def set_checkpoint(self, checkpoint):
         assert (
             checkpoint is None or "classy_state_dict" in checkpoint
         ), "Checkpoint does not contain classy_state_dict"
+        self.checkpoint = checkpoint
 
+    def build_initial_state(self):
+        """
+        Creates initial state using config.
+        """
         self.state = ClassyState(
             self,
             self.phases,
@@ -211,6 +214,8 @@ class ClassyVisionTask(object):
         )
 
         classy_state_dict = (
-            None if checkpoint is None else checkpoint.get("classy_state_dict")
+            None
+            if self.checkpoint is None
+            else self.checkpoint.get("classy_state_dict")
         )
         return self._update_classy_state(self.state, classy_state_dict)
