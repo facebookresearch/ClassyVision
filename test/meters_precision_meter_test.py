@@ -13,7 +13,7 @@ from classy_vision.meters.precision_meter import PrecisionAtKMeter
 
 class TestPrecisionAtKMeter(ClassificationMeterTest):
     def test_precision_meter_registry(self):
-        meter = meters.build_meter("precision_at_k", {"topk": [1, 3]})
+        meter = meters.build_meter({"name": "precision_at_k", "topk": [1, 3]})
         self.assertTrue(isinstance(meter, PrecisionAtKMeter))
 
     def test_single_meter_update_and_reset(self):

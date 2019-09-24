@@ -16,6 +16,10 @@ class ClassyMeter(object):
         """
         raise NotImplementedError
 
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError
+
     @property
     def name(self):
         """Name of the meter.

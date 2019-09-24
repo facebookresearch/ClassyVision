@@ -52,6 +52,14 @@ class RecallAtKMeter(ClassyMeter):
         # Initialize all values properly
         self.reset()
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(
+            topk=config["topk"],
+            target_is_one_hot=config.get("target_is_one_hot", True),
+            num_classes=config.get("num_classes", None),
+        )
+
     @property
     def name(self):
         return "recall_at_k"

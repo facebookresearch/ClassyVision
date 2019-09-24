@@ -13,7 +13,7 @@ from classy_vision.meters.recall_meter import RecallAtKMeter
 
 class TestRecallAtKMeter(ClassificationMeterTest):
     def test_recall_meter_registry(self):
-        meter = meters.build_meter("recall_at_k", {"topk": [1, 3]})
+        meter = meters.build_meter({"name": "recall_at_k", "topk": [1, 3]})
         self.assertTrue(isinstance(meter, RecallAtKMeter))
 
     def test_single_meter_update_and_reset(self):
