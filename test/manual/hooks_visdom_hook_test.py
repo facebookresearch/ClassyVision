@@ -34,7 +34,7 @@ class TestVisdomHook(unittest.TestCase):
         config["dataset"]["train"]["batchsize_per_replica"] = 2
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = setup_task(config, args)
         state = task.build_initial_state()
 
         losses = [1.2, 2.3, 1.23, 2.33]
