@@ -28,7 +28,8 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     epochs 30-59, 0.001 for epoch 60-89, 0.0001 for epochs 90-119.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]):
         for key in ["base_lr", "gamma", "num_decays", "num_epochs"]:
             assert key in config, f"Step with fixed decay scheduler requires: {key}"
         for key in ["base_lr", "gamma"]:
@@ -40,22 +41,35 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
                 isinstance(config[key], int) and config[key] > 0
             ), f"{key} must be a positive integer"
 
-        base_lr = config["base_lr"]
-        num_decays = config["num_decays"]
-        gamma = config["gamma"]
+        warmup = None
+        if "warmup" in config:
+            assert (
+                "epochs" in config["warmup"] and "init_lr" in config["warmup"]
+            ), "warmup config requires two keys: 'epoch' and 'init_lr'"
+            warmup = StepParamScheduler.Warmup(**config["warmup"])
+
+        return cls(
+            base_lr=config["base_lr"],
+            num_decays=config["num_decays"],
+            gamma=config["gamma"],
+            num_epochs=config["num_epochs"],
+            warmup=warmup,
+        )
+
+    def __init__(self, base_lr, num_decays, gamma, num_epochs, warmup=None):
+        super().__init__()
+
+        self.base_lr = base_lr
+        self.num_decays = num_decays
+        self.gamma = gamma
+        self.num_epochs = num_epochs
         values = [base_lr]
         for _ in range(num_decays):
             values.append(values[-1] * gamma)
 
-        step_config = {
-            "name": "step",
-            "values": values,
-            "num_epochs": config["num_epochs"],
-        }
-        if "warmup" in config:
-            step_config["warmup"] = config["warmup"]
-
-        self._step_param_scheduler = StepParamScheduler(step_config)
+        self._step_param_scheduler = StepParamScheduler(
+            num_epochs=num_epochs, values=values, warmup=warmup
+        )
 
         # make this a STEP scheduler
         self.update_interval = UpdateInterval.STEP

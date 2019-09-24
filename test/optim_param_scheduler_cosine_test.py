@@ -33,18 +33,18 @@ class TestCosineScheduler(unittest.TestCase):
         bad_config["num_epochs"] = config["num_epochs"]
         del bad_config["base_lr"]
         with self.assertRaises(AssertionError):
-            CosineDecayParamScheduler(bad_config)
+            CosineDecayParamScheduler.from_config(bad_config)
 
         # Invalid min_lr
         bad_config["base_lr"] = config["base_lr"]
         del bad_config["min_lr"]
         with self.assertRaises(AssertionError):
-            CosineDecayParamScheduler(bad_config)
+            CosineDecayParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):
         config = self._get_valid_config()
 
-        scheduler = CosineDecayParamScheduler(config)
+        scheduler = CosineDecayParamScheduler.from_config(config)
         schedule = [
             round(scheduler(epoch_num / self._num_epochs), 4)
             for epoch_num in range(self._num_epochs)
