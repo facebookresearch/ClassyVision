@@ -14,7 +14,7 @@ _cuda_device_index: int = 0
 _CPU_DEVICE_INDEX = -1
 
 
-def _convert_to_distributed_tensor(tensor):
+def convert_to_distributed_tensor(tensor):
     """
     For some backends, such as NCCL, communication only works if the
     tensor is on the GPU. This helper function converts to the correct
@@ -30,7 +30,7 @@ def _convert_to_distributed_tensor(tensor):
     return (tensor, orig_device)
 
 
-def _convert_to_normal_tensor(tensor, orig_device):
+def convert_to_normal_tensor(tensor, orig_device):
     """
     For some backends, such as NCCL, communication only works if the
     tensor is on the GPU. This converts the tensor back to original device.
@@ -38,6 +38,14 @@ def _convert_to_normal_tensor(tensor, orig_device):
     if tensor.is_cuda and orig_device == "cpu":
         tensor = tensor.cpu()
     return tensor
+
+
+def is_distributed_training_run():
+    return (
+        torch.distributed.is_available()
+        and torch.distributed.is_initialized()
+        and (torch.distributed.get_world_size() > 1)
+    )
 
 
 def is_master():
@@ -53,15 +61,11 @@ def all_reduce_mean(tensor):
     Wrapper over torch.distributed.all_reduce for performing mean reduction
     of tensor over all processes.
     """
-    if (
-        torch.distributed.is_available()
-        and torch.distributed.is_initialized()
-        and torch.distributed.get_world_size() > 1
-    ):
-        tensor, orig_device = _convert_to_distributed_tensor(tensor)
+    if is_distributed_training_run():
+        tensor, orig_device = convert_to_distributed_tensor(tensor)
         torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
         tensor = tensor / torch.distributed.get_world_size()
-        tensor = _convert_to_normal_tensor(tensor, orig_device)
+        tensor = convert_to_normal_tensor(tensor, orig_device)
     return tensor
 
 
@@ -71,14 +75,10 @@ def all_reduce_sum(tensor):
     reduction of tensor over all processes in both distributed /
     non-distributed scenarios.
     """
-    if (
-        torch.distributed.is_available()
-        and torch.distributed.is_initialized()
-        and torch.distributed.get_world_size() > 1
-    ):
-        tensor, orig_device = _convert_to_distributed_tensor(tensor)
+    if is_distributed_training_run():
+        tensor, orig_device = convert_to_distributed_tensor(tensor)
         torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
-        tensor = _convert_to_normal_tensor(tensor, orig_device)
+        tensor = convert_to_normal_tensor(tensor, orig_device)
     return tensor
 
 
