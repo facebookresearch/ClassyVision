@@ -15,7 +15,19 @@ from classy_vision.generic.util import convert_to_one_hot
 
 @register_criterion("label_smoothing_cross_entropy")
 class LabelSmoothingCrossEntropyLoss(ClassyCriterion):
-    def __init__(self, config):
+    @classmethod
+    def from_config(cls, config):
+        assert "weight" not in config, '"weight" not implemented'
+        assert (
+            "smoothing_param" in config
+        ), "Label Smoothing needs a smoothing parameter"
+        return cls(
+            ignore_index=config.get("ignore_index", -100),
+            reduction=config.get("reduction", "mean"),
+            smoothing_param=config.get("smoothing_param"),
+        )
+
+    def __init__(self, ignore_index, reduction, smoothing_param):
         """Intializer for the label smoothed cross entropy loss criterion.
         This decreases gap between output scores and encourages generalization.
         Targets provided to forward can be one-hot vectors (NxC) or class indices(Nx1)
@@ -25,14 +37,10 @@ class LabelSmoothingCrossEntropyLoss(ClassyCriterion):
         'ignore_index': sample should be ignored for loss (optional),
         'smoothing_param': value to be added to each target entry
         """
-        super(LabelSmoothingCrossEntropyLoss, self).__init__(config)
-        assert "weight" not in config, '"weight" not implemented'
-        self._ignore_index = config.get("ignore_index", -100)
-        self._reduction = config.get("reduction", "mean")
-        assert (
-            "smoothing_param" in config
-        ), "Label Smoothing needs a smoothing parameter"
-        self._smoothing_param = config.get("smoothing_param")
+        super().__init__()
+        self._ignore_index = ignore_index
+        self._reduction = reduction
+        self._smoothing_param = smoothing_param
         self.loss_function = _SoftTargetCrossEntropyLoss(
             ignore_index=self._ignore_index, normalize_targets=None
         )

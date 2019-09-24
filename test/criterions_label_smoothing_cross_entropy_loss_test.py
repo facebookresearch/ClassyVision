@@ -172,7 +172,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = LabelSmoothingCrossEntropyLoss(config)
+        crit = LabelSmoothingCrossEntropyLoss.from_config(config)
         outputs = torch.tensor([[0.0, 7.0, 0.0, 0.0, 2.0]])
         targets = torch.tensor([[0, 0, 0, 0, 1]])
         self.assertAlmostEqual(crit(outputs, targets).item(), 5.07609558)
@@ -183,7 +183,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.2,
         }
-        crit = LabelSmoothingCrossEntropyLoss(config)
+        crit = LabelSmoothingCrossEntropyLoss.from_config(config)
         outputs = torch.tensor([[0.0, 7.0]])
         targets = torch.tensor([[-1]])
         self.assertAlmostEqual(crit(outputs, targets).item(), 3.50090909)
@@ -194,7 +194,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.2,
         }
-        crit = LabelSmoothingCrossEntropyLoss(config)
+        crit = LabelSmoothingCrossEntropyLoss.from_config(config)
         outputs = torch.tensor([[1.0, 2.0], [0.0, 2.0]])
         targets = torch.tensor([[0], [1]])
         self.assertAlmostEqual(crit(outputs, targets).item(), 0.76176142)
