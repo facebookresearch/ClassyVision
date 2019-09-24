@@ -6,6 +6,7 @@
 
 import bisect
 import math
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from classy_vision.generic.util import is_pos_int
 
@@ -29,30 +30,23 @@ class MultiStepParamScheduler(ClassyParamScheduler):
     plus one.
     """
 
-    def __init__(self, config):
-        super().__init__(config)
-        assert (
-            "values" in config
-            and isinstance(config["values"], list)
-            and len(config["values"]) > 0
-        ), "Non-Equi Step scheduler requires a list of at least one param value"
-        assert is_pos_int(config["num_epochs"]), "Num epochs must be a positive integer"
-        assert config["num_epochs"] >= len(
-            config["values"]
-        ), "Num epochs must be greater than param schedule"
-        self._param_schedule = config["values"]
-        self._num_epochs = config["num_epochs"]
+    class Warmup(NamedTuple):
+        epochs: Union[int, float]
+        init_lr: float
 
-        if "milestones" in config:
-            assert (
-                isinstance(config["milestones"], list)
-                and len(config["milestones"]) == len(self._param_schedule) - 1
-            ), (
-                "Non-Equi Step scheduler requires a list of %d epochs"
-                % (len(self._param_schedule) - 1)
-            )
-            self._milestones = config["milestones"]
-        else:
+    def __init__(
+        self,
+        values,
+        num_epochs: int,
+        warmup: Warmup = None,
+        milestones: Optional[List[int]] = None,
+    ):
+        super().__init__()
+        self._param_schedule = values
+        self._num_epochs = num_epochs
+        self._milestones = milestones
+
+        if milestones is None:
             # Default equispaced drop_epochs behavior
             self._milestones = []
             step_width = math.ceil(self._num_epochs / float(len(self._param_schedule)))
@@ -73,13 +67,45 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             )
             start_epoch = milestone
 
-        self._warmup = "warmup" in config
+        self._warmup = warmup
         if self._warmup:
+            self._warmup_init_lr = warmup.init_lr
+            self._warmup_len = warmup.epochs / self._num_epochs
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]):
+        assert (
+            "values" in config
+            and isinstance(config["values"], list)
+            and len(config["values"]) > 0
+        ), "Non-Equi Step scheduler requires a list of at least one param value"
+        assert is_pos_int(config["num_epochs"]), "Num epochs must be a positive integer"
+        assert config["num_epochs"] >= len(
+            config["values"]
+        ), "Num epochs must be greater than param schedule"
+
+        milestones = config.get("milestones", None)
+        if "milestones" in config:
+            assert (
+                isinstance(config["milestones"], list)
+                and len(config["milestones"]) == len(config["values"]) - 1
+            ), (
+                "Non-Equi Step scheduler requires a list of %d epochs"
+                % (len(config["values"]) - 1)
+            )
+        warmup = None
+        if "warmup" in config:
             assert isinstance(config["warmup"], dict), "Warmup must be a dict"
             for name in ["init_lr", "epochs"]:
                 assert name in config["warmup"], "warmup requires parameter: %s" % name
-            self._warmup_init_lr = config["warmup"]["init_lr"]
-            self._warmup_len = config["warmup"]["epochs"] / self._num_epochs
+            warmup = cls.Warmup(**config["warmup"])
+
+        return cls(
+            values=config["values"],
+            num_epochs=config["num_epochs"],
+            warmup=warmup,
+            milestones=milestones,
+        )
 
     def __call__(self, where: float):
         if self._warmup and where < self._warmup_len + self.WHERE_EPSILON:
