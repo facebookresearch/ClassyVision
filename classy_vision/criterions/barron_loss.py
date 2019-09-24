@@ -15,19 +15,25 @@ class BarronLoss(ClassyCriterion):
     This implements the Barron loss: https://arxiv.org/pdf/1701.03077.pdf
     """
 
-    def __init__(self, config):
+    @classmethod
+    def from_config(cls, config):
         # Infinity is a valid alpha value but is frequently a string
         config["alpha"] = float(config["alpha"])
-        super(BarronLoss, self).__init__(config)
         # assertions:
         assert type(config["size_average"]) == bool
         assert type(config["alpha"]) == float
         assert type(config["c"]) == float and config["c"] > 0.0
 
-        # set fields:
-        self.size_average = config["size_average"]
-        self.alpha = config["alpha"]
-        self.c = config["c"]
+        return cls(
+            alpha=config["alpha"], size_average=config["size_average"], c=config["c"]
+        )
+
+    def __init__(self, alpha, size_average, c):
+        super(BarronLoss, self).__init__()
+
+        self.size_average = size_average
+        self.alpha = alpha
+        self.c = c
         self.z = max(1.0, 2.0 - self.alpha)
 
         # define all three losses:

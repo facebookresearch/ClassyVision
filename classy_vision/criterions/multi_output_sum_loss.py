@@ -16,13 +16,17 @@ class MultiOutputSumLoss(ClassyCriterion):
     up the losses.
     """
 
-    def __init__(self, config):
-        super().__init__(config)
+    @classmethod
+    def from_config(cls, config):
         assert (
             type(config["loss"]) == dict
         ), "loss must be a dict containing a configuration for a registered loss"
+        return cls(loss=build_criterion(config["loss"]))
 
-        self._loss = build_criterion(self._config["loss"])
+    def __init__(self, loss):
+        super().__init__()
+
+        self._loss = loss
 
     def forward(self, output, target):
         if torch.is_tensor(output):

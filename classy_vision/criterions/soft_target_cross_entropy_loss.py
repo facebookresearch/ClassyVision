@@ -13,7 +13,17 @@ from classy_vision.criterions import ClassyCriterion, register_criterion
 
 @register_criterion("soft_target_cross_entropy")
 class SoftTargetCrossEntropyLoss(ClassyCriterion):
-    def __init__(self, config):
+    @classmethod
+    def from_config(cls, config):
+        if "weight" in config:
+            raise NotImplementedError('"weight" not implemented')
+        return cls(
+            ignore_index=config.get("ignore_index", -100),
+            reduction=config.get("reduction", "mean"),
+            normalize_targets=config.get("normalize_targets", "count_based"),
+        )
+
+    def __init__(self, ignore_index, reduction, normalize_targets):
         """Intializer for the soft target cross-entropy loss criterion.
         This allows the targets for the cross entropy loss to be multilabel
 
@@ -22,12 +32,10 @@ class SoftTargetCrossEntropyLoss(ClassyCriterion):
         'ignore_index': sample should be ignored for loss (optional),
         'reduction': specifies reduction to apply to the output (optional),
         """
-        super(SoftTargetCrossEntropyLoss, self).__init__(config)
-        if "weight" in config:
-            raise NotImplementedError('"weight" not implemented')
-        self._ignore_index = config.get("ignore_index", -100)
-        self._reduction = config.get("reduction", "mean")
-        self._normalize_targets = config.get("normalize_targets", "count_based")
+        super().__init__()
+        self._ignore_index = ignore_index
+        self._reduction = reduction
+        self._normalize_targets = normalize_targets
         if self._reduction != "mean":
             raise NotImplementedError(
                 'reduction type "{}" not implemented'.format(self._reduction)

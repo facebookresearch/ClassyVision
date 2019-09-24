@@ -32,7 +32,7 @@ class TestBarronLoss(unittest.TestCase):
 
     def test_barron(self):
         config = self._get_config()
-        crit = BarronLoss(config)
+        crit = BarronLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), 0.41421353816986084)
@@ -40,7 +40,7 @@ class TestBarronLoss(unittest.TestCase):
         # Alpha = 0
         config = self._get_config()
         config["alpha"] = 0.0
-        crit = BarronLoss(config)
+        crit = BarronLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), 0.40546512603759766)
@@ -48,7 +48,7 @@ class TestBarronLoss(unittest.TestCase):
         # Alpha = inf
         config = self._get_config()
         config["alpha"] = float("inf")
-        crit = BarronLoss(config)
+        crit = BarronLoss.from_config(config)
         outputs = self._get_outputs()
         targets = self._get_targets()
         self.assertAlmostEqual(crit(outputs, targets).item(), 0.39346933364868164)
