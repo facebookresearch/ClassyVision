@@ -78,7 +78,7 @@ def main(args):
     else:
         logging.info("Using CPU")
         set_cpu_device()
-    task = setup_task(config, args, local_rank=local_rank)
+    task = setup_task(config, args)
 
     # Load checkpoint, if available
     checkpoint = load_checkpoint(args.checkpoint_folder, args.device)

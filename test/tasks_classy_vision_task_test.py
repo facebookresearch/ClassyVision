@@ -15,7 +15,7 @@ class TestClassyVisionTask(unittest.TestCase):
     def test_setup_task(self):
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = setup_task(config, args)
         self.assertTrue(isinstance(task, ClassyVisionTask))
 
     def test_get_state(self):
@@ -37,5 +37,5 @@ class TestClassyVisionTask(unittest.TestCase):
         self.assertTrue(state is not None)
 
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = setup_task(config, args)
         state = task.build_initial_state()
