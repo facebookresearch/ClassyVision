@@ -21,14 +21,18 @@ class PolynomialDecayParamScheduler(ClassyParamScheduler):
     so on.
     """
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, base_lr, power):
+        super().__init__()
+
+        self._base_lr = base_lr
+        self._power = power
+
+    @classmethod
+    def from_config(cls, config):
         assert (
             "base_lr" in config and "power" in config
         ), "Polynomial decay scheduler requires a base lr and a power of decay"
-
-        self._base_lr = config["base_lr"]
-        self._power = config["power"]
+        return cls(base_lr=config["base_lr"], power=config["power"])
 
     def __call__(self, where: float):
         return self._base_lr * (1 - where) ** self._power

@@ -26,12 +26,12 @@ class TestFixedScheduler(unittest.TestCase):
         bad_config = copy.deepcopy(config)
         del bad_config["value"]
         with self.assertRaises(AssertionError):
-            ConstantParamScheduler(bad_config)
+            ConstantParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):
         config = self._get_valid_config()
 
-        scheduler = ConstantParamScheduler(config)
+        scheduler = ConstantParamScheduler.from_config(config)
         schedule = [
             scheduler(epoch_num / self._num_epochs)
             for epoch_num in range(self._num_epochs)

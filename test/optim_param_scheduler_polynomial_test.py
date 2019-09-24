@@ -32,18 +32,18 @@ class TestPolynomialScheduler(unittest.TestCase):
         bad_config = copy.deepcopy(config)
         del bad_config["base_lr"]
         with self.assertRaises(AssertionError):
-            PolynomialDecayParamScheduler(bad_config)
+            PolynomialDecayParamScheduler.from_config(bad_config)
 
         # Invalid Power
         bad_config = copy.deepcopy(config)
         del bad_config["power"]
         with self.assertRaises(AssertionError):
-            PolynomialDecayParamScheduler(bad_config)
+            PolynomialDecayParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):
         config = self._get_valid_config()
 
-        scheduler = PolynomialDecayParamScheduler(config)
+        scheduler = PolynomialDecayParamScheduler.from_config(config)
         schedule = [
             round(scheduler(epoch_num / self._num_epochs), 2)
             for epoch_num in range(self._num_epochs)
