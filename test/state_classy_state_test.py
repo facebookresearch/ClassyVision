@@ -51,9 +51,10 @@ class TestClassyState(unittest.TestCase):
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
         task = setup_task(config, args, local_rank=0)
+        task_2 = setup_task(config, args, local_rank=0)
 
         state = task.build_initial_state()
-        state_2 = task.build_initial_state()
+        state_2 = task_2.build_initial_state()
 
         hooks = []
         use_gpu = False
