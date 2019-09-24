@@ -73,11 +73,9 @@ class TestClassyTrainer(unittest.TestCase):
             num_workers=0,
             pin_memory=False,
         )
+        self.assertTrue(task is not None)
 
-        state = task.build_initial_state()
-        self.assertTrue(state is not None)
-
-        trainer = ClassyTrainer()
-        trainer.run(state, hooks=[], use_gpu=False)
-        accuracy = state.meters[0].value["top_1"]
+        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer.train(task)
+        accuracy = task.meters[0].value["top_1"]
         self.assertAlmostEqual(accuracy, 1.0)
