@@ -7,6 +7,7 @@
 import torch
 
 from . import register_transform
+from .classy_transform import ClassyTransform
 
 
 _IMAGENET_EIGEN_VAL = [0.2175, 0.0188, 0.0045]
@@ -20,7 +21,7 @@ _DEFAULT_COLOR_LIGHTING_STD = 0.1
 
 
 @register_transform("lighting")
-class LightingTransform:
+class LightingTransform(ClassyTransform):
     """
     Lighting noise(AlexNet - style PCA - based noise).
     This trick was originally used in AlexNet paper

@@ -8,18 +8,30 @@ import unittest
 
 import torch
 import torchvision.transforms as transforms
-from classy_vision.dataset.transforms import build_transforms, register_transform
+from classy_vision.dataset.transforms import (
+    ClassyTransform,
+    build_transforms,
+    register_transform,
+)
 from classy_vision.dataset.transforms.util import imagenet_no_augment_transform
 
 
 @register_transform("resize")
-def resize(size: int):
-    return transforms.Resize(size=size)
+class resize(ClassyTransform):
+    def __init__(self, size: int):
+        self.transform = transforms.Resize(size=size)
+
+    def __call__(self, img):
+        return self.transform(img)
 
 
 @register_transform("center_crop")
-def center_crop(size: int):
-    return transforms.CenterCrop(size=size)
+class center_crop(ClassyTransform):
+    def __init__(self, size: int):
+        self.transform = transforms.CenterCrop(size=size)
+
+    def __call__(self, img):
+        return self.transform(img)
 
 
 class DatasetTransformsTest(unittest.TestCase):

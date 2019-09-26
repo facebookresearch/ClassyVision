@@ -11,6 +11,8 @@ from typing import Any, Callable, Dict, List, Union
 import torchvision.transforms as transforms
 from classy_vision.generic.registry_utils import import_all_modules
 
+from .classy_transform import ClassyTransform
+
 
 FILE_ROOT = Path(__file__).parent
 
@@ -30,7 +32,7 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
     transform_args = transform_config.copy()
     del transform_args["name"]
     if name in TRANSFORM_REGISTRY:
-        return TRANSFORM_REGISTRY[name](**transform_args)
+        return TRANSFORM_REGISTRY[name].from_config(transform_args)
     # the name should be available in torchvision.transforms
     assert hasattr(transforms, name), (
         f"{name} isn't a registered tranform"
@@ -85,3 +87,10 @@ def register_transform(name: str):
 
 # automatically import any Python files in the transforms/ directory
 import_all_modules(FILE_ROOT, "classy_vision.dataset.transforms")
+
+__all__ = [
+    "ClassyTransform",
+    "LightingTransform",
+    "register_transform",
+    "build_transform",
+]
