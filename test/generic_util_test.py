@@ -92,7 +92,6 @@ class TestUtilMethods(unittest.TestCase):
         targets = self._get_base_targets()
 
         class_hist, total_hist = util.create_class_histograms(pred_probs, targets, 20)
-        print(class_hist)
         torch.testing.assert_allclose(class_hist, self._get_base_class_hist())
         torch.testing.assert_allclose(total_hist, self._get_base_total_hist())
 
@@ -133,18 +132,68 @@ class TestUtilMethods(unittest.TestCase):
         # For curves without duplicates removed / precisions cleaned
         # up, see: P60302268
         exp_pos_prec = torch.tensor(
-            [6.0 / 9.0, 8.0 / 13.0, 9.0 / 15.0, 10.0 / 17.0, 11.0 / 22.0]
-        ).double()
+            [
+                3.0 / 5.0,
+                4.0 / 7.0,
+                6.0 / 9.0,
+                6.0 / 11.0,
+                8.0 / 13.0,
+                9.0 / 15.0,
+                10.0 / 17.0,
+                10.0 / 19.0,
+                10.0 / 20.0,
+                11.0 / 22.0,
+            ],
+            dtype=torch.double,
+        )
         exp_pos_recall = torch.tensor(
-            [6.0 / 11.0, 8.0 / 11.0, 9.0 / 11.0, 10.0 / 11.0, 11.0 / 11.0]
-        ).double()
+            [
+                3.0 / 11.0,
+                4.0 / 11.0,
+                6.0 / 11.0,
+                6.0 / 11.0,
+                8.0 / 11.0,
+                9.0 / 11.0,
+                10.0 / 11.0,
+                10.0 / 11.0,
+                10.0 / 11.0,
+                11.0 / 11.0,
+            ],
+            dtype=torch.double,
+        )
 
         exp_neg_prec = torch.tensor(
-            [4.0 / 5.0, 5.0 / 7.0, 6.0 / 9.0, 8.0 / 13.0, 9.0 / 17.0, 11.0 / 22.0]
-        ).double()
+            [
+                1.0 / 2.0,
+                2.0 / 3.0,
+                4.0 / 5.0,
+                5.0 / 7.0,
+                6.0 / 9.0,
+                6.0 / 11.0,
+                8.0 / 13.0,
+                8.0 / 15.0,
+                9.0 / 17.0,
+                10.0 / 21.0,
+                11.0 / 22.0,
+            ],
+            dtype=torch.double,
+        )
         exp_neg_recall = torch.tensor(
-            [4.0 / 11.0, 5.0 / 11.0, 6.0 / 11.0, 8.0 / 11.0, 9.0 / 11.0, 11.0 / 11.0]
-        ).double()
+            [
+                1.0 / 11.0,
+                2.0 / 11.0,
+                4.0 / 11.0,
+                5.0 / 11.0,
+                6.0 / 11.0,
+                6.0 / 11.0,
+                8.0 / 11.0,
+                8.0 / 11.0,
+                9.0 / 11.0,
+                10.0 / 11.0,
+                11.0 / 11.0,
+            ],
+            dtype=torch.double,
+        )
 
         torch.testing.assert_allclose(pr_curves["prec"][1], exp_pos_prec)
         torch.testing.assert_allclose(pr_curves["prec"][0], exp_neg_prec)
@@ -153,10 +202,10 @@ class TestUtilMethods(unittest.TestCase):
         torch.testing.assert_allclose(pr_curves["recall"][0], exp_neg_recall)
 
         torch.testing.assert_allclose(
-            pr_curves["ap"][1], torch.tensor(0.6389071941375732).double()
+            pr_curves["ap"][1], torch.tensor(0.589678058127256).double()
         )
         torch.testing.assert_allclose(
-            pr_curves["ap"][0], torch.tensor(0.68468004465103150).double()
+            pr_curves["ap"][0], torch.tensor(0.6073388287292031).double()
         )
 
     def test_compute_pr_curves_fail(self):

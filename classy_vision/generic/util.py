@@ -382,35 +382,26 @@ def compute_pr_curves(class_hist, total_hist):
         if class_totals[c] == 0:
             continue
 
-        prev_recall = torch.tensor(-1.0).double()
-        prev_prec = torch.tensor(1.1).double()
+        # Remove duplicate entries
+        prev_r = torch.tensor(-1.0).double()
+        prev_p = torch.tensor(1.1).double()
         new_recall_curve = torch.tensor([], dtype=torch.double)
         new_prec_curve = torch.tensor([], dtype=torch.double)
         for idx, r in enumerate(recall_curve):
             p = prec_curve[idx]
             # Remove points on PR curve that are invalid
-            if r.item() == 0 or p.item() == 0:
+            if r.item() <= 0:
                 continue
 
-            # Remove points that are strictly worse (keep convex hull
-            # of PR curve). Effectively this means that recall should
-            # increase strictly monotonically and we need to remove
-            # "valleys" in the precision curve.
-            if r <= prev_recall:
+            # Remove duplicates (due to empty buckets):
+            if r.item() == prev_r.item() and p.item() == prev_p.item():
                 continue
 
-            # If precision increases, backtrack to find most recent
-            # point where precision was larger than p.  Delete
-            # everything after that in the curve.
-            if p >= prev_prec:
-                ind_to_keep = _find_last_larger_than(p, new_prec_curve) + 1
-                new_recall_curve = new_recall_curve[:ind_to_keep]
-                new_prec_curve = new_prec_curve[:ind_to_keep]
-
+            # Add points to curve
             new_recall_curve = torch.cat((new_recall_curve, r.unsqueeze(0)), dim=0)
             new_prec_curve = torch.cat((new_prec_curve, p.unsqueeze(0)), dim=0)
-            prev_recall = r
-            prev_prec = p
+            prev_r = r
+            prev_p = p
 
         ap = calc_ap(new_prec_curve, new_recall_curve)
         final_prec.append(new_prec_curve)
