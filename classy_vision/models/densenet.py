@@ -136,8 +136,8 @@ class DenseNet(ClassyVisionModel):
 
         # initial convolutional block:
         self.num_blocks = config["num_blocks"]
-        small_input = config["small_input"]
-        if small_input:
+        self.small_input = config["small_input"]
+        if self.small_input:
             self.initial_block = nn.Sequential(
                 nn.Conv2d(
                     3,
