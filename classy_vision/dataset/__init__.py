@@ -7,8 +7,16 @@
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
+from torchvision import set_video_backend
+from torchvision.io._video_opt import _HAS_VIDEO_OPT
 
 from .classy_dataset import ClassyDataset
+
+
+if _HAS_VIDEO_OPT:
+    set_video_backend("video_reader")
+else:
+    set_video_backend("pyav")
 
 
 FILE_ROOT = Path(__file__).parent
