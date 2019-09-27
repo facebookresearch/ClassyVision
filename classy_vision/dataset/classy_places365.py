@@ -42,7 +42,7 @@ class Places365Dataset(ClassyDataset):
             batchsize_per_replica,
             shuffle,
             num_samples,
-        ) = self.parse_config(self._config)
+        ) = self.parse_config(config)
         transform = build_field_transform_default_imagenet(
             transform_config, split=self._split
         )
