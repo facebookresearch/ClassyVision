@@ -442,7 +442,7 @@ def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
         )
 
 
-def update_classy_state(state, state_dict, is_finetuning=False, test_only=False):
+def update_classy_state(state, state_dict, reset_heads=False):
     """
     Updates the state with the provided state dictionary.
 
@@ -450,26 +450,24 @@ def update_classy_state(state, state_dict, is_finetuning=False, test_only=False)
         state: ClassyState instance to update
         state_dict: State dict, should be the output of a call to
             ClassyState.get_classy_state().
-        is_finetuning: if True, leaves the heads from the current state but
-            updates base_model.
-        test_only: if True, state.train is set to False.
+        reset_heads: if True, retains the new heads from the state.
     """
     logging.info("Loading classy state from checkpoint")
 
     try:
-        if is_finetuning:
-            current_state_dict = state.base_model.get_classy_state()
-            # leave heads from current_state_dict, but update base_model
-            model_state_dict = state_dict["base_model"]
-            model_state_dict["config"] = current_state_dict["config"]
-            # replace previous head states with new head states
-            model_state_dict["model"]["heads"] = current_state_dict["model"]["heads"]
-            state_dict["train"] = state.train
-            # TODO (mannatsingh): Implement and verify fine tuning
-            raise NotImplementedError("Fine tuning is not supported yet")
-        if test_only:
-            state_dict["train"] = False
-        state.set_classy_state(state_dict)
+        current_state_dict = state.get_classy_state()
+        model_state_dict = current_state_dict["base_model"]
+        # update trunk from checkpoint
+        model_state_dict["model"]["trunk"] = state_dict["base_model"]["model"]["trunk"]
+
+        if not reset_heads:
+            # replace previous head states with source head states
+            model_state_dict["model"]["heads"] = state_dict["base_model"]["model"][
+                "heads"
+            ]
+
+        current_state_dict["base_model"] = model_state_dict
+        state.set_classy_state(current_state_dict)
         logging.info("Checkpoint load successful")
         return True
     except Exception:
