@@ -14,6 +14,7 @@ from .resample_dataset import ResampleDataset
 from .shuffle_dataset import ShuffleDataset
 from .transform_dataset import TransformDataset
 from .wrap_dataset import WrapDataset
+from .wrap_video_dataset import WrapTorchVisionVideoDataset
 
 
 # TODO: Fix this:
@@ -31,4 +32,5 @@ __all__ = [
     "ShuffleDataset",
     "TransformDataset",
     "WrapDataset",
+    "WrapTorchVisionVideoDataset",
 ]

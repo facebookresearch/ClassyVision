@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from classy_vision.dataset.core.random_video_datasets import RandomVideoDataset
 from classy_vision.dataset.transforms.util_video import (
     VideoConstants,
-    build_field_transform_default_video,
+    build_video_field_transform_default,
 )
 
 
@@ -19,6 +19,7 @@ class DatasetTransformUtilVideoTest(unittest.TestCase):
             "num_frames": 32,
             "height": 128,
             "width": 160,
+            "sample_rate": 44100,
             "num_classes": 10,
             "seed": 0,
             "num_samples": 100,
@@ -34,8 +35,8 @@ class DatasetTransformUtilVideoTest(unittest.TestCase):
         # default training data transform
         sample = dataset[0]
 
-        transform = build_field_transform_default_video(config, "train")
-        output_clip = transform(sample)["input"]
+        transform = build_video_field_transform_default(config, "train")
+        output_clip = transform(sample)["input"]["video"]
         self.assertTrue(output_clip.size(0) == self.config["num_channels"])
         self.assertTrue(output_clip.size(1) == self.config["num_frames"])
         self.assertTrue(output_clip.size(2) == VideoConstants.CROP_SIZE)
@@ -45,7 +46,7 @@ class DatasetTransformUtilVideoTest(unittest.TestCase):
         sample = dataset[1]
         sample_copy = copy.deepcopy(sample)
 
-        expected_output_clip = transforms.ToTensorVideo()(sample["input"])
+        expected_output_clip = transforms.ToTensorVideo()(sample["input"]["video"])
         expected_output_clip = transforms.CenterCropVideo(VideoConstants.CROP_SIZE)(
             expected_output_clip
         )
@@ -53,26 +54,28 @@ class DatasetTransformUtilVideoTest(unittest.TestCase):
             mean=VideoConstants.MEAN, std=VideoConstants.STD
         )(expected_output_clip)
 
-        transform = build_field_transform_default_video(config, "test")
-        output_clip = transform(sample_copy)["input"]
+        transform = build_video_field_transform_default(config, "test")
+        output_clip = transform(sample_copy)["input"]["video"]
 
         self.assertTrue(torch.all(torch.eq(expected_output_clip, output_clip)))
 
         # transform config is provided.
         sample = dataset[2]
 
-        config = [
-            {"name": "ToTensorVideo"},
-            {"name": "RandomResizedCropVideo", "size": 64},
-            {"name": "RandomHorizontalFlipVideo"},
-            {
-                "name": "NormalizeVideo",
-                "mean": [0.485, 0.456, 0.406],
-                "std": [0.229, 0.224, 0.225],
-            },
-        ]
-        transform = build_field_transform_default_video(config, "train")
-        output_clip = transform(sample)["input"]
+        config = {
+            "video": [
+                {"name": "ToTensorVideo"},
+                {"name": "RandomResizedCropVideo", "size": 64},
+                {"name": "RandomHorizontalFlipVideo"},
+                {
+                    "name": "NormalizeVideo",
+                    "mean": [0.485, 0.456, 0.406],
+                    "std": [0.229, 0.224, 0.225],
+                },
+            ]
+        }
+        transform = build_video_field_transform_default(config, "train")
+        output_clip = transform(sample)["input"]["video"]
         self.assertTrue(output_clip.size(0) == self.config["num_channels"])
         self.assertTrue(output_clip.size(1) == self.config["num_frames"])
         self.assertTrue(output_clip.size(2) == 64)

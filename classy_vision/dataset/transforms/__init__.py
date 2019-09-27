@@ -6,7 +6,7 @@
 
 
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List
 
 import torchvision.transforms as transforms
 from classy_vision.generic.registry_utils import import_all_modules
