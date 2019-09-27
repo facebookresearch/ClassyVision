@@ -12,8 +12,8 @@ from classy_vision.dataset.core.random_image_datasets import (
     RandomImageBinaryClassDataset,
 )
 from classy_vision.dataset.transforms.util import (
+    ImagenetNoAugmentTransform,
     build_field_transform_default_imagenet,
-    imagenet_no_augment_transform,
 )
 
 
@@ -64,5 +64,5 @@ class DatasetTransformsUtilTest(unittest.TestCase):
         input_image = dataset[0]["input"]
         output_image = transform(sample)["input"]
         self.assertTrue(
-            torch.allclose(output_image, imagenet_no_augment_transform()(input_image))
+            torch.allclose(output_image, ImagenetNoAugmentTransform()(input_image))
         )
