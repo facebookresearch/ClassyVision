@@ -28,7 +28,7 @@ class SyntheticImageClassificationDataset(ClassyDataset):
             batchsize_per_replica,
             shuffle,
             num_samples,
-        ) = self.parse_config(self._config)
+        ) = self.parse_config(config)
         default_transform = transforms.Compose(
             [
                 transforms.ToTensor(),
