@@ -180,8 +180,7 @@ class ClassyVisionTask(object):
             state_load_success = update_classy_state(
                 state,
                 classy_state_dict,
-                is_finetuning=self.model_config.get("is_finetuning", False),
-                test_only=self.test_only,
+                reset_heads=self.model_config.get("reset_heads", True),
             )
             assert (
                 state_load_success

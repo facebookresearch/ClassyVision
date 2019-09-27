@@ -9,12 +9,13 @@ from test.generic.config_utils import get_test_args, get_test_task_config
 from test.generic.utils import compare_model_state, compare_samples
 
 from classy_vision.generic.classy_trainer_common import train_step
+from classy_vision.generic.util import update_classy_state
 from classy_vision.tasks import setup_task
 
 
 class TestClassyState(unittest.TestCase):
-    def _compare_model_state(self, model_state_1, model_state_2):
-        compare_model_state(self, model_state_1, model_state_2)
+    def _compare_model_state(self, model_state_1, model_state_2, check_heads=True):
+        compare_model_state(self, model_state_1, model_state_2, check_heads)
 
     def _compare_samples(self, sample_1, sample_2):
         compare_samples(self, sample_1, sample_2)
@@ -78,3 +79,87 @@ class TestClassyState(unittest.TestCase):
             train_step(state, hooks, use_gpu, local_variables)
             train_step(state_2, hooks, use_gpu, local_variables)
             self._compare_states(state.get_classy_state(), state_2.get_classy_state())
+
+    def test_update_state(self):
+        """
+        Tests that the update_classy_state successfully updates from a
+        checkpoint
+        """
+        config = get_test_task_config()
+        config["model"]["freeze_trunk"] = False
+        # use a batchsize of 1 for faster testing
+        for split in ["train", "test"]:
+            config["dataset"][split]["batchsize_per_replica"] = 1
+        args = get_test_args()
+        task = setup_task(config, args, local_rank=0)
+
+        for reset_heads in [True, False]:
+            config["model"]["reset_heads"] = reset_heads
+
+            state = task.build_initial_state()
+            state_2 = task.build_initial_state()
+            # test in both train and test mode
+            for _ in range(2):
+                state.advance_phase()
+
+                update_classy_state(
+                    state_2, state.get_classy_state(deep_copy=True), reset_heads
+                )
+                self._compare_model_state(
+                    state.get_classy_state()["base_model"],
+                    state_2.get_classy_state()["base_model"],
+                    not reset_heads,
+                )
+
+    def test_freeze_trunk(self):
+        """
+        Tests that the freeze_trunk setting works as expected
+        """
+        config = get_test_task_config()
+        config["model"]["freeze_trunk"] = True
+        config["model"]["reset_heads"] = True
+        # use a batchsize of 1 for faster testing
+        for split in ["train", "test"]:
+            config["dataset"][split]["batchsize_per_replica"] = 1
+        args = get_test_args()
+        task = setup_task(config, args, local_rank=0)
+
+        state = task.build_initial_state()
+
+        hooks = []
+        use_gpu = False
+        local_variables = {}
+
+        # test in both train and test mode
+        for i in range(2):
+            state.advance_phase()
+
+            previous_state_dict = state.get_classy_state(deep_copy=True)
+
+            # test that after the train step the trunk remains unchanged
+            train_step(state, hooks, use_gpu, local_variables)
+
+            # compares only trunk before and after train_step
+            # and should be true because the trunk is frozen
+            self._compare_model_state(
+                state.get_classy_state()["base_model"],
+                previous_state_dict["base_model"],
+                check_heads=False,
+            )
+
+            # compares both trunk and heads before and after train_step
+            # and should raise AssertionError in train mode because heads
+            # are training, not during test mode
+            if i == 0:
+                with self.assertRaises(AssertionError):
+                    self._compare_model_state(
+                        state.get_classy_state()["base_model"],
+                        previous_state_dict["base_model"],
+                        check_heads=True,
+                    )
+            else:
+                self._compare_model_state(
+                    state.get_classy_state()["base_model"],
+                    previous_state_dict["base_model"],
+                    check_heads=True,
+                )
