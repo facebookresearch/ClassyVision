@@ -27,10 +27,7 @@ class TransformDataset(Dataset):
         assert idx >= 0 and idx < len(self.dataset)
         sample = self.dataset[idx]
         for transform in self._transform:
-            try:  # transform may not implement `idx` as secondary input
-                sample = transform(sample, idx)
-            except TypeError:
-                sample = transform(sample)
+            sample = transform(sample)
         return sample
 
     def __len__(self):

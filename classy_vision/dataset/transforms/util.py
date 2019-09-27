@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import torchvision.transforms as transforms
 
-from . import build_transforms, register_transform
+from . import ClassyTransform, build_transforms, register_transform
 
 
 class ImagenetConstants:
@@ -38,36 +38,46 @@ class FieldTransform:
 
 
 @register_transform("imagenet_augment")
-def imagenet_augment_transform(
-    crop_size: int = ImagenetConstants.CROP_SIZE,
-    mean: List[float] = ImagenetConstants.MEAN,
-    std: List[float] = ImagenetConstants.STD,
-) -> Callable:
-    return transforms.Compose(
-        [
-            transforms.RandomResizedCrop(crop_size),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ]
-    )
+class ImagenetAugmentTransform(ClassyTransform):
+    def __init__(
+        self,
+        crop_size: int = ImagenetConstants.CROP_SIZE,
+        mean: List[float] = ImagenetConstants.MEAN,
+        std: List[float] = ImagenetConstants.STD,
+    ):
+        self.transform = transforms.Compose(
+            [
+                transforms.RandomResizedCrop(crop_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std),
+            ]
+        )
+
+    def __call__(self, img):
+        return self.transform(img)
 
 
 @register_transform("imagenet_no_augment")
-def imagenet_no_augment_transform(
-    resize: int = ImagenetConstants.RESIZE,
-    crop_size: int = ImagenetConstants.CROP_SIZE,
-    mean: List[float] = ImagenetConstants.MEAN,
-    std: List[float] = ImagenetConstants.STD,
-) -> Callable:
-    return transforms.Compose(
-        [
-            transforms.Resize(resize),
-            transforms.CenterCrop(crop_size),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ]
-    )
+class ImagenetNoAugmentTransform(ClassyTransform):
+    def __init__(
+        self,
+        resize: int = ImagenetConstants.RESIZE,
+        crop_size: int = ImagenetConstants.CROP_SIZE,
+        mean: List[float] = ImagenetConstants.MEAN,
+        std: List[float] = ImagenetConstants.STD,
+    ):
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize(resize),
+                transforms.CenterCrop(crop_size),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std),
+            ]
+        )
+
+    def __call__(self, img):
+        return self.transform(img)
 
 
 def build_field_transform_default_imagenet(
@@ -93,9 +103,9 @@ def build_field_transform_default_imagenet(
             transform = default_transform
         elif split is not None:
             transform = (
-                imagenet_augment_transform()
+                ImagenetAugmentTransform()
                 if split == "train"
-                else imagenet_no_augment_transform()
+                else ImagenetNoAugmentTransform()
             )
         else:
             raise ValueError("No transform config provided with no defaults")
