@@ -30,6 +30,9 @@ class FieldTransform:
 
     def __call__(self, sample: Dict[str, Any]) -> Dict[str, Any]:
         """Updates sample by applying a transform and to the appropriate key."""
+        if sample is None:
+            return sample
+
         assert isinstance(sample, dict) and self.key in sample, (
             "This transform only supports dicts with key '%s'" % self.key
         )
