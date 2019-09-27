@@ -28,7 +28,9 @@ def build_criterion(config):
     assert "name" in config, f"name not provided for criterion: {config}"
     name = config["name"]
     if name in CRITERION_REGISTRY:
-        return CRITERION_REGISTRY[name].from_config(config)
+        instance = CRITERION_REGISTRY[name].from_config(config)
+        instance._config_DO_NOT_USE = config
+        return instance
 
     # the name should be available in torch.nn.modules.loss
     assert hasattr(torch_losses, name), (
@@ -41,7 +43,9 @@ def build_criterion(config):
         # if we are passing weights, we need to change the weights from a list
         # to a tensor
         args["weight"] = torch.tensor(args["weight"], dtype=torch.float)
-    return getattr(torch_losses, name)(**args)
+    instance = getattr(torch_losses, name)(**args)
+    instance._config_DO_NOT_USE = config
+    return instance
 
 
 def register_criterion(name):

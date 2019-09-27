@@ -27,6 +27,9 @@ class ClassyTrainer:
         state = task.build_initial_state()
         assert isinstance(state, ClassyState)
 
+        if self.use_gpu:
+            state.criterion = state.criterion.cuda()
+
         if is_distributed_training_run():
             state.init_distributed_data_parallel_model()
 
