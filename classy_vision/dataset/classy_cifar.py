@@ -58,7 +58,7 @@ class CifarDataset(ClassyDataset):
             batchsize_per_replica,
             shuffle,
             num_samples,
-        ) = self.parse_config(self._config)
+        ) = self.parse_config(config)
         default_transform = (
             _cifar_augment_transform()
             if self._split == "train"

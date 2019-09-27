@@ -110,12 +110,11 @@ class TestClassyDataset(unittest.TestCase):
 
     def test_get_set_classy_state(self):
         state = self.dataset1.get_classy_state()
-        self.assertEqual(state["config"], DUMMY_CONFIG)
         self.assertEqual(
             state["wrapped_state"], self.dataset1.dataset.get_classy_state()
         )
 
-        new_config = state["config"]
+        new_config = DUMMY_CONFIG.copy()
         new_config["dummy2"] = 2
         state["config"] = new_config
         self.dataset1.set_classy_state(state)

@@ -32,7 +32,6 @@ class ClassyDataset(Dataset):
         Classy Dataloader constructor.
         """
         # Assignments:
-        self._config = config
         self._split = config["split"] if "split" in config else None
         self.dataset = None
 
@@ -130,7 +129,6 @@ class ClassyDataset(Dataset):
     def get_classy_state(self):
         """Get state for object (e.g. shuffle)"""
         return {
-            "config": self._config,
             "split": self._split,
             "state": {"dataset_type": type(self)},
             "wrapped_state": self.dataset.get_classy_state()
@@ -144,7 +142,6 @@ class ClassyDataset(Dataset):
             "Type of saved state does not match current object. "
             "If intentional, use non-strict flag"
         )
-        self._config = state["config"]
         self._split = state["split"]
         if self.dataset is not None:
             self.dataset.set_classy_state(state["wrapped_state"])
