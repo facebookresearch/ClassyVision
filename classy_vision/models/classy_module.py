@@ -7,7 +7,7 @@
 import copy
 
 import torch.nn as nn
-from classy_vision.heads.classy_vision_head import ClassyVisionHead
+from classy_vision.heads import ClassyVisionHead
 
 
 class ClassyModule(nn.Module):

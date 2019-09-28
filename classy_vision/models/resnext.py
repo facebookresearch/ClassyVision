@@ -13,8 +13,7 @@ import math
 import torch
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
-from classy_vision.heads import register_head
-from classy_vision.heads.classy_vision_head import ClassyVisionHead
+from classy_vision.heads import ClassyVisionHead, register_head
 from torch.nn.parameter import Parameter
 
 from . import register_model

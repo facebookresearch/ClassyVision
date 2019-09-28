@@ -69,3 +69,8 @@ def build_head(head_config):
 
 # automatically import any Python files in the heads/ directory
 import_all_modules(FILE_ROOT, "classy_vision.heads")
+
+from .identity_head import IdentityHead  # isort:skip
+
+
+__all__ = ["ClassyVisionHead", "IdentityHead", "register_head", "build_head"]
