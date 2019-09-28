@@ -8,7 +8,7 @@ import logging
 from typing import Any, Dict
 
 import torch
-from classy_vision.criterions import build_criterion
+from classy_vision.criterions import ClassyCriterion, build_criterion
 from classy_vision.dataset import build_dataset
 from classy_vision.generic.util import copy_model_to_gpu, update_classy_state
 from classy_vision.meters import build_meter
@@ -20,7 +20,6 @@ from classy_vision.state.classy_state import ClassyState
 class ClassyVisionTask(object):
     def __init__(
         self,
-        criterion_config: Dict[str, Any],
         dataset_config: Dict[str, Any],
         device_type: str,
         meter_config: Dict[str, Any],
@@ -31,7 +30,7 @@ class ClassyVisionTask(object):
         pin_memory: bool,
         test_only: bool,
     ):
-        self.criterion_config = criterion_config
+        self.criterion = None
         self.dataset_config = dataset_config
         self.device_type = device_type
         self.meter_config = meter_config
@@ -46,9 +45,12 @@ class ClassyVisionTask(object):
         self.dataloaders = self.build_dataloaders()
         self.phases = self._build_phases()
         self.model = self._build_model()
-        self.criterion = self._build_criterion()
         self.optimizer = build_optimizer(self.optimizer_config, self.model)
         self.meters = self._build_meters()
+
+    def set_criterion(self, criterion: ClassyCriterion):
+        self.criterion = criterion
+        return self
 
     @classmethod
     def setup_task(cls, config, args, **kwargs):
@@ -77,8 +79,8 @@ class ClassyVisionTask(object):
         optimizer_config = config["optimizer"]
         optimizer_config["num_epochs"] = config["num_phases"]
 
+        criterion = build_criterion(config["criterion"])
         return cls(
-            criterion_config=config["criterion"],
             dataset_config=config["dataset"],
             device_type=config["machine"]["device"],
             meter_config=config.get("meters", {}),
@@ -88,11 +90,11 @@ class ClassyVisionTask(object):
             optimizer_config=optimizer_config,
             pin_memory=config["machine"]["pin_memory"],
             test_only=config["test_only"],
-        )
+        ).set_criterion(criterion)
 
     def get_config(self):
         return {
-            "criterion": self.criterion_config,
+            "criterion": self.criterion._config_DO_NOT_USE,
             "dataset": self.dataset_config,
             "device_type": self.device_type,
             "meters": self.meter_config,
@@ -155,15 +157,6 @@ class ClassyVisionTask(object):
         model.eval()
 
         return model
-
-    def _build_criterion(self):
-        """
-        Returns criterion for task.
-        """
-        criterion = build_criterion(self.criterion_config)
-        if self.device_type == "gpu":
-            criterion = criterion.cuda()
-        return criterion
 
     def _build_meters(self):
         """

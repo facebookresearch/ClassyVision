@@ -7,6 +7,7 @@
 import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
+from classy_vision.criterions import build_criterion
 from classy_vision.tasks import setup_task
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 
@@ -20,18 +21,18 @@ class TestClassyVisionTask(unittest.TestCase):
 
     def test_get_state(self):
         config = get_test_task_config()
+        criterion = build_criterion(config["criterion"])
         task = ClassyVisionTask(
             device_type="cpu",
             num_phases=1,
             dataset_config=config["dataset"],
             model_config=config["model"],
             optimizer_config=config["optimizer"],
-            criterion_config=config["criterion"],
             meter_config={},
             test_only=False,
             num_workers=1,
             pin_memory=False,
-        )
+        ).set_criterion(criterion)
 
         state = task.build_initial_state()
         self.assertTrue(state is not None)

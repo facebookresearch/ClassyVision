@@ -6,6 +6,7 @@
 
 import unittest
 
+from classy_vision.criterions import build_criterion
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 from classy_vision.trainer import ClassyTrainer
 
@@ -67,12 +68,11 @@ class TestClassyTrainer(unittest.TestCase):
             dataset_config=config["dataset"],
             model_config=config["model"],
             optimizer_config=config["optimizer"],
-            criterion_config=config["criterion"],
             meter_config=config["meters"],
             test_only=False,
             num_workers=0,
             pin_memory=False,
-        )
+        ).set_criterion(build_criterion(config["criterion"]))
         self.assertTrue(task is not None)
 
         trainer = ClassyTrainer(hooks=[], use_gpu=False)
