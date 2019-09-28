@@ -97,6 +97,23 @@ def is_on_gpu(model):
     return has_params and on_gpu
 
 
+def is_not_none(sample):
+    """
+    Returns True if sample is not None and constituents are not none.
+    """
+    if sample is None:
+        return False
+
+    if isinstance(sample, (list, tuple)):
+        if any(s is None for s in sample):
+            return False
+
+    if isinstance(sample, dict):
+        if any(s is None for s in sample.values()):
+            return False
+    return True
+
+
 def copy_model_to_gpu(model, criterion=None):
     """
     Copies a model and (optional) criterion to GPU and enables cudnn benchmarking.

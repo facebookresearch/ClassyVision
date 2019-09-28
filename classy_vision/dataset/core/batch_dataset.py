@@ -51,10 +51,11 @@ class BatchDataset(Dataset):
             sample = self.dataset[n]
             if not self.filter_func(sample):
                 continue
-            if torch.is_tensor(sample):
-                sample = sample
             batch.append(sample)
         # batch data:
+        if len(batch) == 0:
+            return None
+
         batch = default_collate(batch)
         return batch
 
