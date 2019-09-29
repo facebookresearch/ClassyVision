@@ -5,9 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+from typing import Dict
 
 import torch.nn as nn
 from classy_vision.heads import ClassyVisionHead
+from torch import Tensor
 
 
 class ClassyModule(nn.Module):
@@ -55,8 +57,24 @@ class ClassyModule(nn.Module):
     def get_heads(self):
         return dict(self._heads)
 
-    def forward(self, input):
-        output = self._module(input)
+    def forward(self, input: Tensor) -> Tensor:
+        input = self._module(input)
         for head in self._heads.values():
-            self._head_outputs[head.unique_id] = head(output)
-        return output
+            assert (
+                not head.requires_dict_input()
+            ), f"The head {head.unique_id} expects dict input"
+            self._head_outputs[head.unique_id] = head(input)
+        return input
+
+
+class ClassyModuleWithDictInput(ClassyModule):
+    def forward(self, input: Dict) -> Dict:
+        assert isinstance(input, dict)
+        input = copy.deepcopy(input)
+        input["data"] = self._module(input["data"])
+        for head in self._heads.values():
+            if head.requires_dict_input():
+                self._head_outputs[head.unique_id] = head(input)
+            else:
+                self._head_outputs[head.unique_id] = head(input["data"])
+        return input

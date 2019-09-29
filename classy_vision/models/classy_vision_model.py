@@ -9,7 +9,7 @@ import logging
 
 import torch.nn as nn
 
-from .classy_module import ClassyModule
+from .classy_module import ClassyModule, ClassyModuleWithDictInput
 
 
 class ClassyVisionModel(nn.Module):
@@ -78,13 +78,23 @@ class ClassyVisionModel(nn.Module):
     def summarize(self):
         raise NotImplementedError
 
+    def requires_dict_input(self):
+        """
+        Override this function if the model input is dict and the dict is
+        expected to be used in heads
+        """
+        return False
+
     def build_attachable_block(self, name, module):
         """
         Add a wrapper to the module to allow to attach heads to the module.
         """
         if name in self._attachable_blocks:
             raise ValueError("Found duplicated block name {}".format(name))
-        block = ClassyModule(name, module)
+        if not self.requires_dict_input():
+            block = ClassyModule(name, module)
+        else:
+            block = ClassyModuleWithDictInput(name, module)
         self._attachable_blocks[name] = block
         return block
 

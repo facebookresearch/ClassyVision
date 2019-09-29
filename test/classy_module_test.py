@@ -34,6 +34,17 @@ class TestClassyModule(unittest.TestCase):
             out = self.layer1(x)
             return self.layer2(out)
 
+    class DummyTestModelWithDictInput(DummyTestModel):
+        def requires_dict_input(self):
+            return True
+
+    class DummyTestHeadWithDictInput(DummyTestHead):
+        def forward(self, x):
+            return self.layer(x["data"]) + x["extra_feature"]
+
+        def requires_dict_input(self):
+            return True
+
     def test_head_execution(self):
         model = self.DummyTestModel()
         head = self.DummyTestHead()
@@ -56,3 +67,12 @@ class TestClassyModule(unittest.TestCase):
 
         head2._config["unique_id"] = "head_id2"
         model.set_heads(heads, True)
+
+    def test_head_with_dict_input(self):
+        model = self.DummyTestModelWithDictInput()
+        head = self.DummyTestHeadWithDictInput()
+        heads = {"dummy_block": {head.unique_id: head}}
+        model.set_heads(heads, True)
+        input = {"data": torch.rand(1, 2), "extra_feature": torch.rand(1, 2)}
+        with torch.no_grad():
+            model(input)

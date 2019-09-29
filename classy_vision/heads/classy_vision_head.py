@@ -27,3 +27,9 @@ class ClassyVisionHead(nn.Module):
 
     def forward(self, x):
         raise NotImplementedError
+
+    def requires_dict_input(self):
+        """
+        Override this function if the head expects dict input
+        """
+        return False
