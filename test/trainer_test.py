@@ -63,7 +63,6 @@ class TestClassyTrainer(unittest.TestCase):
         """Checks we can train a small MLP model on a CPU."""
         config = self._get_config()
         task = ClassyVisionTask(
-            device_type="cpu",
             num_phases=10,
             dataset_config=config["dataset"],
             model_config=config["model"],
