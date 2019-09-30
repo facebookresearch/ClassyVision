@@ -6,7 +6,7 @@
 
 
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List
 
 import torchvision.transforms as transforms
 from classy_vision.generic.registry_utils import import_all_modules
@@ -87,6 +87,9 @@ def register_transform(name: str):
 
 # automatically import any Python files in the transforms/ directory
 import_all_modules(FILE_ROOT, "classy_vision.dataset.transforms")
+
+from .lighting_transform import LightingTransform  # isort:skip
+
 
 __all__ = [
     "ClassyTransform",
