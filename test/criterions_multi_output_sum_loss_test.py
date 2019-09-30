@@ -9,10 +9,10 @@ import unittest
 import torch
 from classy_vision.criterions import (
     ClassyCriterion,
+    MultiOutputSumLoss,
     build_criterion,
     register_criterion,
 )
-from classy_vision.criterions.multi_output_sum_loss import MultiOutputSumLoss
 
 
 @register_criterion("mock_1")
