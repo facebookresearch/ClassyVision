@@ -10,10 +10,10 @@ import unittest
 import torch
 from classy_vision.criterions import (
     ClassyCriterion,
+    SumArbitraryLoss,
     build_criterion,
     register_criterion,
 )
-from classy_vision.criterions.sum_arbitrary_loss import SumArbitraryLoss
 
 
 @register_criterion("mock_a")

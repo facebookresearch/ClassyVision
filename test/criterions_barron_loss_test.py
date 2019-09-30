@@ -8,8 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import build_criterion
-from classy_vision.criterions.barron_loss import BarronLoss
+from classy_vision.criterions import BarronLoss, build_criterion
 
 
 class TestBarronLoss(unittest.TestCase):
