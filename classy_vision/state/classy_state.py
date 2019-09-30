@@ -156,26 +156,29 @@ class ClassyState:
         # although DPP will solve this by dynamically re-sharding.
         return self.num_samples_this_phase
 
-    def _recreate_data_loader_from_dataset(self):
+    def _recreate_data_loader_from_dataset(self, phase_type=None):
         """
         This utility is invoked to re-create the data loader object
         for the current phase of execution, using the existing dataset.
         This is sufficient when advancing phases.
         """
+        if phase_type is None:
+            phase_type = self.phase_type
+
         logging.info("Recreating data loader for new phase")
-        dataset = self.dataloaders[self.phase_type].dataset
         num_workers = 0
-        if hasattr(self.dataloaders[self.phase_type], "num_workers"):
-            num_workers = self.dataloaders[self.phase_type].num_workers
+        if hasattr(self.dataloaders[phase_type], "num_workers"):
+            num_workers = self.dataloaders[phase_type].num_workers
         pin_memory = False
-        if hasattr(self.dataloaders[self.phase_type], "pin_memory"):
-            pin_memory = self.dataloaders[self.phase_type].pin_memory
-        if self.phase_type == "test":
+        if hasattr(self.dataloaders[phase_type], "pin_memory"):
+            pin_memory = self.dataloaders[phase_type].pin_memory
+        if phase_type == "test":
             current_phase_id = 0
         else:
             current_phase_id = max(self.train_phase_idx, 0)
 
-        self.dataloaders[self.phase_type] = dataset.iterator(
+        self.dataloaders[phase_type] = self.task.build_dataloader(
+            split=phase_type,
             num_workers=num_workers,
             pin_memory=pin_memory,
             current_phase_id=current_phase_id,
