@@ -8,10 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import build_criterion
-from classy_vision.criterions.label_smoothing_criterion import (
-    LabelSmoothingCrossEntropyLoss,
-)
+from classy_vision.criterions import LabelSmoothingCrossEntropyLoss, build_criterion
 
 
 class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
