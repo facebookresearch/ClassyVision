@@ -24,9 +24,9 @@ except ImportError:
 log = logging.getLogger()
 
 
-class LossLrTensorboardHook(ClassyHook):
+class TensorboardPlotHook(ClassyHook):
     """
-    Hook for writing the losses and learning rates to tensorboard.
+    Hook for writing the losses, learning rates and meters to tensorboard.
 
     Global steps are counted in terms of the number of samples processed.
 
@@ -45,7 +45,7 @@ class LossLrTensorboardHook(ClassyHook):
     def __init__(self, tb_writer) -> None:
         if not tbx_available:
             raise RuntimeError(
-                "tensorboardX not installed, cannot use LossLrTensorboardHook"
+                "tensorboardX not installed, cannot use TensorboardPlotHook"
             )
 
         self.tb_writer = tb_writer
@@ -122,3 +122,12 @@ class LossLrTensorboardHook(ClassyHook):
 
         loss_key = "avg_{phase_type}_loss".format(phase_type=state.phase_type)
         self.tb_writer.add_scalar(loss_key, loss_avg, global_step=phase_type_idx)
+
+        # plot meters which return a dict
+        for meter in state.meters:
+            if not isinstance(meter.value, dict):
+                log.warn(f"Skipping meter {meter.name} with value: {meter.value}")
+                continue
+            for name, value in meter.value.items():
+                meter_key = f"{phase_type}_{meter.name}_{name}"
+                self.tb_writer.add_scalar(meter_key, value, global_step=phase_type_idx)

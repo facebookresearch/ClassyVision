@@ -12,19 +12,19 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_args, get_test_task_config
 
-from classy_vision.hooks import LossLrTensorboardHook
+from classy_vision.hooks import TensorboardPlotHook
 from classy_vision.tasks import setup_task
 from tensorboardX import SummaryWriter
 
 
-class TestLossLrTensorboardHook(unittest.TestCase):
+class TestTensorboardPlotHook(unittest.TestCase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
 
-    @mock.patch("classy_vision.hooks.loss_lr_tensorboard_hook.is_master")
+    @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
     def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
         """
         Tests that the tensorboard writer writes the correct scalars to SummaryWriter
@@ -55,13 +55,13 @@ class TestLossLrTensorboardHook(unittest.TestCase):
             summary_writer = mock.MagicMock(wraps=summary_writer)
 
             # create a loss lr tensorboard hook
-            loss_lr_tensorboard_hook = LossLrTensorboardHook(summary_writer)
+            tensorboard_plot_hook = TensorboardPlotHook(summary_writer)
 
             # test that the hook logs a warning and doesn't write anything to
             # the writer if on_phase_start() is not called for initialization
             # before on_loss() is called.
             with self.assertLogs() as log_watcher:
-                loss_lr_tensorboard_hook.on_loss(state, local_variables)
+                tensorboard_plot_hook.on_loss(state, local_variables)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -73,7 +73,7 @@ class TestLossLrTensorboardHook(unittest.TestCase):
             # the writer if on_phase_start() is not called for initialization
             # if on_phase_end() is called.
             with self.assertLogs() as log_watcher:
-                loss_lr_tensorboard_hook.on_phase_end(state, local_variables)
+                tensorboard_plot_hook.on_phase_end(state, local_variables)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -83,13 +83,13 @@ class TestLossLrTensorboardHook(unittest.TestCase):
             summary_writer.add_scalar.reset_mock()
 
             # run the hook in the correct order
-            loss_lr_tensorboard_hook.on_phase_start(state, local_variables)
+            tensorboard_plot_hook.on_phase_start(state, local_variables)
 
             for loss in losses:
                 state.losses.append(loss)
-                loss_lr_tensorboard_hook.on_loss(state, local_variables)
+                tensorboard_plot_hook.on_loss(state, local_variables)
 
-            loss_lr_tensorboard_hook.on_phase_end(state, local_variables)
+            tensorboard_plot_hook.on_phase_end(state, local_variables)
 
             if master:
                 # add_scalar() should have been called with the right scalars
@@ -109,6 +109,12 @@ class TestLossLrTensorboardHook(unittest.TestCase):
                 summary_writer.add_scalar.assert_any_call(
                     avg_loss_key, mock.ANY, global_step=mock.ANY
                 )
+                for meter in state.meters:
+                    for name in meter.value:
+                        meter_key = f"{phase_type}_{meter.name}_{name}"
+                        summary_writer.add_scalar.assert_any_call(
+                            meter_key, mock.ANY, global_step=mock.ANY
+                        )
             else:
                 # add_scalar() shouldn't be called since is_master() is False
                 summary_writer.add_scalar.assert_not_called()
