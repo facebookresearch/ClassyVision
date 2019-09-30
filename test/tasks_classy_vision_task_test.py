@@ -30,13 +30,11 @@ class TestClassyVisionTask(unittest.TestCase):
             optimizer_config=config["optimizer"],
             meter_config={},
             test_only=False,
-            num_workers=1,
-            pin_memory=False,
         ).set_criterion(criterion)
 
-        state = task.build_initial_state()
+        state = task.build_initial_state(num_workers=1, pin_memory=False)
         self.assertTrue(state is not None)
 
         args = get_test_args()
         task = setup_task(config, args)
-        state = task.build_initial_state()
+        state = task.build_initial_state(num_workers=1, pin_memory=False)
