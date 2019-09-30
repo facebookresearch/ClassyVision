@@ -25,9 +25,7 @@ class ClassyVisionTask(object):
         meter_config: Dict[str, Any],
         model_config: Dict[str, Any],
         num_phases: int,
-        num_workers: int,
         optimizer_config: Dict[str, Any],
-        pin_memory: bool,
         test_only: bool,
     ):
         self.criterion = None
@@ -36,13 +34,11 @@ class ClassyVisionTask(object):
         self.meter_config = meter_config
         self.model_config = model_config
         self.num_phases = num_phases
-        self.num_workers = num_workers
         self.optimizer_config = optimizer_config
-        self.pin_memory = pin_memory
         self.test_only = test_only
 
         self.checkpoint = None
-        self.dataloaders = self.build_dataloaders()
+        self.datasets = self.build_datasets()
         self.phases = self._build_phases()
         self.model = self._build_model()
         self.optimizer = build_optimizer(self.optimizer_config, self.model)
@@ -64,13 +60,8 @@ class ClassyVisionTask(object):
             config["machine"] = {}
         if "device" not in config["machine"]:
             config["machine"]["device"] = args.device
-        if "num_workers" not in config["machine"]:
-            config["machine"]["num_workers"] = args.num_workers
         if "test_only" not in config:
             config["test_only"] = args.test_only
-        config["machine"]["pin_memory"] = (
-            config["machine"]["device"] == "gpu" and torch.cuda.device_count() > 1
-        )
 
         return cls.from_config(config)
 
@@ -86,9 +77,7 @@ class ClassyVisionTask(object):
             meter_config=config.get("meters", {}),
             model_config=config["model"],
             num_phases=config["num_phases"],
-            num_workers=config["machine"]["num_workers"],
             optimizer_config=optimizer_config,
-            pin_memory=config["machine"]["pin_memory"],
             test_only=config["test_only"],
         ).set_criterion(criterion)
 
@@ -100,9 +89,7 @@ class ClassyVisionTask(object):
             "meters": self.meter_config,
             "model": self.model_config,
             "num_phases": self.num_phases,
-            "num_workers": self.num_workers,
             "optimizer": self.optimizer_config,
-            "pin_memory": self.pin_memory,
             "test_only": self.test_only,
         }
 
@@ -129,16 +116,23 @@ class ClassyVisionTask(object):
 
         return [{"train": False} for _ in range(self.num_phases)]
 
-    def build_dataloaders(self, **kwargs):
-        """
-        Returns dataloader (with splits such as train / test) for task.
-        """
-        # Add machine params to dataloader config:
+    def build_datasets(self):
         return {
-            split: build_dataset(self.dataset_config[split]).iterator(
-                **kwargs, num_workers=self.num_workers, pin_memory=self.pin_memory
-            )
+            split: build_dataset(self.dataset_config[split])
             for split in ["train", "test"]
+        }
+
+    def build_dataloader(self, split, num_workers, pin_memory, **kwargs):
+        return self.datasets[split].iterator(
+            num_workers=num_workers, pin_memory=pin_memory, **kwargs
+        )
+
+    def build_dataloaders(self, num_workers, pin_memory, **kwargs):
+        return {
+            split: self.build_dataloader(
+                split, num_workers=num_workers, pin_memory=pin_memory, **kwargs
+            )
+            for split in self.datasets.keys()
         }
 
     def _build_model(self):
@@ -186,10 +180,13 @@ class ClassyVisionTask(object):
         ), "Checkpoint does not contain classy_state_dict"
         self.checkpoint = checkpoint
 
-    def build_initial_state(self):
+    def build_initial_state(self, num_workers=0, pin_memory=False):
         """
         Creates initial state using config.
         """
+        self.dataloaders = self.build_dataloaders(
+            num_workers=num_workers, pin_memory=pin_memory
+        )
         self.state = ClassyState(
             self,
             self.phases,

@@ -12,19 +12,23 @@ from classy_vision.state.classy_state import ClassyState
 
 
 class ClassyTrainer:
-    def __init__(self, hooks, use_gpu):
+    def __init__(self, hooks, use_gpu, num_workers=0):
         assert isinstance(hooks, list)
         assert all(isinstance(hook, ClassyHook) for hook in hooks)
 
         self.hooks = hooks
         self.use_gpu = use_gpu
+        self.num_workers = num_workers
 
     def train(self, task):
         """
         Runs training phases, phases are generated from the config.
         """
 
-        state = task.build_initial_state()
+        pin_memory = self.use_gpu and torch.cuda.device_count() > 1
+        state = task.build_initial_state(
+            num_workers=self.num_workers, pin_memory=pin_memory
+        )
         assert isinstance(state, ClassyState)
 
         if self.use_gpu:
