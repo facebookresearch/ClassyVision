@@ -69,3 +69,22 @@ def register_criterion(name):
 
 # automatically import any Python files in the criterion/ directory
 import_all_modules(FILE_ROOT, "classy_vision.criterions")
+
+
+from .barron_loss import BarronLoss  # isort:skip
+from .label_smoothing_criterion import LabelSmoothingCrossEntropyLoss  # isort:skip
+from .multi_output_sum_loss import MultiOutputSumLoss  # isort:skip
+from .soft_target_cross_entropy_loss import SoftTargetCrossEntropyLoss  # isort:skip
+from .sum_arbitrary_loss import SumArbitraryLoss  # isort:skip
+
+
+__all__ = [
+    "BarronLoss",
+    "ClassyCriterion",
+    "LabelSmoothingCrossEntropyLoss",
+    "MultiOutputSumLoss",
+    "SoftTargetCrossEntropyLoss",
+    "SumArbitraryLoss",
+    "build_criterion",
+    "register_criterion",
+]

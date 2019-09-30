@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import numpy as np
-import torch
 from classy_vision.criterions import ClassyCriterion, register_criterion
 from classy_vision.criterions.soft_target_cross_entropy_loss import (
     _SoftTargetCrossEntropyLoss,
