@@ -65,7 +65,6 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         config = self._get_config()
         config["optimizer"]["num_epochs"] = num_phases
         task = ClassyVisionTask(
-            device_type="cpu",
             num_phases=num_phases,
             dataset_config=config["dataset"],
             model_config=config["model"],

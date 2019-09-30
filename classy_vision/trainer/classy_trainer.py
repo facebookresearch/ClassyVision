@@ -7,6 +7,7 @@
 import torch
 from classy_vision.generic.classy_trainer_common import run_hooks, train_step
 from classy_vision.generic.distributed_util import barrier, is_distributed_training_run
+from classy_vision.generic.util import copy_model_to_gpu
 from classy_vision.hooks import ClassyHook, ClassyHookFunctions
 from classy_vision.state.classy_state import ClassyState
 
@@ -33,6 +34,7 @@ class ClassyTrainer:
 
         if self.use_gpu:
             state.criterion = state.criterion.cuda()
+            state.base_model = copy_model_to_gpu(state.base_model)
 
         if is_distributed_training_run():
             state.init_distributed_data_parallel_model()
