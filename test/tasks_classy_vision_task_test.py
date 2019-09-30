@@ -23,7 +23,6 @@ class TestClassyVisionTask(unittest.TestCase):
         config = get_test_task_config()
         criterion = build_criterion(config["criterion"])
         task = ClassyVisionTask(
-            device_type="cpu",
             num_phases=1,
             dataset_config=config["dataset"],
             model_config=config["model"],

@@ -10,7 +10,7 @@ from typing import Any, Dict
 import torch
 from classy_vision.criterions import ClassyCriterion, build_criterion
 from classy_vision.dataset import build_dataset
-from classy_vision.generic.util import copy_model_to_gpu, update_classy_state
+from classy_vision.generic.util import update_classy_state
 from classy_vision.meters import build_meter
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
@@ -21,7 +21,6 @@ class ClassyVisionTask(object):
     def __init__(
         self,
         dataset_config: Dict[str, Any],
-        device_type: str,
         meter_config: Dict[str, Any],
         model_config: Dict[str, Any],
         num_phases: int,
@@ -30,7 +29,6 @@ class ClassyVisionTask(object):
     ):
         self.criterion = None
         self.dataset_config = dataset_config
-        self.device_type = device_type
         self.meter_config = meter_config
         self.model_config = model_config
         self.num_phases = num_phases
@@ -56,10 +54,6 @@ class ClassyVisionTask(object):
         """
 
         # allow some command-line options to override configuration:
-        if "machine" not in config:
-            config["machine"] = {}
-        if "device" not in config["machine"]:
-            config["machine"]["device"] = args.device
         if "test_only" not in config:
             config["test_only"] = args.test_only
 
@@ -73,7 +67,6 @@ class ClassyVisionTask(object):
         criterion = build_criterion(config["criterion"])
         return cls(
             dataset_config=config["dataset"],
-            device_type=config["machine"]["device"],
             meter_config=config.get("meters", {}),
             model_config=config["model"],
             num_phases=config["num_phases"],
@@ -85,7 +78,6 @@ class ClassyVisionTask(object):
         return {
             "criterion": self.criterion._config_DO_NOT_USE,
             "dataset": self.dataset_config,
-            "device_type": self.device_type,
             "meters": self.meter_config,
             "model": self.model_config,
             "num_phases": self.num_phases,
@@ -142,9 +134,6 @@ class ClassyVisionTask(object):
         # TODO (aadcock): Need to make models accept target metadata
         # as build param to support non-classification tasks
         model = build_model(self.model_config)
-
-        if self.device_type == "gpu":
-            model = copy_model_to_gpu(model)
 
         # put model in eval mode in case any hooks modify model states, it' will
         # be reset to train mode before training
