@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from .classy_trainer import ClassyTrainer
+from .distributed_trainer import DistributedTrainer
 
 
-__all__ = ["ClassyTrainer"]
+__all__ = ["ClassyTrainer", "DistributedTrainer"]
