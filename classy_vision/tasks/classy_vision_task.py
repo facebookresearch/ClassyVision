@@ -25,7 +25,6 @@ class ClassyVisionTask(object):
         model_config: Dict[str, Any],
         num_phases: int,
         optimizer_config: Dict[str, Any],
-        test_only: bool,
     ):
         self.criterion = None
         self.dataset_config = dataset_config
@@ -33,7 +32,7 @@ class ClassyVisionTask(object):
         self.model_config = model_config
         self.num_phases = num_phases
         self.optimizer_config = optimizer_config
-        self.test_only = test_only
+        self.test_only = False
 
         self.checkpoint = None
         self.datasets = self.build_datasets()
@@ -44,6 +43,10 @@ class ClassyVisionTask(object):
 
     def set_criterion(self, criterion: ClassyCriterion):
         self.criterion = criterion
+        return self
+
+    def set_test_only(self, test_only: bool):
+        self.test_only = test_only
         return self
 
     @classmethod
@@ -65,14 +68,18 @@ class ClassyVisionTask(object):
         optimizer_config["num_epochs"] = config["num_phases"]
 
         criterion = build_criterion(config["criterion"])
-        return cls(
-            dataset_config=config["dataset"],
-            meter_config=config.get("meters", {}),
-            model_config=config["model"],
-            num_phases=config["num_phases"],
-            optimizer_config=optimizer_config,
-            test_only=config["test_only"],
-        ).set_criterion(criterion)
+        test_only = config["test_only"]
+        return (
+            cls(
+                dataset_config=config["dataset"],
+                meter_config=config.get("meters", {}),
+                model_config=config["model"],
+                num_phases=config["num_phases"],
+                optimizer_config=optimizer_config,
+            )
+            .set_criterion(criterion)
+            .set_test_only(test_only)
+        )
 
     def get_config(self):
         return {
