@@ -28,7 +28,6 @@ class TestClassyVisionTask(unittest.TestCase):
             model_config=config["model"],
             optimizer_config=config["optimizer"],
             meter_config={},
-            test_only=False,
         ).set_criterion(criterion)
 
         state = task.build_initial_state(num_workers=1, pin_memory=False)
