@@ -18,7 +18,14 @@ METER_REGISTRY = {}
 
 
 def build_meter(config):
-    return METER_REGISTRY[config["name"]].from_config(config)
+    instance = METER_REGISTRY[config["name"]].from_config(config)
+    instance._config_DO_NOT_USE = config
+    return instance
+
+
+def build_meters(config):
+    configs = [{"name": name, **args} for name, args in config.items()]
+    return [build_meter(config) for config in configs]
 
 
 def register_meter(name):
