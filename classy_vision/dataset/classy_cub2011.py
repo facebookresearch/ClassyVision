@@ -48,6 +48,10 @@ class Cub2011Dataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         # find location of images:
         img_dir = None

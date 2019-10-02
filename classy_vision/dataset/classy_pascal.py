@@ -117,6 +117,10 @@ class PascalDataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         # assertions:
         assert self._pascal_version in ["voc2007", "voc2012"]

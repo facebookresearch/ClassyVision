@@ -18,7 +18,7 @@ DATASET_CLASS_NAMES = set()
 
 
 def build_dataset(config, *args, **kwargs):
-    return DATASET_REGISTRY[config["name"]](config, *args, **kwargs)
+    return DATASET_REGISTRY[config["name"]].from_config(config, *args, **kwargs)
 
 
 def get_available_splits(dataset_name):

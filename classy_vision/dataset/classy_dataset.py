@@ -35,6 +35,10 @@ class ClassyDataset(Dataset):
         self._split = config["split"] if "split" in config else None
         self.dataset = None
 
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError()
+
     def parse_config(self, config):
         """
         This function parses out common config options. Those options are
