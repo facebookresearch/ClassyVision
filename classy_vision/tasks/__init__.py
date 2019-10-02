@@ -18,8 +18,11 @@ TASK_REGISTRY = {"classy_vision": ClassyVisionTask}
 TASK_CLASS_NAMES = set()
 
 
-def setup_task(config, args, **kwargs):
-    return TASK_REGISTRY[config["name"]].setup_task(config, args, **kwargs)
+def build_task(config, args, **kwargs):
+    # allow some command-line options to override configuration:
+    if "test_only" not in config:
+        config["test_only"] = args.test_only
+    return TASK_REGISTRY[config["name"]].from_config(config)
 
 
 def register_task(name):

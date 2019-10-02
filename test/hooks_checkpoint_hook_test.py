@@ -12,7 +12,7 @@ from test.generic.config_utils import get_test_args, get_test_task_config
 
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 
 
 class TestCheckpointHook(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestCheckpointHook(unittest.TestCase):
         """
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args)
+        task = build_task(config, args)
         state = task.build_initial_state()
 
         local_variables = {}
@@ -80,7 +80,7 @@ class TestCheckpointHook(unittest.TestCase):
         """
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args)
+        task = build_task(config, args)
         state = task.build_initial_state()
 
         local_variables = {}

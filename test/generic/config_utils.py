@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 
 from .utils import Arguments
 
@@ -71,7 +71,7 @@ def get_test_args():
 def get_test_classy_task():
     config = get_test_task_config()
     args = get_test_args()
-    task = setup_task(config, args)
+    task = build_task(config, args)
     return task
 
 

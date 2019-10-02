@@ -8,15 +8,15 @@ import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
 from classy_vision.criterions import build_criterion
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 
 
 class TestClassyVisionTask(unittest.TestCase):
-    def test_setup_task(self):
+    def test_build_task(self):
         config = get_test_task_config()
         args = get_test_args()
-        task = setup_task(config, args)
+        task = build_task(config, args)
         self.assertTrue(isinstance(task, ClassyVisionTask))
 
     def test_get_state(self):
@@ -33,5 +33,5 @@ class TestClassyVisionTask(unittest.TestCase):
         self.assertTrue(state is not None)
 
         args = get_test_args()
-        task = setup_task(config, args)
+        task = build_task(config, args)
         state = task.build_initial_state(num_workers=1, pin_memory=False)

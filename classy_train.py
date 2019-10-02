@@ -20,7 +20,7 @@ from classy_vision.hooks import (
     TimeMetricsHook,
     VisdomHook,
 )
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 from classy_vision.trainer import DistributedTrainer
 
 
@@ -31,7 +31,7 @@ def main(args):
     # Loads config, sets up task
     config = load_json(args.config)
 
-    task = setup_task(config, args)
+    task = build_task(config, args)
 
     # Load checkpoint, if available
     checkpoint = load_checkpoint(args.checkpoint_folder, args.device)
