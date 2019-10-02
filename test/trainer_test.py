@@ -7,6 +7,7 @@
 import unittest
 
 from classy_vision.criterions import build_criterion
+from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 from classy_vision.trainer import ClassyTrainer
 
@@ -62,13 +63,16 @@ class TestClassyTrainer(unittest.TestCase):
     def test_cpu_training(self):
         """Checks we can train a small MLP model on a CPU."""
         config = self._get_config()
-        task = ClassyVisionTask(
-            num_phases=10,
-            dataset_config=config["dataset"],
-            model_config=config["model"],
-            optimizer_config=config["optimizer"],
-            meter_config=config["meters"],
-        ).set_criterion(build_criterion(config["criterion"]))
+        task = (
+            ClassyVisionTask(
+                num_phases=10,
+                dataset_config=config["dataset"],
+                model_config=config["model"],
+                optimizer_config=config["optimizer"],
+            )
+            .set_criterion(build_criterion(config["criterion"]))
+            .set_meters([AccuracyMeter(topk=[1])])
+        )
         self.assertTrue(task is not None)
 
         trainer = ClassyTrainer(hooks=[], use_gpu=False)

@@ -69,7 +69,6 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             dataset_config=config["dataset"],
             model_config=config["model"],
             optimizer_config=config["optimizer"],
-            meter_config=config["meters"],
         ).set_criterion(build_criterion(config["criterion"]))
 
         self.assertTrue(task is not None)
