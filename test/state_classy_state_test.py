@@ -10,7 +10,7 @@ from test.generic.utils import compare_model_state, compare_samples
 
 from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.generic.util import update_classy_state
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 
 
 class TestClassyState(unittest.TestCase):
@@ -51,8 +51,8 @@ class TestClassyState(unittest.TestCase):
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
-        task = setup_task(config, args)
-        task_2 = setup_task(config, args)
+        task = build_task(config, args)
+        task_2 = build_task(config, args)
 
         state = task.build_initial_state()
         state_2 = task_2.build_initial_state()
@@ -91,7 +91,7 @@ class TestClassyState(unittest.TestCase):
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = build_task(config, args, local_rank=0)
 
         for reset_heads in [True, False]:
             config["model"]["reset_heads"] = reset_heads
@@ -122,7 +122,7 @@ class TestClassyState(unittest.TestCase):
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
-        task = setup_task(config, args, local_rank=0)
+        task = build_task(config, args, local_rank=0)
 
         state = task.build_initial_state()
 
