@@ -77,6 +77,10 @@ class OmniglotDataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         # monkey-patch ImageFolder:
         orig_find_classes = datasets.folder.DatasetFolder._find_classes

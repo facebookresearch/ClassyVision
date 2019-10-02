@@ -47,3 +47,7 @@ class SyntheticImageClassificationDataset(ClassyDataset):
             shuffle=shuffle,
             subsample=num_samples,
         )
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)

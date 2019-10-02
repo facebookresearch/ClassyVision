@@ -43,6 +43,10 @@ class Sun397Dataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         # TODO(aadcock): allow access to predefined train / test splits
         # SUN397 defines 10 different train/test splits,

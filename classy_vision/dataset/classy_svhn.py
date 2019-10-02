@@ -42,6 +42,10 @@ class SVHNDataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         set_proxies()
         dataset = datasets.SVHN(DATA_PATH, split=self._split, download=True)
