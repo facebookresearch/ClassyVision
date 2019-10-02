@@ -77,6 +77,10 @@ class CocoDataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         annot_suffix = _get_annot_suffix(self._split)
         annot_file = os.path.join(

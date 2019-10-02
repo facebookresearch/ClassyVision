@@ -39,6 +39,10 @@ class TestDataset(ClassyDataset):
         target_tensors = [sample["target"] for sample in samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
+    @classmethod
+    def from_config(cls, config, *args, **kwargs):
+        return cls(config, *args, **kwargs)
+
 
 @register_dataset("other_test_dataset")
 class OtherTestDataset(ClassyDataset):
@@ -57,6 +61,10 @@ class OtherTestDataset(ClassyDataset):
         input_tensors = [sample["input"] for sample in self.samples]
         target_tensors = [sample["target"] for sample in self.samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
 
 
 class TestRegistryFunctions(unittest.TestCase):

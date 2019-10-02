@@ -75,6 +75,10 @@ class CifarDataset(ClassyDataset):
             subsample=num_samples,
         )
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(config)
+
     def _load_dataset(self):
         # set up CIFAR dataset:
         set_proxies()
