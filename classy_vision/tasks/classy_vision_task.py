@@ -5,13 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import torch
 from classy_vision.criterions import ClassyCriterion, build_criterion
 from classy_vision.dataset import build_dataset
 from classy_vision.generic.util import update_classy_state
-from classy_vision.meters import build_meter
+from classy_vision.meters import build_meters
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.state.classy_state import ClassyState
@@ -21,14 +21,13 @@ class ClassyVisionTask(object):
     def __init__(
         self,
         dataset_config: Dict[str, Any],
-        meter_config: Dict[str, Any],
         model_config: Dict[str, Any],
         num_phases: int,
         optimizer_config: Dict[str, Any],
     ):
         self.criterion = None
         self.dataset_config = dataset_config
-        self.meter_config = meter_config
+        self.meters = []
         self.model_config = model_config
         self.num_phases = num_phases
         self.optimizer_config = optimizer_config
@@ -39,7 +38,6 @@ class ClassyVisionTask(object):
         self.phases = self._build_phases()
         self.model = self._build_model()
         self.optimizer = build_optimizer(self.optimizer_config, self.model)
-        self.meters = self._build_meters()
 
     def set_criterion(self, criterion: ClassyCriterion):
         self.criterion = criterion
@@ -47,6 +45,10 @@ class ClassyVisionTask(object):
 
     def set_test_only(self, test_only: bool):
         self.test_only = test_only
+        return self
+
+    def set_meters(self, meters: List["ClassyMeter"]):
+        self.meters = meters
         return self
 
     @classmethod
@@ -69,23 +71,24 @@ class ClassyVisionTask(object):
 
         criterion = build_criterion(config["criterion"])
         test_only = config["test_only"]
+        meters = build_meters(config.get("meters", {}))
         return (
             cls(
                 dataset_config=config["dataset"],
-                meter_config=config.get("meters", {}),
                 model_config=config["model"],
                 num_phases=config["num_phases"],
                 optimizer_config=optimizer_config,
             )
             .set_criterion(criterion)
             .set_test_only(test_only)
+            .set_meters(meters)
         )
 
     def get_config(self):
         return {
             "criterion": self.criterion._config_DO_NOT_USE,
             "dataset": self.dataset_config,
-            "meters": self.meter_config,
+            "meters": [meter._config_DO_NOT_USE for meter in self.meters],
             "model": self.model_config,
             "num_phases": self.num_phases,
             "optimizer": self.optimizer_config,
@@ -147,13 +150,6 @@ class ClassyVisionTask(object):
         model.eval()
 
         return model
-
-    def _build_meters(self):
-        """
-        Returns meters for task.
-        """
-        configs = [{"name": name, **args} for name, args in self.meter_config.items()]
-        return [build_meter(config) for config in configs]
 
     def _update_classy_state(self, state, classy_state_dict=None):
         """
