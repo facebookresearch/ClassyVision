@@ -11,7 +11,7 @@ from itertools import product
 from test.generic.config_utils import get_test_args, get_test_task_config
 
 from classy_vision.hooks import VisdomHook
-from classy_vision.tasks import setup_task
+from classy_vision.tasks import build_task
 from visdom import Visdom
 
 
@@ -34,7 +34,7 @@ class TestVisdomHook(unittest.TestCase):
         config["dataset"]["train"]["batchsize_per_replica"] = 2
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         args = get_test_args()
-        task = setup_task(config, args)
+        task = build_task(config, args)
         state = task.build_initial_state()
 
         losses = [1.2, 2.3, 1.23, 2.33]

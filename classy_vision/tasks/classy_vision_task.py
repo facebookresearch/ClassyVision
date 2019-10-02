@@ -52,19 +52,6 @@ class ClassyVisionTask(object):
         return self
 
     @classmethod
-    def setup_task(cls, config, args, **kwargs):
-        """
-        Setup the task using config. Validate that models / datasets /
-        losses / meters are compatible
-        """
-
-        # allow some command-line options to override configuration:
-        if "test_only" not in config:
-            config["test_only"] = args.test_only
-
-        return cls.from_config(config)
-
-    @classmethod
     def from_config(cls, config):
         optimizer_config = config["optimizer"]
         optimizer_config["num_epochs"] = config["num_phases"]
