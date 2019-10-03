@@ -10,11 +10,9 @@ Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf)
 
 import math
 
-import torch
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 from classy_vision.heads import ClassyVisionHead, register_head
-from torch.nn.parameter import Parameter
 
 from . import register_model
 from .classy_vision_model import ClassyVisionModel
@@ -220,6 +218,41 @@ class FullyConnectedLayer(ClassyVisionHead):
         return out
 
 
+class SmallInputInitialBlock(nn.Module):
+    """
+        ResNeXt initial block for small input with `in_planes` input planes
+    """
+
+    def __init__(self, init_planes):
+        super().__init__()
+        self._module = nn.Sequential(
+            conv3x3(3, init_planes, stride=1),
+            nn.BatchNorm2d(init_planes),
+            nn.ReLU(inplace=INPLACE),
+        )
+
+    def forward(self, x):
+        return self._module(x)
+
+
+class InitialBlock(nn.Module):
+    """
+        ResNeXt initial block with `in_planes` input planes
+    """
+
+    def __init__(self, init_planes):
+        super().__init__()
+        self._module = nn.Sequential(
+            nn.Conv2d(3, init_planes, kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(init_planes),
+            nn.ReLU(inplace=INPLACE),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+        )
+
+    def forward(self, x):
+        return self._module(x)
+
+
 @register_model("resnext")
 class ResNeXt(ClassyVisionModel):
     def __init__(self, config):
@@ -253,34 +286,7 @@ class ResNeXt(ClassyVisionModel):
         # initial convolutional block:
         self.num_blocks = config["num_blocks"]
         self.small_input = config["small_input"]
-        if config["small_input"]:
-            self.initial_block = self.build_attachable_block(
-                "initial_block",
-                nn.Sequential(
-                    conv3x3(3, config["init_planes"], stride=1),
-                    nn.BatchNorm2d(config["init_planes"]),
-                    nn.ReLU(inplace=INPLACE),
-                ),
-            )
-            self.layer_type = BasicLayer
-        else:
-            self.initial_block = self.build_attachable_block(
-                "initial_block",
-                nn.Sequential(
-                    nn.Conv2d(
-                        3,
-                        config["init_planes"],
-                        kernel_size=7,
-                        stride=2,
-                        padding=3,
-                        bias=False,
-                    ),
-                    nn.BatchNorm2d(config["init_planes"]),
-                    nn.ReLU(inplace=INPLACE),
-                    nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                ),
-            )
-            self.layer_type = BasicLayer if config["basic_layer"] else BottleneckLayer
+        self._make_initial_block(config)
 
         # compute number of planes at each spatial resolution:
         out_planes = [
@@ -326,6 +332,14 @@ class ResNeXt(ClassyVisionModel):
                 if isinstance(m, GenericLayer):
                     if hasattr(m, "bn"):
                         nn.init.constant_(m.bn.weight, 0)
+
+    def _make_initial_block(self, config):
+        if config["small_input"]:
+            self.initial_block = SmallInputInitialBlock(config["init_planes"])
+            self.layer_type = BasicLayer
+        else:
+            self.initial_block = InitialBlock(config["init_planes"])
+            self.layer_type = BasicLayer if config["basic_layer"] else BottleneckLayer
 
     # helper function that creates ResNet blocks at single spatial resolution:
     def _make_resolution_block(
