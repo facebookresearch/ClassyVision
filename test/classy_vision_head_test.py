@@ -13,12 +13,20 @@ from classy_vision.heads import ClassyVisionHead, build_head, register_head
 class TestClassyVisionHead(unittest.TestCase):
     @register_head("dummy_head")
     class DummyHead(ClassyVisionHead):
-        def __init__(self, config):
-            super().__init__(config)
-            self.fc = torch.nn.Linear(config["in_plane"], config["num_classes"])
+        def __init__(self, unique_id, in_plane, num_classes):
+            super().__init__(unique_id)
+            self.fc = torch.nn.Linear(in_plane, num_classes)
 
         def forward(self, x):
             return self.fc(x)
+
+        @classmethod
+        def from_config(cls, config):
+            return cls(
+                unique_id=config["unique_id"],
+                in_plane=config["in_plane"],
+                num_classes=config["num_classes"],
+            )
 
     def _get_config(self):
         return {

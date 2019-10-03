@@ -4,26 +4,23 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Optional
+
 import torch.nn as nn
 
 
 class ClassyVisionHead(nn.Module):
-    def __init__(self, head_config):
+    def __init__(self, unique_id: Optional[str] = None):
         """
-        Classy Head constructor. This stores the head config for future access.
-        This is also the place to build and initialize the layers.
+        Classy Head constructor.
+        This is the place to build and initialize the layers.
         """
-        assert "name" in head_config
-        assert "unique_id" in head_config
         super().__init__()
-        self._config = head_config
+        self.unique_id = unique_id or self.__class__.__name__
 
-    @property
-    def unique_id(self):
-        """
-        return a global unique identifier for the head.
-        """
-        return self._config["unique_id"]
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError
 
     def forward(self, x):
         raise NotImplementedError

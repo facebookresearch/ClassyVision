@@ -72,8 +72,13 @@ def build_model(model_config):
         ), "Expect freeze_trunk to be specified in config when there is head"
         heads = defaultdict(dict)
         for head_config in model_config["heads"]:
-            head = build_head(head_config)
-            heads[head_config["fork_block"]][head.unique_id] = head
+            assert "fork_block" in head_config, "Expect fork_block in config"
+            fork_block = head_config["fork_block"]
+            updated_config = head_config.copy()
+            del updated_config["fork_block"]
+
+            head = build_head(updated_config)
+            heads[fork_block][head.unique_id] = head
         model.set_heads(heads, model_config["freeze_trunk"])
     return model
 

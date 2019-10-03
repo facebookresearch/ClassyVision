@@ -192,22 +192,19 @@ class BottleneckLayer(GenericLayer):
 
 @register_head("resnext_fc")
 class FullyConnectedLayer(ClassyVisionHead):
-    def __init__(self, config):
-        super().__init__(config)
-        config = self.parse_config(config)
-        num_classes = config["num_classes"]
-        in_plane = config["in_plane"]
-        assert num_classes is None or is_pos_int(num_classes)
-        assert is_pos_int(in_plane)
+    def __init__(self, num_classes, in_plane):
+        super().__init__()
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = None if num_classes is None else nn.Linear(in_plane, num_classes)
 
-    def parse_config(self, config):
-        assert "in_plane" in config
-        return {
-            "num_classes": config["num_classes"] if "num_classes" in config else None,
-            "in_plane": config["in_plane"],
-        }
+    @classmethod
+    def from_config(cls, config):
+        num_classes = config.get("num_classes", None)
+        in_plane = config["in_plane"]
+        assert num_classes is None or is_pos_int(num_classes)
+        assert is_pos_int(in_plane)
+
+        return cls(num_classes=num_classes, in_plane=in_plane)
 
     def forward(self, x):
         # perform average pooling:
