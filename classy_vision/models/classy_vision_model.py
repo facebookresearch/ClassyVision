@@ -73,6 +73,15 @@ class ClassyVisionModel(nn.Module):
         """
         raise NotImplementedError
 
+    def extract_features(self, x):
+        """
+        Extract features from the model.
+
+        Derived classes can implement this method to extract the features before
+        applying the final fc layer.
+        """
+        return self.forward(x)
+
     # TODO (changhan): was planning to re-implement pytorch-summary but it's
     # based on a dummy forward pass. Will leave it to a separate diff
     def summarize(self):
