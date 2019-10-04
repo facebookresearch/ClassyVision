@@ -17,11 +17,13 @@ from classy_vision.hooks import (
     ModelTensorboardHook,
     ProfilerHook,
     ProgressBarHook,
+    TensorboardPlotHook,
     TimeMetricsHook,
     VisdomHook,
 )
 from classy_vision.tasks import build_task
 from classy_vision.trainer import DistributedTrainer
+from tensorboardX import SummaryWriter
 
 
 # run all the things:
@@ -40,7 +42,9 @@ def main(args):
 
     hooks = [LossLrMeterLoggingHook(), ModelComplexityHook(), TimeMetricsHook()]
     if not args.skip_tensorboard:
-        hooks.append(ModelTensorboardHook())
+        tb_writer = SummaryWriter(log_dir="/tmp/tensorboard")
+        hooks.append(TensorboardPlotHook(tb_writer))
+        hooks.append(ModelTensorboardHook(tb_writer))
     if args.checkpoint_folder != "":
         hooks.append(
             CheckpointHook(

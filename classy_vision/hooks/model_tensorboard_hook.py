@@ -13,6 +13,14 @@ from classy_vision.hooks.classy_hook import ClassyHook
 from classy_vision.state.classy_state import ClassyState
 
 
+try:
+    from tensorboardX import SummaryWriter  # noqa F401
+
+    tbx_available = True
+except ImportError:
+    tbx_available = False
+
+
 class ModelTensorboardHook(ClassyHook):
     """
     Shows the model graph in TensorBoard.
@@ -28,8 +36,13 @@ class ModelTensorboardHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def __init__(self, tensorboard_dir: str = "/tmp/tensorboard") -> None:
-        self.tensorboard_dir: str = tensorboard_dir
+    def __init__(self, tb_writer) -> None:
+        if not tbx_available:
+            raise RuntimeError(
+                "tensorboardX not installed, cannot use ModelTensorboardHook"
+            )
+
+        self.tb_writer = tb_writer
 
     def on_start(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
         """
@@ -37,6 +50,15 @@ class ModelTensorboardHook(ClassyHook):
         """
         # Show model in tensorboard:
         logging.info("Showing model graph in TensorBoard...")
+
         if is_master():
-            plot_model(state.model, folder=self.tensorboard_dir)
-        # FIXME(lvdmaaten): Expose folder / SummaryWriter for TensorBoard.
+            try:
+                plot_model(
+                    state.base_model,
+                    size=state.base_model.input_shape,
+                    writer=self.tb_writer,
+                )
+            except Exception:
+                logging.warn(
+                    "Unable to plot model to tensorboard. Exception: ", exc_info=True
+                )
