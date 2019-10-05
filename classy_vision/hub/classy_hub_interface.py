@@ -7,10 +7,12 @@
 from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 
 import torch
+import torch.nn as nn
 from classy_vision.dataset import ClassyDataset
 from classy_vision.dataset.image_path_dataset import ImagePathDataset
 from classy_vision.dataset.transforms import build_transforms
 from classy_vision.models import ClassyVisionModel
+from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
 from classy_vision.tasks import ClassyVisionTask
 
 
@@ -40,7 +42,11 @@ class ClassyHubInterface:
         return cls(task=task)
 
     @classmethod
-    def from_model(cls, model: ClassyVisionModel) -> "ClassyHubInterface":
+    def from_model(
+        cls, model: Union[nn.Module, ClassyVisionModel]
+    ) -> "ClassyHubInterface":
+        if not isinstance(model, ClassyVisionModel):
+            model = ClassyModelWrapper(model)
         return cls(model=model)
 
     def create_image_dataset(
