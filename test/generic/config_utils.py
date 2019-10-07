@@ -45,7 +45,7 @@ def get_test_task_config():
             "freeze_trunk": False,
             "heads": [
                 {
-                    "name": "resnext_fc",
+                    "name": "fully_connected",
                     "unique_id": "default_head",
                     "num_classes": 1000,
                     "fork_block": "block3-2",
@@ -85,7 +85,7 @@ def get_test_model_configs():
             "freeze_trunk": False,
             "heads": [
                 {
-                    "name": "resnext_fc",
+                    "name": "fully_connected",
                     "unique_id": "default_head",
                     "num_classes": 1000,
                     "fork_block": "block3-2",
@@ -102,7 +102,7 @@ def get_test_model_configs():
             "freeze_trunk": False,
             "heads": [
                 {
-                    "name": "resnext_fc",
+                    "name": "fully_connected",
                     "unique_id": "default_head",
                     "num_classes": 1000,
                     "fork_block": "block3-2",

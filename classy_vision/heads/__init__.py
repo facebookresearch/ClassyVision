@@ -25,7 +25,7 @@ def register_head(name):
     For example::
 
         @register_head('classification_head')
-        class FullyConnectedLayer(ClassyVisionHead):
+        class FullyConnectedHead(ClassyVisionHead):
             (...)
 
     .. note::
@@ -70,7 +70,14 @@ def build_head(head_config):
 # automatically import any Python files in the heads/ directory
 import_all_modules(FILE_ROOT, "classy_vision.heads")
 
+from .fully_connected_head import FullyConnectedHead  # isort:skip
 from .identity_head import IdentityHead  # isort:skip
 
 
-__all__ = ["ClassyVisionHead", "IdentityHead", "register_head", "build_head"]
+__all__ = [
+    "ClassyVisionHead",
+    "FullyConnectedHead",
+    "IdentityHead",
+    "build_head",
+    "register_head",
+]
