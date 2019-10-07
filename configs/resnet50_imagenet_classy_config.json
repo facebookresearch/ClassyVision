@@ -33,7 +33,7 @@
         "freeze_trunk": false,
         "heads": [
           {
-            "name": "resnext_fc",
+            "name": "fully_connected",
             "unique_id": "default_head",
             "num_classes": 1000,
             "fork_block": "block3-2",
