@@ -5,29 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 
-import logging
-from typing import Any, Callable, Dict, List, Union
-
 import torch
-from classy_vision.hooks import ClassyHook, ClassyHookFunctions
+from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.state.classy_state import ClassyState
 
 from .distributed_util import all_reduce_mean
 from .perf_stats import PerfTimer
 from .util import recursive_copy_to_gpu
-
-
-def run_hooks(
-    state: ClassyState,
-    local_variables: Dict[str, Any],
-    hooks: List[ClassyHook],
-    hook_function: str,
-) -> None:
-    """
-    Helper function that runs the hook_function for all the classy hooks.
-    """
-    for hook in hooks:
-        getattr(hook, hook_function)(state, local_variables)
 
 
 def _remove_dummy_samples_from_batch(temp_vals):
@@ -50,7 +34,7 @@ def _remove_dummy_samples_from_batch(temp_vals):
     return model_output, target
 
 
-def train_step(state, hooks, use_gpu, local_variables=None):
+def train_step(state, use_gpu, local_variables=None):
     assert isinstance(state, ClassyState)
 
     if local_variables is None:
@@ -75,7 +59,7 @@ def train_step(state, hooks, use_gpu, local_variables=None):
             local_variables["sample"]
         )
 
-    run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_sample.name)
+    state.run_hooks(local_variables, ClassyHookFunctions.on_sample.name)
 
     # Copy sample to GPU
     local_variables["target"] = local_variables["sample"]["target"]
@@ -95,7 +79,7 @@ def train_step(state, hooks, use_gpu, local_variables=None):
         # Only use non-dummy samples for finding loss and meters.
         model_output, target = _remove_dummy_samples_from_batch(local_variables)
 
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_forward.name)
+        state.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
 
         # If all the samples in the batch are dummy then use loss of 0.0
         # We still need to backprop though as all the processes sync on
@@ -120,7 +104,7 @@ def train_step(state, hooks, use_gpu, local_variables=None):
             * local_variables["target"].size(0)
         )
 
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_loss.name)
+        state.run_hooks(local_variables, ClassyHookFunctions.on_loss.name)
 
         model_output_cpu = model_output.cpu() if use_gpu else model_output
 
@@ -137,13 +121,13 @@ def train_step(state, hooks, use_gpu, local_variables=None):
         with PerfTimer("backward", perf_stats):
             state.optimizer.backward(local_variables["local_loss"])
 
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_backward.name)
+        state.run_hooks(local_variables, ClassyHookFunctions.on_backward.name)
 
         state.optimizer.update_schedule_on_step(state.where)
         with PerfTimer("optimizer_step", perf_stats):
             state.optimizer.step()
 
-        run_hooks(state, local_variables, hooks, ClassyHookFunctions.on_update.name)
+        state.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
 
         state.num_updates += num_samples_in_step
 

@@ -30,6 +30,7 @@ class TimeMetricsHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
+        super().__init__()
         self.log_freq: Optional[int] = log_freq
         self.start_time: Optional[float] = None
 

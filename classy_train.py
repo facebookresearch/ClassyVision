@@ -58,9 +58,9 @@ def main(args):
     if args.visdom_server != "":
         hooks.append(VisdomHook(args.visdom_server, args.visdom_port))
 
-    trainer = DistributedTrainer(
-        hooks, args.device == "gpu", num_workers=args.num_workers
-    )
+    task.set_hooks(hooks)
+
+    trainer = DistributedTrainer(args.device == "gpu", num_workers=args.num_workers)
     trainer.train(task)
 
 

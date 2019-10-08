@@ -89,6 +89,5 @@ class TestClassyModelWrapper(unittest.TestCase):
         # TODO(@mannatsingh): Use a set_model method when the task refactor is
         # complete
         task.model = classy_model
-        hooks = []
-        trainer = ClassyTrainer(hooks, use_gpu=False)
+        trainer = ClassyTrainer(use_gpu=False)
         trainer.train(task)
