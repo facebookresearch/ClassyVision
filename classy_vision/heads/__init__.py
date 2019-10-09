@@ -59,12 +59,14 @@ def register_head(name):
     return register_head_cls
 
 
-def build_head(head_config):
-    assert "name" in head_config, "Expect name in config"
-    assert "unique_id" in head_config, "Expect a global unique id in config"
-    assert "fork_block" in head_config, "Expect fork_block in config"
-    assert head_config["name"] in HEAD_REGISTRY, "unknown head"
-    return HEAD_REGISTRY[head_config["name"]](head_config)
+def build_head(config):
+    assert "name" in config, "Expect name in config"
+    assert "unique_id" in config, "Expect a global unique id in config"
+    assert config["name"] in HEAD_REGISTRY, "unknown head"
+    name = config["name"]
+    head_config = config.copy()
+    del head_config["name"]
+    return HEAD_REGISTRY[name].from_config(head_config)
 
 
 # automatically import any Python files in the heads/ directory
