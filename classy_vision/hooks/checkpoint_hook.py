@@ -44,6 +44,7 @@ class CheckpointHook(ClassyHook):
         phase_types: Optional[Collection[str]] = None,
         checkpoint_period: int = 1,
     ) -> None:
+        super().__init__()
         self.checkpoint_folder: str = checkpoint_folder
         self.input_args: Any = input_args
         if phase_types is None:

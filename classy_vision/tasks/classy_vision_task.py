@@ -4,13 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 from typing import Any, Dict, List
 
-import torch
 from classy_vision.criterions import ClassyCriterion, build_criterion
 from classy_vision.dataset import build_dataset
 from classy_vision.generic.util import update_classy_state
+from classy_vision.hooks import ClassyHook
 from classy_vision.meters import build_meters
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
@@ -38,6 +37,7 @@ class ClassyVisionTask(object):
         self.phases = self._build_phases()
         self.model = self._build_model()
         self.optimizer = build_optimizer(self.optimizer_config, self.model)
+        self.hooks = []
 
     def set_criterion(self, criterion: ClassyCriterion):
         self.criterion = criterion
@@ -49,6 +49,10 @@ class ClassyVisionTask(object):
 
     def set_meters(self, meters: List["ClassyMeter"]):
         self.meters = meters
+        return self
+
+    def set_hooks(self, hooks: List[ClassyHook]) -> None:
+        self.hooks = hooks
         return self
 
     @classmethod
@@ -175,7 +179,7 @@ class ClassyVisionTask(object):
             self.criterion,
             self.meters,
             self.optimizer,
-        )
+        ).set_hooks(self.hooks)
 
         classy_state_dict = (
             None

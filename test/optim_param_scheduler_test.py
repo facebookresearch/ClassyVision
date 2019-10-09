@@ -87,7 +87,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         mock.update_interval = UpdateInterval.EPOCH
         task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer = ClassyTrainer(use_gpu=False)
         trainer.train(task)
 
         self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
@@ -105,7 +105,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         mock.update_interval = UpdateInterval.STEP
         task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer = ClassyTrainer(use_gpu=False)
         trainer.train(task)
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.

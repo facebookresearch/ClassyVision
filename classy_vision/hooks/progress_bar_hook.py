@@ -33,6 +33,7 @@ class ProgressBarHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self) -> None:
+        super().__init__()
         self.progress_bar: Optional[progressbar.ProgressBar] = None
         self.bar_size: int = 0
         self.batches: int = 0

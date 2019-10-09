@@ -30,6 +30,7 @@ class LossLrMeterLoggingHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
+        super().__init__()
         self.log_freq: Optional[int] = log_freq
 
     def on_loss(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:

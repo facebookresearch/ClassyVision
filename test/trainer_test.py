@@ -7,6 +7,7 @@
 import unittest
 
 from classy_vision.criterions import build_criterion
+from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 from classy_vision.trainer import ClassyTrainer
@@ -72,10 +73,11 @@ class TestClassyTrainer(unittest.TestCase):
             )
             .set_criterion(build_criterion(config["criterion"]))
             .set_meters([AccuracyMeter(topk=[1])])
+            .set_hooks([LossLrMeterLoggingHook()])
         )
         self.assertTrue(task is not None)
 
-        trainer = ClassyTrainer(hooks=[], use_gpu=False)
+        trainer = ClassyTrainer(use_gpu=False)
         trainer.train(task)
         accuracy = task.meters[0].value["top_1"]
         self.assertAlmostEqual(accuracy, 1.0)

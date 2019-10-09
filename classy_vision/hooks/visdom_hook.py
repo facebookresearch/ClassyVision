@@ -41,6 +41,7 @@ class VisdomHook(ClassyHook):
     def __init__(
         self, server: str, port: str, env: str = "main", title_suffix: str = ""
     ) -> None:
+        super().__init__()
         if not visdom_available:
             raise RuntimeError("Visdom is not installed, cannot use VisdomHook")
 
