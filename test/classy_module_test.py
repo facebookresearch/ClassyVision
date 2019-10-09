@@ -14,7 +14,7 @@ from classy_vision.models.classy_vision_model import ClassyVisionModel
 class TestClassyModule(unittest.TestCase):
     class DummyTestHead(ClassyVisionHead):
         def __init__(self):
-            super().__init__({"name": "dummy_head", "unique_id": "head_id"})
+            super().__init__("head_id")
             self.layer = torch.nn.Linear(2, 2)
 
         def forward(self, x):
@@ -54,5 +54,5 @@ class TestClassyModule(unittest.TestCase):
         with self.assertRaises(ValueError):
             model.set_heads(heads, True)
 
-        head2._config["unique_id"] = "head_id2"
+        head2.unique_id = "head_id2"
         model.set_heads(heads, True)
