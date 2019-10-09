@@ -63,15 +63,15 @@ def register_model(name):
     return register_model_cls
 
 
-def build_model(model_config):
-    assert model_config["name"] in MODEL_REGISTRY, "unknown model"
-    model = MODEL_REGISTRY[model_config["name"]](model_config)
-    if "heads" in model_config:
+def build_model(config):
+    assert config["name"] in MODEL_REGISTRY, "unknown model"
+    model = MODEL_REGISTRY[config["name"]](config)
+    if "heads" in config:
         assert (
-            "freeze_trunk" in model_config
+            "freeze_trunk" in config
         ), "Expect freeze_trunk to be specified in config when there is head"
         heads = defaultdict(dict)
-        for head_config in model_config["heads"]:
+        for head_config in config["heads"]:
             assert "fork_block" in head_config, "Expect fork_block in config"
             fork_block = head_config["fork_block"]
             updated_config = head_config.copy()
@@ -79,7 +79,8 @@ def build_model(model_config):
 
             head = build_head(updated_config)
             heads[fork_block][head.unique_id] = head
-        model.set_heads(heads, model_config["freeze_trunk"])
+        model.set_heads(heads, config["freeze_trunk"])
+    model._config_DO_NOT_USE = config
     return model
 
 

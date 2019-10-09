@@ -94,7 +94,7 @@ class TestClassyState(unittest.TestCase):
         task = build_task(config, args, local_rank=0)
 
         for reset_heads in [True, False]:
-            config["model"]["reset_heads"] = reset_heads
+            config["reset_heads"] = reset_heads
 
             state = task.build_initial_state()
             state_2 = task.build_initial_state()
@@ -117,7 +117,7 @@ class TestClassyState(unittest.TestCase):
         """
         config = get_test_task_config()
         config["model"]["freeze_trunk"] = True
-        config["model"]["reset_heads"] = True
+        config["reset_heads"] = True
         # use a batchsize of 1 for faster testing
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1

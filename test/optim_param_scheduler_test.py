@@ -8,6 +8,8 @@ import unittest
 from unittest.mock import Mock
 
 from classy_vision.criterions import build_criterion
+from classy_vision.models import build_model
+from classy_vision.optim import build_optimizer
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks.classy_vision_task import ClassyVisionTask
 from classy_vision.trainer import ClassyTrainer
@@ -64,12 +66,13 @@ class TestParamSchedulerIntegration(unittest.TestCase):
     def _build_task(self, num_phases):
         config = self._get_config()
         config["optimizer"]["num_epochs"] = num_phases
-        task = ClassyVisionTask(
-            num_phases=num_phases,
-            dataset_config=config["dataset"],
-            model_config=config["model"],
-            optimizer_config=config["optimizer"],
-        ).set_criterion(build_criterion(config["criterion"]))
+        model = build_model(config["model"])
+        task = (
+            ClassyVisionTask(num_phases=num_phases, dataset_config=config["dataset"])
+            .set_criterion(build_criterion(config["criterion"]))
+            .set_model(model)
+            .set_optimizer(build_optimizer(config["optimizer"], model))
+        )
 
         self.assertTrue(task is not None)
         return task

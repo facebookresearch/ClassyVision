@@ -11,33 +11,30 @@ from classy_vision.dataset import build_dataset
 from classy_vision.generic.util import update_classy_state
 from classy_vision.hooks import ClassyHook
 from classy_vision.meters import build_meters
-from classy_vision.models import build_model
-from classy_vision.optim import build_optimizer
+from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.optim import ClassyOptimizer, build_optimizer
 from classy_vision.state.classy_state import ClassyState
 
 
 class ClassyVisionTask(object):
-    def __init__(
-        self,
-        dataset_config: Dict[str, Any],
-        model_config: Dict[str, Any],
-        num_phases: int,
-        optimizer_config: Dict[str, Any],
-    ):
+    def __init__(self, dataset_config: Dict[str, Any], num_phases: int):
         self.criterion = None
         self.dataset_config = dataset_config
         self.meters = []
-        self.model_config = model_config
         self.num_phases = num_phases
-        self.optimizer_config = optimizer_config
         self.test_only = False
+        self.reset_heads = False
+        self.model = None
+        self.optimizer = None
 
         self.checkpoint = None
         self.datasets = self.build_datasets()
         self.phases = self._build_phases()
-        self.model = self._build_model()
-        self.optimizer = build_optimizer(self.optimizer_config, self.model)
         self.hooks = []
+
+    def set_optimizer(self, optimizer: ClassyOptimizer):
+        self.optimizer = optimizer
+        return self
 
     def set_criterion(self, criterion: ClassyCriterion):
         self.criterion = criterion
@@ -55,6 +52,10 @@ class ClassyVisionTask(object):
         self.hooks = hooks
         return self
 
+    def set_model(self, model: ClassyVisionModel):
+        self.model = model
+        return self
+
     @classmethod
     def from_config(cls, config):
         optimizer_config = config["optimizer"]
@@ -63,26 +64,33 @@ class ClassyVisionTask(object):
         criterion = build_criterion(config["criterion"])
         test_only = config["test_only"]
         meters = build_meters(config.get("meters", {}))
-        return (
-            cls(
-                dataset_config=config["dataset"],
-                model_config=config["model"],
-                num_phases=config["num_phases"],
-                optimizer_config=optimizer_config,
-            )
+
+        model = build_model(config["model"])
+        # put model in eval mode in case any hooks modify model states, it'll
+        # be reset to train mode before training
+        model.eval()
+        optimizer = build_optimizer(optimizer_config, model)
+
+        task = (
+            cls(dataset_config=config["dataset"], num_phases=config["num_phases"])
             .set_criterion(criterion)
             .set_test_only(test_only)
+            .set_model(model)
+            .set_optimizer(optimizer)
             .set_meters(meters)
         )
+
+        task.reset_heads = config.get("reset_heads", False)
+        return task
 
     def get_config(self):
         return {
             "criterion": self.criterion._config_DO_NOT_USE,
             "dataset": self.dataset_config,
             "meters": [meter._config_DO_NOT_USE for meter in self.meters],
-            "model": self.model_config,
+            "model": self.model._config_DO_NOT_USE,
             "num_phases": self.num_phases,
-            "optimizer": self.optimizer_config,
+            "optimizer": self.optimizer._config_DO_NOT_USE,
             "test_only": self.test_only,
         }
 
@@ -128,29 +136,13 @@ class ClassyVisionTask(object):
             for split in self.datasets.keys()
         }
 
-    def _build_model(self):
-        """
-        Returns model for task.
-        """
-        # TODO (aadcock): Need to make models accept target metadata
-        # as build param to support non-classification tasks
-        model = build_model(self.model_config)
-
-        # put model in eval mode in case any hooks modify model states, it' will
-        # be reset to train mode before training
-        model.eval()
-
-        return model
-
-    def _update_classy_state(self, state, classy_state_dict=None):
+    def _update_classy_state(self, state, reset_heads, classy_state_dict=None):
         """
         Updates classy state with the provided state dict from a checkpoint.
         """
         if classy_state_dict is not None:
             state_load_success = update_classy_state(
-                state,
-                classy_state_dict,
-                reset_heads=self.model_config.get("reset_heads", True),
+                state, classy_state_dict, reset_heads=reset_heads
             )
             assert (
                 state_load_success
@@ -186,4 +178,6 @@ class ClassyVisionTask(object):
             if self.checkpoint is None
             else self.checkpoint.get("classy_state_dict")
         )
-        return self._update_classy_state(self.state, classy_state_dict)
+        return self._update_classy_state(
+            self.state, self.reset_heads, classy_state_dict
+        )
