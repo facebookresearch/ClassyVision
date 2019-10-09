@@ -28,11 +28,39 @@ class ClassyHookFunctions(Enum):
     on_end = auto()
 
 
+class ClassyHookState:
+    """
+    Class to store state within instances of ClassyHook.
+
+    Any serializable data can be stored in the instance's attributes.
+    """
+
+    def state_dict(self) -> Dict[str, Any]:
+        return self.__dict__
+
+    def load_state_dict(self, state_dict: Dict[str, Any]):
+        self.__dict__ = state_dict
+
+
 class ClassyHook(ABC):
     """
     Abstract class for hooks to plug in to the classy workflow at various points
     to add various functionalities such as logging and reporting.
+
+    Deriving classes should call super().__init__() and store any state in
+    self.state. Any state added to this property should be serializable.
+    E.g. -
+    class MyHook(ClassyHook):
+        def __init__(self, a, b):
+            super().__init__()
+            self.state.a = [1,2,3]
+            self.state.b = "my_hook"
+            # the following line is not allowed
+            # self.state.my_lambda = lambda x: x^2
     """
+
+    def __init__(self):
+        self.state = ClassyHookState()
 
     def _noop(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
         """
@@ -114,3 +142,9 @@ class ClassyHook(ABC):
         Called at the end of training.
         """
         pass
+
+    def state_dict(self) -> Dict[str, Any]:
+        return self.state.state_dict()
+
+    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
+        self.state.load_state_dict(state_dict)
