@@ -40,7 +40,11 @@ def main(args):
 
     task.set_checkpoint(checkpoint)
 
-    hooks = [LossLrMeterLoggingHook(), ModelComplexityHook(), TimeMetricsHook()]
+    hooks = [
+        LossLrMeterLoggingHook(args.log_freq),
+        ModelComplexityHook(),
+        TimeMetricsHook(),
+    ]
     if not args.skip_tensorboard:
         tb_writer = SummaryWriter(log_dir="/tmp/tensorboard")
         hooks.append(TensorboardPlotHook(tb_writer))
