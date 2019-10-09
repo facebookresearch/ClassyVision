@@ -98,6 +98,12 @@ def add_generic_args(parser):
                         the training specified in the config and the
                         actual training of the model""",
     )
+    parser.add_argument(
+        "--log_freq",
+        default=5,
+        type=int,
+        help="Logging frequency for LossLrMeterLoggingHook (default 5)",
+    )
 
     return parser
 
