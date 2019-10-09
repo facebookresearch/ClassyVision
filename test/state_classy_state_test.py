@@ -10,6 +10,7 @@ from test.generic.utils import compare_model_state, compare_samples
 
 from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.generic.util import update_classy_state
+from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.tasks import build_task
 
 
@@ -51,13 +52,12 @@ class TestClassyState(unittest.TestCase):
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
-        task = build_task(config, args)
-        task_2 = build_task(config, args)
+        task = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
+        task_2 = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
 
         state = task.build_initial_state()
         state_2 = task_2.build_initial_state()
 
-        hooks = []
         use_gpu = False
         local_variables = {}
 
@@ -76,8 +76,8 @@ class TestClassyState(unittest.TestCase):
 
             # test that the train step runs the same way on both states
             # and the loss remains the same
-            train_step(state, hooks, use_gpu, local_variables)
-            train_step(state_2, hooks, use_gpu, local_variables)
+            train_step(state, use_gpu, local_variables)
+            train_step(state_2, use_gpu, local_variables)
             self._compare_states(state.get_classy_state(), state_2.get_classy_state())
 
     def test_update_state(self):
@@ -126,7 +126,6 @@ class TestClassyState(unittest.TestCase):
 
         state = task.build_initial_state()
 
-        hooks = []
         use_gpu = False
         local_variables = {}
 
@@ -137,7 +136,7 @@ class TestClassyState(unittest.TestCase):
             previous_state_dict = state.get_classy_state(deep_copy=True)
 
             # test that after the train step the trunk remains unchanged
-            train_step(state, hooks, use_gpu, local_variables)
+            train_step(state, use_gpu, local_variables)
 
             # compares only trunk before and after train_step
             # and should be true because the trunk is frozen

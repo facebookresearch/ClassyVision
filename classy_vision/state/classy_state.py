@@ -6,6 +6,7 @@
 
 import copy
 import logging
+from typing import Any, Dict, List
 
 from classy_vision.generic.distributed_util import (
     init_distributed_data_parallel_model,
@@ -61,6 +62,7 @@ class ClassyState:
             losses = []
         assert isinstance(losses, list), "losses should be a list"
         self.losses = losses
+        self.hooks = []
 
     def init_distributed_data_parallel_model(self):
         assert (
@@ -68,6 +70,24 @@ class ClassyState:
         ), "init_ddp_non_elastic must only be called once"
 
         self.distributed_model = init_distributed_data_parallel_model(self.base_model)
+
+    def set_hooks(self, hooks: List["classy_vision.hooks.ClassyHook"]) -> "ClassyState":
+        from classy_vision.hooks import ClassyHook
+
+        assert isinstance(hooks, list)
+        assert all(isinstance(hook, ClassyHook) for hook in hooks)
+        assert len({hook.name() for hook in hooks}) == len(
+            hooks
+        ), "Cannot have repeated hooks of the same class"
+        self.hooks = hooks
+        return self
+
+    def run_hooks(self, local_variables: Dict[str, Any], hook_function: str) -> None:
+        """
+        Helper function that runs hook_function for all the classy hooks.
+        """
+        for hook in self.hooks:
+            getattr(hook, hook_function)(self, local_variables)
 
     @property
     def num_batches_per_phase(self):
@@ -231,6 +251,7 @@ class ClassyState:
             "num_updates": self.num_updates,
             "num_samples_this_phase": self.num_samples_this_phase,
             "losses": self.losses,
+            "hooks": {hook.name(): hook.state_dict() for hook in self.hooks},
         }
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
@@ -247,6 +268,13 @@ class ClassyState:
         self.num_updates = state["num_updates"]
         self.num_samples_this_phase = state["num_samples_this_phase"]
         self.losses = state["losses"]
+        for hook in self.hooks:
+            # we still want to be able to run when new hooks are added or old
+            # hooks are removed
+            if hook.name() in state["hooks"]:
+                hook.load_state_dict(state["hooks"][hook.name()])
+            else:
+                logging.warn(f"No state found for hook: {hook.name()}")
         # TODO (mannatsingh): Figure out how to set the state of the dataloaders
         # Re-build dataloader & re-create iterator.
         self._recreate_data_loader_from_dataset()

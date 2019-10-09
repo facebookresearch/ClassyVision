@@ -69,6 +69,13 @@ class ClassyHook(ABC):
         """
         pass
 
+    @classmethod
+    def name(cls) -> str:
+        """
+        Returns the name of the class.
+        """
+        return cls.__name__
+
     @abstractmethod
     def on_rendezvous(
         self, state: ClassyState, local_variables: Dict[str, Any]
