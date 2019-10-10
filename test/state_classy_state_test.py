@@ -21,13 +21,15 @@ class TestClassyState(unittest.TestCase):
     def _compare_samples(self, sample_1, sample_2):
         compare_samples(self, sample_1, sample_2)
 
-    def _compare_states(self, state_1, state_2):
+    def _compare_states(self, state_1, state_2, check_heads=True):
         """
         Tests the classy state dicts for equality, but skips the member objects
         which implement their own {get, set}_classy_state functions.
         """
         # check base_model
-        self._compare_model_state(state_1["base_model"], state_2["base_model"])
+        self._compare_model_state(
+            state_1["base_model"], state_2["base_model"], check_heads
+        )
         # check losses
         self.assertEqual(len(state_1["losses"]), len(state_2["losses"]))
         for loss_1, loss_2 in zip(state_1["losses"], state_2["losses"]):
@@ -105,9 +107,9 @@ class TestClassyState(unittest.TestCase):
                 update_classy_state(
                     state_2, state.get_classy_state(deep_copy=True), reset_heads
                 )
-                self._compare_model_state(
-                    state.get_classy_state()["base_model"],
-                    state_2.get_classy_state()["base_model"],
+                self._compare_states(
+                    state.get_classy_state(),
+                    state_2.get_classy_state(),
                     not reset_heads,
                 )
 
