@@ -23,8 +23,7 @@ from classy_vision.dataset.core import (
     ShuffleDataset,
     TransformDataset,
 )
-from classy_vision.dataset.core.async_dataset_iterator import AsyncDatasetIterator
-from classy_vision.dataset.core.dataset_iterator import DatasetIterator
+from torch.utils.data import DataLoader
 
 
 # tensor sizes for which to run tests:
@@ -106,10 +105,10 @@ class TestDatasetDSL(unittest.TestCase):
             # Verify iterator types, does not verify iteration, this
             # is done in separate test set
             it = dataset1.batch(batchsize_per_replica=1).iterator()
-            self.assertTrue(isinstance(it, DatasetIterator))
+            self.assertTrue(isinstance(it, DataLoader))
 
             it = dataset1.batch(batchsize_per_replica=1).iterator(num_workers=2)
-            self.assertTrue(isinstance(it, AsyncDatasetIterator))
+            self.assertTrue(isinstance(it, DataLoader))
             self.assertEqual(it.num_workers, 2)
 
     def test_recursive_state(self):
