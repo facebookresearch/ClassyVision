@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from torch.utils.data import DataLoader
+
 
 class Dataset(object):
     """
@@ -50,23 +52,13 @@ class Dataset(object):
         return ShardDataset(self, *args, **kwargs)
 
     def iterator(self, *args, **kwargs):
-        from .async_dataset_iterator import AsyncDatasetIterator
-        from .dataset_iterator import DatasetIterator
-
-        # Deleting args not used by AsyncDatasetIterator or DatasetIterator
-        key = "current_phase_id"
-        if key in kwargs:
-            del kwargs[key]
-
-        if "backfill_batches" not in kwargs:
-            kwargs["backfill_batches"] = False
-        if "num_workers" in kwargs and kwargs["num_workers"] > 0:
-            return AsyncDatasetIterator(self, *args, **kwargs)
-        else:
-            for key in ["num_workers", "pin_memory", "seed", "mp_start_method"]:
-                if key in kwargs:
-                    del kwargs[key]
-            return DatasetIterator(self, *args, **kwargs)
+        return DataLoader(
+            self,
+            batch_size=None,  # Batching is currently done in dataset
+            num_workers=kwargs.get("num_workers", 0),
+            pin_memory=kwargs.get("pin_memory", False),
+            multiprocessing_context=kwargs.get("multiprocessing_context", None),
+        )
 
     def __getattr__(self, name):
         if "dataset" in self.__dict__:
