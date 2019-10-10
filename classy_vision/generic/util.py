@@ -467,24 +467,18 @@ def update_classy_state(state, state_dict, reset_heads=False):
         state: ClassyState instance to update
         state_dict: State dict, should be the output of a call to
             ClassyState.get_classy_state().
-        reset_heads: if True, retains the new heads from the state.
+        reset_heads: if False, uses the heads' state from the checkpoint.
     """
     logging.info("Loading classy state from checkpoint")
 
     try:
-        current_state_dict = state.get_classy_state()
-        model_state_dict = current_state_dict["base_model"]
-        # update trunk from checkpoint
-        model_state_dict["model"]["trunk"] = state_dict["base_model"]["model"]["trunk"]
-
-        if not reset_heads:
-            # replace previous head states with source head states
-            model_state_dict["model"]["heads"] = state_dict["base_model"]["model"][
-                "heads"
-            ]
-
-        current_state_dict["base_model"] = model_state_dict
-        state.set_classy_state(current_state_dict)
+        if reset_heads:
+            current_state_dict = state.get_classy_state()
+            # replace the checkpointed head states with source head states
+            state_dict["base_model"]["model"]["heads"] = current_state_dict[
+                "base_model"
+            ]["model"]["heads"]
+        state.set_classy_state(state_dict)
         logging.info("Checkpoint load successful")
         return True
     except Exception:
