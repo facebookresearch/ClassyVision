@@ -32,20 +32,11 @@ NUM_CLASSES = 365
 
 @register_dataset("places365")
 class Places365Dataset(ClassyDataset):
-    def __init__(self, config):
-        super(Places365Dataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         # For memoizing target names
         self._target_names = None
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -56,7 +47,18 @@ class Places365Dataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # find location of images:
@@ -68,10 +70,10 @@ class Places365Dataset(ClassyDataset):
         assert img_dir is not None and os.path.isdir(img_dir), "Places folder not found"
 
         # load correct split:
-        with open(SPLIT_FILE[self._split], "rt") as fread:
-            split_char = " " if self._split == "train" else ","
+        with open(SPLIT_FILE[self.split], "rt") as fread:
+            split_char = " " if self.split == "train" else ","
             lines = [l.strip().split(split_char) for l in fread.readlines()]
-            if self._split == "train":
+            if self.split == "train":
                 imgs = ["%s%s" % (img_dir, l[0]) for l in lines]
             else:
                 imgs = [l[0] for l in lines]

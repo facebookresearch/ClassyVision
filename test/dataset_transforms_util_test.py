@@ -19,16 +19,9 @@ from classy_vision.dataset.transforms.util import (
 
 class DatasetTransformsUtilTest(unittest.TestCase):
     def get_test_image_dataset(self):
-        config = {
-            "crop_size": 224,
-            "num_channels": 3,
-            "num_classes": 10,
-            "seed": 0,
-            "class_ratio": 0.5,
-            "num_samples": 100,
-        }
-        dataset = RandomImageBinaryClassDataset(config)
-        return dataset
+        return RandomImageBinaryClassDataset(
+            crop_size=224, class_ratio=0.5, num_samples=100, seed=0
+        )
 
     def test_build_field_transform_default_imagenet(self):
         dataset = self.get_test_image_dataset()

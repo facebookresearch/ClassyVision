@@ -19,26 +19,21 @@ class SyntheticImageClassificationDataset(ClassyDataset):
     def get_available_splits(cls):
         return ["train", "val", "test"]
 
-    def __init__(self, config):
-        super(SyntheticImageClassificationDataset, self).__init__(config)
-        self.dataset = RandomImageBinaryClassDataset(config)
+    def __init__(
+        self,
+        batchsize_per_replica,
+        shuffle,
+        transform,
+        num_samples,
+        crop_size,
+        class_ratio,
+        seed,
+        split=None,
+    ):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
 
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        default_transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=ImagenetConstants.MEAN, std=ImagenetConstants.STD
-                ),
-            ]
-        )
-        transform = build_field_transform_default_imagenet(
-            transform_config, default_transform=default_transform
+        self.dataset = RandomImageBinaryClassDataset(
+            crop_size, class_ratio, num_samples, seed
         )
         self.dataset = self.wrap_dataset(
             self.dataset,
@@ -50,4 +45,35 @@ class SyntheticImageClassificationDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
+        split = config.get("split")
+        crop_size = config["crop_size"]
+        class_ratio = config["class_ratio"]
+        seed = config["seed"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        default_transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=ImagenetConstants.MEAN, std=ImagenetConstants.STD
+                ),
+            ]
+        )
+        transform = build_field_transform_default_imagenet(
+            transform_config, default_transform=default_transform
+        )
+        return cls(
+            batchsize_per_replica,
+            shuffle,
+            transform,
+            num_samples,
+            crop_size,
+            class_ratio,
+            seed,
+            split=split,
+        )

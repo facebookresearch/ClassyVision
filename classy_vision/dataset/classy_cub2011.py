@@ -26,20 +26,11 @@ NUM_CLASSES = 200
 
 @register_dataset("cub2011")
 class Cub2011Dataset(ClassyDataset):
-    def __init__(self, config):
-        super(Cub2011Dataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         # For memoizing target names
         self._target_names = None
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -50,7 +41,18 @@ class Cub2011Dataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # find location of images:
@@ -65,7 +67,7 @@ class Cub2011Dataset(ClassyDataset):
         img_dir = os.path.join(img_dir, "CUB_200_2011")
 
         # load correct split:
-        with open(SPLIT_FILES[self._split], "rt") as fread:
+        with open(SPLIT_FILES[self.split], "rt") as fread:
             lines = [l.strip().split(",") for l in fread.readlines()]
             imgs = [os.path.join(img_dir, x[0][62:]) for x in lines]
             targets = [int(x[1]) - 1 for x in lines]

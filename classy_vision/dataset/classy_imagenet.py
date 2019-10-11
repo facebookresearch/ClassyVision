@@ -32,20 +32,11 @@ class ImagenetDataset(ClassyDataset):
     def get_available_splits(cls):
         return ["train", "val"]
 
-    def __init__(self, config):
-        super(ImagenetDataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         # For memoizing target names
         self._target_names = None
         dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             dataset,
             transform,
@@ -56,14 +47,25 @@ class ImagenetDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # find location of images
         img_dir = None
         for path in CANDIDATE_PATHS:
             if os.path.isdir(path):
-                img_dir = os.path.join(path, self._split)
+                img_dir = os.path.join(path, self.split)
                 break
         assert img_dir is not None and os.path.isdir(
             img_dir
