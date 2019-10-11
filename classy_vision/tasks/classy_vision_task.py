@@ -29,7 +29,7 @@ class ClassyVisionTask(object):
 
         self.checkpoint = None
         self.datasets = self.build_datasets()
-        self.phases = self._build_phases()
+        self.phases = []
         self.hooks = []
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
@@ -159,6 +159,7 @@ class ClassyVisionTask(object):
         """
         Creates initial state using config.
         """
+        self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
             num_workers=num_workers, pin_memory=pin_memory
         )
