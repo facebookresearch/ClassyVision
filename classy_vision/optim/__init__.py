@@ -19,7 +19,11 @@ OPTIMIZER_CLASS_NAMES = set()
 
 
 def build_optimizer(config, model):
-    return OPTIMIZER_REGISTRY[config["name"]].from_config(config=config, model=model)
+    instance = OPTIMIZER_REGISTRY[config["name"]].from_config(
+        config=config, model=model
+    )
+    instance._config_DO_NOT_USE = config
+    return instance
 
 
 def register_optimizer(name):
