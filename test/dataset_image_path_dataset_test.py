@@ -78,7 +78,9 @@ class TestImageDataset(unittest.TestCase):
         config = self.get_dataset_config()
 
         # create an image dataset from the list of images
-        dataset = ImagePathDataset(config, image_paths=image_paths, targets=targets)
+        dataset = ImagePathDataset.from_config(
+            config, image_paths=image_paths, targets=targets
+        )
         dataloader = dataset.iterator()
         # the samples should be in the same order
         for sample, expected_input, expected_target in zip(dataloader, inputs, targets):
@@ -86,14 +88,14 @@ class TestImageDataset(unittest.TestCase):
             self.assertEqual(sample["target"], expected_target)
 
         # test the dataset works without targets as well
-        dataset = ImagePathDataset(config, image_paths=image_paths)
+        dataset = ImagePathDataset.from_config(config, image_paths=image_paths)
         dataloader = dataset.iterator()
         # the samples should be in the same order
         for sample, expected_input in zip(dataloader, inputs):
             self.assertTrue(torch.allclose(sample["input"], expected_input))
 
         # create an image dataset from the root dir
-        dataset = ImagePathDataset(config, image_paths=self.base_dir)
+        dataset = ImagePathDataset.from_config(config, image_paths=self.base_dir)
         dataloader = dataset.iterator()
         # test that we get the same class distribution
         # we don't test the actual samples since the ordering isn't defined

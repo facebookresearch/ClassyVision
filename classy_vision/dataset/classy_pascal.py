@@ -95,20 +95,13 @@ def _get_images_labels_multilabel(image_dir, splits_dir, split):
 
 
 class PascalDataset(ClassyDataset):
-    def __init__(self, config, pascal_version, multilabel):
-        super(PascalDataset, self).__init__(config)
-        self._pascal_version = pascal_version
-        self._multilabel = multilabel
+    _PASCAL_VERSION = None
+    _MULTI_LABEL = None
+
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
+
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -119,26 +112,37 @@ class PascalDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # assertions:
-        assert self._pascal_version in ["voc2007", "voc2012"]
+        assert self._PASCAL_VERSION in ["voc2007", "voc2012"]
         image_dir = (
-            VOC2007_IMG_DIR if self._pascal_version == "voc2007" else VOC2012_IMG_DIR
+            VOC2007_IMG_DIR if self._PASCAL_VERSION == "voc2007" else VOC2012_IMG_DIR
         )
         splits_dir = (
             os.path.join(VOC2007_IMG_DIR, "ImageSets/Main")
-            if self._pascal_version == "voc2007"
+            if self._PASCAL_VERSION == "voc2007"
             else VOC2012_SPLITS_DIR
         )
-        if self._multilabel is False:
+        if self._MULTI_LABEL is False:
             img_paths, img_labels = _get_images_labels_singlelabel(
-                image_dir, splits_dir, self._split
+                image_dir, splits_dir, self.split
             )
         else:
             img_paths, img_labels = _get_images_labels_multilabel(
-                image_dir, splits_dir, self._split
+                image_dir, splits_dir, self.split
             )
         return ListDataset(img_paths, img_labels)
 
@@ -148,14 +152,14 @@ class PascalDataset(ClassyDataset):
 
 @register_dataset("pascal_voc2007")
 class PascalVOC2007Dataset(PascalDataset):
-    def __init__(self, config):
-        super(PascalVOC2007Dataset, self).__init__(config, "voc2007", False)
+    _PASCAL_VERSION = "voc2007"
+    _MULTI_LABEL = False
 
 
 @register_dataset("pascal_voc2007_ml")
 class PascalVOC2007MLDataset(PascalDataset):
-    def __init__(self, config):
-        super(PascalVOC2007MLDataset, self).__init__(config, "voc2007", True)
+    _PASCAL_VERSION = "voc2007"
+    _MULTI_LABEL = True
 
 
 # TODO: @imisra, the 2012 datasets don't seem to work, potentially
@@ -163,19 +167,11 @@ class PascalVOC2007MLDataset(PascalDataset):
 #
 # @register_dataset('pascal_voc2012')
 # class PascalVOC2012Dataset(PascalDataset):
-#     def __init__(self, config):
-#         super(PascalVOC2012Dataset, self).__init__(
-#             config,
-#             'voc2012',
-#             False,
-#         )
+#    _PASCAL_VERSION = "voc2012"
+#    _MULTI_LABEL = False
 
 
 # @register_dataset('pascal_voc2012_ml')
 # class PascalVOC2012MLDataset(PascalDataset):
-#     def __init__(self, config):
-#         super(PascalVOC2012MLDataset, self).__init__(
-#             config,
-#             'voc2012',
-#             True,
-#         )
+#    _PASCAL_VERSION = "voc2012"
+#    _MULTI_LABEL = True

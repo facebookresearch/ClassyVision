@@ -32,16 +32,22 @@ OTHER_DUMMY_CONFIG = {"name": "other_test_dataset", "dummy0": 0, "dummy1": 1}
 class TestDataset(ClassyDataset):
     """Test dataset for validating registry functions"""
 
-    def __init__(self, config, samples):
-        super(TestDataset, self).__init__(config)
-        self.samples = samples
-        input_tensors = [sample["input"] for sample in samples]
-        target_tensors = [sample["target"] for sample in samples]
+    def __init__(self, num_samples):
+        super().__init__(
+            split=None,
+            batchsize_per_replica=1,
+            shuffle=False,
+            transform=None,
+            num_samples=num_samples,
+        )
+        self.num_samples = num_samples
+        input_tensors = [sample["input"] for sample in num_samples]
+        target_tensors = [sample["target"] for sample in num_samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
     def from_config(cls, config, *args, **kwargs):
-        return cls(config, *args, **kwargs)
+        return cls(*args, **kwargs)
 
 
 @register_dataset("other_test_dataset")
@@ -55,16 +61,22 @@ class OtherTestDataset(ClassyDataset):
     def get_available_splits(cls):
         return ["split0", "split1"]
 
-    def __init__(self, config):
-        super(OtherTestDataset, self).__init__(config)
-        self.samples = DUMMY_SAMPLES_1
-        input_tensors = [sample["input"] for sample in self.samples]
-        target_tensors = [sample["target"] for sample in self.samples]
+    def __init__(self, num_samples):
+        super().__init__(
+            split=None,
+            batchsize_per_replica=1,
+            shuffle=False,
+            transform=None,
+            num_samples=num_samples,
+        )
+        self.num_samples = num_samples
+        input_tensors = [sample["input"] for sample in self.num_samples]
+        target_tensors = [sample["target"] for sample in self.num_samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
-    def from_config(cls, config):
-        return cls(config)
+    def from_config(cls, config, *args, **kwargs):
+        return cls(*args, **kwargs)
 
 
 class TestRegistryFunctions(unittest.TestCase):
@@ -129,9 +141,9 @@ class TestClassyDataset(unittest.TestCase):
 
         # Check assert for changing dataset types
         with self.assertRaises(AssertionError):
-            other_dataset = build_dataset(OTHER_DUMMY_CONFIG)
+            other_dataset = build_dataset(OTHER_DUMMY_CONFIG, DUMMY_SAMPLES_1)
             other_dataset.set_classy_state(state)
 
         # Verify when strict flag is false, this does not throw
-        other_dataset = build_dataset(OTHER_DUMMY_CONFIG)
+        other_dataset = build_dataset(OTHER_DUMMY_CONFIG, DUMMY_SAMPLES_1)
         other_dataset.set_classy_state(state, strict=False)
