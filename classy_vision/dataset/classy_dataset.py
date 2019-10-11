@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Callable, Optional
+
 from classy_vision.dataset.core import Dataset, WrapDataset
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.util import is_pos_int
@@ -27,19 +29,31 @@ class ClassyDataset(Dataset):
     def get_available_splits(cls):
         return ["train", "test"]
 
-    def __init__(self, config):
+    def __init__(
+        self,
+        split: Optional[str],
+        batchsize_per_replica: int,
+        shuffle: bool,
+        transform: Optional[Callable],
+        num_samples: Optional[int],
+    ):
         """
         Classy Dataloader constructor.
         """
         # Assignments:
-        self._split = config["split"] if "split" in config else None
+        self.split = split
+        self.batchsize_per_replica = batchsize_per_replica
+        self.shuffle = shuffle
+        self.transform = transform
+        self.num_samples = num_samples
         self.dataset = None
 
     @classmethod
     def from_config(cls, config):
         raise NotImplementedError()
 
-    def parse_config(self, config):
+    @classmethod
+    def parse_config(cls, config):
         """
         This function parses out common config options. Those options are
 
@@ -74,8 +88,9 @@ class ClassyDataset(Dataset):
 
         return transform_config, config["batchsize_per_replica"], shuffle, num_samples
 
+    @classmethod
     def wrap_dataset(
-        self,
+        cls,
         dataset,
         transform=None,
         batchsize_per_replica=1,
@@ -84,7 +99,7 @@ class ClassyDataset(Dataset):
         subsample=None,
     ):
         """
-        Wraps self.dataset with TransformDataset, ShuffleDataset,
+        Wraps a dataset with TransformDataset, ShuffleDataset,
         ResampleDataset, ShardDataset and BatchDataset. For the filter
         function, True = keep sample.
 
@@ -124,8 +139,7 @@ class ClassyDataset(Dataset):
         return len(self.dataset)
 
     def get_batchsize_per_replica(self):
-        # this searches for batchsize_per_replica in self and then in self.dataset
-        return getattr(self, "batchsize_per_replica", 1)
+        return self.batchsize_per_replica
 
     def get_global_batchsize(self):
         return self.get_batchsize_per_replica() * get_world_size()
@@ -133,7 +147,10 @@ class ClassyDataset(Dataset):
     def get_classy_state(self):
         """Get state for object (e.g. shuffle)"""
         return {
-            "split": self._split,
+            "split": self.split,
+            "batchsize_per_replica": self.batchsize_per_replica,
+            "shuffle": self.shuffle,
+            "num_samples": self.num_samples,
             "state": {"dataset_type": type(self)},
             "wrapped_state": self.dataset.get_classy_state()
             if self.dataset is not None
@@ -146,6 +163,9 @@ class ClassyDataset(Dataset):
             "Type of saved state does not match current object. "
             "If intentional, use non-strict flag"
         )
-        self._split = state["split"]
+        self.split = state["split"]
+        self.batchsize_per_replica = state["batchsize_per_replica"]
+        self.shuffle = state["shuffle"]
+        self.num_samples = state["num_samples"]
         if self.dataset is not None:
             self.dataset.set_classy_state(state["wrapped_state"])

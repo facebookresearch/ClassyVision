@@ -55,20 +55,11 @@ def _get_image_dir(split):
 # TODO: @imisra, COCO dataset paths seem not to be correct
 @register_dataset("coco")
 class CocoDataset(ClassyDataset):
-    def __init__(self, config):
-        super(CocoDataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         # For memoizing target names
         self._target_names = None
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -79,10 +70,21 @@ class CocoDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
-        annot_suffix = _get_annot_suffix(self._split)
+        annot_suffix = _get_annot_suffix(self.split)
         annot_file = os.path.join(
             ANNOTATION_PATH, "one_hot_labels_" + annot_suffix + ".pkl"
         )
@@ -90,7 +92,7 @@ class CocoDataset(ClassyDataset):
             annot_data = pickle.load(f)
         image_labels_np = annot_data["gt_labels"]
         image_names = annot_data["image_names"]
-        image_dir = _get_image_dir(self._split)
+        image_dir = _get_image_dir(self.split)
         image_paths = [os.path.join(image_dir, x) for x in image_names]
         image_labels = [np.array(x, dtype=np.int32) for x in image_labels_np.tolist()]
         dataset = ListDataset(image_paths, image_labels)

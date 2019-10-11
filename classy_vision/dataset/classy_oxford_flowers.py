@@ -125,18 +125,9 @@ NUM_CLASSES = len(CLASS_NAMES)
 
 @register_dataset("oxford_flowers")
 class OxfordFlowersDataset(ClassyDataset):
-    def __init__(self, config):
-        super(OxfordFlowersDataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -147,7 +138,18 @@ class OxfordFlowersDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # find location of images:
@@ -157,7 +159,7 @@ class OxfordFlowersDataset(ClassyDataset):
                 img_dir = path
                 break
         assert img_dir is not None, "Oxford Flowers folder not found"
-        img_dir = os.path.join(img_dir, self._split)
+        img_dir = os.path.join(img_dir, self.split)
 
         # return flowers dataset:
         dataset = datasets.ImageFolder(img_dir)

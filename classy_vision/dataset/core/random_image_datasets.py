@@ -12,19 +12,21 @@ from .dataset import Dataset
 
 
 class RandomImageDataset(Dataset):
-    def __init__(self, config):
-        self.config = config
-        self.size = config["crop_size"]
-        self.channels = config["num_channels"]
-        self.num_classes = config["num_classes"]
-        self.seed = config["seed"]
+    def __init__(self, crop_size, num_channels, num_classes, num_samples, seed):
+        self.crop_size = crop_size
+        self.num_channels = num_channels
+        self.num_classes = num_classes
+        self.num_samples = num_samples
+        self.seed = seed
 
     def __getitem__(self, idx):
         with numpy_seed(self.seed + idx):
             return {
                 "input": Image.fromarray(
                     (
-                        np.random.standard_normal([self.size, self.size, self.channels])
+                        np.random.standard_normal(
+                            [self.crop_size, self.crop_size, self.num_channels]
+                        )
                         * 255
                     ).astype(np.uint8)
                 ),
@@ -32,27 +34,27 @@ class RandomImageDataset(Dataset):
             }
 
     def __len__(self):
-        return self.config["num_samples"]
+        return self.num_samples
 
 
 class RandomImageBinaryClassDataset(Dataset):
-    def __init__(self, config):
-        self.config = config
-        self.size = config["crop_size"]
-        self.seed = config["seed"]
+    def __init__(self, crop_size, class_ratio, num_samples, seed):
+        self.crop_size = crop_size
         # User Defined Class Imbalace Ratio
-        self.ratio = config["class_ratio"]
+        self.class_ratio = class_ratio
+        self.num_samples = num_samples
+        self.seed = seed
 
     def __getitem__(self, idx):
         with numpy_seed(self.seed + idx):
-            class_id = int(np.random.random() < self.ratio)
-            image = np.zeros((self.size, self.size, 3))
-            image[:, :, class_id] = np.random.random([self.size, self.size])
-            image[:, :, 2] = np.random.random([self.size, self.size])
+            class_id = int(np.random.random() < self.class_ratio)
+            image = np.zeros((self.crop_size, self.crop_size, 3))
+            image[:, :, class_id] = np.random.random([self.crop_size, self.crop_size])
+            image[:, :, 2] = np.random.random([self.crop_size, self.crop_size])
             return {
                 "input": Image.fromarray((image * 255).astype(np.uint8)),
                 "target": class_id,
             }
 
     def __len__(self):
-        return self.config["num_samples"]
+        return self.num_samples

@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from classy_vision.dataset import ClassyDataset
 from classy_vision.dataset.image_path_dataset import ImagePathDataset
-from classy_vision.dataset.transforms import build_transforms
+from classy_vision.dataset.transforms.util import build_field_transform_default_imagenet
 from classy_vision.models import ClassyVisionModel
 from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
 from classy_vision.tasks import ClassyVisionTask
@@ -53,13 +53,14 @@ class ClassyHubInterface:
         self,
         image_paths: Union[List[str], str],
         targets: Optional[List[Any]] = None,
-        config: Optional[Dict[str, Any]] = None,
-        default_transform: Optional[Callable] = None,
+        batchsize_per_replica: int = 32,
+        shuffle: bool = True,
+        transform: Optional[Callable] = None,
+        num_samples: Optional[int] = None,
         split: str = "train",
     ) -> ClassyDataset:
         """
         Create a ClassyDataset which reads images from image_paths.
-
 
         image_paths: Can be
             - A single directory location, in which case the data is expected to be
@@ -69,21 +70,13 @@ class ClassyHubInterface:
                 images. In this situation, the targets can be specified by the targets
                 argument.
         targets (optional): A list containing the target classes for each image
-        default_transform (optional): Transform to apply if one isn't specified in the
-            config. If left as None, the dataset's split is used to determine the
-            transform to apply. The transform for the split is searched for in
-            self.task, falling back to imagenet transformations if it is not found
-            there.
+        transform (optional): Transform to apply. If left as None, the dataset's
+            split is used to determine the transform to apply. The transform for the
+            split is searched for in self.task, falling back to imagenet transformations
+            if it is not found there.
         """
-        if config is None:
-            # create a default config
-            config = {
-                "batchsize_per_replica": 32,
-                "use_shuffle": split == "train",
-                "num_samples": None,
-                "split": split,
-            }
-        if default_transform is None:
+        if transform is None:
+            transform_config = None
             if self.task is not None:
                 # TODO (@mannatsingh): The transforms aren't picked up from
                 # self.task's datasets, but from the task's config.
@@ -92,13 +85,16 @@ class ClassyHubInterface:
                     .get(split, {})
                     .get("transforms", None)
                 )
-                if transform_config is not None:
-                    default_transform = build_transforms(transform_config)
+            transform = build_field_transform_default_imagenet(
+                transform_config, split=split
+            )
         return ImagePathDataset(
-            config,
-            image_paths=image_paths,
+            batchsize_per_replica,
+            shuffle,
+            transform,
+            num_samples,
+            image_paths,
             targets=targets,
-            default_transform=default_transform,
             split=split,
         )
 

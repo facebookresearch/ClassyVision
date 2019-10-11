@@ -57,18 +57,9 @@ def _make_dataset(_dir, class_to_idx, _extensions):
 
 @register_dataset("omniglot")
 class OmniglotDataset(ClassyDataset):
-    def __init__(self, config):
-        super(OmniglotDataset, self).__init__(config)
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         self.dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        transform = build_field_transform_default_imagenet(
-            transform_config, split=self._split
-        )
         self.dataset = self.wrap_dataset(
             self.dataset,
             transform,
@@ -79,7 +70,18 @@ class OmniglotDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        transform = build_field_transform_default_imagenet(
+            transform_config, split=split
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # monkey-patch ImageFolder:
@@ -91,7 +93,7 @@ class OmniglotDataset(ClassyDataset):
         # return dataset:
         img_dir = os.path.join(
             DATA_PATH,
-            "images_background" if self._split == "train" else "images_evaluation",
+            "images_background" if self.split == "train" else "images_evaluation",
         )
         dataset = datasets.ImageFolder(img_dir)
 

@@ -44,29 +44,16 @@ def _cifar_no_augment_transform():
 
 
 class CifarDataset(ClassyDataset):
-    def __init__(self, config, cifar_type):
-        super(CifarDataset, self).__init__(config)
-        assert cifar_type in [
+    _CIFAR_TYPE = None
+
+    def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
+        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
+        assert self._CIFAR_TYPE in [
             "cifar10",
             "cifar100",
         ], "CIFAR datasets only come in cifar10, cifar100"
-        self._cifar_type = cifar_type
 
         dataset = self._load_dataset()
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = self.parse_config(config)
-        default_transform = (
-            _cifar_augment_transform()
-            if self._split == "train"
-            else _cifar_no_augment_transform()
-        )
-        transform = build_field_transform_default_imagenet(
-            transform_config, default_transform=default_transform
-        )
         self.dataset = self.wrap_dataset(
             dataset,
             transform,
@@ -77,18 +64,34 @@ class CifarDataset(ClassyDataset):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config)
+        assert "split" in config
+        split = config["split"]
+        (
+            transform_config,
+            batchsize_per_replica,
+            shuffle,
+            num_samples,
+        ) = cls.parse_config(config)
+        default_transform = (
+            _cifar_augment_transform()
+            if split == "train"
+            else _cifar_no_augment_transform()
+        )
+        transform = build_field_transform_default_imagenet(
+            transform_config, default_transform=default_transform
+        )
+        return cls(split, batchsize_per_replica, shuffle, transform, num_samples)
 
     def _load_dataset(self):
         # set up CIFAR dataset:
         set_proxies()
-        if self._cifar_type == "cifar10":
+        if self._CIFAR_TYPE == "cifar10":
             dataset = datasets.CIFAR10(
-                DATA_PATH, train=(self._split == "train"), download=True
+                DATA_PATH, train=(self.split == "train"), download=True
             )
         else:
             dataset = datasets.CIFAR100(
-                DATA_PATH, train=(self._split == "train"), download=True
+                DATA_PATH, train=(self.split == "train"), download=True
             )
         unset_proxies()
         dataset = WrapDataset(dataset)
@@ -100,11 +103,9 @@ class CifarDataset(ClassyDataset):
 
 @register_dataset("cifar10")
 class Cifar10Dataset(CifarDataset):
-    def __init__(self, config):
-        super(Cifar10Dataset, self).__init__(config, "cifar10")
+    _CIFAR_TYPE = "cifar10"
 
 
 @register_dataset("cifar100")
 class Cifar100Dataset(CifarDataset):
-    def __init__(self, config):
-        super(Cifar100Dataset, self).__init__(config, "cifar100")
+    _CIFAR_TYPE = "cifar100"

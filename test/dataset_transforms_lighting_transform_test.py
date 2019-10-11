@@ -14,16 +14,9 @@ from classy_vision.dataset.transforms.util import build_field_transform_default_
 
 class LightingTransformTest(unittest.TestCase):
     def get_test_image_dataset(self):
-        config = {
-            "crop_size": 224,
-            "num_channels": 3,
-            "num_classes": 10,
-            "seed": 0,
-            "class_ratio": 0.5,
-            "num_samples": 100,
-        }
-        dataset = RandomImageBinaryClassDataset(config)
-        return dataset
+        return RandomImageBinaryClassDataset(
+            crop_size=224, class_ratio=0.5, num_samples=100, seed=0
+        )
 
     def test_lighting_transform_no_errors(self):
         """
