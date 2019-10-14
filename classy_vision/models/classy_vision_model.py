@@ -13,20 +13,28 @@ from .classy_module import ClassyModule
 
 
 class ClassyVisionModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, num_classes, freeze_trunk=False):
         super().__init__()
-        self._config = model_config
+
+        self._num_classes = num_classes
         self._attachable_blocks = {}
+        self.freeze_trunk = freeze_trunk
+
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError
 
     @property
     def num_classes(self):
-        if "heads" in self._config and len(self._config["heads"]) > 0:
-            if len(self._config["heads"]) != 1:
-                logging.error(
-                    "Trying to get num_classes on a model with multiple heads"
-                )
-            return self._config["heads"][0]["num_classes"]
-        return self._config["num_classes"]
+        # Flatten the dictionary of dictionaries into a list of heads
+        heads = [head for heads in self.get_heads().values() for head in heads.values()]
+
+        if len(heads) == 1:
+            return heads[0].num_classes
+        elif len(heads) >= 1:
+            logging.error("Tried to get num_classes on a model with multiple heads")
+            raise RuntimeError
+        return self._num_classes
 
     def get_classy_state(self, deep_copy=False):
         """
@@ -42,7 +50,7 @@ class ClassyVisionModel(nn.Module):
         # states depend on heads
         self._clear_heads()
         trunk_state_dict = super().state_dict()
-        self.set_heads(attached_heads, self._config.get("freeze_trunk", False))
+        self.set_heads(attached_heads, self.freeze_trunk)
 
         head_state_dict = {}
         for block, heads in attached_heads.items():
@@ -50,16 +58,13 @@ class ClassyVisionModel(nn.Module):
                 head.unique_id: head.state_dict() for head in heads.values()
             }
         model_state_dict = {
-            "config": self._config,
-            "model": {"trunk": trunk_state_dict, "heads": head_state_dict},
+            "model": {"trunk": trunk_state_dict, "heads": head_state_dict}
         }
         if deep_copy:
             model_state_dict = copy.deepcopy(model_state_dict)
         return model_state_dict
 
     def set_classy_state(self, state):
-        self._config = state["config"]
-
         for block, head_states in state["model"]["heads"].items():
             self._attachable_blocks[block].load_head_states(head_states)
 

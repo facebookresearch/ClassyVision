@@ -240,7 +240,6 @@ def recursive_unpack(batch):
 
 
 def compare_model_state(test_fixture, state, state2, check_heads=True):
-    test_fixture.assertEqual(state["config"], state2["config"])
     for k in state["model"]["trunk"].keys():
         if not torch.allclose(state["model"]["trunk"][k], state2["model"]["trunk"][k]):
             print(k, state["model"]["trunk"][k], state2["model"]["trunk"][k])

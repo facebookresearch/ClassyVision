@@ -65,7 +65,7 @@ def register_model(name):
 
 def build_model(config):
     assert config["name"] in MODEL_REGISTRY, "unknown model"
-    model = MODEL_REGISTRY[config["name"]](config)
+    model = MODEL_REGISTRY[config["name"]].from_config(config)
     if "heads" in config:
         assert (
             "freeze_trunk" in config
