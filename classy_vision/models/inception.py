@@ -16,27 +16,27 @@ from .classy_vision_model import ClassyVisionModel
 
 @register_model("inception_v3")
 class Inception3(ClassyVisionModel):
-    def __init__(self, config):
+    def __init__(
+        self, num_classes, freeze_trunk, aux_logits, transform_input, small_input
+    ):
         r"""Inception v3 model architecture from
         `"Rethinking the Inception Architecture for Computer Vision"
           <http://arxiv.org/abs/1512.00567>`_.
         """
-        config = self.parse_config(config)
-        super(Inception3, self).__init__(config)
-        num_classes = config["num_classes"]
+        super().__init__(num_classes, freeze_trunk)
 
         # assertions on inputs:
         assert num_classes is None or is_pos_int(num_classes)
-        assert type(config["aux_logits"]) == bool
-        assert type(config["transform_input"]) == bool
+        assert type(aux_logits) == bool
+        assert type(transform_input) == bool
         assert (
             # not support small_input = True yet
-            type(config["small_input"]) == bool
-            and config["small_input"] is False
+            type(small_input) == bool
+            and small_input is False
         )
 
         # initial convolutional block:
-        self.transform_input = config["transform_input"]
+        self.transform_input = transform_input
         self.Conv2d_1a_3x3 = BasicConv2d(3, 32, kernel_size=3, stride=2)
         self.Conv2d_2a_3x3 = BasicConv2d(32, 32, kernel_size=3)
         self.Conv2d_2b_3x3 = BasicConv2d(32, 64, kernel_size=3, padding=1)
@@ -52,7 +52,7 @@ class Inception3(ClassyVisionModel):
         self.Mixed_6e = InceptionC(768, channels_7x7=192)
         self.AuxLogits = (
             InceptionAux(768, num_classes)
-            if config["aux_logits"] and (num_classes is not None)
+            if aux_logits and (num_classes is not None)
             else None
         )
         self.Mixed_7a = InceptionD(768)
@@ -75,13 +75,16 @@ class Inception3(ClassyVisionModel):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def parse_config(self, config):
-        return {
-            "num_classes": config["num_classes"] if "num_classes" in config else None,
+    @classmethod
+    def from_config(cls, config):
+        config = {
+            "num_classes": config.get("num_classes"),
+            "freeze_trunk": config.get("freeze_trunk", False),
             "aux_logits": config.get("aux_logits", True),
             "transform_input": config.get("transform_input", False),
             "small_input": config.get("small_input", False),
         }
+        return cls(**config)
 
     def forward(self, x):
         if self.transform_input:

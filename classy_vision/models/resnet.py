@@ -23,6 +23,8 @@ class ResNet(ResNeXt):
         ResNet is a special case of ResNeXt.
     """
 
-    def __init__(self, config):
-        config["base_width_and_cardinality"] = None
-        super().__init__(config)
+    def __init__(self, **kwargs):
+        assert (
+            kwargs["base_width_and_cardinality"] is None
+        ), "base_width_and_cardinality should be None for ResNet"
+        super().__init__(**kwargs)
