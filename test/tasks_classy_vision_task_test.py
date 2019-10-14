@@ -8,6 +8,7 @@ import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
 from classy_vision.criterions import build_criterion
+from classy_vision.dataset import build_dataset
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import build_task
@@ -26,11 +27,14 @@ class TestClassyVisionTask(unittest.TestCase):
         model = build_model(config["model"])
         criterion = build_criterion(config["criterion"])
         task = (
-            ClassyVisionTask(num_phases=1, dataset_config=config["dataset"])
+            ClassyVisionTask(num_phases=1)
             .set_criterion(criterion)
             .set_model(model)
             .set_optimizer(build_optimizer(config["optimizer"], model))
         )
+        for split in ["train", "test"]:
+            dataset = build_dataset(config["dataset"][split])
+            task.set_dataset(dataset, split)
 
         state = task.build_initial_state(num_workers=1, pin_memory=False)
         self.assertTrue(state is not None)

@@ -7,6 +7,7 @@
 import unittest
 
 from classy_vision.criterions import build_criterion
+from classy_vision.dataset import build_dataset
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.models import build_model
@@ -68,13 +69,17 @@ class TestClassyTrainer(unittest.TestCase):
         config = self._get_config()
         model = build_model(config["model"])
         task = (
-            ClassyVisionTask(num_phases=10, dataset_config=config["dataset"])
+            ClassyVisionTask(num_phases=10)
             .set_criterion(build_criterion(config["criterion"]))
             .set_model(model)
             .set_optimizer(build_optimizer(config["optimizer"], model))
             .set_meters([AccuracyMeter(topk=[1])])
             .set_hooks([LossLrMeterLoggingHook()])
         )
+        for split in ["train", "test"]:
+            dataset = build_dataset(config["dataset"][split])
+            task.set_dataset(dataset, split)
+
         self.assertTrue(task is not None)
 
         trainer = ClassyTrainer(use_gpu=False)

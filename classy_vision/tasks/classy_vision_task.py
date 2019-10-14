@@ -7,7 +7,7 @@
 from typing import Any, Dict, List
 
 from classy_vision.criterions import ClassyCriterion, build_criterion
-from classy_vision.dataset import build_dataset
+from classy_vision.dataset import ClassyDataset, build_dataset
 from classy_vision.generic.util import update_classy_state
 from classy_vision.hooks import ClassyHook
 from classy_vision.meters import build_meters
@@ -17,20 +17,22 @@ from classy_vision.state.classy_state import ClassyState
 
 
 class ClassyVisionTask(object):
-    def __init__(self, dataset_config: Dict[str, Any], num_phases: int):
+    def __init__(self, num_phases: int):
         self.criterion = None
-        self.dataset_config = dataset_config
+        self.datasets = {}
         self.meters = []
         self.num_phases = num_phases
         self.test_only = False
         self.reset_heads = False
         self.model = None
         self.optimizer = None
-
         self.checkpoint = None
-        self.datasets = self.build_datasets()
         self.phases = []
         self.hooks = []
+
+    def set_dataset(self, dataset: ClassyDataset, split: str):
+        self.datasets[split] = dataset
+        return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
         self.optimizer = optimizer
@@ -48,7 +50,7 @@ class ClassyVisionTask(object):
         self.meters = meters
         return self
 
-    def set_hooks(self, hooks: List[ClassyHook]) -> None:
+    def set_hooks(self, hooks: List[ClassyHook]):
         self.hooks = hooks
         return self
 
@@ -61,10 +63,13 @@ class ClassyVisionTask(object):
         optimizer_config = config["optimizer"]
         optimizer_config["num_epochs"] = config["num_phases"]
 
+        datasets = {}
+        splits = ["train", "test"]
+        for split in splits:
+            datasets[split] = build_dataset(config["dataset"][split])
         criterion = build_criterion(config["criterion"])
         test_only = config["test_only"]
         meters = build_meters(config.get("meters", {}))
-
         model = build_model(config["model"])
         # put model in eval mode in case any hooks modify model states, it'll
         # be reset to train mode before training
@@ -72,13 +77,15 @@ class ClassyVisionTask(object):
         optimizer = build_optimizer(optimizer_config, model)
 
         task = (
-            cls(dataset_config=config["dataset"], num_phases=config["num_phases"])
+            cls(num_phases=config["num_phases"])
             .set_criterion(criterion)
             .set_test_only(test_only)
             .set_model(model)
             .set_optimizer(optimizer)
             .set_meters(meters)
         )
+        for split in splits:
+            task.set_dataset(datasets[split], split)
 
         task.reset_heads = config.get("reset_heads", False)
         return task
@@ -86,7 +93,10 @@ class ClassyVisionTask(object):
     def get_config(self):
         return {
             "criterion": self.criterion._config_DO_NOT_USE,
-            "dataset": self.dataset_config,
+            "dataset": {
+                split: dataset._config_DO_NOT_USE
+                for split, dataset in self.datasets.items()
+            },
             "meters": [meter._config_DO_NOT_USE for meter in self.meters],
             "model": self.model._config_DO_NOT_USE,
             "num_phases": self.num_phases,
@@ -116,12 +126,6 @@ class ClassyVisionTask(object):
             return final_phases
 
         return [{"train": False} for _ in range(self.num_phases)]
-
-    def build_datasets(self):
-        return {
-            split: build_dataset(self.dataset_config[split])
-            for split in ["train", "test"]
-        }
 
     def build_dataloader(self, split, num_workers, pin_memory, **kwargs):
         return self.datasets[split].iterator(
