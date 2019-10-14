@@ -224,7 +224,18 @@ class InitialBlock(nn.Module):
 
 @register_model("resnext")
 class ResNeXt(ClassyVisionModel):
-    def __init__(self, config):
+    def __init__(
+        self,
+        freeze_trunk,
+        num_blocks,
+        init_planes,
+        reduction,
+        small_input,
+        zero_init_bn_residuals,
+        base_width_and_cardinality,
+        basic_layer,
+        final_bn_relu,
+    ):
         """
             Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf).
 
@@ -233,58 +244,55 @@ class ResNeXt(ClassyVisionModel):
             Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
             layersSet. These settings are useful when training Siamese networks.
         """
-        config = self.parse_config(config)
-        super().__init__(config)
+        super().__init__(num_classes=None, freeze_trunk=freeze_trunk)
 
         # assertions on inputs:
-        assert type(config["num_blocks"]) == list
-        assert all(is_pos_int(n) for n in config["num_blocks"])
-        assert is_pos_int(config["init_planes"]) and is_pos_int(config["reduction"])
-        assert type(config["small_input"]) == bool
+        assert type(num_blocks) == list
+        assert all(is_pos_int(n) for n in num_blocks)
+        assert is_pos_int(init_planes) and is_pos_int(reduction)
+        assert type(small_input) == bool
         assert (
-            type(config["zero_init_bn_residuals"]) == bool
+            type(zero_init_bn_residuals) == bool
         ), "zero_init_bn_residuals must be a boolean, set to true if gamma of last\
              BN of residual block should be initialized to 0.0, false for 1.0"
-        assert config["base_width_and_cardinality"] is None or (
-            isinstance(config["base_width_and_cardinality"], (tuple, list))
-            and len(config["base_width_and_cardinality"]) == 2
-            and is_pos_int(config["base_width_and_cardinality"][0])
-            and is_pos_int(config["base_width_and_cardinality"][1])
+        assert base_width_and_cardinality is None or (
+            isinstance(base_width_and_cardinality, (tuple, list))
+            and len(base_width_and_cardinality) == 2
+            and is_pos_int(base_width_and_cardinality[0])
+            and is_pos_int(base_width_and_cardinality[1])
         )
 
         # initial convolutional block:
-        self.num_blocks = config["num_blocks"]
-        self.small_input = config["small_input"]
-        self._make_initial_block(config)
+        self.num_blocks = num_blocks
+        self.small_input = small_input
+        self._make_initial_block(small_input, init_planes, basic_layer)
 
         # compute number of planes at each spatial resolution:
-        out_planes = [
-            config["init_planes"] * 2 ** i * config["reduction"]
-            for i in range(len(config["num_blocks"]))
-        ]
-        in_planes = [config["init_planes"]] + out_planes[:-1]
+        out_planes = [init_planes * 2 ** i * reduction for i in range(len(num_blocks))]
+        in_planes = [init_planes] + out_planes[:-1]
 
         # create subnetworks for each spatial resolution:
         blocks = []
         for idx in range(len(out_planes)):
             mid_planes_and_cardinality = None
-            if config["base_width_and_cardinality"] is not None:
-                w, c = config["base_width_and_cardinality"]
+            if base_width_and_cardinality is not None:
+                w, c = base_width_and_cardinality
                 mid_planes_and_cardinality = (w * 2 ** idx, c)
             new_block = self._make_resolution_block(
                 in_planes[idx],
                 out_planes[idx],
                 idx,
-                config["num_blocks"][idx],  # num layers
+                num_blocks[idx],  # num layers
                 stride=1 if idx == 0 else 2,
                 mid_planes_and_cardinality=mid_planes_and_cardinality,
-                reduction=config["reduction"],
-                final_bn_relu=config["final_bn_relu"] or (idx != (len(out_planes) - 1)),
+                reduction=reduction,
+                final_bn_relu=final_bn_relu or (idx != (len(out_planes) - 1)),
             )
             blocks.append(nn.Sequential(*new_block))
         self.blocks = nn.Sequential(*blocks)
 
         self.out_planes = out_planes[-1]
+        self._num_classes = out_planes
 
         # initialize weights:
         for m in self.modules():
@@ -296,19 +304,19 @@ class ResNeXt(ClassyVisionModel):
 
         # Init BatchNorm gamma to 0.0 for last BN layer, it gets 0.2-0.3% higher
         # final val top1 for larger batch sizes.
-        if "zero_init_bn_residuals" in config and config["zero_init_bn_residuals"]:
+        if zero_init_bn_residuals:
             for m in self.modules():
                 if isinstance(m, GenericLayer):
                     if hasattr(m, "bn"):
                         nn.init.constant_(m.bn.weight, 0)
 
-    def _make_initial_block(self, config):
-        if config["small_input"]:
-            self.initial_block = SmallInputInitialBlock(config["init_planes"])
+    def _make_initial_block(self, small_input, init_planes, basic_layer):
+        if small_input:
+            self.initial_block = SmallInputInitialBlock(init_planes)
             self.layer_type = BasicLayer
         else:
-            self.initial_block = InitialBlock(config["init_planes"])
-            self.layer_type = BasicLayer if config["basic_layer"] else BottleneckLayer
+            self.initial_block = InitialBlock(init_planes)
+            self.layer_type = BasicLayer if basic_layer else BottleneckLayer
 
     # helper function that creates ResNet blocks at single spatial resolution:
     def _make_resolution_block(
@@ -341,23 +349,21 @@ class ResNeXt(ClassyVisionModel):
             )
         return blocks
 
-    def parse_config(self, config):
+    @classmethod
+    def from_config(cls, config):
         assert "num_blocks" in config
-        return {
+        config = {
             "num_blocks": config["num_blocks"],
             "init_planes": config.get("init_planes", 64),
             "reduction": config.get("reduction", 4),
-            "base_width_and_cardinality": config.get(
-                "base_width_and_cardinality", None
-            ),
+            "base_width_and_cardinality": config.get("base_width_and_cardinality"),
             "small_input": config.get("small_input", False),
             "basic_layer": config.get("basic_layer", False),
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
-            "is_finetuning": config.get("is_finetuning", False),
             "freeze_trunk": config.get("freeze_trunk", False),
-            "heads": config.get("heads", []),
         }
+        return cls(**config)
 
     # forward pass in residual network:
     def forward(self, x):

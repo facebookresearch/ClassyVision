@@ -308,7 +308,19 @@ class _Transition(nn.Module):
 
 @register_model("msdnet")
 class MSDNet(ClassyVisionModel):
-    def __init__(self, config):
+    def __init__(
+        self,
+        num_classes,
+        freeze_trunk,
+        num_blocks,
+        init_planes,
+        growth_rate,
+        bottleneck,
+        planes_reduction,
+        reduction,
+        num_channels,
+        small_input,
+    ):
         """Multi-scale densely connected network (MSDNet).
 
         The list `num_blocks` is a list specifying the structure of the network:
@@ -324,57 +336,55 @@ class MSDNet(ClassyVisionModel):
         model will assume 224x224 inputs. The argument `num_channels` sets the
         number of input channels in the image.
         """
-        config = self.parse_config(config)
-        super().__init__(config)
-        num_classes = config["num_classes"]
+        super().__init__(freeze_trunk, num_classes)
 
         # assertions:
-        assert type(config["num_blocks"]) == list
-        assert all(is_pos_int(b) for b in config["num_blocks"])
         assert num_classes is None or is_pos_int(num_classes)
-        assert is_pos_int(config["init_planes"])
-        assert is_pos_int(config["growth_rate"])
-        assert is_pos_int(config["bottleneck"])
-        assert is_pos_int(config["planes_reduction"])
-        assert is_pos_int(config["reduction"])
-        assert is_pos_int(config["num_channels"])
-        assert type(config["small_input"]) == bool
+        assert type(num_blocks) == list
+        assert all(is_pos_int(b) for b in num_blocks)
+        assert is_pos_int(init_planes)
+        assert is_pos_int(growth_rate)
+        assert is_pos_int(bottleneck)
+        assert is_pos_int(planes_reduction)
+        assert is_pos_int(reduction)
+        assert is_pos_int(num_channels)
+        assert type(small_input) == bool
 
         # Construct classifier layers
         classifier_layers, layer_idx, offset = [], 1, 1
-        while layer_idx < sum(config["num_blocks"]):
+        while layer_idx < sum(num_blocks):
             classifier_layers.append(layer_idx)
             layer_idx += offset
             offset += 1
 
-        num_scales = len(config["num_blocks"])
+        num_scales = len(num_blocks)
 
         # initial convolutional block:
-        self.num_blocks = config["num_blocks"]
-        if config["small_input"]:
+        self.num_blocks = num_blocks
+        if small_input:
             self.initial_block = nn.Sequential(
                 nn.Conv2d(
-                    config["num_channels"],
-                    config["init_planes"],
+                    num_channels,
+                    init_planes,
                     kernel_size=3,
                     stride=1,
                     padding=1,
                     bias=False,
                 ),
-                nn.BatchNorm2d(config["init_planes"]),
+                nn.BatchNorm2d(init_planes),
                 nn.ReLU(inplace=True),
             )
         else:
             self.initial_block = nn.Sequential(
                 nn.Conv2d(
-                    config["num_channels"],
-                    config["init_planes"],
+                    num_channels,
+                    init_planes,
                     kernel_size=7,
                     stride=2,
                     padding=3,
                     bias=False,
                 ),
-                nn.BatchNorm2d(config["init_planes"]),
+                nn.BatchNorm2d(init_planes),
                 nn.ReLU(inplace=True),
                 nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
             )
@@ -382,14 +392,12 @@ class MSDNet(ClassyVisionModel):
         # block that creates multi-scale representation:
         self.transitions, self.blocks = [], []
         self.transitions.append(
-            _MultiscaleInitLayer(
-                num_scales, config["init_planes"], reduction=config["reduction"]
-            )
+            _MultiscaleInitLayer(num_scales, init_planes, reduction=reduction)
         )
 
         # loop over spatial resolutions:
         layer_idx = 0
-        for idx, num_layers in enumerate(config["num_blocks"]):
+        for idx, num_layers in enumerate(num_blocks):
 
             # add dense block:
             cur_classifier_layers = [(c - layer_idx) for c in classifier_layers]
@@ -398,18 +406,16 @@ class MSDNet(ClassyVisionModel):
                 num_layers,
                 num_classes=num_classes,
                 classifier_layers=cur_classifier_layers,
-                growth_rate=config["growth_rate"],
-                bottleneck=config["bottleneck"],
+                growth_rate=growth_rate,
+                bottleneck=bottleneck,
             )
             self.blocks.append(block)
             layer_idx += num_layers
 
             # add transition layer:
-            if idx != len(config["num_blocks"]) - 1:
+            if idx != len(num_blocks) - 1:
                 transition = _Transition(
-                    self.blocks[-1].output_size,
-                    planes_reduction=2,
-                    reduction=config["reduction"],
+                    self.blocks[-1].output_size, planes_reduction=2, reduction=reduction
                 )
                 self.transitions.append(transition)
 
@@ -457,11 +463,13 @@ class MSDNet(ClassyVisionModel):
 
         return self
 
-    def parse_config(self, config):
+    @classmethod
+    def from_config(cls, config):
         assert "num_blocks" in config
-        return {
+        config = {
             "num_blocks": config["num_blocks"],
-            "num_classes": config["num_classes"] if "num_classes" in config else None,
+            "num_classes": config.get("num_classes"),
+            "freeze_trunk": config.get("freeze_trunk", False),
             "init_planes": config.get("init_planes", 64),
             "growth_rate": config.get("growth_rate", 32),
             "bottleneck": config.get("bottleneck", 4),
@@ -470,6 +478,7 @@ class MSDNet(ClassyVisionModel):
             "num_channels": config.get("num_channels", 3),
             "small_input": config.get("small_input", False),
         }
+        return cls(**config)
 
     # forward pass in DenseNet:
     def forward(self, x):

@@ -220,7 +220,7 @@ class ClassyState:
 
     def _set_model_train_mode(self):
         phase = self.phases[self.phase_idx]
-        if self.base_model._config.get("freeze_trunk", False):
+        if self.base_model.freeze_trunk:
             self.model.eval()
             for heads in self.base_model.get_heads().values():
                 for h in heads.values():

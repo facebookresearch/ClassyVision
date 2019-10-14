@@ -111,7 +111,17 @@ class _Transition(nn.Sequential):
 
 @register_model("densenet")
 class DenseNet(ClassyVisionModel):
-    def __init__(self, config):
+    def __init__(
+        self,
+        num_blocks,
+        num_classes,
+        freeze_trunk,
+        init_planes,
+        growth_rate,
+        expansion,
+        small_input,
+        final_bn_relu,
+    ):
         """
             Implementation of a standard densely connected network (DenseNet).
 
@@ -121,72 +131,57 @@ class DenseNet(ClassyVisionModel):
             layers. These settings are useful when
             training Siamese networks.
         """
-        config = self.parse_config(config)
-        super(DenseNet, self).__init__(config)
-        num_classes = config["num_classes"]
+        super().__init__(num_classes, freeze_trunk)
 
         # assertions:
-        assert type(config["num_blocks"]) == list
-        assert all(is_pos_int(b) for b in config["num_blocks"])
+        assert type(num_blocks) == list
+        assert all(is_pos_int(b) for b in num_blocks)
         assert num_classes is None or is_pos_int(num_classes)
-        assert is_pos_int(config["init_planes"])
-        assert is_pos_int(config["growth_rate"])
-        assert is_pos_int(config["expansion"])
-        assert type(config["small_input"]) == bool
+        assert is_pos_int(init_planes)
+        assert is_pos_int(growth_rate)
+        assert is_pos_int(expansion)
+        assert type(small_input) == bool
 
         # initial convolutional block:
-        self.num_blocks = config["num_blocks"]
-        self.small_input = config["small_input"]
+        self.num_blocks = num_blocks
+        self.small_input = small_input
         if self.small_input:
             self.initial_block = nn.Sequential(
                 nn.Conv2d(
-                    3,
-                    config["init_planes"],
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias=False,
+                    3, init_planes, kernel_size=3, stride=1, padding=1, bias=False
                 ),
-                nn.BatchNorm2d(config["init_planes"]),
+                nn.BatchNorm2d(init_planes),
                 nn.ReLU(inplace=INPLACE),
             )
         else:
             self.initial_block = nn.Sequential(
                 nn.Conv2d(
-                    3,
-                    config["init_planes"],
-                    kernel_size=7,
-                    stride=2,
-                    padding=3,
-                    bias=False,
+                    3, init_planes, kernel_size=7, stride=2, padding=3, bias=False
                 ),
-                nn.BatchNorm2d(config["init_planes"]),
+                nn.BatchNorm2d(init_planes),
                 nn.ReLU(inplace=INPLACE),
                 nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
             )
         # loop over spatial resolutions:
-        num_planes = config["init_planes"]
+        num_planes = init_planes
         self.features = nn.Sequential()
-        for idx, num_layers in enumerate(config["num_blocks"]):
+        for idx, num_layers in enumerate(num_blocks):
 
             # add dense block:
             block = _DenseBlock(
-                num_layers,
-                num_planes,
-                growth_rate=config["growth_rate"],
-                expansion=config["expansion"],
+                num_layers, num_planes, growth_rate=growth_rate, expansion=expansion
             )
             self.features.add_module("denseblock-%d" % (idx + 1), block)
-            num_planes = num_planes + num_layers * config["growth_rate"]
+            num_planes = num_planes + num_layers * growth_rate
 
             # add transition layer:
-            if idx != len(config["num_blocks"]) - 1:
+            if idx != len(num_blocks) - 1:
                 trans = _Transition(num_planes, num_planes // 2)
                 self.features.add_module("transition-%d" % (idx + 1), trans)
                 num_planes = num_planes // 2
 
         # final batch normalization:
-        if config["final_bn_relu"]:
+        if final_bn_relu:
             self.features.add_module("norm-final", nn.BatchNorm2d(num_planes))
             self.features.add_module("relu-final", nn.ReLU(inplace=INPLACE))
 
@@ -204,17 +199,20 @@ class DenseNet(ClassyVisionModel):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def parse_config(self, config):
+    @classmethod
+    def from_config(cls, config):
         assert "num_blocks" in config
-        return {
+        config = {
             "num_blocks": config["num_blocks"],
-            "num_classes": config["num_classes"] if "num_classes" in config else None,
+            "num_classes": config.get("num_classes"),
+            "freeze_trunk": config.get("freeze_trunk", False),
             "init_planes": config.get("init_planes", 64),
             "growth_rate": config.get("growth_rate", 32),
             "expansion": config.get("expansion", 4),
             "small_input": config.get("small_input", False),
             "final_bn_relu": config.get("final_bn_relu", True),
         }
+        return cls(**config)
 
     # forward pass in DenseNet:
     def forward(self, x):

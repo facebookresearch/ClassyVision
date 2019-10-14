@@ -689,3 +689,10 @@ def convert_to_one_hot(targets, classes):
         one_hot_targets = one_hot_targets.cuda()
     one_hot_targets.scatter_(1, targets.long(), 1)
     return one_hot_targets
+
+
+def bind_method_to_class(method, cls):
+    """
+    Binds an already bound method to the provided class.
+    """
+    return method.__func__.__get__(cls)

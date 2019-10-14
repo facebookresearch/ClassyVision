@@ -61,13 +61,12 @@ class TestClassyModelWrapper(unittest.TestCase):
         input_shape = (10,)
         output_shape = (num_classes,)
         model_depth = 1
-        config = {"num_classes": num_classes}
         classy_model = ClassyModelWrapper(
             model,
+            num_classes=num_classes,
             input_shape=input_shape,
             output_shape=output_shape,
             model_depth=model_depth,
-            config=config,
         )
         self.assertEqual(classy_model.input_shape, input_shape)
         self.assertEqual(classy_model.num_classes, num_classes)

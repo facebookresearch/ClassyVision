@@ -16,20 +16,21 @@ from .classy_vision_model import ClassyVisionModel
 class MLP(ClassyVisionModel):
     """MLP model using ReLU. Useful for testing on CPUs."""
 
-    def __init__(self, config):
-        super().__init__(config)
-
-        assert (key in config for key in ["input_dim", "output_dim", "hidden_dims"])
+    def __init__(
+        self,
+        input_dim,
+        output_dim,
+        hidden_dims,
+        dropout,
+        first_dropout,
+        use_batchnorm,
+        first_batchnorm,
+        num_classes,
+        freeze_trunk,
+    ):
+        super().__init__(num_classes, freeze_trunk)
 
         layers = []
-        input_dim = config["input_dim"]
-        output_dim = config["output_dim"]
-        hidden_dims = config["hidden_dims"]
-        dropout = config.get("dropout", 0)
-        first_dropout = config.get("first_dropout", False)
-        use_batchnorm = config.get("use_batchnorm", False)
-        first_batchnorm = config.get("first_batchnorm", False)
-
         # If first_batchnorm is set, must be using batchnorm
         assert not first_batchnorm or use_batchnorm
 
@@ -54,6 +55,23 @@ class MLP(ClassyVisionModel):
 
         layers.append(nn.Linear(input_dim, output_dim))
         self.mlp = nn.Sequential(*layers)
+
+    @classmethod
+    def from_config(cls, config):
+        assert (key in config for key in ["input_dim", "output_dim", "hidden_dims"])
+
+        output_dim = config["output_dim"]
+        return cls(
+            input_dim=config["input_dim"],
+            output_dim=output_dim,
+            hidden_dims=config["hidden_dims"],
+            dropout=config.get("dropout", 0),
+            first_dropout=config.get("first_dropout", False),
+            use_batchnorm=config.get("use_batchnorm", False),
+            first_batchnorm=config.get("first_batchnorm", False),
+            num_classes=output_dim,
+            freeze_trunk=config.get("freeze_trunk", False),
+        )
 
     def forward(self, x):
         batchsize_per_replica = x.shape[0]
