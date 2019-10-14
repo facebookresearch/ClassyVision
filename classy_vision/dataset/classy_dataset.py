@@ -97,6 +97,7 @@ class ClassyDataset(Dataset):
         filter_func=_return_true,
         shuffle=True,
         subsample=None,
+        shard_group_size=1,
     ):
         """
         Wraps a dataset with TransformDataset, ShuffleDataset,
@@ -125,7 +126,9 @@ class ClassyDataset(Dataset):
             dataset = dataset.resample([n for n in range(subsample)])
 
         # shard data
-        dataset = dataset.shard(get_world_size(), get_rank())
+        dataset = dataset.shard(
+            get_world_size(), get_rank(), group_size=shard_group_size
+        )
 
         # batch data if requested:
         dataset = dataset.batch(batchsize_per_replica, filter_func=filter_func)
