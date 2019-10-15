@@ -187,20 +187,19 @@ class ResNeXt3DStemMultiPathway(nn.Module):
 
 
 class ResNeXt3DStem(nn.Module):
-    def __init__(self, config):
+    def __init__(
+        self, temporal_kernel, spatial_kernel, input_planes, stem_planes, maxpool
+    ):
         super(ResNeXt3DStem, self).__init__()
-
-        temporal_kernel = config["stem_temporal_kernel"]
-        spatial_kernel = config["stem_spatial_kernel"]
         self.stem = ResNeXt3DStemMultiPathway(
-            [config["input_planes"]],
-            [config["stem_planes"]],
+            [input_planes],
+            [stem_planes],
             [[temporal_kernel, spatial_kernel, spatial_kernel]],
             [[1, 2, 2]],  # stride
             [
                 [temporal_kernel // 2, spatial_kernel // 2, spatial_kernel // 2]
             ],  # padding
-            maxpool=[config["stem_maxpool"]],
+            maxpool=[maxpool],
         )
 
     def forward(self, x):
