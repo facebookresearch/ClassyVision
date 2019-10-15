@@ -6,10 +6,16 @@
 
 import copy
 import logging
+from enum import Enum
 
 import torch.nn as nn
 
 from .classy_module import ClassyModule
+
+
+class ClassyModelEvaluationMode(Enum):
+    DEFAULT = 0
+    VIDEO_CLIP_AVERAGING = 1
 
 
 class ClassyVisionModel(nn.Module):
@@ -212,3 +218,7 @@ class ClassyVisionModel(nn.Module):
     @property
     def model_depth(self):
         raise NotImplementedError
+
+    @property
+    def evaluation_mode(self):
+        return ClassyModelEvaluationMode.DEFAULT
