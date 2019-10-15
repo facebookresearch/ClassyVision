@@ -10,10 +10,16 @@ import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
 import torch
+from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.hub import ClassyHubInterface
 from classy_vision.models import ClassyVisionModel, build_model
 from classy_vision.tasks import ClassyVisionTask, build_task
 from torchvision import models, transforms
+
+
+class TestTransform(ClassyTransform):
+    def __call__(self, x):
+        return x
 
 
 class TestClassyHubInterface(unittest.TestCase):
@@ -62,6 +68,14 @@ class TestClassyHubInterface(unittest.TestCase):
 
         # this will pick up the transform from the task's config
         self._test_predict_and_extract_features(hub_interface)
+
+        # test that the correct transform is picked up
+        split = "test"
+        test_transform = TestTransform()
+        task.datasets[split].transform = test_transform
+        hub_interface = ClassyHubInterface.from_task(task)
+        dataset = hub_interface.create_image_dataset([self.image_path], split=split)
+        self.assertIsInstance(dataset.transform, TestTransform)
 
     def test_from_model(self):
         for model in [self._get_classy_model(), self._get_non_classy_model()]:
