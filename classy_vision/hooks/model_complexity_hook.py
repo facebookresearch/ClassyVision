@@ -33,7 +33,11 @@ class ModelComplexityHook(ClassyHook):
         """
         try:
             num_flops = compute_flops(
-                state.model, input_shape=state.base_model.input_shape
+                state.model,
+                input_shape=state.base_model.input_shape,
+                input_key=state.base_model.input_key
+                if hasattr(state.base_model, "input_key")
+                else None,
             )
             if num_flops is None:
                 logging.info("FLOPs for forward pass: skipped.")
