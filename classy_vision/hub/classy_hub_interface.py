@@ -76,18 +76,15 @@ class ClassyHubInterface:
             if it is not found there.
         """
         if transform is None:
-            transform_config = None
-            if self.task is not None:
-                # TODO (@mannatsingh): The transforms aren't picked up from
-                # self.task's datasets, but from the task's config.
-                transform_config = (
-                    self.task.get_config()["dataset"]
-                    .get(split, {})
-                    .get("transforms", None)
+            if self.task is not None and split in self.task.datasets:
+                # use the transform from the dataset for the split
+                dataset = self.task.datasets[split]
+                transform = dataset.transform
+                assert transform is not None, "Cannot infer transform from the task"
+            else:
+                transform = build_field_transform_default_imagenet(
+                    config=None, split=split
                 )
-            transform = build_field_transform_default_imagenet(
-                transform_config, split=split
-            )
         return ImagePathDataset(
             batchsize_per_replica,
             shuffle,
