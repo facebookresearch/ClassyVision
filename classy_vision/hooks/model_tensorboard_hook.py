@@ -57,6 +57,9 @@ class ModelTensorboardHook(ClassyHook):
                 plot_model(
                     state.base_model,
                     size=state.base_model.input_shape,
+                    input_key=state.base_model.input_key
+                    if hasattr(state.base_model, "input_key")
+                    else None,
                     writer=self.tb_writer,
                 )
             except Exception:

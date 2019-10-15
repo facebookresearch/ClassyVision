@@ -9,7 +9,7 @@ import math
 import numpy as np
 import torch
 import torch.nn.modules as nn
-from classy_vision.generic.util import is_pos_int
+from classy_vision.generic.util import get_model_dummy_input, is_pos_int
 from PIL import Image
 
 
@@ -125,7 +125,9 @@ def plot_losses(losses, visdom_server=None, env=None, win=None, title=""):
     return win
 
 
-def plot_model(model, size=(3, 224, 224), writer=None, folder="", train=True):
+def plot_model(
+    model, size=(3, 224, 224), input_key=None, writer=None, folder="", train=True
+):
     """Visualizes a model in TensorBoard.
 
     The TensorBoard writer can be either specified directly via `writer` or can
@@ -141,13 +143,7 @@ def plot_model(model, size=(3, 224, 224), writer=None, folder="", train=True):
     assert (
         writer is not None or folder != ""
     ), "must specify SummaryWriter or folder to create SummaryWriter in"
-    if len(size) == 3:
-        size = (1,) + size
-    assert len(size) == 4, "size must be tuple of length 4 (NCHW)"
-
-    input = torch.zeros(size)
-    if next(model.parameters()).is_cuda:
-        input = input.cuda()
+    input = get_model_dummy_input(model, size, input_key)
     if writer is None:
         writer = SummaryWriter(log_dir=folder, comment="Model graph")
     with writer:

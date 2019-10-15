@@ -10,7 +10,7 @@ import operator
 
 import torch
 import torch.nn as nn
-from classy_vision.generic.util import is_leaf, is_on_gpu
+from classy_vision.generic.util import get_model_dummy_input, is_leaf, is_on_gpu
 from torch.cuda import cudart
 
 
@@ -219,7 +219,7 @@ def restore_forward(model):
     return model
 
 
-def compute_flops(model, input_shape=(3, 244, 244)):
+def compute_flops(model, input_shape=(3, 244, 244), input_key=None):
     """
     Compute the number of FLOPs needed for a forward pass.
     """
@@ -228,11 +228,7 @@ def compute_flops(model, input_shape=(3, 244, 244)):
     assert isinstance(model, nn.Module)
     if not isinstance(input_shape, abc.Sequence):
         return None
-    shape = (1,) + tuple(input_shape)
-    input = torch.zeros(shape)
-    if next(model.parameters()).is_cuda:
-        input = input.cuda()
-
+    input = get_model_dummy_input(model, input_shape, input_key)
     flops_list = []
 
     # measure FLOPs:
