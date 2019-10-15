@@ -17,11 +17,14 @@ class TestCosineScheduler(unittest.TestCase):
     _num_epochs = 10
 
     def _get_valid_config(self):
+        return {"name": "cosine", "max_lr": 0.1, "min_lr": 0}
+
+    def _get_valid_config_with_warmup(self):
         return {
             "name": "cosine",
-            "num_epochs": self._num_epochs,
-            "base_lr": 0.1,
-            "min_lr": 0,
+            "max_lr": 0.1,
+            "min_lr": 0.01,
+            "warmup": {"init_lr": 0.01, "length": 0.2},
         }
 
     def test_invalid_config(self):
@@ -30,13 +33,12 @@ class TestCosineScheduler(unittest.TestCase):
 
         bad_config = copy.deepcopy(config)
         # Invalid Base lr
-        bad_config["num_epochs"] = config["num_epochs"]
-        del bad_config["base_lr"]
+        del bad_config["max_lr"]
         with self.assertRaises(AssertionError):
             CosineDecayParamScheduler.from_config(bad_config)
 
         # Invalid min_lr
-        bad_config["base_lr"] = config["base_lr"]
+        bad_config["max_lr"] = config["max_lr"]
         del bad_config["min_lr"]
         with self.assertRaises(AssertionError):
             CosineDecayParamScheduler.from_config(bad_config)
@@ -68,3 +70,30 @@ class TestCosineScheduler(unittest.TestCase):
         config = self._get_valid_config()
         scheduler = build_param_scheduler(config)
         self.assertTrue(isinstance(scheduler, CosineDecayParamScheduler))
+
+    def test_build_cosine_scheduler_with_warmup(self):
+        config = self._get_valid_config_with_warmup()
+        scheduler = build_param_scheduler(config)
+        self.assertTrue(isinstance(scheduler, CosineDecayParamScheduler))
+
+    def test_scheduler_with_warmup(self):
+        config = self._get_valid_config_with_warmup()
+
+        scheduler = CosineDecayParamScheduler.from_config(config)
+        schedule = [
+            round(scheduler(epoch_num / self._num_epochs), 4)
+            for epoch_num in range(self._num_epochs)
+        ]
+        expected_schedule = [
+            0.01,
+            0.055,
+            0.1,
+            0.0966,
+            0.0868,
+            0.0722,
+            0.055,
+            0.0378,
+            0.0232,
+            0.0134,
+        ]
+        self.assertEqual(schedule, expected_schedule)
