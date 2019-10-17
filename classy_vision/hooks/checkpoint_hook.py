@@ -10,15 +10,15 @@ import tempfile
 from shutil import copy2, move
 from typing import Any, Collection, Dict, Optional
 
+from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import save_checkpoint
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 class CheckpointHook(ClassyHook):
     """
-    Hook to checkpoint a model's state.
+    Hook to checkpoint a model's task.
 
     Saves the checkpoints in checkpoint_folder.
     Args:
@@ -60,7 +60,7 @@ class CheckpointHook(ClassyHook):
         self.checkpoint_period: int = checkpoint_period
         self.phase_counter: int = 0
 
-    def _save_checkpoint(self, state, filename):
+    def _save_checkpoint(self, task, filename):
         assert os.path.exists(
             self.checkpoint_folder
         ), "Checkpoint folder '{}' deleted unexpectedly".format(self.checkpoint_folder)
@@ -71,8 +71,8 @@ class CheckpointHook(ClassyHook):
             self.checkpoint_folder,
             {
                 "input_args": self.input_args,
-                "config": state.task.get_config(),
-                "classy_state_dict": state.get_classy_state(),
+                "config": task.get_config(),
+                "classy_state_dict": task.get_classy_state(),
             },
         )
 
@@ -83,7 +83,9 @@ class CheckpointHook(ClassyHook):
             copy2(checkpoint_file, tmp_file)
             move(tmp_file, os.path.join(self.checkpoint_folder, filename))
 
-    def on_start(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_start(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Check that the checkpoint folder actually exists. If not, raise an exception.
         """
@@ -93,16 +95,18 @@ class CheckpointHook(ClassyHook):
             )
             raise FileNotFoundError(err_msg)
 
-    def on_phase_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
-        Checkpoint the state every checkpoint_period phases.
+        Checkpoint the task every checkpoint_period phases.
         """
-        if not is_master() or state.phase_type not in self.phase_types:
+        if not is_master() or task.phase_type not in self.phase_types:
             return
 
         self.phase_counter += 1
         if self.phase_counter % self.checkpoint_period != 0:
             return
 
-        checkpoint_name = "model_phase-{phase}_end.torch".format(phase=state.phase_idx)
-        self._save_checkpoint(state, checkpoint_name)
+        checkpoint_name = "model_phase-{phase}_end.torch".format(phase=task.phase_idx)
+        self._save_checkpoint(task, checkpoint_name)

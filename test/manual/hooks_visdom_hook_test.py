@@ -35,12 +35,12 @@ class TestVisdomHook(unittest.TestCase):
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         args = get_test_args()
         task = build_task(config, args)
-        state = task.build_initial_state()
+        task.prepare()
 
         losses = [1.2, 2.3, 1.23, 2.33]
         loss_vals = {"train": 0.8825, "test": 0.353}
 
-        state.losses = losses
+        task.losses = losses
 
         visdom_server = "localhost"
         visdom_port = 8097
@@ -60,7 +60,7 @@ class TestVisdomHook(unittest.TestCase):
 
             for phase_idx in range(10):
                 train = phase_idx % 2 == 0
-                state.train = train
+                task.train = train
                 phase_type = "train" if train else "test"
 
                 counts[phase_type] += 1
@@ -68,19 +68,19 @@ class TestVisdomHook(unittest.TestCase):
 
                 # test that the metrics don't change if losses is empty and that
                 # visdom.line() is not called
-                state.losses = []
+                task.losses = []
                 original_metrics = copy.deepcopy(visdom_hook.metrics)
-                visdom_hook.on_phase_end(state, local_variables)
+                visdom_hook.on_phase_end(task, local_variables)
                 self.assertDictEqual(original_metrics, visdom_hook.metrics)
                 mock_visdom.line.assert_not_called()
 
                 # test that the metrics are updated correctly when losses
                 # is non empty
-                state.losses = [loss * count for loss in losses]
-                visdom_hook.on_phase_end(state, local_variables)
+                task.losses = [loss * count for loss in losses]
+                visdom_hook.on_phase_end(task, local_variables)
 
                 # every meter should be present and should have the correct length
-                for meter in state.meters:
+                for meter in task.meters:
                     for key in meter.value:
                         key = phase_type + "_" + meter.name + "_" + key
                         self.assertTrue(
@@ -110,7 +110,7 @@ class TestVisdomHook(unittest.TestCase):
                     and len(visdom_hook.metrics[lr_key]) == counts[phase_type]
                 )
                 self.assertAlmostEqual(
-                    visdom_hook.metrics[lr_key][-1], state.optimizer.lr, places=4
+                    visdom_hook.metrics[lr_key][-1], task.optimizer.lr, places=4
                 )
 
                 if master and not train and visdom_conn:

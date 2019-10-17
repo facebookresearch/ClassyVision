@@ -57,30 +57,30 @@ class TestClassyState(unittest.TestCase):
         task = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
         task_2 = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
 
-        state = task.build_initial_state()
-        state_2 = task_2.build_initial_state()
+        task.prepare()
+        task_2.prepare()
 
         use_gpu = False
         local_variables = {}
 
         # test in both train and test mode
         for _ in range(2):
-            state.advance_phase()
+            task.advance_phase()
 
-            # state 2 should have the same state
-            state_2.set_classy_state(state.get_classy_state(deep_copy=True))
-            self._compare_states(state.get_classy_state(), state_2.get_classy_state())
+            # task 2 should have the same state
+            task_2.set_classy_state(task.get_classy_state(deep_copy=True))
+            self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
             # this tests that both states' iterators return the same samples
-            sample = next(state.get_data_iterator())
-            sample_2 = next(state_2.get_data_iterator())
+            sample = next(task.get_data_iterator())
+            sample_2 = next(task_2.get_data_iterator())
             self._compare_samples(sample, sample_2)
 
             # test that the train step runs the same way on both states
             # and the loss remains the same
-            train_step(state, use_gpu, local_variables)
-            train_step(state_2, use_gpu, local_variables)
-            self._compare_states(state.get_classy_state(), state_2.get_classy_state())
+            train_step(task, use_gpu, local_variables)
+            train_step(task_2, use_gpu, local_variables)
+            self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_update_state(self):
         """
@@ -94,23 +94,25 @@ class TestClassyState(unittest.TestCase):
             config["dataset"][split]["batchsize_per_replica"] = 1
         args = get_test_args()
         task = build_task(config, args, local_rank=0)
+        task_2 = build_task(config, args, local_rank=0)
 
         for reset_heads in [True, False]:
-            config["reset_heads"] = reset_heads
+            task.reset_heads = reset_heads
+            task_2.reset_heads = reset_heads
 
-            state = task.build_initial_state()
-            state_2 = task.build_initial_state()
+            task.prepare()
+            task_2.prepare()
+
             # test in both train and test mode
             for _ in range(2):
-                state.advance_phase()
+                task.advance_phase()
 
                 update_classy_state(
-                    state_2, state.get_classy_state(deep_copy=True), reset_heads
+                    task_2, task.get_classy_state(deep_copy=True), reset_heads
                 )
+
                 self._compare_states(
-                    state.get_classy_state(),
-                    state_2.get_classy_state(),
-                    not reset_heads,
+                    task.get_classy_state(), task_2.get_classy_state(), not reset_heads
                 )
 
     def test_freeze_trunk(self):
@@ -126,24 +128,24 @@ class TestClassyState(unittest.TestCase):
         args = get_test_args()
         task = build_task(config, args, local_rank=0)
 
-        state = task.build_initial_state()
+        task.prepare()
 
         use_gpu = False
         local_variables = {}
 
         # test in both train and test mode
         for i in range(2):
-            state.advance_phase()
+            task.advance_phase()
 
-            previous_state_dict = state.get_classy_state(deep_copy=True)
+            previous_state_dict = task.get_classy_state(deep_copy=True)
 
             # test that after the train step the trunk remains unchanged
-            train_step(state, use_gpu, local_variables)
+            train_step(task, use_gpu, local_variables)
 
             # compares only trunk before and after train_step
             # and should be true because the trunk is frozen
             self._compare_model_state(
-                state.get_classy_state()["base_model"],
+                task.get_classy_state()["base_model"],
                 previous_state_dict["base_model"],
                 check_heads=False,
             )
@@ -154,13 +156,13 @@ class TestClassyState(unittest.TestCase):
             if i == 0:
                 with self.assertRaises(AssertionError):
                     self._compare_model_state(
-                        state.get_classy_state()["base_model"],
+                        task.get_classy_state()["base_model"],
                         previous_state_dict["base_model"],
                         check_heads=True,
                     )
             else:
                 self._compare_model_state(
-                    state.get_classy_state()["base_model"],
+                    task.get_classy_state()["base_model"],
                     previous_state_dict["base_model"],
                     check_heads=True,
                 )

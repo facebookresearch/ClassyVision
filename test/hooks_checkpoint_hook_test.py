@@ -30,7 +30,7 @@ class TestCheckpointHook(unittest.TestCase):
         config = get_test_task_config()
         args = get_test_args()
         task = build_task(config, args)
-        state = task.build_initial_state()
+        task.prepare()
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
@@ -42,28 +42,28 @@ class TestCheckpointHook(unittest.TestCase):
         # checkpoint directory doesn't exist
         # call the on start function
         with self.assertRaises(FileNotFoundError):
-            checkpoint_hook.on_start(state, local_variables)
+            checkpoint_hook.on_start(task, local_variables)
         # call the on end phase function
         with self.assertRaises(AssertionError):
-            checkpoint_hook.on_phase_end(state, local_variables)
+            checkpoint_hook.on_phase_end(task, local_variables)
         # try loading a non-existent checkpoint
         checkpoint = load_checkpoint(checkpoint_folder, device)
         self.assertIsNone(checkpoint)
 
         # create checkpoint dir, verify on_start hook runs
         os.mkdir(checkpoint_folder)
-        checkpoint_hook.on_start(state, local_variables)
+        checkpoint_hook.on_start(task, local_variables)
 
         # Phase_type is test, expect no checkpoint
-        state.train = False
+        task.train = False
         # call the on end phase function
-        checkpoint_hook.on_phase_end(state, local_variables)
+        checkpoint_hook.on_phase_end(task, local_variables)
         checkpoint = load_checkpoint(checkpoint_folder, device)
         self.assertIsNone(checkpoint)
 
-        state.train = True
+        task.train = True
         # call the on end phase function
-        checkpoint_hook.on_phase_end(state, local_variables)
+        checkpoint_hook.on_phase_end(task, local_variables)
         # model should be checkpointed. load and compare
         checkpoint = load_checkpoint(checkpoint_folder, device)
         self.assertIsNotNone(checkpoint)
@@ -72,7 +72,7 @@ class TestCheckpointHook(unittest.TestCase):
         # not testing for equality of classy_state_dict, that is tested in
         # a separate test
         self.assertEqual(checkpoint["input_args"], args)
-        self.assertDictEqual(checkpoint["config"], state.task.get_config())
+        self.assertDictEqual(checkpoint["config"], task.get_config())
 
     def test_checkpoint_period(self) -> None:
         """
@@ -81,7 +81,7 @@ class TestCheckpointHook(unittest.TestCase):
         config = get_test_task_config()
         args = get_test_args()
         task = build_task(config, args)
-        state = task.build_initial_state()
+        task.prepare()
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
@@ -101,25 +101,25 @@ class TestCheckpointHook(unittest.TestCase):
             os.mkdir(checkpoint_folder)
 
             # call the on start function
-            checkpoint_hook.on_start(state, local_variables)
+            checkpoint_hook.on_start(task, local_variables)
 
             # shouldn't create any checkpoints until there are checkpoint_period
             # phases which are in phase_types
             count = 0
             valid_phase_count = 0
             while valid_phase_count < checkpoint_period - 1:
-                state.train = count % 2 == 0
+                task.train = count % 2 == 0
                 # call the on end phase function
-                checkpoint_hook.on_phase_end(state, local_variables)
+                checkpoint_hook.on_phase_end(task, local_variables)
                 checkpoint = load_checkpoint(checkpoint_folder, device)
                 self.assertIsNone(checkpoint)
-                valid_phase_count += 1 if state.phase_type in phase_types else 0
+                valid_phase_count += 1 if task.phase_type in phase_types else 0
                 count += 1
 
             # create a phase which is in phase_types
-            state.train = True
+            task.train = True
             # call the on end phase function
-            checkpoint_hook.on_phase_end(state, local_variables)
+            checkpoint_hook.on_phase_end(task, local_variables)
             # model should be checkpointed. load and compare
             checkpoint = load_checkpoint(checkpoint_folder, device)
             self.assertIsNotNone(checkpoint)

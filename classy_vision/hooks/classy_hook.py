@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Any, Dict
 
-from classy_vision.state.classy_state import ClassyState
+from classy_vision import tasks
 
 
 class ClassyHookFunctions(Enum):
@@ -62,7 +62,9 @@ class ClassyHook(ABC):
     def __init__(self):
         self.state = ClassyHookState()
 
-    def _noop(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def _noop(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Derived classes can set their hook functions to this if they want those
         hook functions to not do anything.
@@ -78,7 +80,7 @@ class ClassyHook(ABC):
 
     @abstractmethod
     def on_rendezvous(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Called when the trainers rendezvous.
@@ -86,7 +88,9 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_start(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_start(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called at the start of training.
         """
@@ -94,7 +98,7 @@ class ClassyHook(ABC):
 
     @abstractmethod
     def on_phase_start(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Called at the start of each phase.
@@ -102,49 +106,63 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_sample(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_sample(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called each time trainer obtained a sample.
         """
         pass
 
     @abstractmethod
-    def on_forward(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_forward(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called each time forward pass is triggered.
         """
         pass
 
     @abstractmethod
-    def on_loss(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_loss(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called each time a loss has been computed.
         """
         pass
 
     @abstractmethod
-    def on_backward(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_backward(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called each time a backward step is performed on the loss.
         """
         pass
 
     @abstractmethod
-    def on_update(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_update(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called each time parameters have been updated.
         """
         pass
 
     @abstractmethod
-    def on_phase_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called at the end of each phase.
         """
         pass
 
     @abstractmethod
-    def on_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Called at the end of training.
         """

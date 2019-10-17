@@ -8,9 +8,9 @@ import logging
 from math import floor
 from typing import Any, Dict, Optional
 
+from classy_vision import tasks
 from classy_vision.generic.distributed_util import get_rank
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 class LossLrMeterLoggingHook(ClassyHook):
@@ -33,39 +33,43 @@ class LossLrMeterLoggingHook(ClassyHook):
         super().__init__()
         self.log_freq: Optional[int] = log_freq
 
-    def on_loss(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_loss(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Log metrics every log_freq batches, if log_freq is not None.
         """
         if self.log_freq is None:
             return
-        batches = len(state.losses)
+        batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
-            self._log_loss_lr_meters(state, local_variables)
+            self._log_loss_lr_meters(task, local_variables)
 
-    def on_phase_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Log the loss, optimizer LR, and meters for the phase.
         """
-        batches = len(state.losses)
+        batches = len(task.losses)
         if batches:
-            self._log_loss_lr_meters(state, local_variables)
+            self._log_loss_lr_meters(task, local_variables)
 
     def _log_loss_lr_meters(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Compute and log the loss, optimizer LR, and meters.
         """
-        phase_type = state.phase_type
-        phase_type_idx = state.train_phase_idx if state.train else state.eval_phase_idx
-        batches = len(state.losses)
+        phase_type = task.phase_type
+        phase_type_idx = task.train_phase_idx if task.train else task.eval_phase_idx
+        batches = len(task.losses)
 
         # Loss for the phase
-        loss = sum(state.losses) / (batches * state.get_batchsize_per_replica())
+        loss = sum(task.losses) / (batches * task.get_batchsize_per_replica())
 
         # Optimizer LR for the phase
-        optimizer_lr = state.optimizer.lr
+        optimizer_lr = task.optimizer.lr
 
         log_strs = [
             "Rank: {}, {} phase: {}, processed batches: {}".format(
@@ -74,6 +78,6 @@ class LossLrMeterLoggingHook(ClassyHook):
             "{} loss: {}, LR rate: {}".format(phase_type, loss, optimizer_lr),
             "Meters:",
         ]
-        for meter in state.meters:
+        for meter in task.meters:
             log_strs.append("{}".format(meter))
         logging.info("\n".join(log_strs))

@@ -8,10 +8,10 @@ import logging
 import time
 from typing import Any, Dict, Optional
 
+from classy_vision import tasks
 from classy_vision.generic.distributed_util import get_rank
 from classy_vision.generic.perf_stats import PerfStats
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 class TimeMetricsHook(ClassyHook):
@@ -35,7 +35,7 @@ class TimeMetricsHook(ClassyHook):
         self.start_time: Optional[float] = None
 
     def on_phase_start(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Initialize start time and reset perf stats
@@ -43,32 +43,36 @@ class TimeMetricsHook(ClassyHook):
         self.start_time = time.time()
         local_variables["perf_stats"] = PerfStats()
 
-    def on_loss(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_loss(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Log metrics every log_freq batches, if log_freq is not None.
         """
         if self.log_freq is None:
             return
-        batches = len(state.losses)
+        batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
-            self._log_performance_metrics(state, local_variables)
+            self._log_performance_metrics(task, local_variables)
 
-    def on_phase_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Log metrics at the end of a phase if log_freq is None.
         """
-        batches = len(state.losses)
+        batches = len(task.losses)
         if batches:
-            self._log_performance_metrics(state, local_variables)
+            self._log_performance_metrics(task, local_variables)
 
     def _log_performance_metrics(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Compute and log performance metrics.
         """
-        phase_type = state.phase_type
-        batches = len(state.losses)
+        phase_type = task.phase_type
+        batches = len(task.losses)
 
         if self.start_time is None:
             logging.warning("start_time not initialized")
@@ -84,7 +88,7 @@ class TimeMetricsHook(ClassyHook):
         # Train step time breakdown
         if local_variables.get("perf_stats") is None:
             logging.warning('"perf_stats" not set in local_variables')
-        elif state.train:
+        elif task.train:
             logging.info(
                 "Train step time breakdown (rank {}):\n{}".format(
                     get_rank(), local_variables["perf_stats"].report_str()

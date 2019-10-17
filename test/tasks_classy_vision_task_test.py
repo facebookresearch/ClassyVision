@@ -36,9 +36,8 @@ class TestClassyVisionTask(unittest.TestCase):
             dataset = build_dataset(config["dataset"][split])
             task.set_dataset(dataset, split)
 
-        state = task.build_initial_state(num_workers=1, pin_memory=False)
-        self.assertTrue(state is not None)
+        task.prepare(num_workers=1, pin_memory=False)
 
         args = get_test_args()
         task = build_task(config, args)
-        state = task.build_initial_state(num_workers=1, pin_memory=False)
+        task.prepare(num_workers=1, pin_memory=False)
