@@ -567,7 +567,7 @@ def visualize_image(img, mean=None, std=None):
 def set_proxies():
     """Set proxies to allow downloading of external URLs."""
     os.environ["HTTP_PROXY"] = "http://fwdproxy:8080"
-    os.environ["HTTPS_PROXY"] = "https://fwdproxy:8080"
+    os.environ["HTTPS_PROXY"] = "http://fwdproxy:8080"
     os.environ["http_proxy"] = "fwdproxy:8080"
     os.environ["https_proxy"] = "fwdproxy:8080"
 
