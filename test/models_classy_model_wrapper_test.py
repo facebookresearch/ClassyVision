@@ -85,8 +85,6 @@ class TestClassyModelWrapper(unittest.TestCase):
             config["dataset"][split]["num_samples"] = 2
         config["num_phases"] = 1
         task = build_task(config, args)
-        # TODO(@mannatsingh): Use a set_model method when the task refactor is
-        # complete
-        task.model = classy_model
+        task.set_model(classy_model)
         trainer = ClassyTrainer(use_gpu=False)
         trainer.train(task)

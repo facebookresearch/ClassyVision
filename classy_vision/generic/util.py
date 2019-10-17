@@ -459,26 +459,26 @@ def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
         )
 
 
-def update_classy_state(state, state_dict, reset_heads=False):
+def update_classy_state(task, state_dict, reset_heads=False):
     """
-    Updates the state with the provided state dictionary.
+    Updates the task with the provided task dictionary.
 
     Args:
-        state: ClassyState instance to update
+        task: ClassyTask instance to update
         state_dict: State dict, should be the output of a call to
-            ClassyState.get_classy_state().
+            ClassyTask.get_classy_state().
         reset_heads: if False, uses the heads' state from the checkpoint.
     """
     logging.info("Loading classy state from checkpoint")
 
     try:
         if reset_heads:
-            current_state_dict = state.get_classy_state()
+            current_state_dict = task.get_classy_state()
             # replace the checkpointed head states with source head states
             state_dict["base_model"]["model"]["heads"] = current_state_dict[
                 "base_model"
             ]["model"]["heads"]
-        state.set_classy_state(state_dict)
+        task.set_classy_state(state_dict)
         logging.info("Checkpoint load successful")
         return True
     except Exception:

@@ -23,7 +23,7 @@ class TestModelTensorboardHook(unittest.TestCase):
         mock_summary_writer = mock.create_autospec(SummaryWriter, instance=True)
 
         task = get_test_classy_task()
-        state = task.build_initial_state()
+        task.prepare()
 
         for master in [False, True]:
             mock_is_master_func.return_value = master
@@ -32,13 +32,13 @@ class TestModelTensorboardHook(unittest.TestCase):
 
             for model_config in model_configs:
                 model = build_model(model_config)
-                state.base_model = model
+                task.base_model = model
 
                 # create a model tensorboard hook
                 model_tensorboard_hook = ModelTensorboardHook(mock_summary_writer)
 
                 with self.assertLogs():
-                    model_tensorboard_hook.on_start(state, local_variables)
+                    model_tensorboard_hook.on_start(task, local_variables)
 
                 if master:
                     # SummaryWriter should have been init-ed with the correct

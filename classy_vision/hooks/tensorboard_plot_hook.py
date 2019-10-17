@@ -8,9 +8,9 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
+from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 try:
@@ -55,7 +55,7 @@ class TensorboardPlotHook(ClassyHook):
         self.num_steps_global: Optional[List[int]] = None
 
     def on_phase_start(
-        self, state: ClassyState, local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Initialize losses and learning_rates.
@@ -64,7 +64,9 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times = []
         self.num_steps_global = []
 
-    def on_loss(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_loss(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Store the observed learning rates.
         """
@@ -72,17 +74,19 @@ class TensorboardPlotHook(ClassyHook):
             logging.warning("learning_rates is not initialized")
             return
 
-        if not state.train:
+        if not task.train:
             # Only need to log the average loss during the test phase
             return
 
-        learning_rate_val = state.optimizer.lr
+        learning_rate_val = task.optimizer.lr
 
         self.learning_rates.append(learning_rate_val)
         self.wall_times.append(time.time())
-        self.num_steps_global.append(state.num_updates)
+        self.num_steps_global.append(task.num_updates)
 
-    def on_phase_end(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Add the losses and learning rates to tensorboard.
         """
@@ -90,25 +94,22 @@ class TensorboardPlotHook(ClassyHook):
             logging.warning("learning_rates is not initialized")
             return
 
-        batches = len(state.losses)
+        batches = len(task.losses)
         if batches == 0 or not is_master():
             return
 
-        phase_type = state.phase_type
-        phase_type_idx = state.train_phase_idx if state.train else state.eval_phase_idx
+        phase_type = task.phase_type
+        phase_type_idx = task.train_phase_idx if task.train else task.eval_phase_idx
 
-        phase_type = state.phase_type
+        phase_type = task.phase_type
         loss_key = f"{phase_type}_loss"
         learning_rate_key = f"{phase_type}_learning_rate_updates"
 
-        if state.train:
+        if task.train:
             for loss, learning_rate, global_step, wall_time in zip(
-                state.losses,
-                self.learning_rates,
-                self.num_steps_global,
-                self.wall_times,
+                task.losses, self.learning_rates, self.num_steps_global, self.wall_times
             ):
-                loss /= state.get_batchsize_per_replica()
+                loss /= task.get_batchsize_per_replica()
                 self.tb_writer.add_scalar(
                     loss_key, loss, global_step=global_step, walltime=wall_time
                 )
@@ -119,13 +120,13 @@ class TensorboardPlotHook(ClassyHook):
                     walltime=wall_time,
                 )
 
-        loss_avg = sum(state.losses) / (batches * state.get_batchsize_per_replica())
+        loss_avg = sum(task.losses) / (batches * task.get_batchsize_per_replica())
 
-        loss_key = "avg_{phase_type}_loss".format(phase_type=state.phase_type)
+        loss_key = "avg_{phase_type}_loss".format(phase_type=task.phase_type)
         self.tb_writer.add_scalar(loss_key, loss_avg, global_step=phase_type_idx)
 
         # plot meters which return a dict
-        for meter in state.meters:
+        for meter in task.meters:
             if not isinstance(meter.value, dict):
                 log.warn(f"Skipping meter {meter.name} with value: {meter.value}")
                 continue

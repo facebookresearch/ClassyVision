@@ -42,9 +42,9 @@ class TestTensorboardPlotHook(unittest.TestCase):
             config["dataset"]["test"]["batchsize_per_replica"] = 5
             args = get_test_args()
             task = build_task(config, args)
-            state = task.build_initial_state()
-            state.phase_idx = phase_idx
-            state.train = train
+            task.prepare()
+            task.phase_idx = phase_idx
+            task.train = train
 
             losses = [1.23, 4.45, 12.3, 3.4]
 
@@ -61,7 +61,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
             # the writer if on_phase_start() is not called for initialization
             # before on_loss() is called.
             with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_loss(state, local_variables)
+                tensorboard_plot_hook.on_loss(task, local_variables)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -73,7 +73,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
             # the writer if on_phase_start() is not called for initialization
             # if on_phase_end() is called.
             with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_phase_end(state, local_variables)
+                tensorboard_plot_hook.on_phase_end(task, local_variables)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -83,13 +83,13 @@ class TestTensorboardPlotHook(unittest.TestCase):
             summary_writer.add_scalar.reset_mock()
 
             # run the hook in the correct order
-            tensorboard_plot_hook.on_phase_start(state, local_variables)
+            tensorboard_plot_hook.on_phase_start(task, local_variables)
 
             for loss in losses:
-                state.losses.append(loss)
-                tensorboard_plot_hook.on_loss(state, local_variables)
+                task.losses.append(loss)
+                tensorboard_plot_hook.on_loss(task, local_variables)
 
-            tensorboard_plot_hook.on_phase_end(state, local_variables)
+            tensorboard_plot_hook.on_phase_end(task, local_variables)
 
             if master:
                 # add_scalar() should have been called with the right scalars
@@ -109,7 +109,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
                 summary_writer.add_scalar.assert_any_call(
                     avg_loss_key, mock.ANY, global_step=mock.ANY
                 )
-                for meter in state.meters:
+                for meter in task.meters:
                     for name in meter.value:
                         meter_key = f"{phase_type}_{meter.name}_{name}"
                         summary_writer.add_scalar.assert_any_call(

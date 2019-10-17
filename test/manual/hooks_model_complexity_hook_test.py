@@ -23,7 +23,7 @@ class TestModelComplexityHook(unittest.TestCase):
         local_variables = {}
 
         task = get_test_classy_task()
-        state = task.build_initial_state()
+        task.prepare()
 
         # create a model complexity hook
         model_complexity_hook = ModelComplexityHook()
@@ -33,10 +33,10 @@ class TestModelComplexityHook(unittest.TestCase):
         ):
             model = build_model(model_config)
 
-            state.base_model = model
+            task.base_model = model
 
             with self.assertLogs() as log_watcher:
-                model_complexity_hook.on_start(state, local_variables)
+                model_complexity_hook.on_start(task, local_variables)
 
             # there should be 2 log statements generated
             self.assertEqual(len(log_watcher.output), 2)
