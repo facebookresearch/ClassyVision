@@ -7,7 +7,6 @@
 import torch
 from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.generic.distributed_util import barrier, is_distributed_training_run
-from classy_vision.generic.util import copy_model_to_gpu
 from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.tasks import ClassyVisionTask
 
@@ -25,10 +24,6 @@ class ClassyTrainer:
         pin_memory = self.use_gpu and torch.cuda.device_count() > 1
         task.prepare(num_workers=self.num_workers, pin_memory=pin_memory)
         assert isinstance(task, ClassyVisionTask)
-
-        if self.use_gpu:
-            task.criterion = task.criterion.cuda()
-            task.base_model = copy_model_to_gpu(task.base_model)
 
         if is_distributed_training_run():
             task.init_distributed_data_parallel_model()
