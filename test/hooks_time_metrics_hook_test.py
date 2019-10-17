@@ -41,19 +41,19 @@ class TestTimeMetricsHook(unittest.TestCase):
             phase_type = "train" if train else "test"
 
             task = get_test_classy_task()
-            state = task.build_initial_state()
-            state.train = train
+            task.prepare()
+            task.train = train
 
             # on_phase_start() should set the start time and perf_stats
             start_time = 1.2
             mock_time.return_value = start_time
-            time_metrics_hook.on_phase_start(state, local_variables)
+            time_metrics_hook.on_phase_start(task, local_variables)
             self.assertEqual(time_metrics_hook.start_time, start_time)
             self.assertTrue(isinstance(local_variables.get("perf_stats"), PerfStats))
 
             # test that the code doesn't raise an exception if losses is empty
             try:
-                time_metrics_hook.on_phase_end(state, local_variables)
+                time_metrics_hook.on_phase_end(task, local_variables)
             except Exception as e:
                 self.fail("Received Exception when losses is []: {}".format(e))
 
@@ -65,18 +65,18 @@ class TestTimeMetricsHook(unittest.TestCase):
                 num_batches = 20
 
                 for i in range(num_batches):
-                    state.losses = list(range(i))
-                    time_metrics_hook.on_loss(state, local_variables)
+                    task.losses = list(range(i))
+                    time_metrics_hook.on_loss(task, local_variables)
                     if log_freq is not None and i and i % log_freq == 0:
-                        mock_fn.assert_called_with(state, local_variables)
+                        mock_fn.assert_called_with(task, local_variables)
                         mock_fn.reset_mock()
                         continue
                     mock_fn.assert_not_called()
 
-                time_metrics_hook.on_phase_end(state, local_variables)
-                mock_fn.assert_called_with(state, local_variables)
+                time_metrics_hook.on_phase_end(task, local_variables)
+                mock_fn.assert_called_with(task, local_variables)
 
-            state.losses = [0.23, 0.45, 0.34, 0.67]
+            task.losses = [0.23, 0.45, 0.34, 0.67]
 
             end_time = 10.4
             avg_batch_time_ms = 2.3 * 1000
@@ -84,7 +84,7 @@ class TestTimeMetricsHook(unittest.TestCase):
 
             # test _log_performance_metrics()
             with self.assertLogs() as log_watcher:
-                time_metrics_hook._log_performance_metrics(state, local_variables)
+                time_metrics_hook._log_performance_metrics(task, local_variables)
 
             # there should 2 be info logs for train and 1 for test
             self.assertEqual(len(log_watcher.output), 2 if train else 1)
@@ -98,7 +98,7 @@ class TestTimeMetricsHook(unittest.TestCase):
                 (
                     r"Average {} batch time \(ms\) for {} batches: "
                     r"(?P<avg_batch_time>[-+]?\d*\.\d+|\d+)"
-                ).format(phase_type, len(state.losses)),
+                ).format(phase_type, len(task.losses)),
                 log_watcher.output[0],
             )
             self.assertIsNotNone(match)
@@ -116,7 +116,7 @@ class TestTimeMetricsHook(unittest.TestCase):
             time_metrics_hook_new = TimeMetricsHook()
 
             with self.assertLogs() as log_watcher:
-                time_metrics_hook_new.on_phase_end(state, local_variables)
+                time_metrics_hook_new.on_phase_end(task, local_variables)
 
             self.assertEqual(len(log_watcher.output), 2)
             self.assertTrue(

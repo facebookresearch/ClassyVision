@@ -7,10 +7,10 @@
 import logging
 from typing import Any, Dict
 
+from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.visualize import plot_model
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 try:
@@ -45,7 +45,9 @@ class ModelTensorboardHook(ClassyHook):
 
         self.tb_writer = tb_writer
 
-    def on_start(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_start(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Plot the model on Tensorboard.
         """
@@ -55,10 +57,10 @@ class ModelTensorboardHook(ClassyHook):
         if is_master():
             try:
                 plot_model(
-                    state.base_model,
-                    size=state.base_model.input_shape,
-                    input_key=state.base_model.input_key
-                    if hasattr(state.base_model, "input_key")
+                    task.base_model,
+                    size=task.base_model.input_shape,
+                    input_key=task.base_model.input_key
+                    if hasattr(task.base_model, "input_key")
                     else None,
                     writer=self.tb_writer,
                 )

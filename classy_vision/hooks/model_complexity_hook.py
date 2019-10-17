@@ -7,9 +7,9 @@
 import logging
 from typing import Any, Dict
 
+from classy_vision import tasks
 from classy_vision.generic.profiler import compute_flops, count_params
 from classy_vision.hooks.classy_hook import ClassyHook
-from classy_vision.state.classy_state import ClassyState
 
 
 class ModelComplexityHook(ClassyHook):
@@ -27,16 +27,18 @@ class ModelComplexityHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def on_start(self, state: ClassyState, local_variables: Dict[str, Any]) -> None:
+    def on_start(
+        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+    ) -> None:
         """
         Measure number of parameters and number of FLOPs.
         """
         try:
             num_flops = compute_flops(
-                state.model,
-                input_shape=state.base_model.input_shape,
-                input_key=state.base_model.input_key
-                if hasattr(state.base_model, "input_key")
+                task.base_model,
+                input_shape=task.base_model.input_shape,
+                input_key=task.base_model.input_key
+                if hasattr(task.base_model, "input_key")
                 else None,
             )
             if num_flops is None:
@@ -50,4 +52,6 @@ class ModelComplexityHook(ClassyHook):
                 """Model contains unsupported modules:
             Could not compute FLOPs for model forward pass"""
             )
-        logging.info("Number of parameters in model: %d" % count_params(state.model))
+        logging.info(
+            "Number of parameters in model: %d" % count_params(task.base_model)
+        )

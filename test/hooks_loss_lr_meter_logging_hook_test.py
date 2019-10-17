@@ -29,17 +29,17 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         args = get_test_args()
         task = build_task(config, args)
-        state = task.build_initial_state()
+        task.prepare()
 
         losses = [1.2, 2.3, 3.4, 4.5]
 
         local_variables = {}
-        state.phase_idx = 0
+        task.phase_idx = 0
 
         loss_vals = {"train": 1.425, "test": 0.57}
 
         for log_freq, phase_type in product([5, None], loss_vals):
-            state.train = phase_type == "train"
+            task.train = phase_type == "train"
 
             # create a loss lr meter hook
             loss_lr_meter_hook = LossLrMeterLoggingHook(log_freq=log_freq)
@@ -52,21 +52,21 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
                 num_batches = 20
 
                 for i in range(num_batches):
-                    state.losses = list(range(i))
-                    loss_lr_meter_hook.on_loss(state, local_variables)
+                    task.losses = list(range(i))
+                    loss_lr_meter_hook.on_loss(task, local_variables)
                     if log_freq is not None and i and i % log_freq == 0:
-                        mock_fn.assert_called_with(state, local_variables)
+                        mock_fn.assert_called_with(task, local_variables)
                         mock_fn.reset_mock()
                         continue
                     mock_fn.assert_not_called()
 
-                loss_lr_meter_hook.on_phase_end(state, local_variables)
-                mock_fn.assert_called_with(state, local_variables)
+                loss_lr_meter_hook.on_phase_end(task, local_variables)
+                mock_fn.assert_called_with(task, local_variables)
 
             # test _log_loss_lr_meters()
-            state.losses = losses
+            task.losses = losses
 
             with self.assertLogs():
-                loss_lr_meter_hook._log_loss_lr_meters(state, local_variables)
+                loss_lr_meter_hook._log_loss_lr_meters(task, local_variables)
 
-            state.phase_idx += 1
+            task.phase_idx += 1
