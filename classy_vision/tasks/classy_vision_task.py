@@ -19,7 +19,10 @@ from classy_vision.meters import build_meters
 from classy_vision.models import ClassyVisionModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
 
+from . import register_task
 
+
+@register_task("classy_vision")
 class ClassyVisionTask(object):
     def __init__(self, num_phases: int):
         self.criterion = None

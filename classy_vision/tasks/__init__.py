@@ -8,13 +8,11 @@ from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
 
-from .classy_vision_task import ClassyVisionTask
-
 
 FILE_ROOT = Path(__file__).parent
 
 
-TASK_REGISTRY = {"classy_vision": ClassyVisionTask}
+TASK_REGISTRY = {}
 TASK_CLASS_NAMES = set()
 
 
@@ -68,3 +66,9 @@ def register_task(name):
 
 # automatically import any Python files in the tasks/ directory
 import_all_modules(FILE_ROOT, "classy_vision.tasks")
+
+
+from .classy_vision_task import ClassyVisionTask  # isort:skip
+
+
+__all__ = ["ClassyVisionTask", "build_task", "register_task"]
