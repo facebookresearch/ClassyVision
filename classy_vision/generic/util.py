@@ -681,12 +681,9 @@ def convert_to_one_hot(targets, classes):
     assert (
         torch.max(targets).item() < classes
     ), "Class Index must be less than number of classes"
-    usecuda = False
-    if torch.cuda.is_available():
-        usecuda = True
-    one_hot_targets = torch.zeros((targets.shape[0], classes), dtype=torch.long)
-    if usecuda:
-        one_hot_targets = one_hot_targets.cuda()
+    one_hot_targets = torch.zeros(
+        (targets.shape[0], classes), dtype=torch.long, device=targets.device
+    )
     one_hot_targets.scatter_(1, targets.long(), 1)
     return one_hot_targets
 
