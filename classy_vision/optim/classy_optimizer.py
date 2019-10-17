@@ -9,32 +9,15 @@ import torch
 from .param_scheduler.classy_vision_param_scheduler import UpdateInterval
 
 
-class ClassyOptimizer(object):
-    def __init__(self, model, lr_scheduler):
+class ClassyOptimizer:
+    def __init__(self, lr_scheduler):
         """
         Classy Optimizer constructor.
         """
-        self.optimizer_params = self._validate_and_get_optimizer_params(model)
-
-        param_groups_override = []
-        self.contains_unregularized_params = False
-        if len(self.optimizer_params["unregularized_params"]) != 0:
-            param_groups_override.append(
-                {
-                    "params": self.optimizer_params["unregularized_params"],
-                    "weight_decay": 0.0,
-                }
-            )
-            self.contains_unregularized_params = True
-
-        if len(self.optimizer_params["regularized_params"]) != 0:
-            param_groups_override.append(
-                {"params": self.optimizer_params["regularized_params"]}
-            )
-        self.param_groups_override = param_groups_override
-
         self._lr_scheduler = lr_scheduler
         self.lr = self._lr_scheduler(0)
+        self._optimizer = None
+        self.optimizer_params = None
 
     def _validate_and_get_optimizer_params(self, model):
         if isinstance(model, torch.nn.parallel.DistributedDataParallel):
@@ -62,12 +45,16 @@ class ClassyOptimizer(object):
 
         return optimizer_params
 
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError
+
     @property
     def optimizer(self):
         """
         Return a torch.optim.optimizer.Optimizer instance.
         """
-        if not hasattr(self, "_optimizer"):
+        if self._optimizer is None:
             raise NotImplementedError
         if not isinstance(self._optimizer, torch.optim.Optimizer):
             raise ValueError("_optimizer must be an instance of torch.optim.Optimizer")
@@ -83,12 +70,35 @@ class ClassyOptimizer(object):
         """
         return {"lr": self.lr}
 
-    def init_pytorch_optimizer(self):
+    def init_pytorch_optimizer(self, model):
         """
-        Initialize the underlying Pytorch optimizer. The initialization should happen
-        only after the model has been moved to the correct device.
+        Using the provided model, create param groups for the optimizer
+        with a weight decay override for params which should be left unregularized.
+
+        This will be called only after the model has been moved to the correct device.
+
+        NOTE: Deriving classes should initialize the underlying Pytorch optimizer
+        in this call. The simplest way to do this after a call to
+        super().init_pytorch_optimizer().
         """
-        pass
+        self.optimizer_params = self._validate_and_get_optimizer_params(model)
+
+        param_groups_override = []
+        self.contains_unregularized_params = False
+        if len(self.optimizer_params["unregularized_params"]) != 0:
+            param_groups_override.append(
+                {
+                    "params": self.optimizer_params["unregularized_params"],
+                    "weight_decay": 0.0,
+                }
+            )
+            self.contains_unregularized_params = True
+
+        if len(self.optimizer_params["regularized_params"]) != 0:
+            param_groups_override.append(
+                {"params": self.optimizer_params["regularized_params"]}
+            )
+        self.param_groups_override = param_groups_override
 
     def get_classy_state(self):
         """

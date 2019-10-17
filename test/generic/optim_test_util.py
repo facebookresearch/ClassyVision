@@ -88,16 +88,16 @@ class TestOptimizer(ABC):
         config = self._get_config()
 
         mock_classy_vision_model = self._get_mock_classy_vision_model()
-        opt1 = build_optimizer(config, mock_classy_vision_model)
-        opt1.init_pytorch_optimizer()
+        opt1 = build_optimizer(config)
+        opt1.init_pytorch_optimizer(mock_classy_vision_model)
 
         self._set_model_gradient(mock_classy_vision_model, grad_values)
         opt1.step()
         state = opt1.get_classy_state()
 
         config["lr"] += 0.1
-        opt2 = build_optimizer(config, mock_classy_vision_model)
-        opt2.init_pytorch_optimizer()
+        opt2 = build_optimizer(config)
+        opt2.init_pytorch_optimizer(mock_classy_vision_model)
         self.assertTrue(isinstance(opt1, self._instance_to_test()))
         opt2.set_classy_state(state)
         self.assertEqual(opt1.parameters, opt2.parameters)
@@ -117,10 +117,10 @@ class TestOptimizer(ABC):
         mock_classy_vision_model2 = self._get_mock_classy_vision_model()
         self._set_model_gradient(mock_classy_vision_model1, grad_values)
         self._set_model_gradient(mock_classy_vision_model2, grad_values)
-        opt1 = build_optimizer(config, mock_classy_vision_model1)
-        opt1.init_pytorch_optimizer()
-        opt2 = build_optimizer(config, mock_classy_vision_model2)
-        opt2.init_pytorch_optimizer()
+        opt1 = build_optimizer(config)
+        opt1.init_pytorch_optimizer(mock_classy_vision_model1)
+        opt2 = build_optimizer(config)
+        opt2.init_pytorch_optimizer(mock_classy_vision_model2)
         opt1.step()
         opt2.step()
         for i in range(len(opt1.optimizer.param_groups[0]["params"])):
@@ -140,18 +140,18 @@ class TestOptimizer(ABC):
         mock_classy_vision_model = self._get_mock_classy_vision_model(
             trainable_params=True
         )
-        opt = build_optimizer(config, mock_classy_vision_model)
-        opt.init_pytorch_optimizer()
+        opt = build_optimizer(config)
+        opt.init_pytorch_optimizer(mock_classy_vision_model)
         self.assertTrue(isinstance(opt, self._instance_to_test()))
 
     def test_raise_error_on_non_trainable_params(self):
         # Test Raise ValueError if there are no trainable params in the model.
         config = self._get_config()
         with self.assertRaises(ValueError):
-            opt = build_optimizer(
-                config, self._get_mock_classy_vision_model(trainable_params=False)
+            opt = build_optimizer(config)
+            opt.init_pytorch_optimizer(
+                self._get_mock_classy_vision_model(trainable_params=False)
             )
-            opt.init_pytorch_optimizer()
 
     def test_get_set_state(self):
         for grad_values in [[0.1, 0.1], [-0.1, -0.1], [0.0, 0.0], [0.1, -0.1]]:
@@ -160,8 +160,8 @@ class TestOptimizer(ABC):
     def test_set_invalid_state(self):
         config = self._get_config()
         mock_classy_vision_model = self._get_mock_classy_vision_model()
-        opt = build_optimizer(config, mock_classy_vision_model)
-        opt.init_pytorch_optimizer()
+        opt = build_optimizer(config)
+        opt.init_pytorch_optimizer(mock_classy_vision_model)
         self.assertTrue(isinstance(opt, self._instance_to_test()))
 
         with self.assertRaises(KeyError):
@@ -171,8 +171,8 @@ class TestOptimizer(ABC):
         config = self._get_config()
 
         mock_classy_vision_model = self._get_mock_classy_vision_model()
-        opt = build_optimizer(config, mock_classy_vision_model)
-        opt.init_pytorch_optimizer()
+        opt = build_optimizer(config)
+        opt.init_pytorch_optimizer(mock_classy_vision_model)
 
         # Test initial learning rate
         for group in opt._optimizer.param_groups:
@@ -198,8 +198,8 @@ class TestOptimizer(ABC):
 
         # Test step learning schedule
         config["lr"] = {"name": "step", "values": [0.1, 0.01, 0.001]}
-        opt = build_optimizer(config, mock_classy_vision_model)
-        opt.init_pytorch_optimizer()
+        opt = build_optimizer(config)
+        opt.init_pytorch_optimizer(mock_classy_vision_model)
         targets = [0.1] * 8 + [0.01] * 3 + [0.001] * 4
         _test_lr_schedule(opt, num_epochs, epochs, targets)
 
@@ -212,7 +212,7 @@ class TestOptimizer(ABC):
             "warmup": {"init_lr": init_lr, "epochs": warmup_epochs},
         }
 
-        opt = build_optimizer(config, mock_classy_vision_model)
-        opt.init_pytorch_optimizer()
+        opt = build_optimizer(config)
+        opt.init_pytorch_optimizer(mock_classy_vision_model)
         targets = [0.01, 0.0325, 0.055] + [0.1] * 5 + [0.01] * 3 + [0.001] * 4
         _test_lr_schedule(opt, num_epochs, epochs, targets)

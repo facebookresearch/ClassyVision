@@ -24,13 +24,12 @@ class TestClassyVisionTask(unittest.TestCase):
 
     def test_get_state(self):
         config = get_test_task_config()
-        model = build_model(config["model"])
         criterion = build_criterion(config["criterion"])
         task = (
             ClassyVisionTask(num_phases=1)
             .set_criterion(criterion)
-            .set_model(model)
-            .set_optimizer(build_optimizer(config["optimizer"], model))
+            .set_model(build_model(config["model"]))
+            .set_optimizer(build_optimizer(config["optimizer"]))
         )
         for split in ["train", "test"]:
             dataset = build_dataset(config["dataset"][split])
