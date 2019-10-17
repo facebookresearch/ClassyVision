@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import torchvision.transforms as transforms
+import torchvision.transforms._transforms_video as transforms_video
 from classy_vision.generic.registry_utils import import_all_modules
 
 from .classy_transform import ClassyTransform
@@ -34,11 +35,14 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
     if name in TRANSFORM_REGISTRY:
         return TRANSFORM_REGISTRY[name].from_config(transform_args)
     # the name should be available in torchvision.transforms
-    assert hasattr(transforms, name), (
+    assert hasattr(transforms, name) or hasattr(transforms_video, name), (
         f"{name} isn't a registered tranform"
         ", nor is it available in torchvision.transforms"
     )
-    return getattr(transforms, name)(**transform_args)
+    if hasattr(transforms, name):
+        return getattr(transforms, name)(**transform_args)
+    else:
+        return getattr(transforms_video, name)(**transform_args)
 
 
 def build_transforms(transforms_config: List[Dict[str, Any]]) -> Callable:
