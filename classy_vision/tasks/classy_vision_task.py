@@ -95,7 +95,7 @@ class ClassyVisionTask(object):
         # put model in eval mode in case any hooks modify model states, it'll
         # be reset to train mode before training
         model.eval()
-        optimizer = build_optimizer(optimizer_config, model)
+        optimizer = build_optimizer(optimizer_config)
 
         task = (
             cls(num_phases=config["num_phases"])
@@ -182,7 +182,7 @@ class ClassyVisionTask(object):
 
         # initialize the pytorch optimizer now since the model has been moved to
         # the appropriate device
-        self.optimizer.init_pytorch_optimizer()
+        self.optimizer.init_pytorch_optimizer(self.base_model)
 
         classy_state_dict = (
             None

@@ -67,12 +67,11 @@ class TestParamSchedulerIntegration(unittest.TestCase):
     def _build_task(self, num_phases):
         config = self._get_config()
         config["optimizer"]["num_epochs"] = num_phases
-        model = build_model(config["model"])
         task = (
             ClassyVisionTask(num_phases=num_phases)
             .set_criterion(build_criterion(config["criterion"]))
-            .set_model(model)
-            .set_optimizer(build_optimizer(config["optimizer"], model))
+            .set_model(build_model(config["model"]))
+            .set_optimizer(build_optimizer(config["optimizer"]))
         )
         for split in ["train", "test"]:
             dataset = build_dataset(config["dataset"][split])
