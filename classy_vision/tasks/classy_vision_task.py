@@ -14,7 +14,7 @@ from classy_vision.generic.distributed_util import (
     init_distributed_data_parallel_model,
     is_distributed_training_run,
 )
-from classy_vision.generic.util import update_classy_state
+from classy_vision.generic.util import copy_model_to_gpu, update_classy_state
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyVisionModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
@@ -167,7 +167,7 @@ class ClassyVisionTask(object):
         ), "Checkpoint does not contain classy_state_dict"
         self.checkpoint = checkpoint
 
-    def prepare(self, num_workers=0, pin_memory=False):
+    def prepare(self, num_workers=0, pin_memory=False, use_gpu=False):
         """
         Prepares the task for training.
         """
@@ -176,11 +176,20 @@ class ClassyVisionTask(object):
             num_workers=num_workers, pin_memory=pin_memory
         )
 
+        if use_gpu:
+            self.criterion = self.criterion.cuda()
+            self.base_model = copy_model_to_gpu(self.base_model)
+
+        # initialize the pytorch optimizer now since the model has been moved to
+        # the appropriate device
+        self.optimizer.init_pytorch_optimizer()
+
         classy_state_dict = (
             None
             if self.checkpoint is None
             else self.checkpoint.get("classy_state_dict")
         )
+
         if classy_state_dict is not None:
             state_load_success = update_classy_state(
                 self, classy_state_dict, reset_heads=self.reset_heads
