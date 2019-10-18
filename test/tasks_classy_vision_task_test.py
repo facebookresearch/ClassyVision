@@ -12,21 +12,21 @@ from classy_vision.dataset import build_dataset
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import build_task
-from classy_vision.tasks.classy_vision_task import ClassyVisionTask
+from classy_vision.tasks.classy_task import ClassyTask
 
 
-class TestClassyVisionTask(unittest.TestCase):
+class TestClassyTask(unittest.TestCase):
     def test_build_task(self):
         config = get_test_task_config()
         args = get_test_args()
         task = build_task(config, args)
-        self.assertTrue(isinstance(task, ClassyVisionTask))
+        self.assertTrue(isinstance(task, ClassyTask))
 
     def test_get_state(self):
         config = get_test_task_config()
         criterion = build_criterion(config["criterion"])
         task = (
-            ClassyVisionTask(num_phases=1)
+            ClassyTask(num_phases=1)
             .set_criterion(criterion)
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))

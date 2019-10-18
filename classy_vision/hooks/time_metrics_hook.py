@@ -35,7 +35,7 @@ class TimeMetricsHook(ClassyHook):
         self.start_time: Optional[float] = None
 
     def on_phase_start(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Initialize start time and reset perf stats
@@ -44,7 +44,7 @@ class TimeMetricsHook(ClassyHook):
         local_variables["perf_stats"] = PerfStats()
 
     def on_loss(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Log metrics every log_freq batches, if log_freq is not None.
@@ -56,7 +56,7 @@ class TimeMetricsHook(ClassyHook):
             self._log_performance_metrics(task, local_variables)
 
     def on_phase_end(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Log metrics at the end of a phase if log_freq is None.
@@ -66,7 +66,7 @@ class TimeMetricsHook(ClassyHook):
             self._log_performance_metrics(task, local_variables)
 
     def _log_performance_metrics(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Compute and log performance metrics.

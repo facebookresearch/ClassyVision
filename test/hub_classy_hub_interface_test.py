@@ -13,7 +13,7 @@ import torch
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.hub import ClassyHubInterface
 from classy_vision.models import ClassyVisionModel, build_model
-from classy_vision.tasks import ClassyVisionTask, build_task
+from classy_vision.tasks import ClassyTask, build_task
 from torchvision import models, transforms
 
 
@@ -63,7 +63,7 @@ class TestClassyHubInterface(unittest.TestCase):
         task = build_task(config, args)
         hub_interface = ClassyHubInterface.from_task(task)
 
-        self.assertIsInstance(hub_interface.task, ClassyVisionTask)
+        self.assertIsInstance(hub_interface.task, ClassyTask)
         self.assertIsInstance(hub_interface.model, ClassyVisionModel)
 
         # this will pick up the transform from the task's config
