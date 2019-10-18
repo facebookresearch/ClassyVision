@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
-import logging
 from enum import Enum
 
 import torch.nn as nn
@@ -37,9 +36,8 @@ class ClassyVisionModel(nn.Module):
 
         if len(heads) == 1:
             return heads[0].num_classes
-        elif len(heads) >= 1:
-            logging.error("Tried to get num_classes on a model with multiple heads")
-            raise RuntimeError
+        elif len(heads) > 1:
+            return {head.unique_id: head.num_classes for head in heads}
         return self._num_classes
 
     def get_classy_state(self, deep_copy=False):
