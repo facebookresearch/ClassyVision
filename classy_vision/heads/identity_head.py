@@ -4,11 +4,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from classy_vision.heads import ClassyVisionHead, register_head
+from classy_vision.heads import ClassyHead, register_head
 
 
 @register_head("identity")
-class IdentityHead(ClassyVisionHead):
+class IdentityHead(ClassyHead):
     def forward(self, x):
         return x
 

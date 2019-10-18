@@ -7,12 +7,12 @@
 import unittest
 
 import torch
-from classy_vision.heads import ClassyVisionHead
+from classy_vision.heads import ClassyHead
 from classy_vision.models.classy_vision_model import ClassyVisionModel
 
 
 class TestClassyModule(unittest.TestCase):
-    class DummyTestHead(ClassyVisionHead):
+    class DummyTestHead(ClassyHead):
         def __init__(self):
             super().__init__("head_id")
             self.layer = torch.nn.Linear(2, 2)

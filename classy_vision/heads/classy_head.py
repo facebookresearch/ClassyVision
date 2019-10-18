@@ -9,7 +9,7 @@ from typing import Optional
 import torch.nn as nn
 
 
-class ClassyVisionHead(nn.Module):
+class ClassyHead(nn.Module):
     def __init__(
         self, unique_id: Optional[str] = None, num_classes: Optional[int] = None
     ):

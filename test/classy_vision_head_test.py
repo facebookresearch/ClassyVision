@@ -7,12 +7,12 @@
 import unittest
 
 import torch
-from classy_vision.heads import ClassyVisionHead, build_head, register_head
+from classy_vision.heads import ClassyHead, build_head, register_head
 
 
-class TestClassyVisionHead(unittest.TestCase):
+class TestClassyHead(unittest.TestCase):
     @register_head("dummy_head")
-    class DummyHead(ClassyVisionHead):
+    class DummyHead(ClassyHead):
         def __init__(self, unique_id, num_classes, in_plane):
             super().__init__(unique_id, num_classes)
             self.fc = torch.nn.Linear(in_plane, num_classes)
