@@ -96,24 +96,14 @@ class TestClassyState(unittest.TestCase):
         task = build_task(config, args, local_rank=0)
         task_2 = build_task(config, args, local_rank=0)
 
-        for reset_heads in [True, False]:
-            task.reset_heads = reset_heads
-            task_2.reset_heads = reset_heads
+        task.prepare()
+        task_2.prepare()
 
-            task.prepare()
-            task_2.prepare()
-
-            # test in both train and test mode
-            for _ in range(2):
-                task.advance_phase()
-
-                update_classy_state(
-                    task_2, task.get_classy_state(deep_copy=True), reset_heads
-                )
-
-                self._compare_states(
-                    task.get_classy_state(), task_2.get_classy_state(), not reset_heads
-                )
+        # test in both train and test mode
+        for _ in range(2):
+            task.advance_phase()
+            update_classy_state(task_2, task.get_classy_state(deep_copy=True))
+            self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_freeze_trunk(self):
         """
@@ -121,7 +111,6 @@ class TestClassyState(unittest.TestCase):
         """
         config = get_test_task_config()
         config["model"]["freeze_trunk"] = True
-        config["reset_heads"] = True
         # use a batchsize of 1 for faster testing
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1

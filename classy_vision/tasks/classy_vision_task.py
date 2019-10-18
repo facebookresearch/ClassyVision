@@ -27,7 +27,6 @@ class ClassyVisionTask(object):
         self.meters = []
         self.num_phases = num_phases
         self.test_only = False
-        self.reset_heads = False
         self.base_model = None
         self.optimizer = None
         self.checkpoint = None
@@ -108,7 +107,6 @@ class ClassyVisionTask(object):
         for split in splits:
             task.set_dataset(datasets[split], split)
 
-        task.reset_heads = config.get("reset_heads", False)
         return task
 
     def get_config(self):
@@ -191,9 +189,7 @@ class ClassyVisionTask(object):
         )
 
         if classy_state_dict is not None:
-            state_load_success = update_classy_state(
-                self, classy_state_dict, reset_heads=self.reset_heads
-            )
+            state_load_success = update_classy_state(self, classy_state_dict)
             assert (
                 state_load_success
             ), "Update classy state from checkpoint was unsuccessful."
