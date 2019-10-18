@@ -13,7 +13,7 @@ from classy_vision.dataset.image_path_dataset import ImagePathDataset
 from classy_vision.dataset.transforms.util import build_field_transform_default_imagenet
 from classy_vision.models import ClassyVisionModel
 from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
-from classy_vision.tasks import ClassyVisionTask
+from classy_vision.tasks import ClassyTask
 
 
 class ClassyHubInterface:
@@ -26,7 +26,7 @@ class ClassyHubInterface:
 
     def __init__(
         self,
-        task: Optional[ClassyVisionTask] = None,
+        task: Optional[ClassyTask] = None,
         model: Optional[ClassyVisionModel] = None,
     ) -> None:
         self.task = task
@@ -38,7 +38,7 @@ class ClassyHubInterface:
             self.model = task.model
 
     @classmethod
-    def from_task(cls, task: ClassyVisionTask) -> "ClassyHubInterface":
+    def from_task(cls, task: ClassyTask) -> "ClassyHubInterface":
         return cls(task=task)
 
     @classmethod

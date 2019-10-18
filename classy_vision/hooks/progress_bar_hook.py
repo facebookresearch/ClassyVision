@@ -39,7 +39,7 @@ class ProgressBarHook(ClassyHook):
         self.batches: int = 0
 
     def on_phase_start(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Create and display a progress bar with 0 progress.
@@ -56,7 +56,7 @@ class ProgressBarHook(ClassyHook):
             self.progress_bar.start()
 
     def on_update(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Update the progress bar with the batch size.
@@ -66,7 +66,7 @@ class ProgressBarHook(ClassyHook):
             self.progress_bar.update(min(self.batches, self.bar_size))
 
     def on_phase_end(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Clear the progress bar at the end of the phase.
