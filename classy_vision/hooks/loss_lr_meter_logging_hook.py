@@ -34,7 +34,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         self.log_freq: Optional[int] = log_freq
 
     def on_loss(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Log metrics every log_freq batches, if log_freq is not None.
@@ -46,7 +46,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             self._log_loss_lr_meters(task, local_variables)
 
     def on_phase_end(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Log the loss, optimizer LR, and meters for the phase.
@@ -56,7 +56,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             self._log_loss_lr_meters(task, local_variables)
 
     def _log_loss_lr_meters(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Compute and log the loss, optimizer LR, and meters.

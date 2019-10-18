@@ -55,7 +55,7 @@ class TensorboardPlotHook(ClassyHook):
         self.num_steps_global: Optional[List[int]] = None
 
     def on_phase_start(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Initialize losses and learning_rates.
@@ -65,7 +65,7 @@ class TensorboardPlotHook(ClassyHook):
         self.num_steps_global = []
 
     def on_loss(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Store the observed learning rates.
@@ -85,7 +85,7 @@ class TensorboardPlotHook(ClassyHook):
         self.num_steps_global.append(task.num_updates)
 
     def on_phase_end(
-        self, task: "tasks.ClassyVisionTask", local_variables: Dict[str, Any]
+        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Add the losses and learning rates to tensorboard.
