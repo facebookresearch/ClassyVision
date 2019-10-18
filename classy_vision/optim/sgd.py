@@ -13,14 +13,15 @@ from . import ClassyOptimizer, register_optimizer
 
 @register_optimizer("sgd")
 class SGD(ClassyOptimizer):
-    def __init__(self, model, lr_scheduler, momentum, weight_decay, nesterov=False):
-        super().__init__(model=model, lr_scheduler=lr_scheduler)
+    def __init__(self, lr_scheduler, momentum, weight_decay, nesterov=False):
+        super().__init__(lr_scheduler=lr_scheduler)
 
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.nesterov = nesterov
 
-    def init_pytorch_optimizer(self):
+    def init_pytorch_optimizer(self, model):
+        super().init_pytorch_optimizer(model)
         self._optimizer = torch.optim.SGD(
             self.param_groups_override,
             lr=self.lr,
@@ -30,7 +31,7 @@ class SGD(ClassyOptimizer):
         )
 
     @classmethod
-    def from_config(cls, config, model):
+    def from_config(cls, config):
         """
         Initializer for stochastic gradient descent optimizer. The config
         is expected to contain at least three keys:
@@ -66,7 +67,6 @@ class SGD(ClassyOptimizer):
         lr_scheduler = build_param_scheduler(lr_config)
 
         return cls(
-            model=model,
             lr_scheduler=lr_scheduler,
             momentum=config["momentum"],
             weight_decay=config["weight_decay"],

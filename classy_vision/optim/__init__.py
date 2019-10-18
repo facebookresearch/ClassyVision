@@ -18,10 +18,8 @@ OPTIMIZER_REGISTRY = {}
 OPTIMIZER_CLASS_NAMES = set()
 
 
-def build_optimizer(config, model):
-    instance = OPTIMIZER_REGISTRY[config["name"]].from_config(
-        config=config, model=model
-    )
+def build_optimizer(config):
+    instance = OPTIMIZER_REGISTRY[config["name"]].from_config(config)
     instance._config_DO_NOT_USE = config
     return instance
 

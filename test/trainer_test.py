@@ -67,12 +67,11 @@ class TestClassyTrainer(unittest.TestCase):
     def test_cpu_training(self):
         """Checks we can train a small MLP model on a CPU."""
         config = self._get_config()
-        model = build_model(config["model"])
         task = (
             ClassyVisionTask(num_phases=10)
             .set_criterion(build_criterion(config["criterion"]))
-            .set_model(model)
-            .set_optimizer(build_optimizer(config["optimizer"], model))
+            .set_model(build_model(config["model"]))
+            .set_optimizer(build_optimizer(config["optimizer"]))
             .set_meters([AccuracyMeter(topk=[1])])
             .set_hooks([LossLrMeterLoggingHook()])
         )

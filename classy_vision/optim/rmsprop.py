@@ -19,7 +19,6 @@ from .param_scheduler.classy_vision_param_scheduler import ClassyParamScheduler
 class RMSProp(ClassyOptimizer):
     def __init__(
         self,
-        model: ClassyVisionModel,
         lr_scheduler: ClassyParamScheduler,
         momentum: float,
         weight_decay: float,
@@ -27,7 +26,7 @@ class RMSProp(ClassyOptimizer):
         eps: float = 1e-8,
         centered: bool = False,
     ) -> None:
-        super().__init__(model=model, lr_scheduler=lr_scheduler)
+        super().__init__(lr_scheduler=lr_scheduler)
 
         self.momentum = momentum
         self.weight_decay = weight_decay
@@ -35,7 +34,8 @@ class RMSProp(ClassyOptimizer):
         self.eps = eps
         self.centered = centered
 
-    def init_pytorch_optimizer(self):
+    def init_pytorch_optimizer(self, model):
+        super().init_pytorch_optimizer(model)
         self._optimizer = torch.optim.RMSprop(
             self.param_groups_override,
             lr=self.lr,
@@ -47,7 +47,7 @@ class RMSProp(ClassyOptimizer):
         )
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any], model: ClassyVisionModel) -> "RMSProp":
+    def from_config(cls, config: Dict[str, Any]) -> "RMSProp":
         """
         Initializer for stochastic gradient descent optimizer. The config
         is expected to contain at least three keys:
@@ -86,7 +86,6 @@ class RMSProp(ClassyOptimizer):
         lr_scheduler = build_param_scheduler(lr_config)
 
         return cls(
-            model=model,
             lr_scheduler=lr_scheduler,
             momentum=config["momentum"],
             weight_decay=config["weight_decay"],
