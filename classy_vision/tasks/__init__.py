@@ -8,13 +8,13 @@ from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
 
-from .classy_vision_task import ClassyVisionTask
+from .classy_task import ClassyTask
 
 
 FILE_ROOT = Path(__file__).parent
 
 
-TASK_REGISTRY = {"classy_vision": ClassyVisionTask}
+TASK_REGISTRY = {"classy_vision": ClassyTask}
 TASK_CLASS_NAMES = set()
 
 
@@ -32,12 +32,12 @@ def register_task(name):
     For example::
 
         @register_task('classification')
-        class ClassificationTask(ClassyVisionTask):
+        class ClassificationTask(ClassyTask):
             (...)
 
     .. note::
 
-        All Tasks must implement the :class:`~classy_vision.tasks.ClassyVisionTask`
+        All Tasks must implement the :class:`~classy_vision.tasks.ClassyTask`
         interface.
 
     Please see the
@@ -49,9 +49,9 @@ def register_task(name):
     def register_task_cls(cls):
         if name in TASK_REGISTRY:
             raise ValueError("Cannot register duplicate task ({})".format(name))
-        if not issubclass(cls, ClassyVisionTask):
+        if not issubclass(cls, ClassyTask):
             raise ValueError(
-                "Task ({}: {}) must extend ClassyVisionTask".format(name, cls.__name__)
+                "Task ({}: {}) must extend ClassyTask".format(name, cls.__name__)
             )
         if cls.__name__ in TASK_CLASS_NAMES:
             raise ValueError(

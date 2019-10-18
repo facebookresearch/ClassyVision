@@ -8,7 +8,7 @@ import torch
 from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.generic.distributed_util import barrier, is_distributed_training_run
 from classy_vision.hooks import ClassyHookFunctions
-from classy_vision.tasks import ClassyVisionTask
+from classy_vision.tasks import ClassyTask
 
 
 class ClassyTrainer:
@@ -16,7 +16,7 @@ class ClassyTrainer:
         self.use_gpu = use_gpu
         self.num_workers = num_workers
 
-    def train(self, task: ClassyVisionTask):
+    def train(self, task: ClassyTask):
         """
         Runs training phases, phases are generated from the config.
         """
@@ -25,7 +25,7 @@ class ClassyTrainer:
         task.prepare(
             num_workers=self.num_workers, pin_memory=pin_memory, use_gpu=self.use_gpu
         )
-        assert isinstance(task, ClassyVisionTask)
+        assert isinstance(task, ClassyTask)
 
         if is_distributed_training_run():
             task.init_distributed_data_parallel_model()

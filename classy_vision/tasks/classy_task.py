@@ -20,7 +20,7 @@ from classy_vision.models import ClassyVisionModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
 
 
-class ClassyVisionTask(object):
+class ClassyTask(object):
     def __init__(self, num_phases: int):
         self.criterion = None
         self.datasets = {}

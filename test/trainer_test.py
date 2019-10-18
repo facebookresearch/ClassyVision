@@ -12,7 +12,7 @@ from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
-from classy_vision.tasks.classy_vision_task import ClassyVisionTask
+from classy_vision.tasks.classy_task import ClassyTask
 from classy_vision.trainer import ClassyTrainer
 
 
@@ -68,7 +68,7 @@ class TestClassyTrainer(unittest.TestCase):
         """Checks we can train a small MLP model on a CPU."""
         config = self._get_config()
         task = (
-            ClassyVisionTask(num_phases=10)
+            ClassyTask(num_phases=10)
             .set_criterion(build_criterion(config["criterion"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))

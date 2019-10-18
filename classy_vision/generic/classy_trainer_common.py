@@ -7,7 +7,7 @@
 
 import torch
 from classy_vision.hooks import ClassyHookFunctions
-from classy_vision.tasks import ClassyVisionTask
+from classy_vision.tasks import ClassyTask
 
 from .distributed_util import all_reduce_mean
 from .perf_stats import PerfTimer
@@ -35,7 +35,7 @@ def _remove_dummy_samples_from_batch(temp_vals):
 
 
 def train_step(task, use_gpu, local_variables=None):
-    assert isinstance(task, ClassyVisionTask)
+    assert isinstance(task, ClassyTask)
 
     if local_variables is None:
         local_variables = {}
