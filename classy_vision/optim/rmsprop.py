@@ -34,14 +34,16 @@ class RMSProp(ClassyOptimizer):
         self.alpha = alpha
         self.eps = eps
         self.centered = centered
+
+    def init_pytorch_optimizer(self):
         self._optimizer = torch.optim.RMSprop(
             self.param_groups_override,
             lr=self.lr,
-            momentum=momentum,
-            weight_decay=weight_decay,
-            alpha=alpha,
-            eps=eps,
-            centered=centered,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay,
+            alpha=self.alpha,
+            eps=self.eps,
+            centered=self.centered,
         )
 
     @classmethod
