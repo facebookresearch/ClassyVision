@@ -83,6 +83,13 @@ class ClassyOptimizer(object):
         """
         return {"lr": self.lr}
 
+    def init_pytorch_optimizer(self):
+        """
+        Initialize the underlying Pytorch optimizer. The initialization should happen
+        only after the model has been moved to the correct device.
+        """
+        pass
+
     def get_classy_state(self):
         """
         Return the optimizer's state dict.

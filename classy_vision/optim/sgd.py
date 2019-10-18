@@ -19,12 +19,14 @@ class SGD(ClassyOptimizer):
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.nesterov = nesterov
+
+    def init_pytorch_optimizer(self):
         self._optimizer = torch.optim.SGD(
             self.param_groups_override,
             lr=self.lr,
-            nesterov=nesterov,
-            momentum=momentum,
-            weight_decay=weight_decay,
+            nesterov=self.nesterov,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay,
         )
 
     @classmethod
