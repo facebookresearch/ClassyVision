@@ -12,7 +12,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 # FIXME: set threshold based on computational budget:
@@ -307,7 +307,7 @@ class _Transition(nn.Module):
 
 
 @register_model("msdnet")
-class MSDNet(ClassyVisionModel):
+class MSDNet(ClassyModel):
     def __init__(
         self,
         num_classes,

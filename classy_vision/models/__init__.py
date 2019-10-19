@@ -10,7 +10,7 @@ from pathlib import Path
 from classy_vision.generic.registry_utils import import_all_modules
 from classy_vision.heads import build_head
 
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 FILE_ROOT = Path(__file__).parent
@@ -27,12 +27,12 @@ def register_model(name):
     For example::
 
         @register_model('resnet')
-        class ResidualNet(ClassyVisionModel):
+        class ResidualNet(ClassyModel):
             (...)
 
     .. note::
 
-        All Models must implement the :class:`~classy_vision.models.ClassyVisionModel`
+        All Models must implement the :class:`~classy_vision.models.ClassyModel`
         interface.
 
     Please see the
@@ -44,11 +44,9 @@ def register_model(name):
     def register_model_cls(cls):
         if name in MODEL_REGISTRY:
             raise ValueError("Cannot register duplicate model ({})".format(name))
-        if not issubclass(cls, ClassyVisionModel):
+        if not issubclass(cls, ClassyModel):
             raise ValueError(
-                "Model ({}: {}) must extend ClassyVisionModel".format(
-                    name, cls.__name__
-                )
+                "Model ({}: {}) must extend ClassyModel".format(name, cls.__name__)
             )
         if cls.__name__ in MODEL_CLASS_NAMES:
             raise ValueError(
@@ -86,3 +84,45 @@ def build_model(config):
 
 # automatically import any Python files in the models/ directory
 import_all_modules(FILE_ROOT, "classy_vision.models")
+
+from .classy_model import ClassyModelEvaluationMode  # isort:skip
+from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
+from .classy_module import ClassyModule  # isort:skip
+from .densenet import DenseNet  # isort:skip
+from .inception import Inception3  # isort:skip
+from .mlp import MLP  # isort:skip
+from .msdnet import MSDNet  # isort:skip
+from .resnet import ResNet  # isort:skip
+from .resnext import ResNeXt  # isort:skip
+from .resnext3d import ResNeXt3D, ResNeXt3DStem  # isort:skip
+from .resnext3d_block import ResBlock  # isort:skip
+from .resnext3d_stage import ResStage  # isort:skip
+from .vgg import VGG  # isort:skip
+from .resnext3d_stem import (  # isort:skip
+    ResNeXt3DStem,
+    ResNeXt3DStemMultiPathway,
+    ResNeXt3DStemSinglePathway,
+)
+
+
+__all__ = [
+    "build_model",
+    "register_model",
+    "ClassyModel",
+    "ClassyModelEvaluationMode",
+    "ClassyModule",
+    "ClassyModelWrapper",
+    "Inception3",
+    "DenseNet",
+    "MLP",
+    "MSDNet",
+    "ResNet",
+    "ResNeXt",
+    "ResBlock",
+    "ResStage",
+    "ResNeXt3DStem",
+    "ResNeXt3DStemSinglePathway",
+    "ResNeXt3DStemMultiPathway",
+    "ResNeXt3D",
+    "VGG",
+]

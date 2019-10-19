@@ -16,7 +16,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 # Stage configurations (supports VGG11 VGG13, VGG16 and VGG19)
@@ -35,7 +35,7 @@ _STAGES = {
 
 
 @register_model("vgg")
-class VGG(ClassyVisionModel):
+class VGG(ClassyModel):
     """VGG model."""
 
     def __init__(

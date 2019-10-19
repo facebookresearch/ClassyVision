@@ -8,7 +8,6 @@ from typing import Any, Dict
 
 import torch.optim
 from classy_vision.generic.util import is_pos_float
-from classy_vision.models.classy_vision_model import ClassyVisionModel
 from classy_vision.optim.param_scheduler import build_param_scheduler
 
 from . import ClassyOptimizer, register_optimizer

@@ -14,7 +14,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 # global setting for in-place ReLU:
@@ -223,7 +223,7 @@ class InitialBlock(nn.Module):
 
 
 @register_model("resnext")
-class ResNeXt(ClassyVisionModel):
+class ResNeXt(ClassyModel):
     def __init__(
         self,
         freeze_trunk,

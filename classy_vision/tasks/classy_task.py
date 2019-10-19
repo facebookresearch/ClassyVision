@@ -16,7 +16,7 @@ from classy_vision.generic.distributed_util import (
 )
 from classy_vision.generic.util import copy_model_to_gpu, update_classy_state
 from classy_vision.meters import build_meters
-from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
 
 
@@ -74,7 +74,7 @@ class ClassyTask(object):
         self.hooks = hooks
         return self
 
-    def set_model(self, model: ClassyVisionModel):
+    def set_model(self, model: ClassyModel):
         self.base_model = model
         return self
 

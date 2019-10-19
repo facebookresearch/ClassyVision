@@ -8,7 +8,7 @@ import unittest
 
 import torch
 from classy_vision.heads import ClassyHead
-from classy_vision.models.classy_vision_model import ClassyVisionModel
+from classy_vision.models import ClassyModel
 
 
 class TestClassyModule(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestClassyModule(unittest.TestCase):
         def forward(self, x):
             return self.layer(x)
 
-    class DummyTestModel(ClassyVisionModel):
+    class DummyTestModel(ClassyModel):
         def __init__(self):
             super().__init__({})
             self.layer1 = self.build_attachable_block(

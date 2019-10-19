@@ -7,14 +7,14 @@
 import unittest
 
 import torch
-from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.models import ClassyModel, build_model
 
 
 class TestMLPModel(unittest.TestCase):
     def test_build_model(self):
         config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
         model = build_model(config)
-        self.assertTrue(isinstance(model, ClassyVisionModel))
+        self.assertTrue(isinstance(model, ClassyModel))
         self.assertEqual(model.model_depth, 2)
 
         tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)
