@@ -6,7 +6,7 @@
 
 import copy
 import unittest
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_fast_test_task_config, get_test_args
 
 import torch
 import torch.nn as nn
@@ -78,12 +78,8 @@ class TestClassyModelWrapper(unittest.TestCase):
         model = models.resnet34(pretrained=False)
         classy_model = ClassyModelWrapper(model)
 
-        config = get_test_task_config()
+        config = get_fast_test_task_config()
         args = get_test_args()
-        # use 2 samples and 1 phase for faster testing
-        for split in ["train", "test"]:
-            config["dataset"][split]["num_samples"] = 2
-        config["num_phases"] = 1
         task = build_task(config, args)
         task.set_model(classy_model)
         trainer = ClassyTrainer(use_gpu=False)

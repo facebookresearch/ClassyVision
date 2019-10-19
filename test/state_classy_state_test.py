@@ -6,10 +6,9 @@
 
 import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
-from test.generic.utils import compare_model_state, compare_samples
+from test.generic.utils import compare_model_state, compare_samples, compare_states
 
 from classy_vision.generic.classy_trainer_common import train_step
-from classy_vision.generic.util import update_classy_state
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.tasks import build_task
 
@@ -22,27 +21,7 @@ class TestClassyState(unittest.TestCase):
         compare_samples(self, sample_1, sample_2)
 
     def _compare_states(self, state_1, state_2, check_heads=True):
-        """
-        Tests the classy state dicts for equality, but skips the member objects
-        which implement their own {get, set}_classy_state functions.
-        """
-        # check base_model
-        self._compare_model_state(
-            state_1["base_model"], state_2["base_model"], check_heads
-        )
-        # check losses
-        self.assertEqual(len(state_1["losses"]), len(state_2["losses"]))
-        for loss_1, loss_2 in zip(state_1["losses"], state_2["losses"]):
-            self.assertAlmostEqual(loss_1, loss_2)
-
-        for key in ["base_model", "meters", "optimizer", "losses"]:
-            # we trust that these have been tested using their unit tests or
-            # by the code above
-            self.assertIn(key, state_1)
-            self.assertIn(key, state_2)
-            del state_1[key]
-            del state_2[key]
-        self.assertDictEqual(state_1, state_2)
+        compare_states(self, state_1, state_2)
 
     def test_get_set_state(self):
         """
@@ -80,29 +59,6 @@ class TestClassyState(unittest.TestCase):
             # and the loss remains the same
             train_step(task, use_gpu, local_variables)
             train_step(task_2, use_gpu, local_variables)
-            self._compare_states(task.get_classy_state(), task_2.get_classy_state())
-
-    def test_update_state(self):
-        """
-        Tests that the update_classy_state successfully updates from a
-        checkpoint
-        """
-        config = get_test_task_config()
-        config["model"]["freeze_trunk"] = False
-        # use a batchsize of 1 for faster testing
-        for split in ["train", "test"]:
-            config["dataset"][split]["batchsize_per_replica"] = 1
-        args = get_test_args()
-        task = build_task(config, args, local_rank=0)
-        task_2 = build_task(config, args, local_rank=0)
-
-        task.prepare()
-        task_2.prepare()
-
-        # test in both train and test mode
-        for _ in range(2):
-            task.advance_phase()
-            update_classy_state(task_2, task.get_classy_state(deep_copy=True))
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_freeze_trunk(self):
