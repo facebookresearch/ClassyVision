@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from unittest.mock import MagicMock
 
 import torch
-from classy_vision.models.classy_vision_model import ClassyVisionModel
+from classy_vision.models import ClassyModel
 from classy_vision.optim import build_optimizer
 
 
@@ -31,7 +31,7 @@ class TestOptimizer(ABC):
         }
 
     def _get_mock_classy_vision_model(self, trainable_params=True):
-        mock_classy_vision_model = ClassyVisionModel(num_classes=0)
+        mock_classy_vision_model = ClassyModel(num_classes=0)
 
         if trainable_params:
             mock_classy_vision_model.get_optimizer_params = MagicMock(

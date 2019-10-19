@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.models import ClassyModel, build_model
 
 
 class TestResNeXt3D(unittest.TestCase):
@@ -92,7 +92,7 @@ class TestResNeXt3D(unittest.TestCase):
             model = build_model(model_config)
             num_classes = model_config["heads"][0]["num_classes"]
             self.assertEqual(num_classes, model.num_classes)
-            self.assertTrue(isinstance(model, ClassyVisionModel))
+            self.assertTrue(isinstance(model, ClassyModel))
             self.assertTrue(
                 type(model.output_shape) == tuple and len(model.output_shape) == 2
             )

@@ -14,7 +14,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 # global setting for in-place ReLU:
@@ -110,7 +110,7 @@ class _Transition(nn.Sequential):
 
 
 @register_model("densenet")
-class DenseNet(ClassyVisionModel):
+class DenseNet(ClassyModel):
     def __init__(
         self,
         num_blocks,

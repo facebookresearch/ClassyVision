@@ -8,12 +8,12 @@ from typing import Any, Dict, Optional, Tuple
 
 import torch.nn as nn
 
-from . import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
-class ClassyModelWrapper(ClassyVisionModel):
+class ClassyModelWrapper(ClassyModel):
     """
-    Class which wraps an nn.Module within a ClassyVisionModel.
+    Class which wraps an nn.Module within a ClassyModel.
 
     The only required argument is the model, the additional args are needed
     to get some additional capabilities from Classy Vision to work.
