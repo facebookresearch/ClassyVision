@@ -12,7 +12,7 @@ from typing import Any, Collection, Dict, Optional
 
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
-from classy_vision.generic.util import save_checkpoint
+from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
@@ -68,12 +68,7 @@ class CheckpointHook(ClassyHook):
         # save checkpoint:
         logging.info("Saving checkpoint to '{}'...".format(self.checkpoint_folder))
         checkpoint_file = save_checkpoint(
-            self.checkpoint_folder,
-            {
-                "input_args": self.input_args,
-                "config": task.get_config(),
-                "classy_state_dict": task.get_classy_state(),
-            },
+            self.checkpoint_folder, get_checkpoint_dict(task, self.input_args)
         )
 
         # make copy of checkpoint that won't be overwritten:
