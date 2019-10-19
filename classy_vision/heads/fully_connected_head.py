@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
-from classy_vision.heads import ClassyVisionHead, register_head
+from classy_vision.heads import ClassyHead, register_head
 
 
 @register_head("fully_connected")
-class FullyConnectedHead(ClassyVisionHead):
+class FullyConnectedHead(ClassyHead):
     def __init__(self, unique_id, num_classes, in_plane):
         super().__init__(unique_id, num_classes)
         assert num_classes is None or is_pos_int(num_classes)
