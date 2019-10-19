@@ -8,7 +8,7 @@ from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
 
-from .classy_vision_head import ClassyVisionHead
+from .classy_head import ClassyHead
 
 
 FILE_ROOT = Path(__file__).parent
@@ -25,12 +25,12 @@ def register_head(name):
     For example::
 
         @register_head('classification_head')
-        class FullyConnectedHead(ClassyVisionHead):
+        class FullyConnectedHead(ClassyHead):
             (...)
 
     .. note::
 
-        All Heads must implement the :class:`~classy_vision.heads.ClassyVisionHead`
+        All Heads must implement the :class:`~classy_vision.heads.ClassyHead`
         interface.
 
     Please see the
@@ -42,9 +42,9 @@ def register_head(name):
     def register_head_cls(cls):
         if name in HEAD_REGISTRY:
             raise ValueError("Cannot register duplicate head ({})".format(name))
-        if not issubclass(cls, ClassyVisionHead):
+        if not issubclass(cls, ClassyHead):
             raise ValueError(
-                "Head ({}: {}) must extend ClassyVisionHead".format(name, cls.__name__)
+                "Head ({}: {}) must extend ClassyHead".format(name, cls.__name__)
             )
         if cls.__name__ in HEAD_CLASS_NAMES:
             raise ValueError(
@@ -77,7 +77,7 @@ from .identity_head import IdentityHead  # isort:skip
 
 
 __all__ = [
-    "ClassyVisionHead",
+    "ClassyHead",
     "FullyConnectedHead",
     "IdentityHead",
     "build_head",

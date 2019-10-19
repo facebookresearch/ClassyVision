@@ -7,7 +7,7 @@
 import copy
 
 import torch.nn as nn
-from classy_vision.heads import ClassyVisionHead
+from classy_vision.heads import ClassyHead
 
 
 class ClassyModule(nn.Module):
@@ -43,10 +43,10 @@ class ClassyModule(nn.Module):
         """
         attach heads to current module.
         Args:
-            heads (list): a list of ClassyVisionHead
+            heads (list): a list of ClassyHead
         """
-        if not all(isinstance(x, ClassyVisionHead) for x in heads):
-            raise ValueError("Head must extend ClassyVisionHead")
+        if not all(isinstance(x, ClassyHead) for x in heads):
+            raise ValueError("Head must extend ClassyHead")
 
         self._heads = nn.ModuleDict()
         for head in heads:

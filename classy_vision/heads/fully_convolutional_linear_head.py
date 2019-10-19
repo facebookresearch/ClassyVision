@@ -8,7 +8,7 @@ from collections.abc import Sequence
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
-from classy_vision.heads import ClassyVisionHead, register_head
+from classy_vision.heads import ClassyHead, register_head
 
 
 class FullyConvolutionalLinear(nn.Module):
@@ -55,7 +55,7 @@ class FullyConvolutionalLinear(nn.Module):
 
 
 @register_head("fully_convolutional_linear")
-class FullyConvolutionalLinearHead(ClassyVisionHead):
+class FullyConvolutionalLinearHead(ClassyHead):
     def __init__(
         self, unique_id, num_classes, in_plane, pool_size, activation_func, use_dropout
     ):
