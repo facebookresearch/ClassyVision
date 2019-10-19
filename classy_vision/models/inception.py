@@ -11,11 +11,11 @@ import torch.nn.functional as F
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 @register_model("inception_v3")
-class Inception3(ClassyVisionModel):
+class Inception3(ClassyModel):
     def __init__(
         self, num_classes, freeze_trunk, aux_logits, transform_input, small_input
     ):

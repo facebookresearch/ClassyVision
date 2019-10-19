@@ -12,10 +12,10 @@ from test.generic.utils import compare_model_state
 
 import torch
 from classy_vision.heads import build_head
-from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.models import ClassyModel, build_model
 
 
-class TestClassyVisionModel(unittest.TestCase):
+class TestClassyModel(unittest.TestCase):
     model_configs = get_test_model_configs()
 
     def _get_config(self, model_config):
@@ -46,7 +46,7 @@ class TestClassyVisionModel(unittest.TestCase):
                 cfg["heads"][0]["num_classes"] if "heads" in cfg else cfg["num_classes"]
             )
             self.assertEqual(num_classes, model.num_classes)
-            self.assertTrue(isinstance(model, ClassyVisionModel))
+            self.assertTrue(isinstance(model, ClassyModel))
             self.assertTrue(
                 type(model.input_shape) == tuple and len(model.input_shape) == 3
             )

@@ -12,7 +12,7 @@ from test.generic.config_utils import get_test_args, get_test_task_config
 import torch
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.hub import ClassyHubInterface
-from classy_vision.models import ClassyVisionModel, build_model
+from classy_vision.models import ClassyModel, build_model
 from classy_vision.tasks import ClassyTask, build_task
 from torchvision import models, transforms
 
@@ -64,7 +64,7 @@ class TestClassyHubInterface(unittest.TestCase):
         hub_interface = ClassyHubInterface.from_task(task)
 
         self.assertIsInstance(hub_interface.task, ClassyTask)
-        self.assertIsInstance(hub_interface.model, ClassyVisionModel)
+        self.assertIsInstance(hub_interface.model, ClassyModel)
 
         # this will pick up the transform from the task's config
         self._test_predict_and_extract_features(hub_interface)
@@ -82,7 +82,7 @@ class TestClassyHubInterface(unittest.TestCase):
             hub_interface = ClassyHubInterface.from_model(model)
 
             self.assertIsNone(hub_interface.task)
-            self.assertIsInstance(hub_interface.model, ClassyVisionModel)
+            self.assertIsInstance(hub_interface.model, ClassyModel)
 
             # this will pick up the transform from imagenet
             self._test_predict_and_extract_features(hub_interface)

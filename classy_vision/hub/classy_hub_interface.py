@@ -11,8 +11,7 @@ import torch.nn as nn
 from classy_vision.dataset import ClassyDataset
 from classy_vision.dataset.image_path_dataset import ImagePathDataset
 from classy_vision.dataset.transforms.util import build_field_transform_default_imagenet
-from classy_vision.models import ClassyVisionModel
-from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
+from classy_vision.models import ClassyModel, ClassyModelWrapper
 from classy_vision.tasks import ClassyTask
 
 
@@ -25,9 +24,7 @@ class ClassyHubInterface:
     """
 
     def __init__(
-        self,
-        task: Optional[ClassyTask] = None,
-        model: Optional[ClassyVisionModel] = None,
+        self, task: Optional[ClassyTask] = None, model: Optional[ClassyModel] = None
     ) -> None:
         self.task = task
         if task is None:
@@ -42,10 +39,8 @@ class ClassyHubInterface:
         return cls(task=task)
 
     @classmethod
-    def from_model(
-        cls, model: Union[nn.Module, ClassyVisionModel]
-    ) -> "ClassyHubInterface":
-        if not isinstance(model, ClassyVisionModel):
+    def from_model(cls, model: Union[nn.Module, ClassyModel]) -> "ClassyHubInterface":
+        if not isinstance(model, ClassyModel):
             model = ClassyModelWrapper(model)
         return cls(model=model)
 

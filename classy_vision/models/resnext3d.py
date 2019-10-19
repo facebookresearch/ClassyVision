@@ -6,9 +6,9 @@
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
-from classy_vision.models import ClassyVisionModel, register_model
-from classy_vision.models.classy_vision_model import ClassyModelEvaluationMode
 
+from . import register_model
+from .classy_model import ClassyModel, ClassyModelEvaluationMode
 from .resnext3d_stage import ResStage
 from .resnext3d_stem import ResNeXt3DStem
 
@@ -20,7 +20,7 @@ model_stems = {
 
 
 @register_model("resnext3d")
-class ResNeXt3D(ClassyVisionModel):
+class ResNeXt3D(ClassyModel):
     def __init__(
         self,
         input_key,

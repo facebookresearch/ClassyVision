@@ -10,7 +10,7 @@ from test.generic.config_utils import get_test_args, get_test_task_config
 
 import torch
 import torch.nn as nn
-from classy_vision.models import ClassyVisionModel
+from classy_vision.models import ClassyModel
 from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
 from classy_vision.tasks import build_task
 from classy_vision.trainer import ClassyTrainer
@@ -33,8 +33,8 @@ class TestClassyModelWrapper(unittest.TestCase):
     def test_classy_model_wrapper(self):
         model = TestModel()
         classy_model = ClassyModelWrapper(model)
-        # test that the returned object is an instance of ClassyVisionModel
-        self.assertIsInstance(classy_model, ClassyVisionModel)
+        # test that the returned object is an instance of ClassyModel
+        self.assertIsInstance(classy_model, ClassyModel)
 
         # test that forward works correctly
         input = torch.zeros((100, 10))

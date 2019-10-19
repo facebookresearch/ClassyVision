@@ -18,7 +18,7 @@ class ClassyModelEvaluationMode(Enum):
     VIDEO_CLIP_AVERAGING = 1
 
 
-class ClassyVisionModel(nn.Module):
+class ClassyModel(nn.Module):
     def __init__(self, num_classes, freeze_trunk=False):
         super().__init__()
 

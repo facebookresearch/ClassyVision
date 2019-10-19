@@ -9,11 +9,11 @@
 import torch.nn as nn
 
 from . import register_model
-from .classy_vision_model import ClassyVisionModel
+from .classy_model import ClassyModel
 
 
 @register_model("mlp")
-class MLP(ClassyVisionModel):
+class MLP(ClassyModel):
     """MLP model using ReLU. Useful for testing on CPUs."""
 
     def __init__(
