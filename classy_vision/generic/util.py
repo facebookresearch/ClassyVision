@@ -428,6 +428,14 @@ def compute_pr_curves(class_hist, total_hist):
     return {"prec": final_prec, "recall": final_recall, "ap": final_ap}
 
 
+def get_checkpoint_dict(task, input_args):
+    return {
+        "input_args": input_args,
+        "config": task.get_config(),
+        "classy_state_dict": task.get_classy_state(),
+    }
+
+
 # function that tries to load a checkpoint:
 def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
     """
