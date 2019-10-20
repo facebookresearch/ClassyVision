@@ -6,11 +6,11 @@
 
 import torch
 
-from . import ClassyCriterion, register_criterion
+from . import ClassyLoss, register_loss
 
 
-@register_criterion("barron")
-class BarronLoss(ClassyCriterion):
+@register_loss("barron")
+class BarronLoss(ClassyLoss):
     """
     This implements the Barron loss: https://arxiv.org/pdf/1701.03077.pdf
     """

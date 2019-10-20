@@ -283,7 +283,7 @@ class TestUtilMethods(unittest.TestCase):
         return {
             "name": "test_task",
             "num_phases": 12,
-            "criterion": {"name": "test_loss"},
+            "loss": {"name": "test_loss"},
             "dataset": {
                 "name": "test_data",
                 "batchsize_per_replica": 8,

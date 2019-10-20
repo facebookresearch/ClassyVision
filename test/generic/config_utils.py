@@ -13,7 +13,7 @@ def get_test_task_config():
     return {
         "name": "classy_vision",
         "num_phases": 12,
-        "criterion": {"name": "CrossEntropyLoss"},
+        "loss": {"name": "CrossEntropyLoss"},
         "dataset": {
             "train": {
                 "name": "synthetic_image",
