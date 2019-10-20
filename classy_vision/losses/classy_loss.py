@@ -4,10 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from torch.nn.modules.loss import _WeightedLoss
+import torch.nn as nn
 
 
-class ClassyLoss(_WeightedLoss):
+class ClassyLoss(nn.Module):
     def __init__(self):
         """
         ClassyLoss constructor. This stores the loss configuration for
