@@ -6,7 +6,6 @@
 
 from typing import Callable, Optional
 
-from classy_vision.dataset.core import Dataset, WrapDataset
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.util import is_pos_int
 from torch.utils.data import DataLoader
@@ -17,14 +16,15 @@ def _return_true(_sample):
     return True
 
 
-class ClassyDataset(Dataset):
+class ClassyDataset:
     """
-    Interface specifying what a Classy Vision dataset can be expected to provide.
+    Wrapper to provide typical dataset functionalities in a single place.
 
-    The main difference between this class and the core dataset class
-    is that a classy dataset provides information about the samples /
-    targets returned and it has some built in functionality for
-    storing configs.
+    split: String indicating split of dataset to use ("train", "test")
+    batchsize_per_replica: Positive int indicating batchsize for training replica
+    shuffle: Bool indicating whether we should shuffle between epochs
+    transform: Callable, will be applied to each sample
+    num_samples: Int, when set restricts the number of samples provided by dataset
     """
 
     @classmethod
@@ -112,9 +112,6 @@ class ClassyDataset(Dataset):
 
         This can only be called once, preferably during construction.
         """
-        # apply all the transformations needed:
-        if not isinstance(dataset, Dataset):
-            dataset = WrapDataset(dataset)
 
         return dataset
 
@@ -162,9 +159,6 @@ class ClassyDataset(Dataset):
             "shuffle": self.shuffle,
             "num_samples": self.num_samples,
             "state": {"dataset_type": type(self)},
-            "wrapped_state": self.dataset.get_classy_state()
-            if self.dataset is not None
-            else None,
         }
 
     def set_classy_state(self, state, strict=True):
@@ -177,5 +171,3 @@ class ClassyDataset(Dataset):
         self.batchsize_per_replica = state["batchsize_per_replica"]
         self.shuffle = state["shuffle"]
         self.num_samples = state["num_samples"]
-        if self.dataset is not None:
-            self.dataset.set_classy_state(state["wrapped_state"])

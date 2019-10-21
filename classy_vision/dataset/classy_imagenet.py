@@ -11,7 +11,6 @@ import torchvision.transforms as transforms
 
 from . import register_dataset
 from .classy_dataset import ClassyDataset
-from .core import WrapDataset
 from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
@@ -69,10 +68,6 @@ class ImagenetDataset(ClassyDataset):
         ), "imagenet folder not found"
 
         dataset = datasets.ImageFolder(img_dir)
-        dataset = WrapDataset(dataset)
-        # Wrap dataset places whole sample in input field by default
-        # Remap this to input / targets since default wrapper does not
-        # know which tensors are targets vs inputs
         self.transform = transforms.Compose(
             [TupleToMapTransform(["input", "target"]), self.transform]
         )
