@@ -10,6 +10,7 @@ from classy_vision.dataset.core import Dataset, WrapDataset
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.util import is_pos_int
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 
 def _return_true(_sample):
@@ -98,7 +99,7 @@ class ClassyDataset(Dataset):
         filter_func=_return_true,  # Unused
         shuffle=True,
         subsample=None,
-        shard_group_size=1,
+        shard_group_size=1,  # Unused
     ):
         """
         WARNING: This function is going to be deleted as part of the
@@ -108,7 +109,7 @@ class ClassyDataset(Dataset):
         be functional, but if you rebase this function will disappear
 
         Wraps self.dataset with TransformDataset, ShuffleDataset,
-        ResampleDataset, and ShardDataset.
+        and ResampleDataset.
 
         If this is not a distributed run, we still wrap the dataset in
         shard dataset, but with world size 1 and rank 0.
@@ -131,11 +132,6 @@ class ClassyDataset(Dataset):
         if subsample is not None and subsample:
             dataset = dataset.resample([n for n in range(subsample)])
 
-        # shard data
-        dataset = dataset.shard(
-            get_world_size(), get_rank(), group_size=shard_group_size
-        )
-
         return dataset
 
     def __getitem__(self, idx):
@@ -144,6 +140,13 @@ class ClassyDataset(Dataset):
     def __len__(self):
         return len(self.dataset)
 
+    def _get_sampler(self):
+        world_size = get_world_size()
+        rank = get_rank()
+        return DistributedSampler(
+            self.dataset, num_replicas=world_size, rank=rank, shuffle=False
+        )
+
     def iterator(self, *args, **kwargs):
         return DataLoader(
             self,
@@ -151,6 +154,7 @@ class ClassyDataset(Dataset):
             num_workers=kwargs.get("num_workers", 0),
             pin_memory=kwargs.get("pin_memory", False),
             multiprocessing_context=kwargs.get("multiprocessing_context", None),
+            sampler=self._get_sampler(),
         )
 
     def get_batchsize_per_replica(self):

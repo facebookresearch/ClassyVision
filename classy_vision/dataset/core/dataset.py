@@ -39,11 +39,6 @@ class Dataset(object):
 
         return TransformDataset(self, *args, **kwargs)
 
-    def shard(self, *args, **kwargs):
-        from .shard_dataset import ShardDataset
-
-        return ShardDataset(self, *args, **kwargs)
-
     def __getattr__(self, name):
         if "dataset" in self.__dict__:
             return getattr(self.__dict__["dataset"], name)
