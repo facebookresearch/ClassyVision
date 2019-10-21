@@ -5,11 +5,12 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
+import unittest.mock as mock
 from test.generic.utils import compare_batches, compare_samples
 
+import classy_vision.dataset.classy_dataset as classy_dataset
 import torch
 from classy_vision.dataset import build_dataset, get_available_splits, register_dataset
-from classy_vision.dataset.classy_dataset import ClassyDataset
 from classy_vision.dataset.core import ListDataset
 from torch.utils.data import DataLoader
 
@@ -36,8 +37,16 @@ DUMMY_CONFIG = {"name": "test_dataset", "dummy0": 0, "dummy1": 1}
 OTHER_DUMMY_CONFIG = {"name": "other_test_dataset", "dummy0": 0, "dummy1": 1}
 
 
+def mock_get_world_size():
+    return 2
+
+
+def mock_get_rank():
+    return 1
+
+
 @register_dataset("test_dataset")
-class TestDataset(ClassyDataset):
+class TestDataset(classy_dataset.ClassyDataset):
     """Test dataset for validating registry functions"""
 
     def __init__(self, samples, batchsize_per_replica=1):
@@ -59,7 +68,7 @@ class TestDataset(ClassyDataset):
 
 
 @register_dataset("other_test_dataset")
-class OtherTestDataset(ClassyDataset):
+class OtherTestDataset(classy_dataset.ClassyDataset):
     """
     Test dataset for validating registry functions that has a different
     type than TestDataset
@@ -183,3 +192,15 @@ class TestClassyDataset(unittest.TestCase):
         batch = next(iter(dl))
         self.assertEqual(batch["input"].size()[0], 2)
         self._compare_batches(batch, BATCHED_DUMMY_SAMPLES_2[0])
+
+    @mock.patch(
+        "classy_vision.dataset.classy_dataset.get_world_size", mock_get_world_size
+    )
+    @mock.patch("classy_vision.dataset.classy_dataset.get_rank", mock_get_rank)
+    def test_shard_logic(self):
+        # This test uses a world size of 2, rank 1 to verify that the
+        # second sample is returned by the dataloader
+        dataset = TestDataset(DUMMY_SAMPLES_2, batchsize_per_replica=1)
+        dl = dataset.iterator(num_workers=0)
+        sample = next(iter(dl))
+        self._compare_batches(sample, DUMMY_SAMPLES_2[1])
