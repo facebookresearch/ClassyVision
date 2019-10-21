@@ -8,7 +8,6 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from classy_vision.dataset import register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
-from classy_vision.dataset.core import WrapDataset
 from classy_vision.generic.util import set_proxies, unset_proxies
 
 from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
@@ -53,7 +52,6 @@ class SVHNDataset(ClassyDataset):
         set_proxies()
         dataset = datasets.SVHN(DATA_PATH, split=self.split, download=True)
         unset_proxies()
-        dataset = WrapDataset(dataset)
         self.transform = transforms.Compose(
             [TupleToMapTransform(["input", "target"]), self.transform]
         )

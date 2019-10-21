@@ -7,10 +7,9 @@
 import torch
 
 from ...generic.util import torch_seed
-from .dataset import Dataset
 
 
-class RandomVideoDataset(Dataset):
+class RandomVideoDataset:
     def __init__(
         self,
         num_classes,

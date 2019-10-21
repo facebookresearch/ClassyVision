@@ -6,10 +6,8 @@
 
 from torchvision.datasets.folder import default_loader
 
-from .dataset import Dataset
 
-
-class ListDataset(Dataset):
+class ListDataset:
     """Dataset that loads data using a list of items, a corresponding loader,
     and a list of metadata. The default loader is an image file loader so this
     dataset can be used directly with a list of image files.

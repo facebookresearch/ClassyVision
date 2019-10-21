@@ -8,10 +8,9 @@ import numpy as np
 from PIL import Image
 
 from ...generic.util import numpy_seed
-from .dataset import Dataset
 
 
-class RandomImageDataset(Dataset):
+class RandomImageDataset:
     def __init__(self, crop_size, num_channels, num_classes, num_samples, seed):
         self.crop_size = crop_size
         self.num_channels = num_channels
@@ -37,7 +36,7 @@ class RandomImageDataset(Dataset):
         return self.num_samples
 
 
-class RandomImageBinaryClassDataset(Dataset):
+class RandomImageBinaryClassDataset:
     def __init__(self, crop_size, class_ratio, num_samples, seed):
         self.crop_size = crop_size
         # User Defined Class Imbalace Ratio

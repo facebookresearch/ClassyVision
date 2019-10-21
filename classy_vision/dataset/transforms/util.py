@@ -97,15 +97,12 @@ class TupleToMapTransform(ClassyTransform):
         self._map_keys = list_of_map_keys
 
     def __call__(self, sample):
-        # NOTE: This will be fixed in a follow-up diff to remove the
-        # WrapDataset class...currently WrapDataset places all data in
-        # a map with "input" key
-        assert len(sample["input"]) == len(self._map_keys), (
+        assert len(sample) == len(self._map_keys), (
             "Provided sample tuple must have same number of keys "
             "as provided to transform"
         )
         output_sample = {}
-        for idx, s in enumerate(sample["input"]):
+        for idx, s in enumerate(sample):
             output_sample[self._map_keys[idx]] = s
 
         return output_sample

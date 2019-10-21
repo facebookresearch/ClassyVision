@@ -10,7 +10,6 @@ from classy_vision.generic.util import set_proxies, unset_proxies
 
 from . import register_dataset
 from .classy_dataset import ClassyDataset
-from .core import WrapDataset
 from .transforms.util import (
     ImagenetConstants,
     TupleToMapTransform,
