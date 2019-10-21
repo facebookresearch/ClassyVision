@@ -7,11 +7,12 @@
 import os
 
 import torchvision.datasets as datasets
+import torchvision.transforms as transforms
 from classy_vision.dataset import register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
 from classy_vision.dataset.core import WrapDataset
 
-from .transforms.util import build_field_transform_default_imagenet
+from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
 # constants for the OmniGlot dataset:
@@ -102,8 +103,8 @@ class OmniglotDataset(ClassyDataset):
         datasets.folder.make_dataset = orig_make_dataset
 
         dataset = WrapDataset(dataset)
-        dataset = dataset.transform(
-            lambda x: {"input": x["input"][0], "target": x["input"][1]}
+        self.transform = transforms.Compose(
+            [TupleToMapTransform(["input", "target"]), self.transform]
         )
         self._num_classes = len(dataset.classes)
         return dataset
