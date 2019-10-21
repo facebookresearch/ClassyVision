@@ -169,7 +169,7 @@ class ClassyModel(nn.Module):
     def validate(self, dataset_output_shape):
         raise NotImplementedError
 
-    def get_optimizer_params(self):
+    def get_optimizer_params(self, bn_weight_decay=False):
         """
         Function to return dict of params with "keys" from
         {"regularized_params", "unregularized_params"}
@@ -180,7 +180,7 @@ class ClassyModel(nn.Module):
         to 0.0
 
         This implementation sets BatchNorm's all trainable params to be
-        unregularized_params.
+        unregularized_params if bn_weight_decay is False.
 
         Override this function for any custom behavior.
         """
@@ -194,7 +194,9 @@ class ClassyModel(nn.Module):
                 for params in module.parameters(recurse=False):
                     if params.requires_grad:
                         regularized_params.append(params)
-            elif isinstance(module, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
+            elif not bn_weight_decay and isinstance(
+                module, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)
+            ):
                 for params in module.parameters():
                     if params.requires_grad:
                         unregularized_params.append(params)
