@@ -11,7 +11,11 @@ from classy_vision.generic.util import set_proxies, unset_proxies
 from . import register_dataset
 from .classy_dataset import ClassyDataset
 from .core import WrapDataset
-from .transforms.util import ImagenetConstants, build_field_transform_default_imagenet
+from .transforms.util import (
+    ImagenetConstants,
+    TupleToMapTransform,
+    build_field_transform_default_imagenet,
+)
 
 
 # constants for the CIFAR datasets:
@@ -94,9 +98,8 @@ class CifarDataset(ClassyDataset):
                 DATA_PATH, train=(self.split == "train"), download=True
             )
         unset_proxies()
-        dataset = WrapDataset(dataset)
-        dataset = dataset.transform(
-            lambda x: {"input": x["input"][0], "target": x["input"][1]}
+        self.transform = transforms.Compose(
+            [TupleToMapTransform(["input", "target"]), self.transform]
         )
         return dataset
 

@@ -8,7 +8,7 @@ import os
 from functools import wraps
 
 import torch
-from classy_vision.dataset.core import Dataset, WrapDataset
+from classy_vision.dataset.core import Dataset
 
 from .merge_dataset import MergeDataset
 
@@ -71,36 +71,6 @@ def make_torch_deterministic(seed=0):
     torch.cuda.manual_seed_all(seed)
     os.environ["MKL_NUM_THREADS"] = "1"
     os.environ["OMP_NUM_THREADS"] = "1"
-
-
-def create_test_data(tensor_size, dtype=torch.float32):
-    """Create test data and reference values (features only)."""
-    values = torch.randn(tensor_size, dtype=dtype)
-    return WrapDataset(torch.utils.data.TensorDataset(values), "input"), values
-
-
-def create_test_targets(N, num_classes=10):
-    """Create test data and reference values (targets only)."""
-    values = torch.randint(num_classes, (N,))
-    return WrapDataset(torch.utils.data.TensorDataset(values), "target"), values
-
-
-# PyTorch Tensordataset wraps outputs in list / tuple, so undo that
-# before returning using this + the transform call
-def _unwrap_test_data(x):
-    input_sample = x["input"][0]
-    target_sample = x["target"][0]
-    return {"input": input_sample, "target": target_sample}
-
-
-def create_test_dataset(tensor_size, num_classes=10):
-    """Create test data and reference values (features and targets)."""
-    dataset1, values1 = create_test_data(tensor_size)
-    dataset2, values2 = create_test_targets(tensor_size[0], num_classes)
-    return (
-        MergeDataset([dataset1, dataset2]).transform(_unwrap_test_data),
-        {"input": values1, "target": values2},
-    )
 
 
 def compare_batches(test_fixture, batch1, batch2):

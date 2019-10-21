@@ -7,11 +7,12 @@
 import os
 
 import torchvision.datasets as datasets
+import torchvision.transforms as transforms
 
 from . import register_dataset
 from .classy_dataset import ClassyDataset
 from .core import WrapDataset
-from .transforms.util import build_field_transform_default_imagenet
+from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
 # constants for ImageNet dataset:
@@ -20,10 +21,6 @@ CANDIDATE_PATHS = [
     "/mnt/fair-flash3-east/imagenet_full_size",
 ]
 NUM_CLASSES = 1000
-
-
-def _transform_sample(sample):
-    return {"input": sample["input"][0], "target": sample["input"][1]}
 
 
 @register_dataset("imagenet")
@@ -76,7 +73,9 @@ class ImagenetDataset(ClassyDataset):
         # Wrap dataset places whole sample in input field by default
         # Remap this to input / targets since default wrapper does not
         # know which tensors are targets vs inputs
-        dataset = dataset.transform(_transform_sample)
+        self.transform = transforms.Compose(
+            [TupleToMapTransform(["input", "target"]), self.transform]
+        )
         return dataset
 
     # Imagenet dataset specific functions
