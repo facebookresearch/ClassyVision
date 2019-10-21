@@ -5,12 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import torchvision.datasets as datasets
+import torchvision.transforms as transforms
 from classy_vision.dataset import register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
 from classy_vision.dataset.core import WrapDataset
 from classy_vision.generic.util import set_proxies, unset_proxies
 
-from .transforms.util import build_field_transform_default_imagenet
+from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
 # constants for the SVHN datasets:
@@ -53,7 +54,7 @@ class SVHNDataset(ClassyDataset):
         dataset = datasets.SVHN(DATA_PATH, split=self.split, download=True)
         unset_proxies()
         dataset = WrapDataset(dataset)
-        dataset = dataset.transform(
-            lambda x: {"input": x["input"][0], "target": x["input"][1]}
+        self.transform = transforms.Compose(
+            [TupleToMapTransform(["input", "target"]), self.transform]
         )
         return dataset
