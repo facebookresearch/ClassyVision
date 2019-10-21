@@ -32,56 +32,21 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
         'ignore_index': sample should be ignored for loss (optional),
         'reduction': specifies reduction to apply to the output (optional),
         """
-        super().__init__()
+        super(SoftTargetCrossEntropyLoss, self).__init__()
         self._ignore_index = ignore_index
         self._reduction = reduction
+        assert normalize_targets in [None, "count_based"]
         self._normalize_targets = normalize_targets
         if self._reduction != "mean":
             raise NotImplementedError(
                 'reduction type "{}" not implemented'.format(self._reduction)
             )
-        self.loss_function = _SoftTargetCrossEntropyLoss(
-            ignore_index=self._ignore_index,
-            normalize_targets=self._normalize_targets,
-            reduction=self._reduction,
-        )
+        self._eps = np.finfo(np.float32).eps
 
     def forward(self, output, target):
-        return self.loss_function(logits=output, targets=target)
-
-
-class _SoftTargetCrossEntropyLoss(torch.nn.Module):
-    """
-    Helper function for above loss.
-    This is separated out so that it can be used on its own (as a Pytorch loss)
-    """
-
-    def __init__(
-        self,
-        size_average=None,
-        reduce=None,
-        reduction="mean",
-        ignore_index=-100,
-        normalize_targets="count_based",
-    ):
-        """
-        Soft targets loss
-        loss = torch.sum(- targets * F.log_softmax(logits, -1), -1)
-        """
-        super(_SoftTargetCrossEntropyLoss, self).__init__()
-        self.ignore_index = ignore_index
-        assert normalize_targets in [None, "count_based"]
-        self.normalize_targets = normalize_targets
-        assert reduction in ["mean"]
-        self.reduction = reduction
-        self.eps = np.finfo(np.float32).eps
-
-    def forward(self, logits, targets):
-        """
-        for N examples and C classes
-        - targets: N x C, the plural (targets) is intentional.
-        - logits: N x C
-                  these are raw outputs (without softmax/sigmoid, hence "logits")
+        """for N examples and C classes
+        - output: N x C these are raw outputs (without softmax/sigmoid)
+        - target: N x C corresponding targets
 
         Target elements set to ignore_index contribute 0 loss.
 
@@ -89,21 +54,18 @@ class _SoftTargetCrossEntropyLoss(torch.nn.Module):
         reduction.
         """
         assert (
-            logits.shape == targets.shape
-        ), "_SoftTargetCrossEntropyLoss requires logits and target to be same"
-        valid_mask = targets != self.ignore_index
-        valid_targets = targets.float() * valid_mask.float()
-        if self.normalize_targets == "count_based":
-            valid_targets /= self.eps + valid_targets.sum(dim=1, keepdim=True)
-        per_sample_per_target_loss = -valid_targets * F.log_softmax(logits, -1)
+            output.shape == target.shape
+        ), "SoftTargetCrossEntropyLoss requires output and target to be same"
+        valid_mask = target != self._ignore_index
+        valid_targets = target.float() * valid_mask.float()
+        if self._normalize_targets == "count_based":
+            valid_targets /= self._eps + valid_targets.sum(dim=1, keepdim=True)
+        per_sample_per_target_loss = -valid_targets * F.log_softmax(output, -1)
         # perform reduction
-        if self.reduction == "mean":
+        if self._reduction == "mean":
             per_sample_loss = torch.sum(per_sample_per_target_loss, -1)
             # normalize based on the number of samples with > 0 non-ignored targets
             loss = per_sample_loss.sum() / torch.sum(
                 (torch.sum(valid_mask, -1) > 0)
             ).clamp(min=1)
         return loss
-
-    def __call__(self, logits, targets):
-        return self.forward(logits, targets)

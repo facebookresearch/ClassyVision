@@ -8,7 +8,7 @@ import numpy as np
 from classy_vision.generic.util import convert_to_one_hot
 from classy_vision.losses import ClassyLoss, register_loss
 from classy_vision.losses.soft_target_cross_entropy_loss import (
-    _SoftTargetCrossEntropyLoss,
+    SoftTargetCrossEntropyLoss,
 )
 
 
@@ -40,8 +40,8 @@ class LabelSmoothingCrossEntropyLoss(ClassyLoss):
         self._ignore_index = ignore_index
         self._reduction = reduction
         self._smoothing_param = smoothing_param
-        self.loss_function = _SoftTargetCrossEntropyLoss(
-            ignore_index=self._ignore_index, normalize_targets=None
+        self.loss_function = SoftTargetCrossEntropyLoss(
+            self._ignore_index, self._reduction, None
         )
         self._eps = np.finfo(np.float32).eps
 
@@ -91,4 +91,4 @@ class LabelSmoothingCrossEntropyLoss(ClassyLoss):
         smoothed_targets = self.smooth_targets(
             valid_targets=valid_targets, classes=output.shape[1]
         )
-        return self.loss_function(logits=output, targets=smoothed_targets)
+        return self.loss_function(output, smoothed_targets)
