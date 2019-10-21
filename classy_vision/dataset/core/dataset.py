@@ -4,8 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from torch.utils.data import DataLoader
-
 
 class Dataset(object):
     """
@@ -26,11 +24,6 @@ class Dataset(object):
     def __len__(self):
         raise NotImplementedError("Dataset is an abstract class.")
 
-    def batch(self, *args, **kwargs):
-        from .batch_dataset import BatchDataset
-
-        return BatchDataset(self, *args, **kwargs)
-
     def resample(self, *args, **kwargs):
         from .resample_dataset import ResampleDataset
 
@@ -50,15 +43,6 @@ class Dataset(object):
         from .shard_dataset import ShardDataset
 
         return ShardDataset(self, *args, **kwargs)
-
-    def iterator(self, *args, **kwargs):
-        return DataLoader(
-            self,
-            batch_size=None,  # Batching is currently done in dataset
-            num_workers=kwargs.get("num_workers", 0),
-            pin_memory=kwargs.get("pin_memory", False),
-            multiprocessing_context=kwargs.get("multiprocessing_context", None),
-        )
 
     def __getattr__(self, name):
         if "dataset" in self.__dict__:
