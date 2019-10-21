@@ -64,6 +64,16 @@ def get_test_task_config():
     }
 
 
+def get_fast_test_task_config():
+    config = get_test_task_config()
+    # use 10 samples, 5 batchsize, and 1 phase for faster testing
+    for split in ["train", "test"]:
+        config["dataset"][split]["num_samples"] = 10
+        config["dataset"][split]["batchsize_per_replica"] = 5
+    config["num_phases"] = 1
+    return config
+
+
 def get_test_args():
     return Arguments(device="cpu", num_workers=8, test_only=False)
 

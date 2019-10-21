@@ -267,3 +267,27 @@ def compare_samples(test_fixture, sample1, sample2):
 
     test_fixture.assertTrue(torch.allclose(sample1["input"], sample2["input"]))
     test_fixture.assertTrue(torch.allclose(sample1["target"], sample2["target"]))
+
+
+def compare_states(test_fixture, state_1, state_2, check_heads=True):
+    """
+    Tests the classy state dicts for equality, but skips the member objects
+    which implement their own {get, set}_classy_state functions.
+    """
+    # check base_model
+    compare_model_state(
+        test_fixture, state_1["base_model"], state_2["base_model"], check_heads
+    )
+    # check losses
+    test_fixture.assertEqual(len(state_1["losses"]), len(state_2["losses"]))
+    for loss_1, loss_2 in zip(state_1["losses"], state_2["losses"]):
+        test_fixture.assertAlmostEqual(loss_1, loss_2)
+
+    for key in ["base_model", "meters", "optimizer", "losses"]:
+        # we trust that these have been tested using their unit tests or
+        # by the code above
+        test_fixture.assertIn(key, state_1)
+        test_fixture.assertIn(key, state_2)
+        del state_1[key]
+        del state_2[key]
+    test_fixture.assertDictEqual(state_1, state_2)
