@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from torch.utils.data import DataLoader
 
 from .dataset import Dataset
 
@@ -30,6 +31,16 @@ class WrapDataset(Dataset):
 
     def __len__(self):
         return len(self.dataset)
+
+    def iterator(self, *args, **kwargs):
+        # WrapDataset will be removed soon
+        return DataLoader(
+            self,
+            batch_size=kwargs.get("batchsize_per_replica", 1),
+            num_workers=kwargs.get("num_workers", 0),
+            pin_memory=kwargs.get("pin_memory", False),
+            multiprocessing_context=kwargs.get("multiprocessing_context", None),
+        )
 
     def get_classy_state(self):
         """Pytorch datasets don't have state"""
