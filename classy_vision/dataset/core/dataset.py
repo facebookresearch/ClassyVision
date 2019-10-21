@@ -24,11 +24,6 @@ class Dataset(object):
     def __len__(self):
         raise NotImplementedError("Dataset is an abstract class.")
 
-    def transform(self, *args, **kwargs):
-        from .transform_dataset import TransformDataset
-
-        return TransformDataset(self, *args, **kwargs)
-
     def __getattr__(self, name):
         if "dataset" in self.__dict__:
             return getattr(self.__dict__["dataset"], name)

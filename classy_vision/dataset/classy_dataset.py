@@ -93,7 +93,7 @@ class ClassyDataset(Dataset):
     def wrap_dataset(
         cls,
         dataset,
-        transform=None,
+        transform=None,  # Unused
         batchsize_per_replica=None,  # Unused
         filter_func=_return_true,  # Unused
         shuffle=True,  # Unused
@@ -107,8 +107,6 @@ class ClassyDataset(Dataset):
         gotten an intermediate dataset state. This state should still
         be functional, but if you rebase this function will disappear
 
-        Wraps self.dataset with TransformDataset..
-
         If this is not a distributed run, we still wrap the dataset in
         shard dataset, but with world size 1 and rank 0.
 
@@ -118,15 +116,14 @@ class ClassyDataset(Dataset):
         if not isinstance(dataset, Dataset):
             dataset = WrapDataset(dataset)
 
-        # Apply transforms
-        if transform is not None:
-            dataset = dataset.transform(transform)
-
         return dataset
 
     def __getitem__(self, idx):
         assert idx >= 0 and idx < len(self), "Provided idx is outside of dataset range"
-        return self.dataset[idx]
+        sample = self.dataset[idx]
+        if self.transform is None:
+            return sample
+        return self.transform(sample)
 
     def __len__(self):
         assert self.num_samples is None or self.num_samples <= len(
