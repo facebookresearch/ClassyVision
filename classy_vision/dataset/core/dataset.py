@@ -24,16 +24,6 @@ class Dataset(object):
     def __len__(self):
         raise NotImplementedError("Dataset is an abstract class.")
 
-    def resample(self, *args, **kwargs):
-        from .resample_dataset import ResampleDataset
-
-        return ResampleDataset(self, *args, **kwargs)
-
-    def shuffle(self, *args, **kwargs):
-        from .shuffle_dataset import ShuffleDataset
-
-        return ShuffleDataset(self, *args, **kwargs)
-
     def transform(self, *args, **kwargs):
         from .transform_dataset import TransformDataset
 
