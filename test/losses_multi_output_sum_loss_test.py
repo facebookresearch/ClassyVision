@@ -7,16 +7,16 @@
 import unittest
 
 import torch
-from classy_vision.criterions import (
-    ClassyCriterion,
+from classy_vision.losses import (
+    ClassyLoss,
     MultiOutputSumLoss,
-    build_criterion,
-    register_criterion,
+    build_loss,
+    register_loss,
 )
 
 
-@register_criterion("mock_1")
-class MockCriterion1(ClassyCriterion):
+@register_loss("mock_1")
+class MockLoss1(ClassyLoss):
     def forward(self, pred, target):
         return torch.tensor(1.0)
 
@@ -28,7 +28,7 @@ class MockCriterion1(ClassyCriterion):
 class TestMultiOutputSumLoss(unittest.TestCase):
     def test_multi_output_sum_loss(self):
         config = {"name": "multi_output_sum_loss", "loss": {"name": "mock_1"}}
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, MultiOutputSumLoss))
 
         # test with a single output

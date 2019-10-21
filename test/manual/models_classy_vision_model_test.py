@@ -22,7 +22,7 @@ class TestClassyModel(unittest.TestCase):
         return {
             "name": "classy_vision",
             "num_phases": 12,
-            "criterion": {"name": "test_criterion"},
+            "loss": {"name": "test_loss"},
             "dataset": {
                 "name": "imagenet",
                 "batchsize_per_replica": 8,

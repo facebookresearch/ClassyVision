@@ -7,8 +7,8 @@
 import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 
-from classy_vision.criterions import build_criterion
 from classy_vision.dataset import build_dataset
+from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import build_task
@@ -24,10 +24,10 @@ class TestClassyTask(unittest.TestCase):
 
     def test_get_state(self):
         config = get_test_task_config()
-        criterion = build_criterion(config["criterion"])
+        loss = build_loss(config["loss"])
         task = (
             ClassyTask(num_phases=1)
-            .set_criterion(criterion)
+            .set_loss(loss)
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
         )

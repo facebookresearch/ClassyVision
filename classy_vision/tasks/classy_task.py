@@ -8,13 +8,13 @@ import copy
 import logging
 from typing import Any, Dict, List
 
-from classy_vision.criterions import ClassyCriterion, build_criterion
 from classy_vision.dataset import ClassyDataset, build_dataset
 from classy_vision.generic.distributed_util import (
     init_distributed_data_parallel_model,
     is_distributed_training_run,
 )
 from classy_vision.generic.util import copy_model_to_gpu, update_classy_state
+from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
@@ -22,7 +22,7 @@ from classy_vision.optim import ClassyOptimizer, build_optimizer
 
 class ClassyTask(object):
     def __init__(self, num_phases: int):
-        self.criterion = None
+        self.loss = None
         self.datasets = {}
         self.meters = []
         self.num_phases = num_phases
@@ -50,8 +50,8 @@ class ClassyTask(object):
         self.optimizer = optimizer
         return self
 
-    def set_criterion(self, criterion: ClassyCriterion):
-        self.criterion = criterion
+    def set_loss(self, loss: ClassyLoss):
+        self.loss = loss
         return self
 
     def set_test_only(self, test_only: bool):
@@ -87,7 +87,7 @@ class ClassyTask(object):
         splits = ["train", "test"]
         for split in splits:
             datasets[split] = build_dataset(config["dataset"][split])
-        criterion = build_criterion(config["criterion"])
+        loss = build_loss(config["loss"])
         test_only = config["test_only"]
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
@@ -98,7 +98,7 @@ class ClassyTask(object):
 
         task = (
             cls(num_phases=config["num_phases"])
-            .set_criterion(criterion)
+            .set_loss(loss)
             .set_test_only(test_only)
             .set_model(model)
             .set_optimizer(optimizer)
@@ -111,7 +111,7 @@ class ClassyTask(object):
 
     def get_config(self):
         return {
-            "criterion": self.criterion._config_DO_NOT_USE,
+            "loss": self.loss._config_DO_NOT_USE,
             "dataset": {
                 split: dataset._config_DO_NOT_USE
                 for split, dataset in self.datasets.items()
@@ -175,7 +175,7 @@ class ClassyTask(object):
         )
 
         if use_gpu:
-            self.criterion = self.criterion.cuda()
+            self.loss = self.loss.cuda()
             self.base_model = copy_model_to_gpu(self.base_model)
 
         # initialize the pytorch optimizer now since the model has been moved to

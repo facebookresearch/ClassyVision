@@ -8,16 +8,11 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import (
-    ClassyCriterion,
-    SumArbitraryLoss,
-    build_criterion,
-    register_criterion,
-)
+from classy_vision.losses import ClassyLoss, SumArbitraryLoss, build_loss, register_loss
 
 
-@register_criterion("mock_a")
-class MockCriterion1(ClassyCriterion):
+@register_loss("mock_a")
+class MockLoss1(ClassyLoss):
     def forward(self, pred, target):
         return torch.tensor(1.0)
 
@@ -26,8 +21,8 @@ class MockCriterion1(ClassyCriterion):
         return cls()
 
 
-@register_criterion("mock_b")
-class MockCriterion2(ClassyCriterion):
+@register_loss("mock_b")
+class MockLoss2(ClassyLoss):
     def forward(self, pred, target):
         return torch.tensor(2.0)
 
@@ -36,8 +31,8 @@ class MockCriterion2(ClassyCriterion):
         return cls()
 
 
-@register_criterion("mock_c")
-class MockCriterion3(ClassyCriterion):
+@register_loss("mock_c")
+class MockLoss3(ClassyLoss):
     def forward(self, pred, target):
         return torch.tensor(3.0)
 
@@ -62,10 +57,10 @@ class TestSumArbitraryLoss(unittest.TestCase):
 
     def test_build_sum_arbitrary(self):
         config = self._get_config()
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, SumArbitraryLoss))
         self.assertAlmostEqual(crit.weights, [1.0, 1.0, 1.0])
-        mod_list = [MockCriterion1, MockCriterion2, MockCriterion3]
+        mod_list = [MockLoss1, MockLoss2, MockLoss3]
         for idx, crit_type in enumerate(mod_list):
             self.assertTrue(isinstance(crit.losses[idx], crit_type))
 
@@ -94,7 +89,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
 
     def test_deep_copy(self):
         config = self._get_config()
-        crit1 = build_criterion(config)
+        crit1 = build_loss(config)
         self.assertTrue(isinstance(crit1, SumArbitraryLoss))
         outputs = self._get_outputs()
         targets = self._get_targets()

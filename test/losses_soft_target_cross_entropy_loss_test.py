@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import SoftTargetCrossEntropyLoss, build_criterion
+from classy_vision.losses import SoftTargetCrossEntropyLoss, build_loss
 
 
 class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
 
     def test_build_soft_target_cross_entropy(self):
         config = self._get_config()
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, SoftTargetCrossEntropyLoss))
         self.assertEqual(crit._ignore_index, -1)
         self.assertEqual(crit._reduction, "mean")
@@ -74,7 +74,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
 
     def test_deep_copy(self):
         config = self._get_config()
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, SoftTargetCrossEntropyLoss))
         outputs = self._get_outputs()
         targets = self._get_targets()
