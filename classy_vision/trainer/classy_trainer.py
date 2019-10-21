@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import torch
-from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.generic.distributed_util import barrier, is_distributed_training_run
 from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.tasks import ClassyTask
@@ -41,7 +40,7 @@ class ClassyTrainer:
             while True:
                 # Process next sample
                 try:
-                    task = train_step(task, self.use_gpu, local_variables)
+                    task.train_step(self.use_gpu, local_variables)
                 except StopIteration:
                     break
 

@@ -8,7 +8,6 @@ import unittest
 from test.generic.config_utils import get_test_args, get_test_task_config
 from test.generic.utils import compare_model_state, compare_samples, compare_states
 
-from classy_vision.generic.classy_trainer_common import train_step
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.tasks import build_task
 
@@ -57,8 +56,8 @@ class TestClassyState(unittest.TestCase):
 
             # test that the train step runs the same way on both states
             # and the loss remains the same
-            train_step(task, use_gpu, local_variables)
-            train_step(task_2, use_gpu, local_variables)
+            task.train_step(use_gpu, local_variables)
+            task_2.train_step(use_gpu, local_variables)
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_freeze_trunk(self):
@@ -85,7 +84,7 @@ class TestClassyState(unittest.TestCase):
             previous_state_dict = task.get_classy_state(deep_copy=True)
 
             # test that after the train step the trunk remains unchanged
-            train_step(task, use_gpu, local_variables)
+            task.train_step(use_gpu, local_variables)
 
             # compares only trunk before and after train_step
             # and should be true because the trunk is frozen
