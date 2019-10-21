@@ -56,14 +56,7 @@ class CifarDataset(ClassyDataset):
             "cifar100",
         ], "CIFAR datasets only come in cifar10, cifar100"
 
-        dataset = self._load_dataset()
-        self.dataset = self.wrap_dataset(
-            dataset,
-            transform,
-            batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
+        self.dataset = self._load_dataset()
 
     @classmethod
     def from_config(cls, config):

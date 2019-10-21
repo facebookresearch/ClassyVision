@@ -31,13 +31,6 @@ class Cub2011Dataset(ClassyDataset):
         # For memoizing target names
         self._target_names = None
         self.dataset = self._load_dataset()
-        self.dataset = self.wrap_dataset(
-            self.dataset,
-            transform,
-            batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
 
     @classmethod
     def from_config(cls, config):

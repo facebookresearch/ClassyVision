@@ -89,32 +89,6 @@ class ClassyDataset:
 
         return transform_config, batchsize_per_replica, shuffle, num_samples
 
-    @classmethod
-    def wrap_dataset(
-        cls,
-        dataset,
-        transform=None,  # Unused
-        batchsize_per_replica=None,  # Unused
-        filter_func=_return_true,  # Unused
-        shuffle=True,  # Unused
-        subsample=None,  # Unused
-        shard_group_size=1,  # Unused
-    ):
-        """
-        WARNING: This function is going to be deleted as part of the
-        migration of the Classy Vision datasets to canonical pytorch
-        datasets. If you see this function in your codebase, you have
-        gotten an intermediate dataset state. This state should still
-        be functional, but if you rebase this function will disappear
-
-        If this is not a distributed run, we still wrap the dataset in
-        shard dataset, but with world size 1 and rank 0.
-
-        This can only be called once, preferably during construction.
-        """
-
-        return dataset
-
     def __getitem__(self, idx):
         assert idx >= 0 and idx < len(self), "Provided idx is outside of dataset range"
         sample = self.dataset[idx]

@@ -60,13 +60,6 @@ class OmniglotDataset(ClassyDataset):
     def __init__(self, split, batchsize_per_replica, shuffle, transform, num_samples):
         super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         self.dataset = self._load_dataset()
-        self.dataset = self.wrap_dataset(
-            self.dataset,
-            transform,
-            batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
 
     @classmethod
     def from_config(cls, config):
