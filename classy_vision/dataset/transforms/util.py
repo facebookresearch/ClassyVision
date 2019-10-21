@@ -83,6 +83,34 @@ class ImagenetNoAugmentTransform(ClassyTransform):
         return self.transform(img)
 
 
+@register_transform("tuple_to_map")
+class TupleToMapTransform(ClassyTransform):
+    """
+    This transform takes a sample of the form (data1, data2, ...) and
+    returns a sample of the form {key1: data1, key2: data2, ...}
+
+    It is useful for mapping output from datasets like the PyTorch
+    ImageFolder dataset (tuple) to dict with named data fields.
+    """
+
+    def __init__(self, list_of_map_keys: List[str]):
+        self._map_keys = list_of_map_keys
+
+    def __call__(self, sample):
+        # NOTE: This will be fixed in a follow-up diff to remove the
+        # WrapDataset class...currently WrapDataset places all data in
+        # a map with "input" key
+        assert len(sample["input"]) == len(self._map_keys), (
+            "Provided sample tuple must have same number of keys "
+            "as provided to transform"
+        )
+        output_sample = {}
+        for idx, s in enumerate(sample["input"]):
+            output_sample[self._map_keys[idx]] = s
+
+        return output_sample
+
+
 def build_field_transform_default_imagenet(
     config: Optional[List[Dict[str, Any]]],
     default_transform: Optional[Callable] = None,

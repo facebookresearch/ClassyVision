@@ -49,12 +49,14 @@ def mock_get_rank():
 class TestDataset(classy_dataset.ClassyDataset):
     """Test dataset for validating registry functions"""
 
-    def __init__(self, samples, batchsize_per_replica=1, num_samples=None):
+    def __init__(
+        self, samples, batchsize_per_replica=1, num_samples=None, transform=None
+    ):
         super().__init__(
             split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
-            transform=None,
+            transform=transform,
             num_samples=len(samples) if num_samples is None else num_samples,
         )
         input_tensors = [sample["input"] for sample in samples]
@@ -211,3 +213,11 @@ class TestClassyDataset(unittest.TestCase):
         dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=3)
         with self.assertRaises(AssertionError):
             len(dataset)
+
+    def test_transform_logic(self):
+        def _return_1_transform(sample):
+            return 1
+
+        dataset = TestDataset(DUMMY_SAMPLES_2, transform=_return_1_transform)
+        sample = dataset[0]
+        self.assertEqual(sample, 1)

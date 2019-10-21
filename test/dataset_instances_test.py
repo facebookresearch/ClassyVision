@@ -12,13 +12,6 @@ from classy_vision.dataset import build_dataset, get_available_splits
 from classy_vision.dataset.classy_dataset import ClassyDataset
 
 
-# list of datasets expected to be present:
-DEFAULT_SETTINGS = {
-    "batchsizes_per_replica": [1, 2],
-    "num_samples": [10],
-    "shuffle": [True, False],
-}
-
 RAPID_DATASETS_TO_TEST = [
     "imagenet",
     # TODO: T48865995
@@ -75,16 +68,9 @@ class TestDatasets(unittest.TestCase):
             return self.configs
 
         self.configs = []
-        for batchsize_per_replica in DEFAULT_SETTINGS["batchsizes_per_replica"]:
-            for num_samples in DEFAULT_SETTINGS["num_samples"]:
-                for use_shuffle in DEFAULT_SETTINGS["shuffle"]:
-                    self.configs.append(
-                        {
-                            "batchsize_per_replica": batchsize_per_replica,
-                            "num_samples": num_samples,
-                            "use_shuffle": use_shuffle,
-                        }
-                    )
+        self.configs.append(
+            {"batchsize_per_replica": 1, "num_samples": 10, "use_shuffle": True}
+        )
         return self.configs
 
     def _check_dataset(self, dataset, dataset_name):
@@ -131,12 +117,6 @@ class TestDatasets(unittest.TestCase):
                     config["name"] = dataset_name
                     config["split"] = split
                     dataset = build_dataset(config)
-                    if (
-                        hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle")
-                        and config["use_shuffle"]
-                    ):
-                        dataset.do_shuffle(epoch_num=0)
-
                     self._check_dataset(dataset, dataset_name)
 
     @unittest.skipUnless(
@@ -151,12 +131,6 @@ class TestDatasets(unittest.TestCase):
                     config["name"] = dataset_name
                     config["split"] = split
                     dataset = build_dataset(config)
-                    if (
-                        hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle")
-                        and config["use_shuffle"]
-                    ):
-                        dataset.do_shuffle(epoch_num=0)
-
                     self._check_dataset(dataset, dataset_name)
 
 
