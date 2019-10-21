@@ -4,10 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from classy_vision.dataset.core.dataset import Dataset
 
-
-class MergeDataset(Dataset):
+class MergeDataset:
     """
         Dataset that merges samples from multiple datasets into single sample.
 
@@ -31,7 +29,6 @@ class MergeDataset(Dataset):
 
         # assertions:
         assert isinstance(datasets, list)
-        assert all(isinstance(dataset, Dataset) for dataset in datasets)
         assert all(len(dataset) == len(datasets[0]) for dataset in datasets)
 
         # create object:

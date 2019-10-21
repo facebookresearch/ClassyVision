@@ -10,7 +10,6 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from classy_vision.dataset import register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
-from classy_vision.dataset.core import WrapDataset
 
 from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
@@ -102,7 +101,6 @@ class OmniglotDataset(ClassyDataset):
         datasets.folder.DatasetFolder._find_classes = orig_find_classes
         datasets.folder.make_dataset = orig_make_dataset
 
-        dataset = WrapDataset(dataset)
         self.transform = transforms.Compose(
             [TupleToMapTransform(["input", "target"]), self.transform]
         )

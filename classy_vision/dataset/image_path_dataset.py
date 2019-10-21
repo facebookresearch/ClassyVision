@@ -10,7 +10,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
 from .classy_dataset import ClassyDataset
-from .core import ListDataset, WrapDataset
+from .core import ListDataset
 from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
@@ -84,9 +84,6 @@ class ImagePathDataset(ClassyDataset):
                 image_paths
             ), "Expect image_paths to be a dir when it is a string"
             dataset = datasets.ImageFolder(image_paths)
-            # Wrap dataset places whole sample in input field by default
-            # Remap this to input / targets since default wrapper does not
-            # know which tensors are targets vs inputs
             self.transform = transforms.Compose(
                 [TupleToMapTransform(["input", "target"]), self.transform]
             )

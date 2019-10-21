@@ -8,7 +8,6 @@ import os
 from functools import wraps
 
 import torch
-from classy_vision.dataset.core import Dataset
 
 from .merge_dataset import MergeDataset
 
@@ -125,15 +124,17 @@ def compare_batchlist_and_dataset_with_skips(
         compare_batches(test_fixture, batch, dataset_batch)
 
 
-class MockErrorDataset(Dataset):
+class MockErrorDataset:
     """
-    Dataset used for testing. Wraps a real dataset, but allows us to
-    delete samples on return to simulate errors
+    Dataset used for testing. Wraps a real dataset with a
+    batchsize_per_replica, but allows us to delete samples on return
+    to simulate errors (similar to what happens with Everstore)
     """
 
     def __init__(self, dataset):
         self.rebatch_map = {}
         self.dataset = dataset
+        self.batchsize_per_replica = dataset.batchsize_per_replica
 
     def __getitem__(self, idx):
         batch = self.dataset[idx]
