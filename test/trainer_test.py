@@ -6,9 +6,9 @@
 
 import unittest
 
-from classy_vision.criterions import build_criterion
 from classy_vision.dataset import build_dataset
 from classy_vision.hooks import LossLrMeterLoggingHook
+from classy_vision.losses import build_loss
 from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
@@ -19,7 +19,7 @@ from classy_vision.trainer import ClassyTrainer
 class TestClassyTrainer(unittest.TestCase):
     def _get_config(self):
         return {
-            "criterion": {"name": "CrossEntropyLoss"},
+            "loss": {"name": "CrossEntropyLoss"},
             "dataset": {
                 "train": {
                     "name": "synthetic_image",
@@ -69,7 +69,7 @@ class TestClassyTrainer(unittest.TestCase):
         config = self._get_config()
         task = (
             ClassyTask(num_phases=10)
-            .set_criterion(build_criterion(config["criterion"]))
+            .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
             .set_meters([AccuracyMeter(topk=[1])])

@@ -7,13 +7,13 @@
 from torch.nn.modules.loss import _WeightedLoss
 
 
-class ClassyCriterion(_WeightedLoss):
+class ClassyLoss(_WeightedLoss):
     def __init__(self):
         """
-        Classy Criterion constructor. This stores the criterion config for
-        future access and constructs the basic criterion object.
+        ClassyLoss constructor. This stores the loss configuration for
+        future access and constructs the basic loss object.
         """
-        super(ClassyCriterion, self).__init__()
+        super(ClassyLoss, self).__init__()
 
     @classmethod
     def from_config(cls, config):

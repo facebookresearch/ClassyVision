@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import LabelSmoothingCrossEntropyLoss, build_criterion
+from classy_vision.losses import LabelSmoothingCrossEntropyLoss, build_loss
 
 
 class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.1,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         self.assertEqual(crit._ignore_index, -1)
 
@@ -28,7 +28,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.1,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([[0, 0, 0, 0, 1]])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 5)
@@ -49,7 +49,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([[-1, 0, 0, 0, 1]])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 5)
@@ -70,7 +70,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([[1, 0, 0, 0, 1]])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 5)
@@ -92,7 +92,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.1,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([[1, 1, 1, 1]])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 4)
@@ -111,7 +111,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([[1, 1, 1, 1, 1], [1, 0, 0, 0, 1]])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 5)
@@ -140,7 +140,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         targets = torch.tensor([4, -1])
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         valid_targets = crit.compute_valid_targets(targets, 5)
@@ -202,7 +202,7 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
             "ignore_index": -1,
             "smoothing_param": 0.5,
         }
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, LabelSmoothingCrossEntropyLoss))
         outputs = torch.tensor([[0.0, 7.0, 0.0, 0.0, 2.0]])
         targets = torch.tensor([[0, 0, 0, 0, 1]])

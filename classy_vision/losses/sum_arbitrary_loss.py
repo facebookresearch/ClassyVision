@@ -6,11 +6,11 @@
 
 import torch
 
-from . import ClassyCriterion, build_criterion, register_criterion
+from . import ClassyLoss, build_loss, register_loss
 
 
-@register_criterion("sum_arbitrary")
-class SumArbitraryLoss(ClassyCriterion):
+@register_loss("sum_arbitrary")
+class SumArbitraryLoss(ClassyLoss):
     """
     Sums a collection of (weighted) torch.nn losses.
 
@@ -29,11 +29,11 @@ class SumArbitraryLoss(ClassyCriterion):
 
         loss_modules = []
         for loss_config in config["losses"]:
-            loss_modules.append(build_criterion(loss_config))
+            loss_modules.append(build_loss(loss_config))
 
         assert all(
-            isinstance(loss_module, ClassyCriterion) for loss_module in loss_modules
-        ), "All losses must be registered, valid ClassyCriterions"
+            isinstance(loss_module, ClassyLoss) for loss_module in loss_modules
+        ), "All losses must be registered, valid ClassyLosses"
 
         return cls(losses=loss_modules, weights=config.get("weights", None))
 

@@ -1,7 +1,7 @@
 {
     "name": "test_task",
     "num_phases": 12,
-    "criterion": {
+    "loss": {
         "name": "test_loss"
     },
     "dataset": {

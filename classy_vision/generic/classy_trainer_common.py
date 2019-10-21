@@ -89,7 +89,7 @@ def train_step(task, use_gpu, local_variables=None):
                 torch.tensor(0.0, device=target.device), requires_grad=True
             )
         else:
-            local_variables["local_loss"] = task.criterion(model_output, target)
+            local_variables["local_loss"] = task.loss(model_output, target)
 
         # NOTE: This performs an all_reduce_mean() on the losses across the replicas.
         # The reduce should ideally be weighted by the length of the targets on each

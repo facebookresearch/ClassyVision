@@ -5,15 +5,15 @@
 # LICENSE file in the root directory of this source tree.
 
 import numpy as np
-from classy_vision.criterions import ClassyCriterion, register_criterion
-from classy_vision.criterions.soft_target_cross_entropy_loss import (
+from classy_vision.generic.util import convert_to_one_hot
+from classy_vision.losses import ClassyLoss, register_loss
+from classy_vision.losses.soft_target_cross_entropy_loss import (
     _SoftTargetCrossEntropyLoss,
 )
-from classy_vision.generic.util import convert_to_one_hot
 
 
-@register_criterion("label_smoothing_cross_entropy")
-class LabelSmoothingCrossEntropyLoss(ClassyCriterion):
+@register_loss("label_smoothing_cross_entropy")
+class LabelSmoothingCrossEntropyLoss(ClassyLoss):
     @classmethod
     def from_config(cls, config):
         assert "weight" not in config, '"weight" not implemented'
@@ -27,7 +27,7 @@ class LabelSmoothingCrossEntropyLoss(ClassyCriterion):
         )
 
     def __init__(self, ignore_index, reduction, smoothing_param):
-        """Intializer for the label smoothed cross entropy loss criterion.
+        """Intializer for the label smoothed cross entropy loss.
         This decreases gap between output scores and encourages generalization.
         Targets provided to forward can be one-hot vectors (NxC) or class indices(Nx1)
 
@@ -70,7 +70,7 @@ class LabelSmoothingCrossEntropyLoss(ClassyCriterion):
 
         """
         This function takes valid (No ignore values present) one-hot target vectors
-        and computes smoothed target vectors (normalized) according to the criterion's
+        and computes smoothed target vectors (normalized) according to the loss's
         smoothing parameter
         """
 
