@@ -9,6 +9,7 @@ from typing import Callable, Optional
 from classy_vision.dataset.core import Dataset, WrapDataset
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.util import is_pos_int
+from torch.utils.data import DataLoader
 
 
 def _return_true(_sample):
@@ -93,16 +94,21 @@ class ClassyDataset(Dataset):
         cls,
         dataset,
         transform=None,
-        batchsize_per_replica=1,
-        filter_func=_return_true,
+        batchsize_per_replica=None,  # Unused
+        filter_func=_return_true,  # Unused
         shuffle=True,
         subsample=None,
         shard_group_size=1,
     ):
         """
-        Wraps a dataset with TransformDataset, ShuffleDataset,
-        ResampleDataset, ShardDataset and BatchDataset. For the filter
-        function, True = keep sample.
+        WARNING: This function is going to be deleted as part of the
+        migration of the Classy Vision datasets to canonical pytorch
+        datasets. If you see this function in your codebase, you have
+        gotten an intermediate dataset state. This state should still
+        be functional, but if you rebase this function will disappear
+
+        Wraps self.dataset with TransformDataset, ShuffleDataset,
+        ResampleDataset, and ShardDataset.
 
         If this is not a distributed run, we still wrap the dataset in
         shard dataset, but with world size 1 and rank 0.
@@ -130,9 +136,6 @@ class ClassyDataset(Dataset):
             get_world_size(), get_rank(), group_size=shard_group_size
         )
 
-        # batch data if requested:
-        dataset = dataset.batch(batchsize_per_replica, filter_func=filter_func)
-
         return dataset
 
     def __getitem__(self, idx):
@@ -140,6 +143,15 @@ class ClassyDataset(Dataset):
 
     def __len__(self):
         return len(self.dataset)
+
+    def iterator(self, *args, **kwargs):
+        return DataLoader(
+            self,
+            batch_size=self.batchsize_per_replica,
+            num_workers=kwargs.get("num_workers", 0),
+            pin_memory=kwargs.get("pin_memory", False),
+            multiprocessing_context=kwargs.get("multiprocessing_context", None),
+        )
 
     def get_batchsize_per_replica(self):
         return self.batchsize_per_replica
