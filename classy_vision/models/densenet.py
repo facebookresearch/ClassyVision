@@ -198,6 +198,8 @@ class DenseNet(ClassyModel):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
+            elif isinstance(m, nn.Linear):
+                m.bias.data.zero_()
 
     @classmethod
     def from_config(cls, config):
