@@ -71,23 +71,23 @@ class ClassyDataset(Dataset):
 
         transforms (optional): list of tranform configurations to be applied in order
         """
-        assert "batchsize_per_replica" in config and is_pos_int(
-            config["batchsize_per_replica"]
+        batchsize_per_replica = config.get("batchsize_per_replica")
+        assert is_pos_int(
+            batchsize_per_replica
         ), "batchsize_per_replica must be a positive int"
 
-        assert "use_shuffle" in config and isinstance(
-            config["use_shuffle"], bool
-        ), "use_shuffle must be a boolean"
+        shuffle = config.get("use_shuffle")
+        assert isinstance(shuffle, bool), "use_shuffle must be a boolean"
 
-        assert "num_samples" in config and (
-            config["num_samples"] is None or is_pos_int(config["num_samples"])
+        # Num samples is not used in all cases and has a clear default of None
+        num_samples = config.get("num_samples", None)
+        assert num_samples is None or is_pos_int(
+            num_samples
         ), "num_samples must be a positive int"
 
         transform_config = config.get("transforms")
-        shuffle = config.get("use_shuffle")
-        num_samples = config.get("num_samples", None)
 
-        return transform_config, config["batchsize_per_replica"], shuffle, num_samples
+        return transform_config, batchsize_per_replica, shuffle, num_samples
 
     @classmethod
     def wrap_dataset(
