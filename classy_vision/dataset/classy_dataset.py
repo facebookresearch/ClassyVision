@@ -65,8 +65,7 @@ class ClassyDataset(Dataset):
         replica (effectively the number of processes performing
         training...usually corresponds to GPU
 
-        use_shuffle: Enable shuffling for the dataset (adds "do_shuffle"
-        member for shuffling on command)
+        use_shuffle: Enable shuffling for the dataset
 
         num_samples: Artificially restrict the number of samples in a dataset epoch
 
@@ -97,8 +96,8 @@ class ClassyDataset(Dataset):
         transform=None,
         batchsize_per_replica=None,  # Unused
         filter_func=_return_true,  # Unused
-        shuffle=True,
-        subsample=None,
+        shuffle=True,  # Unused
+        subsample=None,  # Unused
         shard_group_size=1,  # Unused
     ):
         """
@@ -108,8 +107,7 @@ class ClassyDataset(Dataset):
         gotten an intermediate dataset state. This state should still
         be functional, but if you rebase this function will disappear
 
-        Wraps self.dataset with TransformDataset, ShuffleDataset,
-        and ResampleDataset.
+        Wraps self.dataset with TransformDataset..
 
         If this is not a distributed run, we still wrap the dataset in
         shard dataset, but with world size 1 and rank 0.
@@ -124,27 +122,23 @@ class ClassyDataset(Dataset):
         if transform is not None:
             dataset = dataset.transform(transform)
 
-        # Apply shuffle
-        if shuffle:
-            dataset = dataset.shuffle()
-
-        # subsample dataset (if requested):
-        if subsample is not None and subsample:
-            dataset = dataset.resample([n for n in range(subsample)])
-
         return dataset
 
     def __getitem__(self, idx):
+        assert idx >= 0 and idx < len(self), "Provided idx is outside of dataset range"
         return self.dataset[idx]
 
     def __len__(self):
-        return len(self.dataset)
+        assert self.num_samples is None or self.num_samples <= len(
+            self.dataset
+        ), "Num samples mus be less than length of base dataset"
+        return len(self.dataset) if self.num_samples is None else self.num_samples
 
     def _get_sampler(self):
         world_size = get_world_size()
         rank = get_rank()
         return DistributedSampler(
-            self.dataset, num_replicas=world_size, rank=rank, shuffle=False
+            self, num_replicas=world_size, rank=rank, shuffle=self.shuffle
         )
 
     def iterator(self, *args, **kwargs):
