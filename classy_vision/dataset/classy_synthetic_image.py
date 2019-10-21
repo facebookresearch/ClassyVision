@@ -35,13 +35,6 @@ class SyntheticImageClassificationDataset(ClassyDataset):
         self.dataset = RandomImageBinaryClassDataset(
             crop_size, class_ratio, num_samples, seed
         )
-        self.dataset = self.wrap_dataset(
-            self.dataset,
-            transform,
-            batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
 
     @classmethod
     def from_config(cls, config):

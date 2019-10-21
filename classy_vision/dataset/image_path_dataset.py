@@ -47,14 +47,7 @@ class ImagePathDataset(ClassyDataset):
         )
         super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
 
-        dataset = self._load_dataset(image_paths, targets)
-        self.dataset = self.wrap_dataset(
-            dataset,
-            transform,
-            batchsize_per_replica=batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
+        self.dataset = self._load_dataset(image_paths, targets)
 
     @classmethod
     def from_config(cls, config, image_paths, targets=None, default_transform=None):

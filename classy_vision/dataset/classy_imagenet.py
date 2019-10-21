@@ -32,14 +32,7 @@ class ImagenetDataset(ClassyDataset):
         super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
         # For memoizing target names
         self._target_names = None
-        dataset = self._load_dataset()
-        self.dataset = self.wrap_dataset(
-            dataset,
-            transform,
-            batchsize_per_replica=batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=num_samples,
-        )
+        self.dataset = self._load_dataset()
 
     @classmethod
     def from_config(cls, config):
