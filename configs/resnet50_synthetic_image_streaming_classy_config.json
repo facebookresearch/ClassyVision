@@ -1,7 +1,7 @@
 {
     "name": "classy_vision",
     "num_phases": 2,
-    "criterion": {
+    "loss": {
         "name": "CrossEntropyLoss"
     },
     "dataset": {

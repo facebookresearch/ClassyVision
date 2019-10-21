@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.criterions import BarronLoss, build_criterion
+from classy_vision.losses import BarronLoss, build_loss
 
 
 class TestBarronLoss(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestBarronLoss(unittest.TestCase):
 
     def test_build_barron(self):
         config = self._get_config()
-        crit = build_criterion(config)
+        crit = build_loss(config)
         self.assertTrue(isinstance(crit, BarronLoss))
         self.assertEqual(crit.size_average, config["size_average"])
         self.assertAlmostEqual(crit.alpha, config["alpha"])
@@ -54,7 +54,7 @@ class TestBarronLoss(unittest.TestCase):
 
     def test_deep_copy(self):
         config = self._get_config()
-        crit1 = build_criterion(config)
+        crit1 = build_loss(config)
         self.assertTrue(isinstance(crit1, BarronLoss))
         outputs = self._get_outputs()
         targets = self._get_targets()

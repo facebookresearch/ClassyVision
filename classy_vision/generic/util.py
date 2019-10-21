@@ -114,9 +114,9 @@ def is_not_none(sample):
     return True
 
 
-def copy_model_to_gpu(model, criterion=None):
+def copy_model_to_gpu(model, loss=None):
     """
-    Copies a model and (optional) criterion to GPU and enables cudnn benchmarking.
+    Copies a model and (optional) loss to GPU and enables cudnn benchmarking.
     For multiple gpus training, the model in DistributedDataParallel for
     distributed training.
     """
@@ -124,9 +124,9 @@ def copy_model_to_gpu(model, criterion=None):
         torch.backends.cudnn.benchmark = True
     model = model.cuda()
 
-    if criterion is not None:
-        criterion = criterion.cuda()
-        return model, criterion
+    if loss is not None:
+        loss = loss.cuda()
+        return model, loss
     else:
         return model
 

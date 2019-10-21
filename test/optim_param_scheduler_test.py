@@ -7,8 +7,8 @@
 import unittest
 from unittest.mock import Mock
 
-from classy_vision.criterions import build_criterion
 from classy_vision.dataset import build_dataset
+from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.optim.param_scheduler import UpdateInterval
@@ -19,7 +19,7 @@ from classy_vision.trainer import ClassyTrainer
 class TestParamSchedulerIntegration(unittest.TestCase):
     def _get_config(self):
         return {
-            "criterion": {"name": "CrossEntropyLoss"},
+            "loss": {"name": "CrossEntropyLoss"},
             "dataset": {
                 "train": {
                     "name": "synthetic_image",
@@ -69,7 +69,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         config["optimizer"]["num_epochs"] = num_phases
         task = (
             ClassyTask(num_phases=num_phases)
-            .set_criterion(build_criterion(config["criterion"]))
+            .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
         )

@@ -6,11 +6,11 @@
 
 import torch
 
-from . import ClassyCriterion, build_criterion, register_criterion
+from . import ClassyLoss, build_loss, register_loss
 
 
-@register_criterion("multi_output_sum_loss")
-class MultiOutputSumLoss(ClassyCriterion):
+@register_loss("multi_output_sum_loss")
+class MultiOutputSumLoss(ClassyLoss):
     """
     Applies the provided loss to the list of outputs (or single output) and sums
     up the losses.
@@ -21,7 +21,7 @@ class MultiOutputSumLoss(ClassyCriterion):
         assert (
             type(config["loss"]) == dict
         ), "loss must be a dict containing a configuration for a registered loss"
-        return cls(loss=build_criterion(config["loss"]))
+        return cls(loss=build_loss(config["loss"]))
 
     def __init__(self, loss):
         super().__init__()

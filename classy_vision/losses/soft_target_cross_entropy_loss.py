@@ -8,11 +8,11 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from classy_vision.criterions import ClassyCriterion, register_criterion
+from classy_vision.losses import ClassyLoss, register_loss
 
 
-@register_criterion("soft_target_cross_entropy")
-class SoftTargetCrossEntropyLoss(ClassyCriterion):
+@register_loss("soft_target_cross_entropy")
+class SoftTargetCrossEntropyLoss(ClassyLoss):
     @classmethod
     def from_config(cls, config):
         if "weight" in config:
@@ -24,7 +24,7 @@ class SoftTargetCrossEntropyLoss(ClassyCriterion):
         )
 
     def __init__(self, ignore_index, reduction, normalize_targets):
-        """Intializer for the soft target cross-entropy loss criterion.
+        """Intializer for the soft target cross-entropy loss loss.
         This allows the targets for the cross entropy loss to be multilabel
 
         Config params:
@@ -52,7 +52,7 @@ class SoftTargetCrossEntropyLoss(ClassyCriterion):
 
 class _SoftTargetCrossEntropyLoss(torch.nn.Module):
     """
-    Helper function for above criterion.
+    Helper function for above loss.
     This is separated out so that it can be used on its own (as a Pytorch loss)
     """
 
