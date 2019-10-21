@@ -49,15 +49,14 @@ def mock_get_rank():
 class TestDataset(classy_dataset.ClassyDataset):
     """Test dataset for validating registry functions"""
 
-    def __init__(self, samples, batchsize_per_replica=1):
+    def __init__(self, samples, batchsize_per_replica=1, num_samples=None):
         super().__init__(
             split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
             transform=None,
-            num_samples=len(samples),
+            num_samples=len(samples) if num_samples is None else num_samples,
         )
-        self.num_samples = len(samples)
         input_tensors = [sample["input"] for sample in samples]
         target_tensors = [sample["target"] for sample in samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
@@ -86,7 +85,6 @@ class OtherTestDataset(classy_dataset.ClassyDataset):
             transform=None,
             num_samples=len(samples),
         )
-        self.num_samples = len(samples)
         input_tensors = [sample["input"] for sample in samples]
         target_tensors = [sample["target"] for sample in samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
@@ -204,3 +202,12 @@ class TestClassyDataset(unittest.TestCase):
         dl = dataset.iterator(num_workers=0)
         sample = next(iter(dl))
         self._compare_batches(sample, DUMMY_SAMPLES_2[1])
+
+    def test_num_samples_logic(self):
+        dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=1)
+        self.assertEqual(len(dataset), 1)
+
+        # Check assert for num_samples > length of base dataset
+        dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=3)
+        with self.assertRaises(AssertionError):
+            len(dataset)
