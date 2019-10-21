@@ -5,12 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.utils import compare_samples
+from test.generic.utils import compare_batches, compare_samples
 
 import torch
 from classy_vision.dataset import build_dataset, get_available_splits, register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
 from classy_vision.dataset.core import ListDataset
+from torch.utils.data import DataLoader
 
 
 DUMMY_SAMPLES_1 = [
@@ -23,6 +24,13 @@ DUMMY_SAMPLES_2 = [
     {"input": torch.tensor([[[4, 5], [6, 7]]]), "target": torch.tensor([[1]])},
 ]
 
+BATCHED_DUMMY_SAMPLES_2 = [
+    {
+        "input": torch.tensor([[[[0, 1], [2, 3]]], [[[4, 5], [6, 7]]]]),
+        "target": torch.tensor([[[0]], [[1]]]),
+    }
+]
+
 DUMMY_CONFIG = {"name": "test_dataset", "dummy0": 0, "dummy1": 1}
 
 OTHER_DUMMY_CONFIG = {"name": "other_test_dataset", "dummy0": 0, "dummy1": 1}
@@ -32,17 +40,17 @@ OTHER_DUMMY_CONFIG = {"name": "other_test_dataset", "dummy0": 0, "dummy1": 1}
 class TestDataset(ClassyDataset):
     """Test dataset for validating registry functions"""
 
-    def __init__(self, num_samples):
+    def __init__(self, samples, batchsize_per_replica=1):
         super().__init__(
             split=None,
-            batchsize_per_replica=1,
+            batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
             transform=None,
-            num_samples=num_samples,
+            num_samples=len(samples),
         )
-        self.num_samples = num_samples
-        input_tensors = [sample["input"] for sample in num_samples]
-        target_tensors = [sample["target"] for sample in num_samples]
+        self.num_samples = len(samples)
+        input_tensors = [sample["input"] for sample in samples]
+        target_tensors = [sample["target"] for sample in samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
@@ -61,17 +69,17 @@ class OtherTestDataset(ClassyDataset):
     def get_available_splits(cls):
         return ["split0", "split1"]
 
-    def __init__(self, num_samples):
+    def __init__(self, samples, batchsize_per_replica=1):
         super().__init__(
             split=None,
-            batchsize_per_replica=1,
+            batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
             transform=None,
-            num_samples=num_samples,
+            num_samples=len(samples),
         )
-        self.num_samples = num_samples
-        input_tensors = [sample["input"] for sample in self.num_samples]
-        target_tensors = [sample["target"] for sample in self.num_samples]
+        self.num_samples = len(samples)
+        input_tensors = [sample["input"] for sample in samples]
+        target_tensors = [sample["target"] for sample in samples]
         self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
@@ -112,6 +120,9 @@ class TestClassyDataset(unittest.TestCase):
     def _compare_samples(self, sample1, sample2):
         compare_samples(self, sample1, sample2)
 
+    def _compare_batches(self, batch1, batch2):
+        compare_batches(self, batch1, batch2)
+
     def test_init(self):
         self.assertTrue(self.dataset1 is not None)
         self.assertTrue(self.dataset2 is not None)
@@ -147,3 +158,28 @@ class TestClassyDataset(unittest.TestCase):
         # Verify when strict flag is false, this does not throw
         other_dataset = build_dataset(OTHER_DUMMY_CONFIG, DUMMY_SAMPLES_1)
         other_dataset.set_classy_state(state, strict=False)
+
+    def test_get_iterator(self):
+        # Verifies that we can retrieve samples with iterators
+        dl = self.dataset1.iterator(num_workers=0)
+        assert isinstance(
+            dl, DataLoader
+        ), "Classy Iterator should return instance of PyTorch Dataloader"
+        next(iter(dl))
+
+        dl = self.dataset1.iterator(num_workers=2)
+        assert isinstance(
+            dl, DataLoader
+        ), "Classy Iterator should return instance of PyTorch Dataloader"
+        it = iter(dl)
+        next(it)
+        # Because we use multiprocessing we delete the iterable to
+        # shutdown workers
+        del it
+
+    def test_batch_logic(self):
+        dataset = TestDataset(DUMMY_SAMPLES_2, batchsize_per_replica=2)
+        dl = dataset.iterator(num_workers=0)
+        batch = next(iter(dl))
+        self.assertEqual(batch["input"].size()[0], 2)
+        self._compare_batches(batch, BATCHED_DUMMY_SAMPLES_2[0])
