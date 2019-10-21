@@ -131,7 +131,10 @@ class TestDatasets(unittest.TestCase):
                     config["name"] = dataset_name
                     config["split"] = split
                     dataset = build_dataset(config)
-                    if config["use_shuffle"]:
+                    if (
+                        hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle")
+                        and config["use_shuffle"]
+                    ):
                         dataset.do_shuffle(epoch_num=0)
 
                     self._check_dataset(dataset, dataset_name)
@@ -148,7 +151,10 @@ class TestDatasets(unittest.TestCase):
                     config["name"] = dataset_name
                     config["split"] = split
                     dataset = build_dataset(config)
-                    if config["use_shuffle"]:
+                    if (
+                        hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle")
+                        and config["use_shuffle"]
+                    ):
                         dataset.do_shuffle(epoch_num=0)
 
                     self._check_dataset(dataset, dataset_name)
