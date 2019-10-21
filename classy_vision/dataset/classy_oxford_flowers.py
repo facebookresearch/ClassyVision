@@ -11,7 +11,6 @@ import torchvision.transforms as transforms
 
 from . import register_dataset
 from .classy_dataset import ClassyDataset
-from .core import WrapDataset
 from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
 
 
@@ -164,7 +163,6 @@ class OxfordFlowersDataset(ClassyDataset):
 
         # return flowers dataset:
         dataset = datasets.ImageFolder(img_dir)
-        dataset = WrapDataset(dataset)
         self.transform = transforms.Compose(
             [TupleToMapTransform(["input", "target"]), self.transform]
         )

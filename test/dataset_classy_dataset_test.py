@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import unittest
 import unittest.mock as mock
 from test.generic.utils import compare_batches, compare_samples
@@ -150,14 +151,10 @@ class TestClassyDataset(unittest.TestCase):
 
     def test_get_set_classy_state(self):
         state = self.dataset1.get_classy_state()
-        self.assertEqual(
-            state["wrapped_state"], self.dataset1.dataset.get_classy_state()
-        )
-
-        new_config = DUMMY_CONFIG.copy()
-        new_config["dummy2"] = 2
-        state["config"] = new_config
+        new_state = copy.deepcopy(state)
+        new_state["split"] = "new_split"
         self.dataset1.set_classy_state(state)
+        self.assertFalse(new_state == state, "State should have changed")
 
         # Check assert for changing dataset types
         with self.assertRaises(AssertionError):
