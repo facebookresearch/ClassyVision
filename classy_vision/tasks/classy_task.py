@@ -491,7 +491,9 @@ class ClassyTask(object):
             # Update meters
             with PerfTimer("meters_update", perf_stats):
                 for meter in self.meters:
-                    meter.update(model_output_cpu, target.detach().cpu())
+                    meter.update(
+                        model_output_cpu, target.detach().cpu(), is_train=self.train
+                    )
 
         num_samples_in_step = self.get_global_batchsize()
         self.num_samples_this_phase += num_samples_in_step

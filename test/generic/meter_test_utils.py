@@ -85,7 +85,7 @@ class ClassificationMeterTest(unittest.TestCase):
         return qio
 
     def _apply_updates_and_test_meter(
-        self, meter, model_output, target, expected_value
+        self, meter, model_output, target, expected_value, **kwargs
     ):
         """
         Runs a valid meter test. Does not reset meter before / after running
@@ -97,7 +97,7 @@ class ClassificationMeterTest(unittest.TestCase):
             target = [target]
 
         for i in range(len(model_output)):
-            meter.update(model_output[i], target[i])
+            meter.update(model_output[i], target[i], **kwargs)
 
         meter_value = meter.value
         for key, val in expected_value.items():
@@ -123,7 +123,7 @@ class ClassificationMeterTest(unittest.TestCase):
             )
 
     def meter_update_and_reset_test(
-        self, meter, model_outputs, targets, expected_value
+        self, meter, model_outputs, targets, expected_value, **kwargs
     ):
         """
         This test verifies that a single update on the meter is successful,
@@ -138,14 +138,14 @@ class ClassificationMeterTest(unittest.TestCase):
             meter.validate(model_outputs[i].size(), targets[i].size())
 
         self._apply_updates_and_test_meter(
-            meter, model_outputs, targets, expected_value
+            meter, model_outputs, targets, expected_value, **kwargs
         )
 
         meter.reset()
 
         # Verify reset works by reusing single update test
         self._apply_updates_and_test_meter(
-            meter, model_outputs, targets, expected_value
+            meter, model_outputs, targets, expected_value, **kwargs
         )
 
     def meter_invalid_meter_input_test(self, meter, model_output, target):
@@ -153,8 +153,22 @@ class ClassificationMeterTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             meter.validate(model_output.shape, target.shape)
 
+    def meter_invalid_update_test(self, meter, model_output, target, **kwargs):
+        """
+        Runs a valid meter test. Does not reset meter before / after running
+        """
+        if not isinstance(model_output, list):
+            model_output = [model_output]
+
+        if not isinstance(target, list):
+            target = [target]
+
+        with self.assertRaises(AssertionError):
+            for i in range(len(model_output)):
+                meter.update(model_output[i], target[i], **kwargs)
+
     def meter_get_set_classy_state_test(
-        self, meters, model_outputs, targets, expected_value
+        self, meters, model_outputs, targets, expected_value, **kwargs
     ):
         """
         Tests get and set classy state methods of meter.
@@ -167,8 +181,8 @@ class ClassificationMeterTest(unittest.TestCase):
         meter0 = meters[0]
         meter1 = meters[1]
 
-        meter0.update(model_outputs[0], targets[0])
-        meter1.update(model_outputs[1], targets[1])
+        meter0.update(model_outputs[0], targets[0], **kwargs)
+        meter1.update(model_outputs[1], targets[1], **kwargs)
 
         value0 = meter0.value
         value1 = meter1.value
