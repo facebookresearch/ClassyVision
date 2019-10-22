@@ -26,7 +26,8 @@ class TestClassyTask(unittest.TestCase):
         config = get_test_task_config()
         loss = build_loss(config["loss"])
         task = (
-            ClassyTask(num_phases=1)
+            ClassyTask()
+            .set_num_epochs(1)
             .set_loss(loss)
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))

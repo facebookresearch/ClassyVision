@@ -12,7 +12,7 @@ from .utils import Arguments
 def get_test_task_config():
     return {
         "name": "classy_vision",
-        "num_phases": 12,
+        "num_epochs": 12,
         "loss": {"name": "CrossEntropyLoss"},
         "dataset": {
             "train": {

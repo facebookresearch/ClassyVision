@@ -1,6 +1,6 @@
 {
     "name": "classy_vision",
-    "num_phases": 90,
+    "num_epochs": 90,
     "loss": {
         "name": "label_smoothing_cross_entropy",
         "smoothing_param": 0.1

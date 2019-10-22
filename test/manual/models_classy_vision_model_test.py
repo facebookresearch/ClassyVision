@@ -21,7 +21,7 @@ class TestClassyModel(unittest.TestCase):
     def _get_config(self, model_config):
         return {
             "name": "classy_vision",
-            "num_phases": 12,
+            "num_epochs": 12,
             "loss": {"name": "test_loss"},
             "dataset": {
                 "name": "imagenet",

@@ -6,7 +6,7 @@
 
 import copy
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
@@ -29,11 +29,11 @@ from classy_vision.optim import ClassyOptimizer, build_optimizer
 
 
 class ClassyTask(object):
-    def __init__(self, num_phases: int):
+    def __init__(self):
         self.loss = None
         self.datasets = {}
         self.meters = []
-        self.num_phases = num_phases
+        self.num_epochs = 1
         self.test_only = False
         self.base_model = None
         self.optimizer = None
@@ -49,6 +49,10 @@ class ClassyTask(object):
         self.data_iterator = None
         self.num_samples_this_phase = 0
         self.losses = []
+
+    def set_num_epochs(self, num_epochs: Union[int, float]):
+        self.num_epochs = num_epochs
+        return self
 
     def set_dataset(self, dataset: ClassyDataset, split: str):
         self.datasets[split] = dataset
@@ -89,7 +93,7 @@ class ClassyTask(object):
     @classmethod
     def from_config(cls, config):
         optimizer_config = config["optimizer"]
-        optimizer_config["num_epochs"] = config["num_phases"]
+        optimizer_config["num_epochs"] = config["num_epochs"]
 
         datasets = {}
         splits = ["train", "test"]
@@ -105,7 +109,8 @@ class ClassyTask(object):
         optimizer = build_optimizer(optimizer_config)
 
         task = (
-            cls(num_phases=config["num_phases"])
+            cls()
+            .set_num_epochs(config["num_epochs"])
             .set_loss(loss)
             .set_test_only(test_only)
             .set_model(model)
@@ -126,7 +131,7 @@ class ClassyTask(object):
             },
             "meters": [meter._config_DO_NOT_USE for meter in self.meters],
             "model": self.base_model._config_DO_NOT_USE,
-            "num_phases": self.num_phases,
+            "num_epochs": self.num_epochs,
             "optimizer": self.optimizer._config_DO_NOT_USE,
             "test_only": self.test_only,
         }
@@ -144,7 +149,7 @@ class ClassyTask(object):
         phases + x test phases, interleaved.
         """
         if not self.test_only:
-            phases = [{"train": True} for _ in range(self.num_phases)]
+            phases = [{"train": True} for _ in range(self.num_epochs)]
 
             final_phases = []
             for phase in phases:
@@ -152,7 +157,7 @@ class ClassyTask(object):
                 final_phases.append({"train": False})
             return final_phases
 
-        return [{"train": False} for _ in range(self.num_phases)]
+        return [{"train": False} for _ in range(self.num_epochs)]
 
     def build_dataloader(self, split, num_workers, pin_memory, **kwargs):
         return self.datasets[split].iterator(
