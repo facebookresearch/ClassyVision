@@ -53,7 +53,7 @@ class ClassyMeter(object):
         """
         raise NotImplementedError
 
-    def update(self, model_output, target):
+    def update(self, model_output, target, **kwargs):
         """Updates any internal state of meter.
         Gets called after each batch processing of each phase.
 

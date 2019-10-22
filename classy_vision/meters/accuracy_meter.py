@@ -109,7 +109,7 @@ class AccuracyMeter(ClassyMeter):
     def __repr__(self):
         return repr({"name": self.name, "value": self.value})
 
-    def update(self, model_output, target):
+    def update(self, model_output, target, **kwargs):
         """
         args:
             model_output: tensor of shape (B, C) where each value is
