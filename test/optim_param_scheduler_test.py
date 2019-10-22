@@ -64,11 +64,12 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             },
         }
 
-    def _build_task(self, num_phases):
+    def _build_task(self, num_epochs):
         config = self._get_config()
-        config["optimizer"]["num_epochs"] = num_phases
+        config["optimizer"]["num_epochs"] = num_epochs
         task = (
-            ClassyTask(num_phases=num_phases)
+            ClassyTask()
+            .set_num_epochs(num_epochs)
             .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
@@ -81,7 +82,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         return task
 
     def test_param_scheduler_epoch(self):
-        task = self._build_task(num_phases=3)
+        task = self._build_task(num_epochs=3)
 
         where_list = []
 
@@ -99,7 +100,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
 
     def test_param_scheduler_step(self):
-        task = self._build_task(num_phases=3)
+        task = self._build_task(num_epochs=3)
 
         where_list = []
 

@@ -68,7 +68,8 @@ class TestClassyTrainer(unittest.TestCase):
         """Checks we can train a small MLP model on a CPU."""
         config = self._get_config()
         task = (
-            ClassyTask(num_phases=10)
+            ClassyTask()
+            .set_num_epochs(10)
             .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))

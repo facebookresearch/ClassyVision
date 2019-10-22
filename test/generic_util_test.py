@@ -287,7 +287,7 @@ class TestUtilMethods(unittest.TestCase):
     def _get_config(self):
         return {
             "name": "test_task",
-            "num_phases": 12,
+            "num_epochs": 12,
             "loss": {"name": "test_loss"},
             "dataset": {
                 "name": "test_data",

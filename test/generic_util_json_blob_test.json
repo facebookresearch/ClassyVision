@@ -1,6 +1,6 @@
 {
     "name": "test_task",
-    "num_phases": 12,
+    "num_epochs": 12,
     "loss": {
         "name": "test_loss"
     },
