@@ -203,8 +203,24 @@ class TestClassyDataset(unittest.TestCase):
         self._compare_batches(sample, DUMMY_SAMPLES_2[1])
 
     def test_num_samples_logic(self):
+        dataset = TestDataset(DUMMY_SAMPLES_2)
+        self.assertEqual(len(dataset), 2)
+
         dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=1)
+        # Verify len returns right value for dataset
         self.assertEqual(len(dataset), 1)
+        # Verify len returns right value for iterator
+        self.assertEqual(len(dataset.iterator(num_workers=0)), 1)
+        # Verify iterator returns correct number of samples
+        it = iter(dataset.iterator(num_workers=0))
+        num_samples = 0
+        while True:
+            try:
+                next(it)
+                num_samples += 1
+            except StopIteration:
+                break
+        self.assertEqual(num_samples, 1)
 
         # Check assert for num_samples > length of base dataset
         dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=3)
