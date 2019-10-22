@@ -7,20 +7,9 @@
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
-from torchvision import set_video_backend
 
 from .classy_dataset import ClassyDataset
 
-
-# TorchVision supports 2 types of video backend, namely pyav and video_reader.
-# pyav backend has pyav dependency, which is easy to resolve for both pip and conda
-# installation setup in TorchVision prebuilt package.
-# video_reader backend has ffmpeg dependency, which is easy to resolve in conda
-# setup but is hard to resolve in pip setup.
-# To ensure ClassyVision is easy to install for both pip and conda users, we
-# choose to use pyav backend by default.
-
-set_video_backend("pyav")
 
 FILE_ROOT = Path(__file__).parent
 

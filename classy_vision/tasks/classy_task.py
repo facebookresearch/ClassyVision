@@ -26,6 +26,7 @@ from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
+from torchvision import set_video_backend
 
 
 class ClassyTask(object):
@@ -95,6 +96,16 @@ class ClassyTask(object):
         optimizer_config = config["optimizer"]
         optimizer_config["num_epochs"] = config["num_epochs"]
 
+        # TorchVision supports 2 types of video backend, namely pyav and video_reader.
+        # pyav backend has pyav dependency, which is easy to resolve for both pip
+        # and conda installation setup in TorchVision prebuilt package.
+        # video_reader backend has ffmpeg dependency, which is easy to resolve in
+        # conda setup but is hard to resolve in pip setup.
+        # To ensure ClassyVision is easy to install for both pip and conda users,
+        # we use pyav backend by default.
+        video_backend = config["dataset"].get("video_backend", "pyav")
+        set_video_backend(video_backend)
+        logging.info("set video backend to %s" % video_backend)
         datasets = {}
         splits = ["train", "test"]
         for split in splits:
