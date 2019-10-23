@@ -18,7 +18,7 @@ class TestModelComplexityHook(unittest.TestCase):
         Test that the number of parameters and the FLOPs are calcuated correctly.
         """
         model_configs = get_test_model_configs()
-        expected_mega_flops = [4100, 4245, None]
+        expected_mega_flops = [4122, 4274, 106152]
         expected_params = [25557032, 25028904, 43009448]
         local_variables = {}
 
