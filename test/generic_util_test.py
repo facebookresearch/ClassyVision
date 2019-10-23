@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import argparse
+import typing
 import unittest
 import unittest.mock as mock
 from pathlib import Path
@@ -327,6 +329,27 @@ class TestUtilMethods(unittest.TestCase):
         self.assertTrue(torch.equal(torch.randn(10), random_tensor_1))
         torch.manual_seed(1)
         self.assertTrue(torch.equal(torch.randn(10), random_tensor_2))
+
+    def test_input_args_to_dict(self):
+        args_dict = {"a": 1, "b": "1234", "c": [1, 2, 3]}
+
+        # test argparse.Namespace
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--a", type=int)
+        parser.add_argument("--b")
+        parser.add_argument("--c", nargs="*", type=int)
+        input_args = ["--a", "1", "--b", "1234", "--c", "1", "2", "3"]
+        input_args = parser.parse_args(input_args)
+        self.assertDictEqual(args_dict, util.input_args_to_dict(input_args))
+
+        # test typing.NamedTuple
+        class Args(typing.NamedTuple):
+            a: int
+            b: str
+            c: typing.List[int]
+
+        input_args = Args(**args_dict)
+        self.assertDictEqual(args_dict, util.input_args_to_dict(input_args))
 
 
 class TestUpdateStateFunctions(unittest.TestCase):
