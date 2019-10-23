@@ -68,3 +68,9 @@ def register_task(name):
 
 # automatically import any Python files in the tasks/ directory
 import_all_modules(FILE_ROOT, "classy_vision.tasks")
+
+
+from .fine_tuning_task import FineTuningTask  # isort:skip
+
+
+__all__ = ["ClassyTask", "FineTuningTask", "build_task", "register_task"]

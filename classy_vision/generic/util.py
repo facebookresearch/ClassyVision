@@ -467,6 +467,31 @@ def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
         )
 
 
+def update_classy_model(model, model_state_dict, reset_heads):
+    """
+    Updates the model with the provided model state dictionary.
+
+    Args:
+        model: ClassyVisionModel instance to update
+        model_state_dict: State dict, should be the output of a call to
+            ClassyVisionModel.get_classy_state().
+        reset_heads: if False, uses the heads' state from model_state_dict.
+    """
+    try:
+        if reset_heads:
+            current_model_state_dict = model.get_classy_state()
+            # replace the checkpointed head states with source head states
+            model_state_dict["model"]["heads"] = current_model_state_dict["model"][
+                "heads"
+            ]
+        model.set_classy_state(model_state_dict)
+        logging.info("Model state load successful")
+        return True
+    except Exception:
+        logging.exception("Could not load the model state")
+    return False
+
+
 def update_classy_state(task, state_dict):
     """
     Updates the task with the provided task dictionary.
