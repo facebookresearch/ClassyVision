@@ -12,7 +12,7 @@ from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.optim.param_scheduler import UpdateInterval
-from classy_vision.tasks.classy_task import ClassyTask
+from classy_vision.tasks import ClassificationTask
 from classy_vision.trainer import ClassyTrainer
 
 
@@ -68,7 +68,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         config = self._get_config()
         config["optimizer"]["num_epochs"] = num_epochs
         task = (
-            ClassyTask()
+            ClassificationTask()
             .set_num_epochs(num_epochs)
             .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))

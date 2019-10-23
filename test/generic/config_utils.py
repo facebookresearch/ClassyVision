@@ -11,7 +11,7 @@ from .utils import Arguments
 
 def get_test_task_config(head_num_classes=1000):
     return {
-        "name": "classy_vision",
+        "name": "classification_task",
         "num_epochs": 12,
         "loss": {"name": "CrossEntropyLoss"},
         "dataset": {
@@ -66,7 +66,7 @@ def get_test_task_config(head_num_classes=1000):
 
 def get_fast_test_task_config(head_num_classes=1000):
     return {
-        "name": "classy_vision",
+        "name": "classification_task",
         "num_epochs": 1,
         "loss": {"name": "CrossEntropyLoss"},
         "dataset": {
@@ -184,7 +184,7 @@ def get_test_model_configs():
 
 def get_test_video_task_config():
     return {
-        "name": "classy_vision",
+        "name": "classification_task",
         "num_epochs": 27,
         "loss": {"name": "CrossEntropyLoss"},
         "dataset": {

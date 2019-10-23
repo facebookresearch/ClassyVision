@@ -14,7 +14,7 @@ from .classy_task import ClassyTask
 FILE_ROOT = Path(__file__).parent
 
 
-TASK_REGISTRY = {"classy_vision": ClassyTask}
+TASK_REGISTRY = {}
 TASK_CLASS_NAMES = set()
 
 
@@ -34,7 +34,6 @@ def register_task(name):
         @register_task('classification')
         class ClassificationTask(ClassyTask):
             (...)
-
     .. note::
 
         All Tasks must implement the :class:`~classy_vision.tasks.ClassyTask`
@@ -66,11 +65,16 @@ def register_task(name):
     return register_task_cls
 
 
-# automatically import any Python files in the tasks/ directory
-import_all_modules(FILE_ROOT, "classy_vision.tasks")
-
-
+from .classification_task import ClassificationTask  # isort:skip
 from .fine_tuning_task import FineTuningTask  # isort:skip
 
+__all__ = [
+    "ClassyTask",
+    "FineTuningTask",
+    "build_task",
+    "register_task",
+    "ClassificationTask",
+]
 
-__all__ = ["ClassyTask", "FineTuningTask", "build_task", "register_task"]
+# automatically import any Python files in the tasks/ directory
+import_all_modules(FILE_ROOT, "classy_vision.tasks")

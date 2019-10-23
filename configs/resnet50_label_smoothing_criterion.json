@@ -1,5 +1,5 @@
 {
-    "name": "classy_vision",
+    "name": "classification_task",
     "num_epochs": 90,
     "loss": {
         "name": "label_smoothing_cross_entropy",

@@ -20,7 +20,7 @@ class TestClassyModel(unittest.TestCase):
 
     def _get_config(self, model_config):
         return {
-            "name": "classy_vision",
+            "name": "classification_task",
             "num_epochs": 12,
             "loss": {"name": "test_loss"},
             "dataset": {
