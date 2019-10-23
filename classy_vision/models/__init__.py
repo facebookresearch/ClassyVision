@@ -85,9 +85,9 @@ def build_model(config):
 # automatically import any Python files in the models/ directory
 import_all_modules(FILE_ROOT, "classy_vision.models")
 
+from .classy_block import ClassyBlock  # isort:skip
 from .classy_model import ClassyModelEvaluationMode  # isort:skip
 from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
-from .classy_module import ClassyModule  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .inception import Inception3  # isort:skip
 from .mlp import MLP  # isort:skip
@@ -108,9 +108,9 @@ from .resnext3d_stem import (  # isort:skip
 __all__ = [
     "build_model",
     "register_model",
+    "ClassyBlock",
     "ClassyModel",
     "ClassyModelEvaluationMode",
-    "ClassyModule",
     "ClassyModelWrapper",
     "Inception3",
     "DenseNet",
