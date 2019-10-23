@@ -10,7 +10,7 @@ import torch.nn as nn
 from classy_vision.heads import ClassyHead
 
 
-class ClassyModule(nn.Module):
+class ClassyBlock(nn.Module):
     def __init__(self, name, module):
         super().__init__()
         self._name = name
@@ -41,7 +41,7 @@ class ClassyModule(nn.Module):
 
     def set_heads(self, heads):
         """
-        attach heads to current module.
+        attach heads to current block.
         Args:
             heads (list): a list of ClassyHead
         """

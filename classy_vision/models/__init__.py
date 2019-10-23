@@ -87,7 +87,7 @@ import_all_modules(FILE_ROOT, "classy_vision.models")
 
 from .classy_model import ClassyModelEvaluationMode  # isort:skip
 from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
-from .classy_module import ClassyModule  # isort:skip
+from .classy_block import ClassyBlock  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .inception import Inception3  # isort:skip
 from .mlp import MLP  # isort:skip
@@ -110,7 +110,7 @@ __all__ = [
     "register_model",
     "ClassyModel",
     "ClassyModelEvaluationMode",
-    "ClassyModule",
+    "ClassyBlock",
     "ClassyModelWrapper",
     "Inception3",
     "DenseNet",

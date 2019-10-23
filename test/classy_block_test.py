@@ -11,7 +11,7 @@ from classy_vision.heads import ClassyHead
 from classy_vision.models import ClassyModel
 
 
-class TestClassyModule(unittest.TestCase):
+class TestClassyBlock(unittest.TestCase):
     class DummyTestHead(ClassyHead):
         def __init__(self):
             super().__init__("head_id")
