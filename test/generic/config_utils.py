@@ -180,3 +180,91 @@ def get_test_model_configs():
             "small_input": False,
         },
     ]
+
+
+def get_test_video_task_config():
+    return {
+        "name": "classy_vision",
+        "num_epochs": 27,
+        "loss": {"name": "CrossEntropyLoss"},
+        "dataset": {
+            "train": {
+                "name": "synthetic_video",
+                "split": "train",
+                "batchsize_per_replica": 8,
+                "use_shuffle": True,
+                "num_samples": 128,
+                "frames_per_clip": 8,
+                "video_height": 128,
+                "video_width": 160,
+                "num_classes": 50,
+                "clips_per_video": 1,
+            },
+            "test": {
+                "name": "synthetic_video",
+                "split": "test",
+                "batchsize_per_replica": 10,
+                "use_shuffle": False,
+                "num_samples": 40,
+                "frames_per_clip": 8,
+                "video_height": 128,
+                "video_width": 160,
+                "num_classes": 50,
+                "clips_per_video": 10,
+            },
+        },
+        "meters": {"accuracy": {"topk": [1, 5]}},
+        "model": {
+            "name": "resnext3d",
+            "frames_per_clip": 8,
+            "input_planes": 3,
+            "clip_crop_size": 224,
+            "transformation_type": "bottleneck_transformation",
+            "num_blocks": [3, 4, 6, 3],
+            "input_key": "video",
+            "stem_name": "resnext3d_stem",
+            "stem_planes": 64,
+            "stem_temporal_kernel": 5,
+            "stem_spatial_kernel": 7,
+            "stem_maxpool": True,
+            "stage_planes": 64,
+            "stage_temporal_kernel_basis": [[3], [3, 1], [3, 1], [1, 3]],
+            "temporal_conv_1x1": [True, True, True, True],
+            "stage_temporal_stride": [1, 1, 1, 1],
+            "stage_spatial_stride": [1, 2, 2, 2],
+            "num_groups": 1,
+            "width_per_group": 64,
+            "num_classes": 50,
+            "freeze_trunk": False,
+            "heads": [
+                {
+                    "name": "fully_convolutional_linear",
+                    "unique_id": "default_head",
+                    "pool_size": [8, 7, 7],
+                    "activation_func": "softmax",
+                    "num_classes": 50,
+                    "fork_block": "pathway1-stage5-block3",
+                    "in_plane": 512,
+                    "use_dropout": True,
+                }
+            ],
+        },
+        "optimizer": {
+            "name": "sgd",
+            "lr": {
+                "name": "multistep",
+                "num_epochs": 10,
+                "values": [0.1, 0.01, 0.001, 0.0001],
+                "milestones": [3, 7, 9],
+            },
+            "weight_decay": 0.0001,
+            "momentum": 0.9,
+        },
+    }
+
+
+def get_test_classy_video_task():
+    config = get_test_video_task_config()
+    args = get_test_args()
+    task = build_task(config, args)
+    return task
