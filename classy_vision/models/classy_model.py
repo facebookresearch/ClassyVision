@@ -10,7 +10,7 @@ from enum import Enum
 
 import torch.nn as nn
 
-from .classy_module import ClassyModule
+from .classy_block import ClassyBlock
 
 
 class ClassyModelEvaluationMode(Enum):
@@ -104,7 +104,7 @@ class ClassyModel(nn.Module):
         """
         if name in self._attachable_blocks:
             raise ValueError("Found duplicated block name {}".format(name))
-        block = ClassyModule(name, module)
+        block = ClassyBlock(name, module)
         self._attachable_blocks[name] = block
         return block
 
