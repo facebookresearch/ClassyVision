@@ -15,7 +15,11 @@ from torch.cuda import cudart
 
 
 def profile(
-    model, batchsize_per_replica=32, input_shape=(3, 224, 224), use_nvprof=False
+    model,
+    batchsize_per_replica=32,
+    input_shape=(3, 224, 224),
+    use_nvprof=False,
+    input_key=None,
 ):
     """
     Performs CPU or GPU profiling of the specified model on the specified input.
@@ -30,10 +34,13 @@ def profile(
         logging.info("CUDA profiling: Make sure you are running under nvprof!")
 
     # input for model:
-    input = torch.zeros(batchsize_per_replica, *input_shape)
-    if is_on_gpu(model):
-        input = input.cuda(non_blocking=False)
-
+    input = get_model_dummy_input(
+        model,
+        input_shape,
+        input_key,
+        batchsize=batchsize_per_replica,
+        non_blocking=False,
+    )
     # perform profiling:
     with torch.no_grad():
         model(input)  # warm up CUDA memory allocator and profiler
@@ -56,7 +63,7 @@ def _layer_flops(layer, x):
     # get layer type:
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
-
+    batchsize_per_replica = x.size()[0]
     # 2D convolution:
     if layer_type in ["Conv2d"]:
         out_h = int(
@@ -70,7 +77,8 @@ def _layer_flops(layer, x):
             + 1
         )
         return (
-            layer.in_channels
+            batchsize_per_replica
+            * layer.in_channels
             * layer.out_channels
             * layer.kernel_size[0]
             * layer.kernel_size[1]
@@ -92,7 +100,8 @@ def _layer_flops(layer, x):
         )
         count1 = _layer_flops(layer.relu, x) + _layer_flops(layer.norm, x)
         count2 = (
-            conv.in_channels
+            batchsize_per_replica
+            * conv.in_channels
             * conv.out_channels
             * conv.kernel_size[0]
             * conv.kernel_size[1]
@@ -103,20 +112,21 @@ def _layer_flops(layer, x):
         return count1 + count2
 
     # non-linearities:
-    elif layer_type in ["ReLU", "Tanh", "Sigmoid"]:
+    elif layer_type in ["ReLU", "Tanh", "Sigmoid", "Softmax"]:
         return x.numel()
 
     # 2D pooling layers:
     elif layer_type in ["AvgPool2d", "MaxPool2d"]:
-        in_w = x.size()[2]
+        in_h = x.size()[2]
+        in_w = x.size()[3]
         if isinstance(layer.kernel_size, int):
             layer.kernel_size = (layer.kernel_size, layer.kernel_size)
         kernel_ops = layer.kernel_size[0] * layer.kernel_size[1]
+        out_h = 1 + int(
+            (in_h + 2 * layer.padding - layer.kernel_size[0]) / layer.stride
+        )
         out_w = 1 + int(
             (in_w + 2 * layer.padding - layer.kernel_size[1]) / layer.stride
-        )
-        out_h = 1 + int(
-            (in_w + 2 * layer.padding - layer.kernel_size[0]) / layer.stride
         )
         return x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
 
@@ -143,9 +153,75 @@ def _layer_flops(layer, x):
         bias_ops = layer.bias.numel()
         return x.size()[0] * (weight_ops + bias_ops)
 
-    # batch normalization:
-    elif layer_type in ["BatchNorm2d"]:
-        return 2 * x.size()[0]
+    # 2D/3D batch normalization:
+    elif layer_type in ["BatchNorm2d", "BatchNorm3d"]:
+        return 2 * x.numel()
+
+    # 3D convolution
+    elif layer_type in ["Conv3d"]:
+        out_t = int(
+            (x.size()[2] + 2 * layer.padding[0] - layer.kernel_size[0])
+            // layer.stride[0]
+            + 1
+        )
+        out_h = int(
+            (x.size()[3] + 2 * layer.padding[1] - layer.kernel_size[1])
+            // layer.stride[1]
+            + 1
+        )
+        out_w = int(
+            (x.size()[4] + 2 * layer.padding[2] - layer.kernel_size[2])
+            // layer.stride[2]
+            + 1
+        )
+        return (
+            batchsize_per_replica
+            * layer.in_channels
+            * layer.out_channels
+            * layer.kernel_size[0]
+            * layer.kernel_size[1]
+            * layer.kernel_size[2]
+            * out_t
+            * out_h
+            * out_w
+            / layer.groups
+        )
+
+    # 3D pooling layers
+    elif layer_type in ["AvgPool3d", "MaxPool3d"]:
+        in_t = x.size()[2]
+        in_h = x.size()[3]
+        in_w = x.size()[4]
+        if isinstance(layer.kernel_size, int):
+            layer.kernel_size = (
+                layer.kernel_size,
+                layer.kernel_size,
+                layer.kernel_size,
+            )
+        if isinstance(layer.padding, int):
+            layer.padding = (layer.padding, layer.padding, layer.padding)
+        if isinstance(layer.stride, int):
+            layer.stride = (layer.stride, layer.stride, layer.stride)
+        kernel_ops = layer.kernel_size[0] * layer.kernel_size[1] * layer.kernel_size[2]
+        out_t = 1 + int(
+            (in_t + 2 * layer.padding[0] - layer.kernel_size[0]) / layer.stride[0]
+        )
+        out_h = 1 + int(
+            (in_h + 2 * layer.padding[1] - layer.kernel_size[1]) / layer.stride[1]
+        )
+        out_w = 1 + int(
+            (in_w + 2 * layer.padding[2] - layer.kernel_size[2]) / layer.stride[2]
+        )
+        return batchsize_per_replica * x.size()[1] * out_t * out_h * out_w * kernel_ops
+
+    # dropout layer
+    elif layer_type in ["Dropout"]:
+        # At test time, we do not drop values but scale the feature map by the
+        # dropout ratio
+        flops = 1
+        for dim_size in x.size():
+            flops *= dim_size
+        return flops
 
     # not implemented:
     raise NotImplementedError("FLOPs not implemented for %s layer" % layer_type)

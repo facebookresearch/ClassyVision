@@ -42,5 +42,6 @@ class ProfilerHook(ClassyHook):
             task.model,
             batchsize_per_replica=batchsize_per_replica,
             input_shape=input_shape,
+            input_key=getattr(task.base_model, "input_key", None),
         )
         logging.info(summarize_profiler_info(p))

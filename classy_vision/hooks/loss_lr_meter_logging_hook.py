@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from math import floor
 from typing import Any, Dict, Optional
 
 from classy_vision import tasks
