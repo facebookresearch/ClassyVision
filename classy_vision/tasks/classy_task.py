@@ -16,7 +16,7 @@ class ClassyTask(ABC):
     @classmethod
     @abstractmethod
     def from_config(cls, config):
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     def init_distributed_data_parallel_model(self):
