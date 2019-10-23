@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import random
 from typing import Any, Callable, Dict, List, Optional
 
 import torch
@@ -21,7 +22,58 @@ class VideoConstants:
 
     MEAN = ImagenetConstants.MEAN
     STD = ImagenetConstants.STD
+    SCALE = (128, 160)
     CROP_SIZE = 112
+
+
+@register_transform("video_random_scale_crop")
+class VideoRandomScaleCrop(ClassyTransform):
+    """Given a scale range, randomly choose a scale. Rescale the clip so that
+    its short edge equals to the chosen scale. Then randomly crop the video
+    clip with the specified size.
+    Such training data augmengation is used in VGG net
+    (https://arxiv.org/abs/1409.1556).
+    Also see reference implementation `Kinetics.spatial_sampling` in SlowFast
+        codebase.
+
+    Args:
+        size (int or tuple): expected output size (height, width)
+        scale (2-tuple): the min- and max scale
+        interpolation_mode: Default: "bilinear"
+    """
+
+    def __init__(self, size, scale, interpolation_mode="bilinear"):
+        if isinstance(size, tuple):
+            assert len(size) == 2, "size should be tuple (height, width)"
+            self.size = size
+        else:
+            self.size = (size, size)
+
+        self.interpolation_mode = interpolation_mode
+        self.scale = scale
+
+    def __call__(self, clip):
+        # clip size: C x T x H x W
+        h = clip.size()[2]
+        w = clip.size()[3]
+        rand_scale = random.randint(self.scale[0], self.scale[1])
+        if h < w:
+            new_h = rand_scale
+            new_w = int(rand_scale * w / h)
+        else:
+            new_w = rand_scale
+            new_h = int(rand_scale * h / w)
+        clip = torch.nn.functional.interpolate(
+            clip, size=(new_h, new_w), mode=self.interpolation_mode
+        )
+        assert (
+            self.size[0] <= new_h and self.size[1] <= new_w
+        ), "crop size can not be larger than video frame size"
+
+        i = random.randint(0, new_h - self.size[0])
+        j = random.randint(0, new_w - self.size[1])
+        clip = clip[:, :, i : i + self.size[0], j : j + self.size[1]]
+        return clip
 
 
 @register_transform("video_default_augment")
@@ -29,13 +81,15 @@ class VideoDefaultAugmentTransform(ClassyTransform):
     def __init__(
         self,
         crop_size: int = VideoConstants.CROP_SIZE,
+        scale: List[int] = VideoConstants.SCALE,
         mean: List[float] = VideoConstants.MEAN,
         std: List[float] = VideoConstants.STD,
     ):
         self._transform = transforms.Compose(
             [
                 transforms_video.ToTensorVideo(),
-                transforms_video.RandomResizedCropVideo(crop_size),
+                # TODO(zyan3): migrate VideoRandomScaleCrop to TorchVision
+                VideoRandomScaleCrop(crop_size, scale),
                 transforms_video.RandomHorizontalFlipVideo(),
                 transforms_video.NormalizeVideo(mean=mean, std=std),
             ]
