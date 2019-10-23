@@ -12,7 +12,7 @@ from test.generic.utils import compare_model_state, compare_samples, compare_sta
 
 import classy_vision.generic.util as util
 import torch
-from classy_vision.generic.util import update_classy_state
+from classy_vision.generic.util import update_classy_model, update_classy_state
 from classy_vision.tasks import build_task
 from classy_vision.trainer import ClassyTrainer
 
@@ -333,6 +333,9 @@ class TestUpdateStateFunctions(unittest.TestCase):
     def _compare_states(self, state_1, state_2, check_heads=True):
         compare_states(self, state_1, state_2)
 
+    def _compare_model_state(self, state_1, state_2, check_heads=True):
+        return compare_model_state(self, state_1, state_2, check_heads=check_heads)
+
     def test_update_classy_state(self):
         """
         Tests that the update_classy_state successfully updates from a
@@ -347,3 +350,32 @@ class TestUpdateStateFunctions(unittest.TestCase):
         trainer.train(task)
         update_classy_state(task_2, task.get_classy_state(deep_copy=True))
         self._compare_states(task.get_classy_state(), task_2.get_classy_state())
+
+    def test_update_classy_model(self):
+        """
+        Tests that the update_classy_model successfully updates from a
+        checkpoint
+        """
+        config = get_fast_test_task_config()
+        args = get_test_args()
+        task = build_task(config, args)
+        trainer = ClassyTrainer(use_gpu=False)
+        trainer.train(task)
+        for reset_heads in [False, True]:
+            task_2 = build_task(config, args)
+            update_classy_model(
+                task_2.model, task.model.get_classy_state(deep_copy=True), reset_heads
+            )
+            self._compare_model_state(
+                task.model.get_classy_state(),
+                task_2.model.get_classy_state(),
+                check_heads=not reset_heads,
+            )
+            if reset_heads:
+                # the model head states should be different
+                with self.assertRaises(Exception):
+                    self._compare_model_state(
+                        task.model.get_classy_state(),
+                        task_2.model.get_classy_state(),
+                        check_heads=True,
+                    )

@@ -9,7 +9,7 @@ from classy_vision.tasks import build_task
 from .utils import Arguments
 
 
-def get_test_task_config():
+def get_test_task_config(head_num_classes=1000):
     return {
         "name": "classy_vision",
         "num_epochs": 12,
@@ -47,7 +47,7 @@ def get_test_task_config():
                 {
                     "name": "fully_connected",
                     "unique_id": "default_head",
-                    "num_classes": 1000,
+                    "num_classes": head_num_classes,
                     "fork_block": "block3-2",
                     "in_plane": 2048,
                 }
@@ -64,14 +64,58 @@ def get_test_task_config():
     }
 
 
-def get_fast_test_task_config():
-    config = get_test_task_config()
-    # use 10 samples, 5 batchsize, and 1 phase for faster testing
-    for split in ["train", "test"]:
-        config["dataset"][split]["num_samples"] = 10
-        config["dataset"][split]["batchsize_per_replica"] = 5
-    config["num_phases"] = 1
-    return config
+def get_fast_test_task_config(head_num_classes=1000):
+    return {
+        "name": "classy_vision",
+        "num_epochs": 1,
+        "loss": {"name": "CrossEntropyLoss"},
+        "dataset": {
+            "train": {
+                "name": "synthetic_image",
+                "split": "train",
+                "crop_size": 20,
+                "class_ratio": 0.5,
+                "num_samples": 10,
+                "seed": 0,
+                "batchsize_per_replica": 2,
+                "use_shuffle": False,
+            },
+            "test": {
+                "name": "synthetic_image",
+                "split": "test",
+                "crop_size": 20,
+                "class_ratio": 0.5,
+                "num_samples": 10,
+                "seed": 0,
+                "batchsize_per_replica": 2,
+                "use_shuffle": False,
+            },
+        },
+        "model": {
+            "name": "resnet",
+            "num_blocks": [1],
+            "small_input": False,
+            "zero_init_bn_residuals": True,
+            "freeze_trunk": False,
+            "heads": [
+                {
+                    "name": "fully_connected",
+                    "unique_id": "default_head",
+                    "num_classes": head_num_classes,
+                    "fork_block": "block0-0",
+                    "in_plane": 256,
+                }
+            ],
+        },
+        "meters": {"accuracy": {"topk": [1]}},
+        "optimizer": {
+            "name": "sgd",
+            "lr": 0.01,
+            "weight_decay": 1e-4,
+            "weight_decay_batchnorm": 0.0,
+            "momentum": 0.9,
+        },
+    }
 
 
 def get_test_args():
