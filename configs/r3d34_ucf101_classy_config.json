@@ -1,6 +1,6 @@
 {
     "name": "classy_vision",
-    "num_phases": 300,
+    "num_epochs": 300,
     "loss": {
         "name": "CrossEntropyLoss"
     },
