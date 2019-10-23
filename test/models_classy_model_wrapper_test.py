@@ -13,7 +13,7 @@ import torch.nn as nn
 from classy_vision.models import ClassyModel
 from classy_vision.models.classy_model_wrapper import ClassyModelWrapper
 from classy_vision.tasks import build_task
-from classy_vision.trainer import ClassyTrainer
+from classy_vision.trainer import LocalTrainer
 from torchvision import models
 
 
@@ -82,5 +82,5 @@ class TestClassyModelWrapper(unittest.TestCase):
         args = get_test_args()
         task = build_task(config, args)
         task.set_model(classy_model)
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)

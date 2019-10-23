@@ -13,7 +13,7 @@ from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks import ClassificationTask
-from classy_vision.trainer import ClassyTrainer
+from classy_vision.trainer import LocalTrainer
 
 
 class TestParamSchedulerIntegration(unittest.TestCase):
@@ -94,7 +94,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         mock.update_interval = UpdateInterval.EPOCH
         task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
 
         self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
@@ -112,7 +112,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         mock.update_interval = UpdateInterval.STEP
         task.optimizer._lr_scheduler = mock
 
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.

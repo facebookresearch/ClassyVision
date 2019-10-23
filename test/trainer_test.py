@@ -13,7 +13,7 @@ from classy_vision.meters.accuracy_meter import AccuracyMeter
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import ClassificationTask
-from classy_vision.trainer import ClassyTrainer
+from classy_vision.trainer import LocalTrainer
 
 
 class TestClassyTrainer(unittest.TestCase):
@@ -82,7 +82,7 @@ class TestClassyTrainer(unittest.TestCase):
 
         self.assertTrue(task is not None)
 
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
         accuracy = task.meters[0].value["top_1"]
         self.assertAlmostEqual(accuracy, 1.0)
