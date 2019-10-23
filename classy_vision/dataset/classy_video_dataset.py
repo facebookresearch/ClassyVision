@@ -4,9 +4,14 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import logging
 import multiprocessing
+import os
 
+import torch
+from classy_vision.generic.distributed_util import get_rank, get_world_size
 from torchvision.datasets.samplers.clip_sampler import (
+    DistributedSampler,
     RandomClipSampler,
     UniformClipSampler,
 )
@@ -68,10 +73,15 @@ class ClassyVideoDataset(ClassyDataset):
         ) = super().parse_config(config)
 
         if not config["split"] == "train":
-            assert batchsize_per_replica % clips_per_video == 0, (
-                "For video test dataset, the batchsize per replica must be a "
-                "multiplier of No. of clips samepled from each video"
-            )
+            # At testing time, we do not crop frames but conduct a FCN-style evaluation.
+            # Video spatial resolution can vary from video to video. So we test one
+            # video at a time, and NO. of clips in a minibatch should be equal to
+            # No. of clips sampled from a video
+            if not batchsize_per_replica == clips_per_video:
+                logging.warning(
+                    f"For testing, batchsize per replica ({batchsize_per_replica})"
+                    + f"should be equal to clips_per_video ({clips_per_video})"
+                )
 
         return (
             transform_config,
@@ -88,34 +98,58 @@ class ClassyVideoDataset(ClassyDataset):
             clips_per_video,
         )
 
-    def wrap_video_dataset(
-        self,
-        dataset,
-        split,
-        clips_per_video,
-        transform,
-        batchsize_per_replica,
-        shuffle=True,
-        subsample=None,
-    ):
-        if split == "train":
+    def load_metadata(self, filepath, video_dir=None, update_file_path=False):
+        metadata = torch.load(filepath)
+        if video_dir is not None and update_file_path:
+            # video path in meta data can be computed in a different root video folder
+            # If we use a different root video folder, we need to update the video paths
+            assert os.path.exists(video_dir), "folder does not exist: %s" % video_dir
+            for idx, video_path in enumerate(metadata["video_paths"]):
+                # video path template is $VIDEO_DIR/$CLASS_NAME/$VIDEO_FILE
+                dirname, filename = os.path.split(video_path)
+                _, class_name = os.path.split(dirname)
+                metadata["video_paths"][idx] = os.path.join(
+                    video_dir, class_name, filename
+                )
+        return metadata
+
+    def save_metadata(self, filepath):
+        filedir = os.path.dirname(filepath)
+        if not os.path.exists(filedir):
+            try:
+                os.mkdirs(filedir)
+            except Exception as err:
+                logging.warn(f"Fail to create folder: {filedir}")
+                raise err
+        logging.info(f"Save metadata to file: {filedir}")
+        try:
+            torch.save(self.metadata, filepath)
+        except ValueError:
+            logging.warn(f"Fail to save metadata to file: {filepath}")
+
+    def _get_sampler(self):
+        if self.split == "train":
             # For video model training, we don't necessarily want to use all possible
             # clips in the video in one training epoch. More often, we randomly
             # sample at most N clips per training video. In practice, N is often 1
-            sampler = RandomClipSampler(dataset.video_clips, clips_per_video)
+            clip_sampler = RandomClipSampler(
+                self.dataset.video_clips, self.clips_per_video
+            )
         else:
             # For video model testing, we sample N evenly spaced clips per test
             # video. We will simply average predictions over them
-            sampler = UniformClipSampler(dataset.video_clips, clips_per_video)
-        dataset = dataset.resample(list(sampler))
-
-        return self.wrap_dataset(
-            dataset,
-            transform=transform,
-            batchsize_per_replica=batchsize_per_replica,
-            shuffle=shuffle,
-            subsample=subsample,
-            shard_group_size=1 if split == "train" else clips_per_video,
+            clip_sampler = UniformClipSampler(
+                self.dataset.video_clips, self.clips_per_video
+            )
+        world_size = get_world_size()
+        rank = get_rank()
+        return DistributedSampler(
+            clip_sampler,
+            num_replicas=world_size,
+            rank=rank,
+            shuffle=self.shuffle,
+            group_size=self.clips_per_video,
+            num_samples=self.num_samples,
         )
 
     def iterator(self, *args, **kwargs):
