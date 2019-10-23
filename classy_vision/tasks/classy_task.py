@@ -484,6 +484,12 @@ class ClassyTask(object):
                     torch.tensor(0.0, device=target.device), requires_grad=True
                 )
             else:
+                # For video classification, model_outputs are different between training
+                # and test time. At training time, it is logit of individual clip.
+                # At testing time, it is class probabilities averaged over pixel
+                # locations obtained in a FCN manner. Therefore, at testing time,
+                # the local_loss is meaningless and should be ignored. But
+                # results of meters are still meaningful.
                 local_variables["local_loss"] = self.loss(model_output, target)
 
             # NOTE: This performs an all_reduce_mean() on the losses across the

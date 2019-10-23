@@ -17,6 +17,7 @@ class WrapTorchVisionVideoDataset:
         assert isinstance(dataset, torch.utils.data.Dataset)
         super(WrapTorchVisionVideoDataset, self).__init__()
         self.dataset = dataset
+        self.video_clips = dataset.video_clips
 
     def __getitem__(self, idx):
         video, audio, target = self.dataset[idx]

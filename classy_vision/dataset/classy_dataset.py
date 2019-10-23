@@ -90,7 +90,9 @@ class ClassyDataset:
         return transform_config, batchsize_per_replica, shuffle, num_samples
 
     def __getitem__(self, idx):
-        assert idx >= 0 and idx < len(self), "Provided idx is outside of dataset range"
+        assert idx >= 0 and idx < len(
+            self.dataset
+        ), "Provided idx is outside of dataset range"
         sample = self.dataset[idx]
         if self.transform is None:
             return sample
