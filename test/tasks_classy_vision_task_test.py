@@ -11,22 +11,21 @@ from classy_vision.dataset import build_dataset
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
-from classy_vision.tasks import build_task
-from classy_vision.tasks.classy_task import ClassyTask
+from classy_vision.tasks import ClassificationTask, build_task
 
 
-class TestClassyTask(unittest.TestCase):
+class TestClassificationTask(unittest.TestCase):
     def test_build_task(self):
         config = get_test_task_config()
         args = get_test_args()
         task = build_task(config, args)
-        self.assertTrue(isinstance(task, ClassyTask))
+        self.assertTrue(isinstance(task, ClassificationTask))
 
     def test_get_state(self):
         config = get_test_task_config()
         loss = build_loss(config["loss"])
         task = (
-            ClassyTask()
+            ClassificationTask()
             .set_num_epochs(1)
             .set_loss(loss)
             .set_model(build_model(config["model"]))

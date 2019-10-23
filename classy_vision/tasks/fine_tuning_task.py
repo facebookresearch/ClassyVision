@@ -7,12 +7,11 @@
 from typing import Any, Dict
 
 from classy_vision.generic.util import update_classy_model
-from classy_vision.tasks import register_task
-from classy_vision.tasks.classy_task import ClassyTask
+from classy_vision.tasks import ClassificationTask, register_task
 
 
 @register_task("fine_tuning")
-class FineTuningTask(ClassyTask):
+class FineTuningTask(ClassificationTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pretrained_checkpoint = None
