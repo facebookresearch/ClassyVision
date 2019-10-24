@@ -217,9 +217,6 @@ class ClassificationTask(ClassyTask):
         }
 
     def prepare(self, num_workers=0, pin_memory=False, use_gpu=False):
-        """
-        Prepares the task for training.
-        """
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
             num_workers=num_workers, pin_memory=pin_memory
