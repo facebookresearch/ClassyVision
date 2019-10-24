@@ -71,7 +71,7 @@ class TestCheckpointHook(unittest.TestCase):
             self.assertIn(key, checkpoint)
         # not testing for equality of classy_state_dict, that is tested in
         # a separate test
-        self.assertEqual(checkpoint["input_args"], args)
+        self.assertDictEqual(checkpoint["input_args"], args._asdict())
         self.assertDictEqual(checkpoint["config"], task.get_config())
 
     def test_checkpoint_period(self) -> None:

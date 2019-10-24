@@ -9,8 +9,6 @@ from functools import wraps
 
 import torch
 
-from .merge_dataset import MergeDataset
-
 
 class Arguments(object):
     """Object that looks like input arguments. Used to spoof argparse namespace."""
@@ -27,6 +25,9 @@ class Arguments(object):
             return self.args == other.args
         else:
             return NotImplemented
+
+    def _asdict(self):
+        return vars(self)
 
 
 def skip_if_no_gpu(func):
