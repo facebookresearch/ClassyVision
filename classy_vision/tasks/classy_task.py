@@ -50,6 +50,13 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
+    def prepare(self, num_workers=0, pin_memory=False, use_gpu=False):
+        """
+        Prepares the task for training.
+        """
+        pass
+
+    @abstractmethod
     def train_step(self, use_gpu, local_variables=None):
         pass
 
