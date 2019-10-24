@@ -11,7 +11,7 @@ from test.generic.utils import compare_model_state
 
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.tasks import FineTuningTask, build_task
-from classy_vision.trainer import ClassyTrainer
+from classy_vision.trainer import LocalTrainer
 
 
 class TestFineTuningTask(unittest.TestCase):
@@ -69,7 +69,7 @@ class TestFineTuningTask(unittest.TestCase):
         pre_train_config = self._get_pre_train_config(head_num_classes=1000)
         args = get_test_args()
         pre_train_task = build_task(pre_train_config, args)
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(pre_train_task)
         checkpoint = get_checkpoint_dict(pre_train_task, args)
 

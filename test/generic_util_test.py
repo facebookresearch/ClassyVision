@@ -14,7 +14,7 @@ import classy_vision.generic.util as util
 import torch
 from classy_vision.generic.util import update_classy_model, update_classy_state
 from classy_vision.tasks import build_task
-from classy_vision.trainer import ClassyTrainer
+from classy_vision.trainer import LocalTrainer
 
 
 ROOT = Path(__file__).parent
@@ -346,7 +346,7 @@ class TestUpdateStateFunctions(unittest.TestCase):
         task = build_task(config, args)
         task_2 = build_task(config, args)
         task_2.prepare()
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
         update_classy_state(task_2, task.get_classy_state(deep_copy=True))
         self._compare_states(task.get_classy_state(), task_2.get_classy_state())
@@ -359,7 +359,7 @@ class TestUpdateStateFunctions(unittest.TestCase):
         config = get_fast_test_task_config()
         args = get_test_args()
         task = build_task(config, args)
-        trainer = ClassyTrainer(use_gpu=False)
+        trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
         for reset_heads in [False, True]:
             task_2 = build_task(config, args)
