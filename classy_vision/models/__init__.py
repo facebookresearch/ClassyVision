@@ -65,9 +65,6 @@ def build_model(config):
     assert config["name"] in MODEL_REGISTRY, "unknown model"
     model = MODEL_REGISTRY[config["name"]].from_config(config)
     if "heads" in config:
-        assert (
-            "freeze_trunk" in config
-        ), "Expect freeze_trunk to be specified in config when there is head"
         heads = defaultdict(dict)
         for head_config in config["heads"]:
             assert "fork_block" in head_config, "Expect fork_block in config"
@@ -77,7 +74,7 @@ def build_model(config):
 
             head = build_head(updated_config)
             heads[fork_block][head.unique_id] = head
-        model.set_heads(heads, config["freeze_trunk"])
+        model.set_heads(heads)
     model._config_DO_NOT_USE = config
     return model
 

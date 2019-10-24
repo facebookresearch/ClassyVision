@@ -102,7 +102,7 @@ class TestClassyModel(unittest.TestCase):
         for head_config in head_configs:
             head = build_head(head_config)
             heads[head_config["fork_block"]][head.unique_id] = head
-        model.set_heads(heads, True)
+        model.set_heads(heads)
         model_state = model.get_classy_state()
 
         # the heads should be the same as we set
@@ -113,5 +113,5 @@ class TestClassyModel(unittest.TestCase):
         model._clear_heads()
         self._compare_model_state(model.get_classy_state(), trunk_state)
 
-        model.set_heads(heads, True)
+        model.set_heads(heads)
         self._compare_model_state(model.get_classy_state(), model_state)

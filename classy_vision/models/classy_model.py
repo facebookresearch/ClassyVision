@@ -19,12 +19,11 @@ class ClassyModelEvaluationMode(Enum):
 
 
 class ClassyModel(nn.Module):
-    def __init__(self, num_classes, freeze_trunk=False):
+    def __init__(self, num_classes):
         super().__init__()
 
         self._num_classes = num_classes
         self._attachable_blocks = {}
-        self.freeze_trunk = freeze_trunk
 
     @classmethod
     def from_config(cls, config):
@@ -56,7 +55,7 @@ class ClassyModel(nn.Module):
         # states depend on heads
         self._clear_heads()
         trunk_state_dict = super().state_dict()
-        self.set_heads(attached_heads, self.freeze_trunk)
+        self.set_heads(attached_heads)
 
         head_state_dict = {}
         for block, heads in attached_heads.items():
@@ -120,7 +119,7 @@ class ClassyModel(nn.Module):
         for block in self._attachable_blocks.values():
             block.set_heads([])
 
-    def set_heads(self, heads, freeze_trunk):
+    def set_heads(self, heads):
         """
         Attach all the heads to corresponding blocks.
         A head is a neural network which takes input from an interior block of
@@ -128,13 +127,8 @@ class ClassyModel(nn.Module):
         model / model trunk.
         heads -- a mapping between fork block name and dictionary of heads
                  (e.g. {"block15": {"team1": head1, "team2": head2}})
-        freeze_trunk -- whether freeze the parameters of layers in the base model
         """
         self._clear_heads()
-
-        if freeze_trunk:
-            for param in self.parameters():
-                param.requires_grad = False
 
         head_ids = set()
         for block_name, heads in heads.items():

@@ -41,7 +41,6 @@ class ResNeXt3D(ClassyModel):
         stage_spatial_stride,
         num_groups,
         width_per_group,
-        freeze_trunk,
         zero_init_final_transform_bn,
     ):
         """
@@ -79,12 +78,10 @@ class ResNeXt3D(ClassyModel):
                 num_groups > 1 is for ResNeXt like networks.
             width_per_group (int): No. of channels per group in 2nd (group) conv in the
                 residual transformation in the first stage
-            freeze_trunk (bool): if true, model trunk, including stem and stages,
-                is freezed and only heads are finetuned.
             zero_init_final_transform_bn (bool): if true, the weight of last
                 BatchNorm in in the residual transformation is initialized to zero
         """
-        super(ResNeXt3D, self).__init__(num_classes=None, freeze_trunk=freeze_trunk)
+        super(ResNeXt3D, self).__init__(num_classes=None)
 
         self._input_key = input_key
         self.input_planes = input_planes
@@ -187,8 +184,6 @@ class ResNeXt3D(ClassyModel):
                 "width_per_group": config.get("width_per_group", 64),
             }
         )
-        # Default setting for model trunk.
-        ret_config.update({"freeze_trunk": config.get("freeze_trunk", False)})
         # Default setting for model parameter initialization
         ret_config.update(
             {

@@ -115,7 +115,6 @@ class DenseNet(ClassyModel):
         self,
         num_blocks,
         num_classes,
-        freeze_trunk,
         init_planes,
         growth_rate,
         expansion,
@@ -131,7 +130,7 @@ class DenseNet(ClassyModel):
             layers. These settings are useful when
             training Siamese networks.
         """
-        super().__init__(num_classes, freeze_trunk)
+        super().__init__(num_classes)
 
         # assertions:
         assert type(num_blocks) == list
@@ -207,7 +206,6 @@ class DenseNet(ClassyModel):
         config = {
             "num_blocks": config["num_blocks"],
             "num_classes": config.get("num_classes"),
-            "freeze_trunk": config.get("freeze_trunk", False),
             "init_planes": config.get("init_planes", 64),
             "growth_rate": config.get("growth_rate", 32),
             "expansion": config.get("expansion", 4),

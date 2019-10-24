@@ -41,7 +41,6 @@ class VGG(ClassyModel):
     def __init__(
         self,
         num_classes,
-        freeze_trunk,
         depth,
         num_stages,
         stride2_inds,
@@ -53,7 +52,7 @@ class VGG(ClassyModel):
         relu_inplace,
         small_input,
     ):
-        super().__init__(num_classes, freeze_trunk)
+        super().__init__(num_classes)
 
         assert num_classes is None or is_pos_int(num_classes)
         assert depth in _STAGES.keys(), "VGG{} not supported".format(depth)
@@ -148,7 +147,6 @@ class VGG(ClassyModel):
         )
 
         config.setdefault("num_classes", None)
-        config.setdefault("freeze_trunk", False)
         return cls(**config)
 
     def _init_weights(self):

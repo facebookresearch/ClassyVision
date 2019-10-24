@@ -38,7 +38,6 @@
         "num_blocks": [3, 4, 6, 3],
         "small_input": false,
         "zero_init_bn_residuals": true,
-        "freeze_trunk": false,
         "heads": [
           {
             "name": "fully_connected",

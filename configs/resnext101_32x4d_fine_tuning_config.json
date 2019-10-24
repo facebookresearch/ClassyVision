@@ -31,7 +31,6 @@
         "base_width_and_cardinality": [4, 32],
         "small_input": false,
         "zero_init_bn_residuals": true,
-        "freeze_trunk": true,
         "heads": [
             {
                 "name": "fully_connected",

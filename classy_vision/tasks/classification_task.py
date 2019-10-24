@@ -481,13 +481,7 @@ class ClassificationTask(ClassyTask):
 
     def _set_model_train_mode(self):
         phase = self.phases[self.phase_idx]
-        if self.base_model.freeze_trunk:
-            self.model.eval()
-            for heads in self.base_model.get_heads().values():
-                for h in heads.values():
-                    h.train(phase["train"])
-        else:
-            self.base_model.train(phase["train"])
+        self.base_model.train(phase["train"])
 
         if self.train and self.train_phase_idx >= 0:
             self.optimizer.update_schedule_on_epoch(self.where)

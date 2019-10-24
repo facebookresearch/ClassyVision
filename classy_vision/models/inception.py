@@ -16,14 +16,12 @@ from .classy_model import ClassyModel
 
 @register_model("inception_v3")
 class Inception3(ClassyModel):
-    def __init__(
-        self, num_classes, freeze_trunk, aux_logits, transform_input, small_input
-    ):
+    def __init__(self, num_classes, aux_logits, transform_input, small_input):
         r"""Inception v3 model architecture from
         `"Rethinking the Inception Architecture for Computer Vision"
           <http://arxiv.org/abs/1512.00567>`_.
         """
-        super().__init__(num_classes, freeze_trunk)
+        super().__init__(num_classes)
 
         # assertions on inputs:
         assert num_classes is None or is_pos_int(num_classes)
@@ -79,7 +77,6 @@ class Inception3(ClassyModel):
     def from_config(cls, config):
         config = {
             "num_classes": config.get("num_classes"),
-            "freeze_trunk": config.get("freeze_trunk", False),
             "aux_logits": config.get("aux_logits", True),
             "transform_input": config.get("transform_input", False),
             "small_input": config.get("small_input", False),

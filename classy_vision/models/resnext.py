@@ -226,7 +226,6 @@ class InitialBlock(nn.Module):
 class ResNeXt(ClassyModel):
     def __init__(
         self,
-        freeze_trunk,
         num_blocks,
         init_planes,
         reduction,
@@ -244,7 +243,7 @@ class ResNeXt(ClassyModel):
             Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
             layersSet. These settings are useful when training Siamese networks.
         """
-        super().__init__(num_classes=None, freeze_trunk=freeze_trunk)
+        super().__init__(num_classes=None)
 
         # assertions on inputs:
         assert type(num_blocks) == list
@@ -361,7 +360,6 @@ class ResNeXt(ClassyModel):
             "basic_layer": config.get("basic_layer", False),
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
-            "freeze_trunk": config.get("freeze_trunk", False),
         }
         return cls(**config)
 
