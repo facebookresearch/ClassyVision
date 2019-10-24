@@ -6,6 +6,7 @@
 
 from .classy_trainer import ClassyTrainer
 from .distributed_trainer import DistributedTrainer
+from .local_trainer import LocalTrainer
 
 
-__all__ = ["ClassyTrainer", "DistributedTrainer"]
+__all__ = ["ClassyTrainer", "DistributedTrainer", "LocalTrainer"]
