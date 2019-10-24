@@ -149,22 +149,6 @@ class TestClassyDataset(unittest.TestCase):
             sample = self.dataset2[idx]
             self._compare_samples(sample, DUMMY_SAMPLES_2[idx])
 
-    def test_get_set_classy_state(self):
-        state = self.dataset1.get_classy_state()
-        new_state = copy.deepcopy(state)
-        new_state["split"] = "new_split"
-        self.dataset1.set_classy_state(state)
-        self.assertFalse(new_state == state, "State should have changed")
-
-        # Check assert for changing dataset types
-        with self.assertRaises(AssertionError):
-            other_dataset = build_dataset(OTHER_DUMMY_CONFIG, DUMMY_SAMPLES_1)
-            other_dataset.set_classy_state(state)
-
-        # Verify when strict flag is false, this does not throw
-        other_dataset = build_dataset(OTHER_DUMMY_CONFIG, DUMMY_SAMPLES_1)
-        other_dataset.set_classy_state(state, strict=False)
-
     def test_get_iterator(self):
         # Verifies that we can retrieve samples with iterators
         dl = self.dataset1.iterator(num_workers=0)

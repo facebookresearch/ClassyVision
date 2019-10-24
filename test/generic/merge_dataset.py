@@ -53,27 +53,3 @@ class MergeDataset:
 
     def __len__(self):
         return len(self.datasets[0])
-
-    def get_classy_state(self):
-        state = {"state": {"dataset_type": type(self)}}
-        if isinstance(self.datasets, list):
-            state["wrapped_states"] = [
-                dataset.get_classy_state() for dataset in self.datasets
-            ]
-        else:
-            state["wrapped_states"] = {
-                key: dataset.get_classy_state()
-                for key, dataset in self.datasets.items()
-            }
-
-        return state
-
-    def set_classy_state(self, state):
-        if isinstance(self.datasets, list):
-            for idx, dataset in enumerate(self.datasets):
-                dataset.set_classy_state(state["wrapped_states"][idx])
-        else:
-            for key, dataset in self.datasets.items():
-                dataset.set_classy_state(state["wrapped_states"][key])
-
-        return self

@@ -126,24 +126,3 @@ class ClassyDataset:
 
     def get_global_batchsize(self):
         return self.get_batchsize_per_replica() * get_world_size()
-
-    def get_classy_state(self):
-        """Get state for object (e.g. shuffle)"""
-        return {
-            "split": self.split,
-            "batchsize_per_replica": self.batchsize_per_replica,
-            "shuffle": self.shuffle,
-            "num_samples": self.num_samples,
-            "state": {"dataset_type": type(self)},
-        }
-
-    def set_classy_state(self, state, strict=True):
-        """Sets state for object (e.g. shuffle)"""
-        assert isinstance(self, state["state"]["dataset_type"]) or not strict, (
-            "Type of saved state does not match current object. "
-            "If intentional, use non-strict flag"
-        )
-        self.split = state["split"]
-        self.batchsize_per_replica = state["batchsize_per_replica"]
-        self.shuffle = state["shuffle"]
-        self.num_samples = state["num_samples"]

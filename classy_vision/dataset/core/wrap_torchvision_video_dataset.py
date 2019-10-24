@@ -25,10 +25,3 @@ class WrapTorchVisionVideoDataset:
 
     def __len__(self):
         return len(self.dataset)
-
-    def get_classy_state(self):
-        # Pytorch datasets don't have state
-        return {
-            # For debugging saved states
-            "state": {"dataset_type": type(self)}
-        }
