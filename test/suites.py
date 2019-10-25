@@ -44,4 +44,5 @@ def unittests():
 
 
 if __name__ == "__main__":
-    unittest.run(unittests())
+    runner = unittest.TextTestRunner()
+    runner.run(unittests())
