@@ -144,8 +144,8 @@
         "name": "sgd",
         "lr": {
             "name": "cosine",
-            "max_lr": 0.04,
-            "min_lr": 0.00004,
+            "start_lr": 0.04,
+            "end_lr": 0.00004,
             "warmup": {
                 "init_lr": 0.005,
                 "length": 0.13
