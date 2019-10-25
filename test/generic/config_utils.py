@@ -42,7 +42,6 @@ def get_test_task_config(head_num_classes=1000):
             "num_blocks": [3, 4, 6, 3],
             "small_input": False,
             "zero_init_bn_residuals": True,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_connected",
@@ -96,7 +95,6 @@ def get_fast_test_task_config(head_num_classes=1000):
             "num_blocks": [1],
             "small_input": False,
             "zero_init_bn_residuals": True,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_connected",
@@ -136,7 +134,6 @@ def get_test_model_configs():
             "name": "resnet",
             "num_blocks": [3, 4, 6, 3],
             "small_input": False,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_connected",
@@ -153,7 +150,6 @@ def get_test_model_configs():
             "num_blocks": [3, 4, 6, 3],
             "base_width_and_cardinality": [4, 32],
             "small_input": False,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_connected",

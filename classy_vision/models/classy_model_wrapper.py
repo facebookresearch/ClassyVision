@@ -23,12 +23,11 @@ class ClassyModelWrapper(ClassyModel):
         self,
         model: nn.Module,
         num_classes: Optional[int] = None,
-        freeze_trunk: bool = False,
         input_shape: Optional[Tuple] = None,
         output_shape: Optional[Tuple] = None,
         model_depth: Optional[int] = None,
     ):
-        super().__init__(num_classes, freeze_trunk)
+        super().__init__(num_classes)
         self.model = model
         self._input_shape = input_shape
         self._output_shape = output_shape

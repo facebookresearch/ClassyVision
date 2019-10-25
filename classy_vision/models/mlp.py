@@ -26,9 +26,8 @@ class MLP(ClassyModel):
         use_batchnorm,
         first_batchnorm,
         num_classes,
-        freeze_trunk,
     ):
-        super().__init__(num_classes, freeze_trunk)
+        super().__init__(num_classes)
 
         layers = []
         # If first_batchnorm is set, must be using batchnorm
@@ -70,7 +69,6 @@ class MLP(ClassyModel):
             use_batchnorm=config.get("use_batchnorm", False),
             first_batchnorm=config.get("first_batchnorm", False),
             num_classes=output_dim,
-            freeze_trunk=config.get("freeze_trunk", False),
         )
 
     def forward(self, x):

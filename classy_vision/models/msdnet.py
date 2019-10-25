@@ -311,7 +311,6 @@ class MSDNet(ClassyModel):
     def __init__(
         self,
         num_classes,
-        freeze_trunk,
         num_blocks,
         init_planes,
         growth_rate,
@@ -336,7 +335,7 @@ class MSDNet(ClassyModel):
         model will assume 224x224 inputs. The argument `num_channels` sets the
         number of input channels in the image.
         """
-        super().__init__(freeze_trunk, num_classes)
+        super().__init__(num_classes)
 
         # assertions:
         assert num_classes is None or is_pos_int(num_classes)
@@ -469,7 +468,6 @@ class MSDNet(ClassyModel):
         config = {
             "num_blocks": config["num_blocks"],
             "num_classes": config.get("num_classes"),
-            "freeze_trunk": config.get("freeze_trunk", False),
             "init_planes": config.get("init_planes", 64),
             "growth_rate": config.get("growth_rate", 32),
             "bottleneck": config.get("bottleneck", 4),

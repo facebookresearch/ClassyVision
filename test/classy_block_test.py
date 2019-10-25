@@ -37,7 +37,7 @@ class TestClassyBlock(unittest.TestCase):
     def test_head_execution(self):
         model = self.DummyTestModel()
         head = self.DummyTestHead()
-        model.set_heads({"dummy_block2": {head.unique_id: head}}, True)
+        model.set_heads({"dummy_block2": {head.unique_id: head}})
         input = torch.randn(1, 2)
         output = model(input)
         head_output = model.head_outputs["head_id"]
@@ -52,7 +52,7 @@ class TestClassyBlock(unittest.TestCase):
             "dummy_block2": {head2.unique_id: head2},
         }
         with self.assertRaises(ValueError):
-            model.set_heads(heads, True)
+            model.set_heads(heads)
 
         head2.unique_id = "head_id2"
-        model.set_heads(heads, True)
+        model.set_heads(heads)
