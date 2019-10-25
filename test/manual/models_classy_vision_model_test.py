@@ -42,10 +42,6 @@ class TestClassyModel(unittest.TestCase):
         for cfg in self.model_configs:
             config = self._get_config(cfg)
             model = build_model(config["model"])
-            num_classes = (
-                cfg["heads"][0]["num_classes"] if "heads" in cfg else cfg["num_classes"]
-            )
-            self.assertEqual(num_classes, model.num_classes)
             self.assertTrue(isinstance(model, ClassyModel))
             self.assertTrue(
                 type(model.input_shape) == tuple and len(model.input_shape) == 3
