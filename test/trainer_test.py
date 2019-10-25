@@ -64,8 +64,8 @@ class TestClassyTrainer(unittest.TestCase):
             },
         }
 
-    def test_cpu_training(self):
-        """Checks we can train a small MLP model on a CPU."""
+    def test_training(self):
+        """Checks we can train a small MLP model."""
         config = self._get_config()
         task = (
             ClassificationTask()
@@ -82,7 +82,7 @@ class TestClassyTrainer(unittest.TestCase):
 
         self.assertTrue(task is not None)
 
-        trainer = LocalTrainer(use_gpu=False)
+        trainer = LocalTrainer()
         trainer.train(task)
         accuracy = task.meters[0].value["top_1"]
         self.assertAlmostEqual(accuracy, 1.0)

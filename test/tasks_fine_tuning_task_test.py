@@ -69,7 +69,7 @@ class TestFineTuningTask(unittest.TestCase):
         pre_train_config = self._get_pre_train_config(head_num_classes=1000)
         args = get_test_args()
         pre_train_task = build_task(pre_train_config, args)
-        trainer = LocalTrainer(use_gpu=False)
+        trainer = LocalTrainer()
         trainer.train(pre_train_task)
         checkpoint = get_checkpoint_dict(pre_train_task, args)
 

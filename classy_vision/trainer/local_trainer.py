@@ -12,7 +12,7 @@ from .classy_trainer import ClassyTrainer
 
 
 class LocalTrainer(ClassyTrainer):
-    def __init__(self, use_gpu, num_workers=0):
+    def __init__(self, use_gpu=None, num_workers=0):
         super().__init__(use_gpu=use_gpu, num_workers=num_workers)
         if self.use_gpu:
             logging.info("Using GPU, CUDA device index: {}".format(0))

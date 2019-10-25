@@ -45,7 +45,7 @@ def _init_distributed(use_gpu):
 
 
 class DistributedTrainer(ClassyTrainer):
-    def __init__(self, use_gpu, num_workers):
+    def __init__(self, use_gpu=None, num_workers=0):
         super().__init__(use_gpu=use_gpu, num_workers=num_workers)
         _init_env_vars()
         _init_distributed(self.use_gpu)

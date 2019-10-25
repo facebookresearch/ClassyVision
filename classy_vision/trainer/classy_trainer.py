@@ -13,7 +13,9 @@ from classy_vision.tasks import ClassyTask
 
 
 class ClassyTrainer:
-    def __init__(self, use_gpu, num_workers=0):
+    def __init__(self, use_gpu=None, num_workers=0):
+        if use_gpu is None:
+            use_gpu = torch.cuda.is_available()
         self.use_gpu = use_gpu
         self.num_workers = num_workers
 
