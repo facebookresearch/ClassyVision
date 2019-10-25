@@ -42,6 +42,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             return
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
+            logging.info("Local unsynced metric values:")
             self._log_loss_lr_meters(task, local_variables)
 
     def on_phase_end(
@@ -52,6 +53,11 @@ class LossLrMeterLoggingHook(ClassyHook):
         """
         batches = len(task.losses)
         if batches:
+            # Most trainers will sync meters on phase end, however we
+            # do not explicitly state this since it is possible for a
+            # trainer to implement an unsynced end of phase meter or
+            # for meters to not provide a sync function.
+            logging.info("End of phase metric values:")
             self._log_loss_lr_meters(task, local_variables)
 
     def _log_loss_lr_meters(

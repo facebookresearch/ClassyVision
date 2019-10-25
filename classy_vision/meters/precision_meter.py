@@ -37,7 +37,6 @@ class PrecisionAtKMeter(ClassyMeter):
         self._topk = topk
         self._target_is_one_hot = target_is_one_hot
         self._num_classes = num_classes
-        self._state_unsynced = False
 
         # _total_* variables store running, in-sync totals for the
         # metrics. These should not be communicated / summed.
@@ -65,7 +64,7 @@ class PrecisionAtKMeter(ClassyMeter):
     def name(self):
         return "precision_at_k"
 
-    def _sync_state(self):
+    def sync_state(self):
         # Communications
         self._curr_correct_predictions_k = all_reduce_sum(
             self._curr_correct_predictions_k
@@ -82,18 +81,20 @@ class PrecisionAtKMeter(ClassyMeter):
 
     @property
     def value(self):
-        if self._state_unsynced:
-            self._sync_state()
-            self._state_unsynced = False
+        # Return value based on the local state of meter which
+        # includes the local sample count since last sync and the total global sample
+        # count obtained at the last sync
+        correct_predictions = {
+            k: self._curr_correct_predictions_k[i]
+            + self._total_correct_predictions_k[i]
+            for i, k in enumerate(self._topk)
+        }
+        sample_count = self._total_sample_count + self._curr_sample_count
         return {
-            "top_{}".format(k): (
-                correct_prediction_k.item() / (k * self._total_sample_count).item()
-            )
-            if self._total_sample_count
+            "top_{}".format(k): (correct_predictions[k] / (k * sample_count)).item()
+            if sample_count
             else 0.0
-            for k, correct_prediction_k in zip(
-                self._topk, self._total_correct_predictions_k
-            )
+            for k in self._topk
         }
 
     @property
@@ -119,7 +120,6 @@ class PrecisionAtKMeter(ClassyMeter):
         self._total_sample_count = state["total_sample_count"].clone()
         self._curr_correct_predictions_k = state["curr_correct_predictions_k"].clone()
         self._curr_sample_count = state["curr_sample_count"].clone()
-        self._state_unsynced = True
 
     def __repr__(self):
         return repr({"name": self.name, "value": self.value})
@@ -143,11 +143,9 @@ class PrecisionAtKMeter(ClassyMeter):
             torch.min(target.eq(0) + target.eq(1)) == 1
         ), "Target must be one-hot encoded vector"
 
-        self._state_unsynced = True
         # Due to dummy samples, in some corner cases, the whole batch could
         # be dummy samples, in that case we want to not update meters on that
-        # process but still want to update the state to unsynced as the state
-        # should be same for all processes.
+        # process
         if model_output.shape[0] == 0:
             return
         _, pred_classes = model_output.topk(
