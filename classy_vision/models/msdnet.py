@@ -514,7 +514,7 @@ class MSDNet(ClassyModel):
 
     @property
     def output_shape(self):
-        return (1, self.num_classes)
+        return (1, self._num_classes)
 
     @property
     def model_depth(self):

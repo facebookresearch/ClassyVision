@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
-import logging
 from enum import Enum
 
 import torch.nn as nn
@@ -29,18 +28,6 @@ class ClassyModel(nn.Module):
     @classmethod
     def from_config(cls, config):
         raise NotImplementedError
-
-    @property
-    def num_classes(self):
-        # Flatten the dictionary of dictionaries into a list of heads
-        heads = [head for heads in self.get_heads().values() for head in heads.values()]
-
-        if len(heads) == 1:
-            return heads[0].num_classes
-        elif len(heads) >= 1:
-            logging.error("Tried to get num_classes on a model with multiple heads")
-            raise RuntimeError
-        return self._num_classes
 
     def get_classy_state(self, deep_copy=False):
         """

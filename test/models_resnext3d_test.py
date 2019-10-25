@@ -90,8 +90,6 @@ class TestResNeXt3D(unittest.TestCase):
     def test_build_model(self):
         for model_config in self.model_configs:
             model = build_model(model_config)
-            num_classes = model_config["heads"][0]["num_classes"]
-            self.assertEqual(num_classes, model.num_classes)
             self.assertTrue(isinstance(model, ClassyModel))
             self.assertTrue(
                 type(model.output_shape) == tuple and len(model.output_shape) == 2
