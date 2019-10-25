@@ -28,7 +28,13 @@ class ClassyMeter(object):
 
     @property
     def value(self):
-        """Value of meter, can be any python object.
+        """Value of meter based on local state, can be any python object.
+
+        Note: If there are multiple training processes then this
+        represents the local state of the meter. If sync meter is
+        implemented, then value will return the global state since the
+        last sync PLUS any local unsynced updates that have occurred
+        in the local process.
         """
         raise NotImplementedError
 
@@ -46,6 +52,19 @@ class ClassyMeter(object):
             classy_state: State to restore from.
         """
         raise NotImplementedError
+
+    def sync_state(self):
+        """Syncs state with all other meters in distributed training.
+
+        WARNING: Calls to sync_state could involve communications via
+        torch.distributed which can result in a loss of performance or
+        deadlocks if not coordinated among threads
+        """
+        # If not provided by child class this does nothing by default
+        # and meter only provides the local process stats. If
+        # implemented then the meter provides the global stats at last
+        # sync + any local updates since the last sync
+        pass
 
     def reset(self):
         """Resets any internal meter state.
