@@ -25,7 +25,6 @@ class TestResNeXt3D(unittest.TestCase):
             "stage_planes": 64,
             "num_groups": 1,
             "width_per_group": 16,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_convolutional_linear",

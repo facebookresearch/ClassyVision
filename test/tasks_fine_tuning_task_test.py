@@ -74,23 +74,44 @@ class TestFineTuningTask(unittest.TestCase):
         checkpoint = get_checkpoint_dict(pre_train_task, args)
 
         for reset_heads, heads_num_classes in [(False, 1000), (True, 200)]:
-            fine_tuning_config = self._get_fine_tuning_config(
-                head_num_classes=heads_num_classes
-            )
-            fine_tuning_task = build_task(fine_tuning_config, args)
-            fine_tuning_task.set_pretrained_checkpoint(
-                copy.deepcopy(checkpoint)
-            ).set_reset_heads(reset_heads)
-            # run in test mode to compare the model state
-            fine_tuning_task.set_test_only(True)
-            trainer.train(fine_tuning_task)
-            self._compare_model_state(
-                pre_train_task.model.get_classy_state(),
-                fine_tuning_task.model.get_classy_state(),
-                check_heads=not reset_heads,
-            )
-            # run in train mode to check accuracy
-            fine_tuning_task.set_test_only(False)
-            trainer.train(fine_tuning_task)
-            accuracy = fine_tuning_task.meters[0].value["top_1"]
-            self.assertAlmostEqual(accuracy, 1.0)
+            for freeze_trunk in [True, False]:
+                fine_tuning_config = self._get_fine_tuning_config(
+                    head_num_classes=heads_num_classes
+                )
+                fine_tuning_task = build_task(fine_tuning_config, args)
+                fine_tuning_task = (
+                    fine_tuning_task.set_pretrained_checkpoint(
+                        copy.deepcopy(checkpoint)
+                    )
+                    .set_reset_heads(reset_heads)
+                    .set_freeze_trunk(freeze_trunk)
+                )
+                # run in test mode to compare the model state
+                fine_tuning_task.set_test_only(True)
+                trainer.train(fine_tuning_task)
+                self._compare_model_state(
+                    pre_train_task.model.get_classy_state(),
+                    fine_tuning_task.model.get_classy_state(),
+                    check_heads=not reset_heads,
+                )
+                # run in train mode to check accuracy
+                fine_tuning_task.set_test_only(False)
+                trainer.train(fine_tuning_task)
+                if freeze_trunk:
+                    # if trunk is frozen the states should be the same
+                    self._compare_model_state(
+                        pre_train_task.model.get_classy_state(),
+                        fine_tuning_task.model.get_classy_state(),
+                        check_heads=False,
+                    )
+                else:
+                    # trunk isn't frozen, the states should be different
+                    with self.assertRaises(Exception):
+                        self._compare_model_state(
+                            pre_train_task.model.get_classy_state(),
+                            fine_tuning_task.model.get_classy_state(),
+                            check_heads=False,
+                        )
+
+                accuracy = fine_tuning_task.meters[0].value["top_1"]
+                self.assertAlmostEqual(accuracy, 1.0)
