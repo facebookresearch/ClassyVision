@@ -69,7 +69,6 @@ class TestClassyModelWrapper(unittest.TestCase):
             model_depth=model_depth,
         )
         self.assertEqual(classy_model.input_shape, input_shape)
-        self.assertEqual(classy_model.num_classes, num_classes)
         self.assertEqual(classy_model.output_shape, output_shape)
         self.assertEqual(classy_model.model_depth, model_depth)
 
