@@ -117,7 +117,7 @@ def get_fast_test_task_config(head_num_classes=1000):
 
 
 def get_test_args():
-    return Arguments(device="cpu", num_workers=8, test_only=False)
+    return Arguments(test_only=False)
 
 
 def get_test_classy_task():
