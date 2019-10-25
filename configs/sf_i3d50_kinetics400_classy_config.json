@@ -5,7 +5,6 @@
     "name": "CrossEntropyLoss"
   },
   "dataset": {
-    "video_backend": "pyav",
     "train": {
       "name": "kinetics400",
       "split": "train",
