@@ -52,6 +52,7 @@ def _meter_worker(qin, qout, meter, world_size, rank, filename):
             meter.update(val[0], val[1])
 
         elif signal == VALUE_SIGNAL:
+            meter.sync_state()
             qout.put(meter.value)
 
         elif signal == SHUTDOWN_SIGNAL:
@@ -99,6 +100,7 @@ class ClassificationMeterTest(unittest.TestCase):
         for i in range(len(model_output)):
             meter.update(model_output[i], target[i], **kwargs)
 
+        meter.sync_state()
         meter_value = meter.value
         for key, val in expected_value.items():
             self.assertTrue(
@@ -184,7 +186,10 @@ class ClassificationMeterTest(unittest.TestCase):
         meter0.update(model_outputs[0], targets[0], **kwargs)
         meter1.update(model_outputs[1], targets[1], **kwargs)
 
+        meter0.sync_state()
         value0 = meter0.value
+
+        meter1.sync_state()
         value1 = meter1.value
         for key, val in value0.items():
             self.assertNotEqual(
