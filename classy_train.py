@@ -24,11 +24,13 @@ from classy_vision.hooks import (
 from classy_vision.tasks import build_task
 from classy_vision.trainer import DistributedTrainer
 from tensorboardX import SummaryWriter
+from torchvision import set_video_backend
 
 
-# run all the things:
 def main(args):
+    # Global settings
     torch.manual_seed(0)
+    set_video_backend(args.video_backend)
 
     # Loads config, sets up task
     config = load_json(args.config)

@@ -104,6 +104,12 @@ def add_generic_args(parser):
         type=int,
         help="Logging frequency for LossLrMeterLoggingHook (default 5)",
     )
+    parser.add_argument(
+        "--video-backend",
+        default="pyav",
+        type=str,
+        help="torchvision video decoder backend (pyav or video_reader). Default pyav",
+    )
 
     return parser
 
