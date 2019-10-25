@@ -81,5 +81,5 @@ class TestClassyModelWrapper(unittest.TestCase):
         args = get_test_args()
         task = build_task(config, args)
         task.set_model(classy_model)
-        trainer = LocalTrainer(use_gpu=False)
+        trainer = LocalTrainer()
         trainer.train(task)

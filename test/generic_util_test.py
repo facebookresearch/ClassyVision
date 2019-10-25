@@ -10,7 +10,7 @@ import unittest
 import unittest.mock as mock
 from pathlib import Path
 from test.generic.config_utils import get_fast_test_task_config, get_test_args
-from test.generic.utils import compare_model_state, compare_samples, compare_states
+from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
