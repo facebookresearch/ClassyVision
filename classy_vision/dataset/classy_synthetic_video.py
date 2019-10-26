@@ -72,6 +72,15 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
             clips_per_video,
         )
 
+    def _get_sampler(self, epoch):
+        world_size = get_world_size()
+        rank = get_rank()
+        sampler = DistributedSampler(
+            self, num_replicas=world_size, rank=rank, shuffle=self.shuffle
+        )
+        sampler.set_epoch(epoch)
+        return sampler
+
     @classmethod
     def from_config(cls, config):
         split = config["split"]
@@ -107,11 +116,4 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
             step_between_clips,
             frame_rate,
             clips_per_video,
-        )
-
-    def _get_sampler(self):
-        world_size = get_world_size()
-        rank = get_rank()
-        return DistributedSampler(
-            self.dataset, num_replicas=world_size, rank=rank, shuffle=self.shuffle
         )
