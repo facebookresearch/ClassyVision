@@ -35,8 +35,8 @@ class TestClassificationTask(unittest.TestCase):
             dataset = build_dataset(config["dataset"][split])
             task.set_dataset(dataset, split)
 
-        task.prepare(num_workers=1, pin_memory=False)
+        task.prepare(num_dataloader_workers=1, pin_memory=False)
 
         args = get_test_args()
         task = build_task(config, args)
-        task.prepare(num_workers=1, pin_memory=False)
+        task.prepare(num_dataloader_workers=1, pin_memory=False)

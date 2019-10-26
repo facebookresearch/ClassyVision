@@ -55,12 +55,15 @@ class FineTuningTask(ClassificationTask):
             self.optimizer.update_schedule_on_epoch(self.where)
 
     def prepare(
-        self, num_workers: int = 0, pin_memory: bool = False, use_gpu: bool = False
+        self,
+        num_dataloader_workers: int = 0,
+        pin_memory: bool = False,
+        use_gpu: bool = False,
     ) -> None:
         assert (
             self.pretrained_checkpoint is not None
         ), "Need a pretrained checkpoint for fine tuning"
-        super().prepare(num_workers, pin_memory, use_gpu)
+        super().prepare(num_dataloader_workers, pin_memory, use_gpu)
         if self.checkpoint is None:
             # no checkpoint exists, load the model's state from the pretrained
             # checkpoint
