@@ -51,12 +51,17 @@ class TestDataset(classy_dataset.ClassyDataset):
     """Test dataset for validating registry functions"""
 
     def __init__(
-        self, samples, batchsize_per_replica=1, num_samples=None, transform=None
+        self,
+        samples,
+        batchsize_per_replica=1,
+        num_samples=None,
+        shuffle=False,
+        transform=None,
     ):
         super().__init__(
             split=None,
             batchsize_per_replica=batchsize_per_replica,
-            shuffle=False,
+            shuffle=shuffle,
             transform=transform,
             num_samples=len(samples) if num_samples is None else num_samples,
         )
@@ -210,6 +215,44 @@ class TestClassyDataset(unittest.TestCase):
         dataset = TestDataset(DUMMY_SAMPLES_2, num_samples=3)
         with self.assertRaises(AssertionError):
             len(dataset)
+
+    def test_shuffle_logic(self):
+        # Simple samples to test shuffling, just a single value tensor
+        # so we know how things were shuffled
+        dummy_samples_10 = [
+            {"input": torch.tensor([[0]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[1]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[2]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[3]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[4]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[5]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[6]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[7]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[8]]), "target": torch.tensor([0])},
+            {"input": torch.tensor([[9]]), "target": torch.tensor([0])},
+        ]
+        dataset = TestDataset(dummy_samples_10, shuffle=True)
+
+        def unpack_tensors(tensor_list):
+            return [t["input"].item() for t in tensor_list]
+
+        # Epoch 0
+        iterator = dataset.iterator(num_workers=0, current_phase_id=0)
+        it = iter(iterator)
+        epoch_0_list = [sample for sample in it]
+        epoch_0_list = unpack_tensors(epoch_0_list)
+
+        # Epoch 1
+        iterator = dataset.iterator(num_workers=0, current_phase_id=1)
+        it = iter(iterator)
+        epoch_1_list = [sample for sample in it]
+        epoch_1_list = unpack_tensors(epoch_1_list)
+
+        # Should be same length, should be shuffled, should be
+        # different shuffles for each epoch
+        self.assertEqual(len(epoch_0_list), len(epoch_1_list))
+        self.assertTrue(epoch_0_list != [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertTrue(epoch_0_list != epoch_1_list)
 
     def test_transform_logic(self):
         def _return_1_transform(sample):
