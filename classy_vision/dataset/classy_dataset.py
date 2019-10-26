@@ -102,21 +102,29 @@ class ClassyDataset:
         ), "Num samples mus be less than length of base dataset"
         return len(self.dataset) if self.num_samples is None else self.num_samples
 
-    def _get_sampler(self):
+    def _get_sampler(self, epoch):
         world_size = get_world_size()
         rank = get_rank()
-        return DistributedSampler(
+        sampler = DistributedSampler(
             self, num_replicas=world_size, rank=rank, shuffle=self.shuffle
         )
+        sampler.set_epoch(epoch)
+        return sampler
 
     def iterator(self, *args, **kwargs):
+        # TODO: Fix naming to be consistent (i.e. everyone uses epoch)
+        epoch = 0
+        if "current_phase_id" in kwargs:
+            epoch = kwargs["current_phase_id"]
+        assert isinstance(epoch, int), "Epoch must be an int"
+
         return DataLoader(
             self,
             batch_size=self.batchsize_per_replica,
             num_workers=kwargs.get("num_workers", 0),
             pin_memory=kwargs.get("pin_memory", False),
             multiprocessing_context=kwargs.get("multiprocessing_context", None),
-            sampler=self._get_sampler(),
+            sampler=self._get_sampler(epoch=epoch),
         )
 
     def get_batchsize_per_replica(self):
