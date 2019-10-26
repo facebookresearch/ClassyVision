@@ -10,7 +10,6 @@ from typing import List, Union
 
 import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
-from classy_vision.generic.classy_trainer_common import _remove_dummy_samples_from_batch
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
     init_distributed_data_parallel_model,
@@ -350,20 +349,11 @@ class ClassificationTask(ClassyTask):
                     local_variables["sample"]["input"]
                 )
 
-            # Only use non-dummy samples for finding loss and meters.
-            model_output, target = _remove_dummy_samples_from_batch(local_variables)
-
             self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
 
-            # If all the samples in the batch are dummy then use loss of 0.0
-            # We still need to backprop though as all the processes sync on
-            # that.
-            if model_output.shape[0] == 0:
-                local_variables["local_loss"] = torch.autograd.Variable(
-                    torch.tensor(0.0, device=target.device), requires_grad=True
-                )
-            else:
-                local_variables["local_loss"] = self.loss(model_output, target)
+            model_output = local_variables["output"]
+            target = local_variables["sample"]["target"]
+            local_variables["local_loss"] = self.loss(model_output, target)
 
             # NOTE: This performs an all_reduce_mean() on the losses across the
             # replicas.  The reduce should ideally be weighted by the length of
