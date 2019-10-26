@@ -42,6 +42,15 @@ class ClassyDataset:
         """
         Classy Dataloader constructor.
         """
+        # Asserts:
+        assert is_pos_int(
+            batchsize_per_replica
+        ), "batchsize_per_replica must be a positive int"
+        assert isinstance(shuffle, bool), "shuffle must be a boolean"
+        assert num_samples is None or is_pos_int(
+            num_samples
+        ), "num_samples must be a positive int or None"
+
         # Assignments:
         self.split = split
         self.batchsize_per_replica = batchsize_per_replica
@@ -69,22 +78,11 @@ class ClassyDataset:
 
         num_samples: Artificially restrict the number of samples in a dataset epoch
 
-        transforms (optional): list of tranform configurations to be applied in order
+        transforms: list of tranform configurations to be applied in order
         """
         batchsize_per_replica = config.get("batchsize_per_replica")
-        assert is_pos_int(
-            batchsize_per_replica
-        ), "batchsize_per_replica must be a positive int"
-
         shuffle = config.get("use_shuffle")
-        assert isinstance(shuffle, bool), "use_shuffle must be a boolean"
-
-        # Num samples is not used in all cases and has a clear default of None
-        num_samples = config.get("num_samples", None)
-        assert num_samples is None or is_pos_int(
-            num_samples
-        ), "num_samples must be a positive int"
-
+        num_samples = config.get("num_samples")
         transform_config = config.get("transforms")
 
         return transform_config, batchsize_per_replica, shuffle, num_samples
