@@ -113,10 +113,14 @@ class ClassyDataset:
 
     def iterator(self, *args, **kwargs):
         # TODO: Fix naming to be consistent (i.e. everyone uses epoch)
+        shuffle_seed = kwargs.get("shuffle_seed", 0)
+        assert isinstance(shuffle_seed, int), "Shuffle seed must be an int"
         epoch = 0
         if "current_phase_id" in kwargs:
             epoch = kwargs["current_phase_id"]
         assert isinstance(epoch, int), "Epoch must be an int"
+
+        offset_epoch = shuffle_seed + epoch
 
         return DataLoader(
             self,
@@ -124,7 +128,7 @@ class ClassyDataset:
             num_workers=kwargs.get("num_workers", 0),
             pin_memory=kwargs.get("pin_memory", False),
             multiprocessing_context=kwargs.get("multiprocessing_context", None),
-            sampler=self._get_sampler(epoch=epoch),
+            sampler=self._get_sampler(epoch=offset_epoch),
         )
 
     def get_batchsize_per_replica(self):

@@ -254,6 +254,13 @@ class TestClassyDataset(unittest.TestCase):
         self.assertTrue(epoch_0_list != [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
         self.assertTrue(epoch_0_list != epoch_1_list)
 
+        # Test different shuffle seeds
+        iterator = dataset.iterator(num_workers=0, current_phase_id=0, shuffle_seed=10)
+        it = iter(iterator)
+        epoch_0_seed_10_list = [sample for sample in it]
+        epoch_0_seed_10_list = unpack_tensors(epoch_0_seed_10_list)
+        self.assertTrue(epoch_0_seed_10_list != epoch_0_list)
+
     def test_transform_logic(self):
         def _return_1_transform(sample):
             return 1
