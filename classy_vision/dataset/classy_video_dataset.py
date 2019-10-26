@@ -127,7 +127,7 @@ class ClassyVideoDataset(ClassyDataset):
         except ValueError:
             logging.warn(f"Fail to save metadata to file: {filepath}")
 
-    def _get_sampler(self):
+    def _get_sampler(self, epoch):
         if self.split == "train":
             # For video model training, we don't necessarily want to use all possible
             # clips in the video in one training epoch. More often, we randomly
@@ -143,7 +143,7 @@ class ClassyVideoDataset(ClassyDataset):
             )
         world_size = get_world_size()
         rank = get_rank()
-        return DistributedSampler(
+        sampler = DistributedSampler(
             clip_sampler,
             num_replicas=world_size,
             rank=rank,
@@ -151,6 +151,8 @@ class ClassyVideoDataset(ClassyDataset):
             group_size=self.clips_per_video,
             num_samples=self.num_samples,
         )
+        sampler.set_epoch(epoch)
+        return sampler
 
     def iterator(self, *args, **kwargs):
         # for video dataset, it may use VideoClips class from TorchVision,
