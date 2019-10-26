@@ -216,10 +216,10 @@ class ClassificationTask(ClassyTask):
             for split in self.datasets.keys()
         }
 
-    def prepare(self, num_workers=0, pin_memory=False, use_gpu=False):
+    def prepare(self, num_dataloader_workers=0, pin_memory=False, use_gpu=False):
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
-            num_workers=num_workers, pin_memory=pin_memory
+            num_workers=num_dataloader_workers, pin_memory=pin_memory
         )
 
         if use_gpu:
