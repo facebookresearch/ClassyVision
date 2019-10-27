@@ -8,7 +8,7 @@ import os
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_test_task_config
 
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
@@ -28,8 +28,7 @@ class TestCheckpointHook(unittest.TestCase):
         right phase_type and only if the checkpoint directory exists.
         """
         config = get_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         task.prepare()
 
         local_variables = {}
@@ -37,7 +36,7 @@ class TestCheckpointHook(unittest.TestCase):
         device = "cpu"
 
         # create a checkpoint hook
-        checkpoint_hook = CheckpointHook(checkpoint_folder, args, phase_types=["train"])
+        checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
 
         # checkpoint directory doesn't exist
         # call the on start function
@@ -71,7 +70,7 @@ class TestCheckpointHook(unittest.TestCase):
             self.assertIn(key, checkpoint)
         # not testing for equality of classy_state_dict, that is tested in
         # a separate test
-        self.assertDictEqual(checkpoint["input_args"], args._asdict())
+        self.assertDictEqual(checkpoint["input_args"], {})
         self.assertDictEqual(checkpoint["config"], task.get_config())
 
     def test_checkpoint_period(self) -> None:
@@ -79,8 +78,7 @@ class TestCheckpointHook(unittest.TestCase):
         Test that the checkpoint_period works as expected.
         """
         config = get_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         task.prepare()
 
         local_variables = {}
@@ -92,7 +90,7 @@ class TestCheckpointHook(unittest.TestCase):
             # create a checkpoint hook
             checkpoint_hook = CheckpointHook(
                 checkpoint_folder,
-                args,
+                {},
                 phase_types=phase_types,
                 checkpoint_period=checkpoint_period,
             )

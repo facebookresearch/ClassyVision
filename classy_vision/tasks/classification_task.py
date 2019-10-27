@@ -110,7 +110,7 @@ class ClassificationTask(ClassyTask):
         for split in splits:
             datasets[split] = build_dataset(config["dataset"][split])
         loss = build_loss(config["loss"])
-        test_only = config["test_only"]
+        test_only = config.get("test_only", False)
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
         # put model in eval mode in case any hooks modify model states, it'll

@@ -433,14 +433,14 @@ def input_args_to_dict(input_args):
     """
     Converts arguments parsed through argparse or named tuples to dicts
     """
-    assert isinstance(input_args, argparse.Namespace) or hasattr(
-        input_args, "_asdict"
-    ), f"Unexpected input_args of type: {type(input_args)}"
-    if isinstance(input_args, argparse.Namespace):
-        input_args = vars(input_args)
-    else:
-        input_args = input_args._asdict()
-    return input_args
+    if isinstance(input_args, dict):
+        return input_args
+    elif isinstance(input_args, argparse.Namespace):
+        return vars(input_args)
+    elif hasattr(input_args, "_asdict"):
+        return input_args._asdict()
+
+    raise RuntimeError(f"Unexpected input_args of type: {type(input_args)}")
 
 
 def get_checkpoint_dict(task, input_args):

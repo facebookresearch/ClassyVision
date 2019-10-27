@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_test_task_config
 from test.generic.utils import compare_model_state, compare_samples, compare_states
 
 from classy_vision.hooks import LossLrMeterLoggingHook
@@ -31,9 +31,8 @@ class TestClassyState(unittest.TestCase):
         # use a batchsize of 1 for faster testing
         for split in ["train", "test"]:
             config["dataset"][split]["batchsize_per_replica"] = 1
-        args = get_test_args()
-        task = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
-        task_2 = build_task(config, args).set_hooks([LossLrMeterLoggingHook()])
+        task = build_task(config).set_hooks([LossLrMeterLoggingHook()])
+        task_2 = build_task(config).set_hooks([LossLrMeterLoggingHook()])
 
         task.prepare()
         task_2.prepare()
