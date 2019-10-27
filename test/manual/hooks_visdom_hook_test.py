@@ -8,7 +8,7 @@ import copy
 import unittest
 import unittest.mock as mock
 from itertools import product
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_test_task_config
 
 from classy_vision.hooks import VisdomHook
 from classy_vision.tasks import build_task
@@ -33,8 +33,7 @@ class TestVisdomHook(unittest.TestCase):
         config = get_test_task_config()
         config["dataset"]["train"]["batchsize_per_replica"] = 2
         config["dataset"]["test"]["batchsize_per_replica"] = 5
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         task.prepare()
 
         losses = [1.2, 2.3, 1.23, 2.33]

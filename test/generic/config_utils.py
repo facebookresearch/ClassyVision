@@ -116,14 +116,9 @@ def get_fast_test_task_config(head_num_classes=1000):
     }
 
 
-def get_test_args():
-    return Arguments(test_only=False)
-
-
 def get_test_classy_task():
     config = get_test_task_config()
-    args = get_test_args()
-    task = build_task(config, args)
+    task = build_task(config)
     return task
 
 
@@ -261,6 +256,5 @@ def get_test_video_task_config():
 
 def get_test_classy_video_task():
     config = get_test_video_task_config()
-    args = get_test_args()
-    task = build_task(config, args)
+    task = build_task(config)
     return task

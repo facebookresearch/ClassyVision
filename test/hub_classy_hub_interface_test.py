@@ -7,7 +7,7 @@
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_test_task_config
 
 import torch
 from classy_vision.dataset.transforms import ClassyTransform
@@ -59,8 +59,7 @@ class TestClassyHubInterface(unittest.TestCase):
 
     def test_from_task(self):
         config = get_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         hub_interface = ClassyHubInterface.from_task(task)
 
         self.assertIsInstance(hub_interface.task, ClassyTask)
