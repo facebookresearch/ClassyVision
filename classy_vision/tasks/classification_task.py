@@ -49,7 +49,6 @@ class ClassificationTask(ClassyTask):
         self.distributed_model = None
         self.phase_idx = -1
         self.train_phase_idx = -1
-        self.advance_to_next_phase = True
         self.num_updates = 0
         self.data_iterator = None
         self.num_samples_this_phase = 0
@@ -259,8 +258,6 @@ class ClassificationTask(ClassyTask):
         return where
 
     def get_classy_state(self, deep_copy=False):
-        # NOTE: this does not return any task information since we are
-        # planning on a refactor.
         classy_state_dict = {
             "train": self.train,
             "base_model": self.base_model.get_classy_state(),
@@ -268,7 +265,6 @@ class ClassificationTask(ClassyTask):
             "optimizer": self.optimizer.get_classy_state(),
             "phase_idx": self.phase_idx,
             "train_phase_idx": self.train_phase_idx,
-            "advance_to_next_phase": self.advance_to_next_phase,
             "num_updates": self.num_updates,
             "num_samples_this_phase": self.num_samples_this_phase,
             "losses": self.losses,
