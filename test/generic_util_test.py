@@ -9,7 +9,7 @@ import typing
 import unittest
 import unittest.mock as mock
 from pathlib import Path
-from test.generic.config_utils import get_fast_test_task_config, get_test_args
+from test.generic.config_utils import get_fast_test_task_config
 from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
@@ -365,9 +365,8 @@ class TestUpdateStateFunctions(unittest.TestCase):
         checkpoint
         """
         config = get_fast_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
-        task_2 = build_task(config, args)
+        task = build_task(config)
+        task_2 = build_task(config)
         task_2.prepare()
         trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
@@ -380,12 +379,11 @@ class TestUpdateStateFunctions(unittest.TestCase):
         checkpoint
         """
         config = get_fast_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         trainer = LocalTrainer(use_gpu=False)
         trainer.train(task)
         for reset_heads in [False, True]:
-            task_2 = build_task(config, args)
+            task_2 = build_task(config)
             update_classy_model(
                 task_2.model, task.model.get_classy_state(deep_copy=True), reset_heads
             )

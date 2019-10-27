@@ -6,7 +6,7 @@
 
 import copy
 import unittest
-from test.generic.config_utils import get_fast_test_task_config, get_test_args
+from test.generic.config_utils import get_fast_test_task_config
 from test.generic.utils import compare_model_state
 
 from classy_vision.generic.util import get_checkpoint_dict
@@ -31,20 +31,17 @@ class TestFineTuningTask(unittest.TestCase):
 
     def test_build_task(self):
         config = self._get_fine_tuning_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         self.assertIsInstance(task, FineTuningTask)
 
     def test_prepare(self):
         pre_train_config = self._get_pre_train_config()
-        args = get_test_args()
-        pre_train_task = build_task(pre_train_config, args)
+        pre_train_task = build_task(pre_train_config)
         pre_train_task.prepare()
-        checkpoint = get_checkpoint_dict(pre_train_task, args)
+        checkpoint = get_checkpoint_dict(pre_train_task, {})
 
         fine_tuning_config = self._get_fine_tuning_config()
-        args = get_test_args()
-        fine_tuning_task = build_task(fine_tuning_config, args)
+        fine_tuning_task = build_task(fine_tuning_config)
         # cannot prepare a fine tuning task without a pre training checkpoint
         with self.assertRaises(Exception):
             fine_tuning_task.prepare()
@@ -54,8 +51,7 @@ class TestFineTuningTask(unittest.TestCase):
 
         # test a fine tuning task with incompatible heads
         fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10)
-        args = get_test_args()
-        fine_tuning_task = build_task(fine_tuning_config, args)
+        fine_tuning_task = build_task(fine_tuning_config)
         fine_tuning_task.set_pretrained_checkpoint(checkpoint)
         # cannot prepare a fine tuning task with a pre training checkpoint which
         # has incompatible heads
@@ -67,18 +63,17 @@ class TestFineTuningTask(unittest.TestCase):
 
     def test_train(self):
         pre_train_config = self._get_pre_train_config(head_num_classes=1000)
-        args = get_test_args()
-        pre_train_task = build_task(pre_train_config, args)
+        pre_train_task = build_task(pre_train_config)
         trainer = LocalTrainer()
         trainer.train(pre_train_task)
-        checkpoint = get_checkpoint_dict(pre_train_task, args)
+        checkpoint = get_checkpoint_dict(pre_train_task, {})
 
         for reset_heads, heads_num_classes in [(False, 1000), (True, 200)]:
             for freeze_trunk in [True, False]:
                 fine_tuning_config = self._get_fine_tuning_config(
                     head_num_classes=heads_num_classes
                 )
-                fine_tuning_task = build_task(fine_tuning_config, args)
+                fine_tuning_task = build_task(fine_tuning_config)
                 fine_tuning_task = (
                     fine_tuning_task.set_pretrained_checkpoint(
                         copy.deepcopy(checkpoint)

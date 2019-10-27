@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_args, get_test_task_config
+from test.generic.config_utils import get_test_task_config
 
 from classy_vision.dataset import build_dataset
 from classy_vision.losses import build_loss
@@ -17,8 +17,7 @@ from classy_vision.tasks import ClassificationTask, build_task
 class TestClassificationTask(unittest.TestCase):
     def test_build_task(self):
         config = get_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
 
     def test_get_state(self):
@@ -37,6 +36,5 @@ class TestClassificationTask(unittest.TestCase):
 
         task.prepare(num_dataloader_workers=1, pin_memory=False)
 
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         task.prepare(num_dataloader_workers=1, pin_memory=False)

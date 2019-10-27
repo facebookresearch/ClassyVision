@@ -6,7 +6,7 @@
 
 import copy
 import unittest
-from test.generic.config_utils import get_fast_test_task_config, get_test_args
+from test.generic.config_utils import get_fast_test_task_config
 
 import torch
 import torch.nn as nn
@@ -78,8 +78,7 @@ class TestClassyModelWrapper(unittest.TestCase):
         classy_model = ClassyModelWrapper(model)
 
         config = get_fast_test_task_config()
-        args = get_test_args()
-        task = build_task(config, args)
+        task = build_task(config)
         task.set_model(classy_model)
         trainer = LocalTrainer()
         trainer.train(task)
