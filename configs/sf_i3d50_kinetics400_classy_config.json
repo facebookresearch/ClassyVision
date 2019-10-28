@@ -1,6 +1,6 @@
 {
   "name": "classy_vision",
-  "num_epochs": 27,
+  "num_epochs": 80,
   "loss": {
     "name": "CrossEntropyLoss"
   },
@@ -144,19 +144,9 @@
   "optimizer": {
     "name": "sgd",
     "lr": {
-      "name": "multistep",
-      "num_epochs": 27,
-      "values": [
-        0.1,
-        0.01,
-        0.001,
-        0.0001
-      ],
-      "milestones": [
-        11,
-        18.3,
-        22
-      ]
+      "name": "cosine",
+      "max_lr": 0.1,
+      "min_lr": 0.0001
     },
     "weight_decay": 0.0001,
     "momentum": 0.9,

@@ -62,7 +62,7 @@ class BasicTransformation(nn.Module):
             bias=False,
         )
         branch2b_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
-        branch2b_bn.final_transform_bn = True
+        branch2b_bn.final_transform_op = True
 
         self.basic_transform = nn.Sequential(
             branch2a, branch2a_bn, branch2a_relu, branch2b, branch2b_bn
@@ -72,9 +72,9 @@ class BasicTransformation(nn.Module):
         return self.basic_transform(x)
 
 
-class BottleneckTransformation(nn.Module):
+class PostactivatedBottleneckTransformation(nn.Module):
     """
-    Bottleneck transformation: 1x1x1, Tx3x3, 1x1x1, where T is the size of
+    Bottleneck transformation: Tx1x1, 1x3x3, 1x1x1, where T is the size of
         temporal kernel.
     """
 
@@ -85,7 +85,7 @@ class BottleneckTransformation(nn.Module):
         temporal_stride,
         spatial_stride,
         num_groups,
-        dim_inner=1,
+        dim_inner,
         temporal_kernel_size=3,
         temporal_conv_1x1=True,
         spatial_stride_1x1=False,
@@ -115,7 +115,7 @@ class BottleneckTransformation(nn.Module):
             bn_mmt (float): momentum for batch norm. Noted that BN momentum in
                 PyTorch = 1 - BN momentum in Caffe2.
         """
-        super(BottleneckTransformation, self).__init__()
+        super(PostactivatedBottleneckTransformation, self).__init__()
         (temporal_kernel_size_1x1, temporal_kernel_size_3x3) = (
             (temporal_kernel_size, 1)
             if temporal_conv_1x1
@@ -158,7 +158,7 @@ class BottleneckTransformation(nn.Module):
             bias=False,
         )
         self.branch2c_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
-        self.branch2a_bn.final_transform_bn = True
+        self.branch2c_bn.final_transform_op = True
 
     def forward(self, x):
         # Explicitly forward every layer.
@@ -178,10 +178,206 @@ class BottleneckTransformation(nn.Module):
         return x
 
 
-res_transformations = {
+class PreactivatedBottleneckTransformation(nn.Module):
+    """
+    Bottleneck transformation with pre-activation, which includes BatchNorm3D
+        and ReLu. Conv3D kernsl are Tx1x1, 1x3x3, 1x1x1, where T is the size of
+        temporal kernel (https://arxiv.org/abs/1603.05027).
+    """
+
+    def __init__(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        num_groups,
+        dim_inner,
+        temporal_kernel_size=3,
+        temporal_conv_1x1=True,
+        spatial_stride_1x1=False,
+        inplace_relu=True,
+        bn_eps=1e-5,
+        bn_mmt=0.1,
+        disable_pre_activation=False,
+        **kwargs
+    ):
+        """
+        Args:
+            dim_in (int): the channel dimensions of the input.
+            dim_out (int): the channel dimension of the output.
+            temporal_kernel_size (int): the temporal kernel sizes of the middle
+                convolution in the bottleneck.
+            temporal_conv_1x1 (bool): if True, do temporal convolution in the fist
+                1x1 Conv3d. Otherwise, do it in the second 3x3 Conv3d
+            temporal_stride (int): the temporal stride of the bottleneck.
+            spatial_stride (int): the spatial_stride of the bottleneck.
+            num_groups (int): number of groups for the convolution.
+            dim_inner (int): the inner dimension of the block.
+                is for standard ResNet like networks, and num_groups>1 is for
+                ResNeXt like networks.
+            spatial_stride_1x1 (bool): if True, apply spatial_stride to 1x1 conv.
+            inplace_relu (bool): calculate the relu on the original input
+                without allocating new memory.
+            bn_eps (float): epsilon for batch norm.
+            bn_mmt (float): momentum for batch norm. Noted that BN momentum in
+                PyTorch = 1 - BN momentum in Caffe2.
+            disable_pre_activation (bool): If true, disable pre activation,
+                including BatchNorm3D and ReLU.
+        """
+        super(PreactivatedBottleneckTransformation, self).__init__()
+        (temporal_kernel_size_1x1, temporal_kernel_size_3x3) = (
+            (temporal_kernel_size, 1)
+            if temporal_conv_1x1
+            else (1, temporal_kernel_size)
+        )
+        (str1x1, str3x3) = (
+            (spatial_stride, 1) if spatial_stride_1x1 else (1, spatial_stride)
+        )
+
+        self.disable_pre_activation = disable_pre_activation
+        if not disable_pre_activation:
+            self.branch2a_bn = nn.BatchNorm3d(dim_in, eps=bn_eps, momentum=bn_mmt)
+            self.branch2a_relu = nn.ReLU(inplace=inplace_relu)
+
+        self.branch2a = nn.Conv3d(
+            dim_in,
+            dim_inner,
+            kernel_size=[temporal_kernel_size_1x1, 1, 1],
+            stride=[1, str1x1, str1x1],
+            padding=[temporal_kernel_size_1x1 // 2, 0, 0],
+            bias=False,
+        )
+        # Tx3x3 group conv, BN, ReLU.
+        self.branch2b_bn = nn.BatchNorm3d(dim_inner, eps=bn_eps, momentum=bn_mmt)
+        self.branch2b_relu = nn.ReLU(inplace=inplace_relu)
+        self.branch2b = nn.Conv3d(
+            dim_inner,
+            dim_inner,
+            [temporal_kernel_size_3x3, 3, 3],
+            stride=[temporal_stride, str3x3, str3x3],
+            padding=[temporal_kernel_size_3x3 // 2, 1, 1],
+            groups=num_groups,
+            bias=False,
+        )
+        # 1x1x1 conv, BN.
+        self.branch2c_bn = nn.BatchNorm3d(dim_inner, eps=bn_eps, momentum=bn_mmt)
+        self.branch2c_relu = nn.ReLU(inplace=inplace_relu)
+        self.branch2c = nn.Conv3d(
+            dim_inner,
+            dim_out,
+            kernel_size=[1, 1, 1],
+            stride=[1, 1, 1],
+            padding=[0, 0, 0],
+            bias=False,
+        )
+        self.branch2c.final_transform_op = True
+
+    def forward(self, x):
+        # Branch2a
+        if not self.disable_pre_activation:
+            x = self.branch2a_bn(x)
+            x = self.branch2a_relu(x)
+        x = self.branch2a(x)
+        # Branch2b
+        x = self.branch2b_bn(x)
+        x = self.branch2b_relu(x)
+        x = self.branch2b(x)
+        # Branch2c
+        x = self.branch2c_bn(x)
+        x = self.branch2c_relu(x)
+        x = self.branch2c(x)
+        return x
+
+
+residual_transformations = {
     "basic_transformation": BasicTransformation,
-    "bottleneck_transformation": BottleneckTransformation,
-    # For more types of residual block, add them below
+    "postactivated_bottleneck_transformation": PostactivatedBottleneckTransformation,
+    "preactivated_bottleneck_transformation": PreactivatedBottleneckTransformation,
+    # For more types of residual transformations, add them below
+}
+
+
+class PostactivatedShortcutTransformation(nn.Module):
+    """
+    Skip connection used in ResNet3D model.
+    """
+
+    def __init__(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        bn_eps=1e-5,
+        bn_mmt=0.1,
+        **kwargs
+    ):
+        super(PostactivatedShortcutTransformation, self).__init__()
+        # Use skip connection with projection if dim or spatial/temporal res change.
+        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
+            self.branch1 = nn.Conv3d(
+                dim_in,
+                dim_out,
+                kernel_size=1,
+                stride=[temporal_stride, spatial_stride, spatial_stride],
+                padding=0,
+                bias=False,
+            )
+            self.branch1_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
+
+    def forward(self, x):
+        if hasattr(self, "branch1") and hasattr(self, "branch1_bn"):
+            return self.branch1_bn(self.branch1(x))
+        else:
+            return x
+
+
+class PreactivatedShortcutTransformation(nn.Module):
+    """
+    Skip connection with pre-activation, which includes BatchNorm3D and ReLU,
+        in ResNet3D model (https://arxiv.org/abs/1603.05027).
+    """
+
+    def __init__(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        inplace_relu=True,
+        bn_eps=1e-5,
+        bn_mmt=0.1,
+        disable_pre_activation=False,
+        **kwargs
+    ):
+        super(PreactivatedShortcutTransformation, self).__init__()
+        # Use skip connection with projection if dim or spatial/temporal res change.
+        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
+            if not disable_pre_activation:
+                self.branch1_bn = nn.BatchNorm3d(dim_in, eps=bn_eps, momentum=bn_mmt)
+                self.branch1_relu = nn.ReLU(inplace=inplace_relu)
+            self.branch1 = nn.Conv3d(
+                dim_in,
+                dim_out,
+                kernel_size=1,
+                stride=[temporal_stride, spatial_stride, spatial_stride],
+                padding=0,
+                bias=False,
+            )
+
+    def forward(self, x):
+        if hasattr(self, "branch1_bn") and hasattr(self, "branch1_relu"):
+            x = self.branch1_relu(self.branch1_bn(x))
+        if hasattr(self, "branch1"):
+            x = self.branch1(x)
+        return x
+
+
+skip_transformations = {
+    "postactivated_shortcut": PostactivatedShortcutTransformation,
+    "preactivated_shortcut": PreactivatedShortcutTransformation,
+    # For more types of skip transformations, add them below
 }
 
 
@@ -199,11 +395,13 @@ class ResBlock(nn.Module):
         temporal_conv_1x1,
         temporal_stride,
         spatial_stride,
-        transformation_type,
+        skip_transformation_type,
+        residual_transformation_type,
         num_groups=1,
         inplace_relu=True,
         bn_eps=1e-5,
         bn_mmt=0.1,
+        disable_pre_activation=False,
     ):
         """
         ResBlock class constructs redisual blocks. More details can be found in:
@@ -215,51 +413,52 @@ class ResBlock(nn.Module):
             dim_inner (int): the inner dimension of the block.
             temporal_kernel_size (int): the temporal kernel sizes of the middle
                 convolution in the bottleneck.
-            temporal_conv_1x1 (bool): Only useful for BottleneckTransformation.
+            temporal_conv_1x1 (bool): Only useful for PostactivatedBottleneckTransformation.
                 if True, do temporal convolution in the fist 1x1 Conv3d.
                 Otherwise, do it in the second 3x3 Conv3d
             temporal_stride (int): the temporal stride of the bottleneck.
             spatial_stride (int): the spatial_stride of the bottleneck.
             stride (int): the stride of the bottleneck.
-            transformation_type (str): the type of residual transformation
+            skip_transformation_type (str): the type of skip transformation
+            residual_transformation_type (str): the type of residual transformation
             num_groups (int): number of groups for the convolution. num_groups=1
-            is for standard ResNet like networks, and num_groups>1 is for
-            ResNeXt like networks.
+                is for standard ResNet like networks, and num_groups>1 is for
+                ResNeXt like networks.
+            disable_pre_activation (bool): If true, disable the preactivation,
+                which includes BatchNorm3D and ReLU.
         """
-
         super(ResBlock, self).__init__()
-        # Use skip connection with projection if dim or spatial/temporal res change.
-        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
-            self.branch1 = nn.Conv3d(
-                dim_in,
-                dim_out,
-                kernel_size=1,
-                stride=[temporal_stride, spatial_stride, spatial_stride],
-                padding=0,
-                bias=False,
-            )
-            self.bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
 
-        assert transformation_type in res_transformations, (
-            "unknown residual transformation: %s" % transformation_type
+        assert skip_transformation_type in skip_transformations, (
+            "unknown skip transformation: %s" % skip_transformation_type
+        )
+        self.skip = skip_transformations[skip_transformation_type](
+            dim_in,
+            dim_out,
+            temporal_stride,
+            spatial_stride,
+            bn_eps=bn_eps,
+            bn_mmt=bn_mmt,
+            disable_pre_activation=disable_pre_activation,
         )
 
-        self.branch2 = res_transformations[transformation_type](
+        assert residual_transformation_type in residual_transformations, (
+            "unknown residual transformation: %s" % residual_transformation_type
+        )
+        self.residual = residual_transformations[residual_transformation_type](
             dim_in,
             dim_out,
             temporal_stride,
             spatial_stride,
             num_groups,
-            dim_inner=dim_inner,
+            dim_inner,
             temporal_kernel_size=temporal_kernel_size,
             temporal_conv_1x1=temporal_conv_1x1,
+            disable_pre_activation=disable_pre_activation,
         )
         self.relu = nn.ReLU(inplace_relu)
 
     def forward(self, x):
-        if hasattr(self, "branch1"):
-            x = self.bn(self.branch1(x)) + self.branch2(x)
-        else:
-            x = x + self.branch2(x)
+        x = self.skip(x) + self.residual(x)
         x = self.relu(x)
         return x
