@@ -6,8 +6,6 @@
 
 from classy_vision.tasks import build_task
 
-from .utils import Arguments
-
 
 def get_test_task_config(head_num_classes=1000):
     return {
@@ -227,7 +225,6 @@ def get_test_video_task_config():
             "num_groups": 1,
             "width_per_group": 64,
             "num_classes": 50,
-            "freeze_trunk": False,
             "heads": [
                 {
                     "name": "fully_convolutional_linear",

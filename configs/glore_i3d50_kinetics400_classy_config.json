@@ -122,7 +122,6 @@
     "num_groups": 1,
     "width_per_group": 64,
     "num_classes": 400,
-    "freeze_trunk": false,
     "zero_init_residual_transform": true,
     "heads": [
       {
