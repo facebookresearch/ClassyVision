@@ -30,10 +30,6 @@ SLOW_DATASETS_TO_TEST = [
     "cifar10",  # Slow test, 10m
     "cifar100",  # Slow test, 10m
     #  'uru',  # T44459960,
-    "oc_nudity_q1_violates",  # VERY slow test, >60m
-    "oc_nudity_q1_benign",  # VERY slow test, >60m
-    "oc_nudity_q1_suggestive",  # VERY slow test, >60m
-    "oc_violence_benign_vs_mad",  # VERY slow test, >60m
     "places365",  # Slow test, 6m
     "svhn",  # Slow test, 10m
     "yfcc100m",  # VERY Slow test, >60m
