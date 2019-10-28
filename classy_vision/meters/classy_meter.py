@@ -38,21 +38,6 @@ class ClassyMeter(object):
         """
         raise NotImplementedError
 
-    @property
-    def meter_state_dict(self):
-        """Dictionary of states for the meter.
-        """
-        raise NotImplementedError
-
-    @meter_state_dict.setter
-    def meter_state_dict(self, classy_state):
-        """Sets the meter state from classy_state.
-
-        Args:
-            classy_state: State to restore from.
-        """
-        raise NotImplementedError
-
     def sync_state(self):
         """Syncs state with all other meters in distributed training.
 
@@ -91,7 +76,7 @@ class ClassyMeter(object):
     def get_classy_state(self):
         """Gets the state of the ClassyMeter.
         """
-        return self.meter_state_dict
+        raise NotImplementedError
 
     def set_classy_state(self, state):
         """Sets the state of the ClassyMeter.
@@ -99,13 +84,4 @@ class ClassyMeter(object):
         Args:
             state: State of the Meter to restore.
         """
-        # Validate name and existence of mandatory fields (common to all meters).
-        for field in self.meter_state_dict.keys():
-            assert (
-                field in state
-            ), "State does not contain mandatory {0} " "field".format(field)
-        assert self.name == state["name"], "Incompatible meter name!"
-
-        # Assign classy_state to meter_state_dict.
-        # Each meter runs its own assertions and then sets state.
-        self.meter_state_dict = state
+        raise NotImplementedError
