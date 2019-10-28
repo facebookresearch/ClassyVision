@@ -35,7 +35,7 @@ def main(args):
     # Loads config, sets up task
     config = load_json(args.config)
 
-    task = build_task(config, args)
+    task = build_task(config)
 
     # Load checkpoint, if available
     checkpoint = load_checkpoint(args.checkpoint_folder, args.device)
@@ -66,7 +66,9 @@ def main(args):
 
     task.set_hooks(hooks)
 
-    trainer = DistributedTrainer(args.device == "gpu", num_workers=args.num_workers)
+    trainer = DistributedTrainer(
+        args.device == "gpu", num_dataloader_workers=args.num_workers
+    )
     trainer.train(task)
 
 
