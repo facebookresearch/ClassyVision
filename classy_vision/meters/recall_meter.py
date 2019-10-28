@@ -96,8 +96,7 @@ class RecallAtKMeter(ClassyMeter):
             for k in self._topk
         }
 
-    @property
-    def meter_state_dict(self):
+    def get_classy_state(self):
         """Contains the states of the meter.
         """
         return {
@@ -109,9 +108,17 @@ class RecallAtKMeter(ClassyMeter):
             "curr_correct_predictions_k": self._curr_correct_predictions_k.clone(),
         }
 
-    @meter_state_dict.setter
-    def meter_state_dict(self, state):
-        assert self._topk == state["top_k"], "Incompatible top-k for recall!"
+    def set_classy_state(self, state):
+        assert (
+            self.name == state["name"]
+        ), "State name {state_name} does not match meter name {obj_name}".format(
+            state_name=state["name"], obj_name=self.name
+        )
+        assert (
+            self._topk == state["top_k"]
+        ), "top-k of state {state_k} does not match object's top-k {obj_k}".format(
+            state_k=state["top_k"], obj_k=self._topk
+        )
 
         # Restore the state -- correct_predictions and correct_targets.
         self.reset()

@@ -51,18 +51,22 @@ class VideoAccuracyMeter(ClassyMeter):
     def value(self):
         return self._accuracy_meter.value
 
-    @property
-    def meter_state_dict(self):
+    def get_classy_state(self):
         """Contains the states of the meter.
         """
-        state_dict = self._accuracy_meter.meter_state_dict
-        state_dict["name"] = "video_accuracy"
-        state_dict["clips_per_video_train"] = self._clips_per_video_train
-        state_dict["clips_per_video_test"] = self._clips_per_video_test
-        return state_dict
+        state = {}
+        state["accuracy_state"] = self._accuracy_meter.get_classy_state()
+        state["name"] = "video_accuracy"
+        state["clips_per_video_train"] = self._clips_per_video_train
+        state["clips_per_video_test"] = self._clips_per_video_test
+        return state
 
-    @meter_state_dict.setter
-    def meter_state_dict(self, state):
+    def set_classy_state(self, state):
+        assert (
+            "video_accuracy" == state["name"]
+        ), "State name {state_name} does not match meter name {obj_name}".format(
+            state_name=state["name"], obj_name=self.name
+        )
         assert (
             self._clips_per_video_train == state["clips_per_video_train"]
         ), "incompatible clips_per_video_train for video accuracy"
@@ -71,7 +75,7 @@ class VideoAccuracyMeter(ClassyMeter):
         ), "incompatible clips_per_video_test for video accuracy"
         # Restore the state -- correct_predictions and sample_count.
         self.reset()
-        self._accuracy_meter.meter_state_dict = state
+        self._accuracy_meter.set_classy_state(state["accuracy_state"])
 
     def __repr__(self):
         return repr({"name": self.name, "value": self._accuracy_meter.value})
