@@ -92,7 +92,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.EPOCH
-        task.optimizer._lr_scheduler = mock
+        task.optimizer.lr_scheduler = mock
 
         trainer = LocalTrainer()
         trainer.train(task)
@@ -110,7 +110,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.STEP
-        task.optimizer._lr_scheduler = mock
+        task.optimizer.lr_scheduler = mock
 
         trainer = LocalTrainer()
         trainer.train(task)

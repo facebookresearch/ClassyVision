@@ -28,8 +28,14 @@ class CosineParamScheduler(ClassyParamScheduler):
         length: float  # normalizaed length in [0, 1)
         init_lr: float
 
-    def __init__(self, start_lr: float, end_lr: float, warmup: Optional[Warmup] = None):
-        super().__init__()
+    def __init__(
+        self,
+        start_lr: float,
+        end_lr: float,
+        update_interval: str,
+        warmup: Optional[Warmup] = None,
+    ):
+        super().__init__(update_interval)
         self._start_lr = start_lr
         self._end_lr = end_lr
         self._warmup = warmup
@@ -55,8 +61,15 @@ class CosineParamScheduler(ClassyParamScheduler):
             for name in ["init_lr", "length"]:
                 assert name in config["warmup"], "warmup requires parameter: %s" % name
             warmup = cls.Warmup(**config["warmup"])
-
-        return cls(start_lr=config["start_lr"], end_lr=config["end_lr"], warmup=warmup)
+        update_interval = "epoch"
+        if "update_interval" in config:
+            update_interval = config["update_interval"]
+        return cls(
+            start_lr=config["start_lr"],
+            end_lr=config["end_lr"],
+            update_interval=update_interval,
+            warmup=warmup,
+        )
 
     def __call__(self, where: float):
         warmup_length = self._warmup.length if self._warmup is not None else 0

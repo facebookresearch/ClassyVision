@@ -38,10 +38,11 @@ class MultiStepParamScheduler(ClassyParamScheduler):
         self,
         values,
         num_epochs: int,
+        update_interval: str,
         warmup: Warmup = None,
         milestones: Optional[List[int]] = None,
     ):
-        super().__init__()
+        super().__init__(update_interval)
         self._param_schedule = values
         self._num_epochs = num_epochs
         self._milestones = milestones
@@ -99,10 +100,13 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             for name in ["init_lr", "epochs"]:
                 assert name in config["warmup"], "warmup requires parameter: %s" % name
             warmup = cls.Warmup(**config["warmup"])
-
+        update_interval = "epoch"
+        if "update_interval" in config:
+            update_interval = config["update_interval"]
         return cls(
             values=config["values"],
             num_epochs=config["num_epochs"],
+            update_interval=update_interval,
             warmup=warmup,
             milestones=milestones,
         )

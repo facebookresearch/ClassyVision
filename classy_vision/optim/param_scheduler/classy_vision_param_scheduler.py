@@ -16,8 +16,15 @@ class ClassyParamScheduler(object):
     # To be used for comparisons with where
     WHERE_EPSILON = 1e-6
 
-    def __init__(self):
-        self.update_interval = UpdateInterval.EPOCH
+    def __init__(self, update_interval="epoch"):
+        assert update_interval in [
+            "epoch",
+            "step",
+        ], f"Unknown update_interval: {update_interval}"
+        if update_interval == "epoch":
+            self.update_interval = UpdateInterval.EPOCH
+        else:
+            self.update_interval = UpdateInterval.STEP
 
     def __call__(self, where: float):
         """

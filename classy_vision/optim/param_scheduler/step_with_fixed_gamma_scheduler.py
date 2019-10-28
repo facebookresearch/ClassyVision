@@ -47,17 +47,22 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
                 "epochs" in config["warmup"] and "init_lr" in config["warmup"]
             ), "warmup config requires two keys: 'epoch' and 'init_lr'"
             warmup = StepParamScheduler.Warmup(**config["warmup"])
-
+        update_interval = "epoch"
+        if "update_interval" in config:
+            update_interval = config["update_interval"]
         return cls(
             base_lr=config["base_lr"],
             num_decays=config["num_decays"],
             gamma=config["gamma"],
             num_epochs=config["num_epochs"],
+            update_interval=update_interval,
             warmup=warmup,
         )
 
-    def __init__(self, base_lr, num_decays, gamma, num_epochs, warmup=None):
-        super().__init__()
+    def __init__(
+        self, base_lr, num_decays, gamma, num_epochs, update_interval, warmup=None
+    ):
+        super().__init__(update_interval)
 
         self.base_lr = base_lr
         self.num_decays = num_decays

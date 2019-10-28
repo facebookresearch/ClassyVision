@@ -32,9 +32,10 @@ class StepParamScheduler(ClassyParamScheduler):
         self,
         num_epochs: Union[int, float],
         values: List[float],
+        update_interval: str,
         warmup: Optional[Warmup] = None,
     ):
-        super().__init__()
+        super().__init__(update_interval)
 
         self._param_schedule = values
         self._warmup = warmup
@@ -58,8 +59,14 @@ class StepParamScheduler(ClassyParamScheduler):
                 assert name in config["warmup"], "warmup requires parameter: %s" % name
             warmup = cls.Warmup(**config["warmup"])
 
+        update_interval = "epoch"
+        if "update_interval" in config:
+            update_interval = config["update_interval"]
         return cls(
-            num_epochs=config["num_epochs"], values=config["values"], warmup=warmup
+            num_epochs=config["num_epochs"],
+            values=config["values"],
+            update_interval=update_interval,
+            warmup=warmup,
         )
 
     def __call__(self, where: float):

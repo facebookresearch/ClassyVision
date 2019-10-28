@@ -13,14 +13,17 @@ class ConstantParamScheduler(ClassyParamScheduler):
     Returns a constant value for a optimizer param.
     """
 
-    def __init__(self, value: float):
-        super().__init__()
+    def __init__(self, value: float, update_interval: str):
+        super().__init__(update_interval)
         self._value = value
 
     @classmethod
     def from_config(cls, config):
         assert "value" in config
-        return cls(value=config["value"])
+        update_interval = "epoch"
+        if "update_interval" in config:
+            update_interval = config["update_interval"]
+        return cls(value=config["value"], update_interval=update_interval)
 
     def __call__(self, where: float):
         if where >= 1.0:
