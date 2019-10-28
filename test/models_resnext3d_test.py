@@ -17,6 +17,7 @@ class TestResNeXt3D(unittest.TestCase):
             "name": "resnext3d",
             "input_key": "video",
             "clip_crop_size": 112,
+            "skip_transformation_type": "postactivated_shortcut",
             "frames_per_clip": 32,
             "input_planes": 3,
             "stem_name": "resnext3d_stem",
@@ -36,19 +37,17 @@ class TestResNeXt3D(unittest.TestCase):
                 }
             ],
         }
+        pbt = "postactivated_bottleneck_transformation"
         model_config_variants = [
             # ResNeXt3D-34
-            {"transformation_type": "basic_transformation", "num_blocks": [3, 4, 6, 3]},
-            # ResNeXt3D-50
             {
-                "transformation_type": "bottleneck_transformation",
+                "residual_transformation_type": "basic_transformation",
                 "num_blocks": [3, 4, 6, 3],
             },
+            # ResNeXt3D-50
+            {"residual_transformation_type": pbt, "num_blocks": [3, 4, 6, 3]},
             # ResNeXt3D-101
-            {
-                "transformation_type": "bottleneck_transformation",
-                "num_blocks": [3, 4, 23, 3],
-            },
+            {"residual_transformation_type": pbt, "num_blocks": [3, 4, 23, 3]},
         ]
 
         self.model_configs = []

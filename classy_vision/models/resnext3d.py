@@ -26,7 +26,8 @@ class ResNeXt3D(ClassyModel):
         input_key,
         input_planes,
         clip_crop_size,
-        transformation_type,
+        skip_transformation_type,
+        residual_transformation_type,
         frames_per_clip,
         num_blocks,
         stem_name,
@@ -41,10 +42,14 @@ class ResNeXt3D(ClassyModel):
         stage_spatial_stride,
         num_groups,
         width_per_group,
-        zero_init_final_transform_bn,
+        zero_init_residual_transform,
     ):
         """
-            Implementation of 3D ResNe(X)t (https://arxiv.org/pdf/1812.03982.pdf).
+            Implementation of
+                1) conventional post-activated 3D ResNe(X)t
+                (https://arxiv.org/abs/1812.03982).
+                2) pre-activated 3D ResNe(X)t
+                (https://arxiv.org/abs/1811.12814).
             The model consists of one stem, a number of stages, and one or multiple
                 heads that are attached to different blocks in the stage.
         Args:
@@ -52,7 +57,8 @@ class ResNeXt3D(ClassyModel):
             input_planes (int): the channel dimension of the input. Normally 3 is used
                 for rgb input.
             clip_crop_size (int): spatial cropping size of video clip at train time.
-            transformation_type (str): the type of residual transformation.
+            skip_transformation_type (str): the type of skip transformation.
+            residual_transformation_type (str): the type of residual transformation.
             frames_per_clip (int): No. of frames in a video clip.
             num_blocks (list): list of the number of blocks in stages.
             stem_name (str): name of model stem.
@@ -78,8 +84,10 @@ class ResNeXt3D(ClassyModel):
                 num_groups > 1 is for ResNeXt like networks.
             width_per_group (int): No. of channels per group in 2nd (group) conv in the
                 residual transformation in the first stage
-            zero_init_final_transform_bn (bool): if true, the weight of last
-                BatchNorm in in the residual transformation is initialized to zero
+            zero_init_residual_transform (bool): if true, the weight of last
+                op, which could be either BatchNorm3D in post-activated transformation
+                or Conv3D in pre-activated transformation, in the residual
+                transformation is initialized to zero
         """
         super(ResNeXt3D, self).__init__(num_classes=None)
 
@@ -118,13 +126,16 @@ class ResNeXt3D(ClassyModel):
                 [stage_spatial_stride[s]],
                 [num_blocks[s]],
                 [num_groups],
-                transformation_type,
+                skip_transformation_type,
+                residual_transformation_type,
                 block_callback=self.build_attachable_block,
+                disable_pre_activation=True if s == 0 else False,
+                final_stage=True if s == (num_stages - 1) else False,
             )
             stages.append(stage)
 
         self.stages = nn.Sequential(*stages)
-        self._init_parameter(zero_init_final_transform_bn)
+        self._init_parameter(zero_init_residual_transform)
 
     @classmethod
     def from_config(cls, config):
@@ -132,7 +143,8 @@ class ResNeXt3D(ClassyModel):
         required_args = [
             "input_planes",
             "clip_crop_size",
-            "transformation_type",
+            "skip_transformation_type",
+            "residual_transformation_type",
             "frames_per_clip",
             "num_blocks",
         ]
@@ -187,8 +199,8 @@ class ResNeXt3D(ClassyModel):
         # Default setting for model parameter initialization
         ret_config.update(
             {
-                "zero_init_final_transform_bn": config.get(
-                    "zero_init_final_transform_bn", False
+                "zero_init_residual_transform": config.get(
+                    "zero_init_residual_transform", False
                 )
             }
         )
@@ -210,17 +222,26 @@ class ResNeXt3D(ClassyModel):
 
         return cls(**ret_config)
 
-    def _init_parameter(self, zero_init_final_transform_bn):
+    def _init_parameter(self, zero_init_residual_transform):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+                if (
+                    hasattr(m, "final_transform_op")
+                    and m.final_transform_op
+                    and zero_init_residual_transform
+                ):
+                    nn.init.constant_(m.weight, 0)
+                else:
+                    nn.init.kaiming_normal_(
+                        m.weight, mode="fan_out", nonlinearity="relu"
+                    )
                 if m.bias:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm3d) and m.affine:
                 if (
-                    hasattr(m, "final_transform_bn")
-                    and m.final_transform_bn
-                    and zero_init_final_transform_bn
+                    hasattr(m, "final_transform_op")
+                    and m.final_transform_op
+                    and zero_init_residual_transform
                 ):
                     batchnorm_weight = 0.0
                 else:
