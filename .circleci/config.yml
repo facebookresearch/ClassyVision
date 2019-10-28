@@ -9,7 +9,9 @@ version: 2
 # -------------------------------------------------------------------------------------
 cpu: &cpu
   docker:
-    - image: circleci/python:3.6.1
+  machine:
+    image: default
+  resource_class: medium
 
 gpu: &gpu
   environment:
@@ -69,21 +71,23 @@ jobs:
     steps:
       - checkout
 
+      - <<: *install_python
+
       - <<: *setup_venv
 
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-cpu-dependencies-{{ checksum "requirements.txt" }}
+            - v2-cpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-cpu-dependencies-
+            - v2-cpu-dependencies-
 
       - <<: *install_dep
 
       - save_cache:
           paths:
             - ~/venv
-          key: v1-cpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v2-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
