@@ -220,9 +220,13 @@ class ClassificationTask(ClassyTask):
             num_workers=num_dataloader_workers, pin_memory=pin_memory
         )
 
+        # move the model and loss to the right device
         if use_gpu:
-            self.loss = self.loss.cuda()
+            self.loss.cuda()
             self.base_model = copy_model_to_gpu(self.base_model)
+        else:
+            self.loss.cpu()
+            self.base_model.cpu()
 
         # initialize the pytorch optimizer now since the model has been moved to
         # the appropriate device
