@@ -125,7 +125,6 @@
     "num_groups": 1,
     "width_per_group": 64,
     "num_classes": 51,
-    "freeze_trunk": false,
     "heads": [
       {
         "name": "fully_convolutional_linear",
