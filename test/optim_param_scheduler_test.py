@@ -59,7 +59,6 @@ class TestParamSchedulerIntegration(unittest.TestCase):
                 "num_epochs": 10,
                 "lr": 0.1,
                 "weight_decay": 1e-4,
-                "weight_decay_batchnorm": 0.0,
                 "momentum": 0.9,
             },
         }

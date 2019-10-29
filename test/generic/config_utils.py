@@ -55,7 +55,6 @@ def get_test_task_config(head_num_classes=1000):
             "num_epochs": 12,
             "lr": {"name": "step", "values": [0.1, 0.01]},
             "weight_decay": 1e-4,
-            "weight_decay_batchnorm": 0.0,
             "momentum": 0.9,
         },
     }
@@ -108,7 +107,6 @@ def get_fast_test_task_config(head_num_classes=1000):
             "name": "sgd",
             "lr": 0.01,
             "weight_decay": 1e-4,
-            "weight_decay_batchnorm": 0.0,
             "momentum": 0.9,
         },
     }
@@ -164,7 +162,6 @@ def get_test_mlp_task_config():
             "num_epochs": 10,
             "lr": 0.1,
             "weight_decay": 1e-4,
-            "weight_decay_batchnorm": 0.0,
             "momentum": 0.9,
         },
     }

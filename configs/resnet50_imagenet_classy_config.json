@@ -47,7 +47,6 @@
             "values": [0.1, 0.01, 0.001]
         },
         "weight_decay": 1e-4,
-        "weight_decay_batchnorm": 0.0,
         "momentum": 0.9
     }
 }
