@@ -1,5 +1,5 @@
 {
-  "name": "classy_vision",
+  "name": "classification_task",
   "num_epochs": 80,
   "loss": {
     "name": "CrossEntropyLoss"
@@ -130,7 +130,7 @@
         "pool_size": [
           8,
           7,
-              7
+          7
         ],
         "activation_func": "softmax",
         "num_classes": 400,
