@@ -48,3 +48,22 @@ def register_param_scheduler(name):
 
 # automatically import any Python files in the optim/param_scheduler/ directory
 import_all_modules(FILE_ROOT, "classy_vision.optim.param_scheduler")
+
+from .constant_scheduler import ConstantParamScheduler  # isort:skip
+from .cosine_scheduler import CosineParamScheduler  # isort:skip
+from .multi_step_scheduler import MultiStepParamScheduler  # isort:skip
+from .polynomial_decay_scheduler import PolynomialDecayParamScheduler  # isort:skip
+from .step_scheduler import StepParamScheduler  # isort:skip
+from .step_with_fixed_gamma_scheduler import (  # isort:skip
+    StepWithFixedGammaParamScheduler,
+)
+
+__all__ = [
+    "ClassyParamScheduler",
+    "ConstantParamScheduler",
+    "CosineParamScheduler",
+    "MultiStepParamScheduler",
+    "PolynomialDecayParamScheduler",
+    "StepParamScheduler",
+    "StepWithFixedGammaParamScheduler",
+]
