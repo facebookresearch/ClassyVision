@@ -51,3 +51,8 @@ def register_optimizer(name):
 
 # automatically import any Python files in the optim/ directory
 import_all_modules(FILE_ROOT, "classy_vision.optim")
+
+from .rmsprop import RMSProp  # isort:skip
+from .sgd import SGD  # isort:skip
+
+__all__ = ["ClassyOptimizer", "RMSProp", "SGD"]
