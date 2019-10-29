@@ -7,11 +7,11 @@
 import os
 
 import torch
+import torchvision.transforms as transforms
 from torchvision.datasets.hmdb51 import HMDB51
 
 from . import register_dataset
-from .classy_video_dataset import ClassyVideoDataset
-from .core import WrapTorchVisionVideoDataset
+from .classy_video_dataset import ClassyVideoDataset, VideoTupleToMapTransform
 from .transforms.util_video import build_video_field_transform_default
 
 
@@ -103,7 +103,7 @@ class HMDB51Dataset(ClassyVideoDataset):
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
-        dataset = HMDB51(
+        self.dataset = HMDB51(
             video_dir,
             splits_dir,
             frames_per_clip,
@@ -118,11 +118,9 @@ class HMDB51Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
         )
-        metadata = dataset.metadata
+        metadata = self.dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
             HMDB51Dataset.save_metadata(metadata, metadata_filepath)
-
-        self.dataset = WrapTorchVisionVideoDataset(dataset)
 
     @classmethod
     def from_config(cls, config):
@@ -147,7 +145,12 @@ class HMDB51Dataset(ClassyVideoDataset):
             clips_per_video,
         ) = cls.parse_config(config)
 
-        transform = build_video_field_transform_default(transform_config, split)
+        transform = transforms.Compose(
+            [
+                VideoTupleToMapTransform(),
+                build_video_field_transform_default(transform_config, split),
+            ]
+        )
         return cls(
             split,
             batchsize_per_replica,

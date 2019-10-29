@@ -17,6 +17,23 @@ from torchvision.datasets.samplers.clip_sampler import (
 )
 
 from .classy_dataset import ClassyDataset
+from .transforms import ClassyTransform
+
+
+class VideoTupleToMapTransform(ClassyTransform):
+    """
+    This helper transform takes a sample of the form (video, audio, target)
+    and returns a sample of the form {"input": {"video" video,
+    "audio": audio}, "target": target}
+
+    It's particularly useful for remapping torchvision samples which are
+    tuples of the form (video, audio, target).
+    """
+
+    def __call__(self, sample):
+        video, audio, target = sample
+        output_sample = {"input": {"video": video, "audio": audio}, "target": target}
+        return output_sample
 
 
 class ClassyVideoDataset(ClassyDataset):
