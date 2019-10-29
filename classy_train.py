@@ -23,7 +23,6 @@ from classy_vision.hooks import (
 )
 from classy_vision.tasks import build_task
 from classy_vision.trainer import DistributedTrainer
-from tensorboardX import SummaryWriter
 from torchvision import set_video_backend
 
 
@@ -48,9 +47,14 @@ def main(args):
         TimeMetricsHook(),
     ]
     if not args.skip_tensorboard:
-        tb_writer = SummaryWriter(log_dir="/tmp/tensorboard")
-        hooks.append(TensorboardPlotHook(tb_writer))
-        hooks.append(ModelTensorboardHook(tb_writer))
+        try:
+            from tensorboardX import SummaryWriter
+
+            tb_writer = SummaryWriter(log_dir="/tmp/tensorboard")
+            hooks.append(TensorboardPlotHook(tb_writer))
+            hooks.append(ModelTensorboardHook(tb_writer))
+        except ImportError:
+            logging.warning("tensorboardX not installed, skipping tensorboard hooks")
     if args.checkpoint_folder != "":
         hooks.append(
             CheckpointHook(
