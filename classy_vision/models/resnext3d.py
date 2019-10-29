@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import torch
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
 
@@ -158,7 +159,7 @@ class ResNeXt3D(ClassyModel):
         #   stem_maxpool: by default, spatial maxpool op is disabled in stem
         ret_config.update(
             {
-                "input_key": config.get("input_key", "video"),
+                "input_key": config.get("input_key", None),
                 "stem_name": config.get("stem_name", "resnext3d_stem"),
                 "stem_planes": config.get("stem_planes", 64),
                 "stem_temporal_kernel": config.get("stem_temporal_kernel", 3),
@@ -252,14 +253,79 @@ class ResNeXt3D(ClassyModel):
                 nn.init.normal_(m.weight, mean=0.0, std=0.01)
                 nn.init.constant_(m.bias, 0)
 
+    def set_classy_state(self, state):
+        # We need to support both regular checkpoint loading and 2D conv weight
+        # inflation into 3D conv weight in this function.
+        self.load_head_states(state)
+        current_state = self.state_dict()
+        for name, weight_src in state["model"]["trunk"].items():
+            assert name in current_state, (
+                "weight %s is not found in ResNeXt3D model" % name
+            )
+            weight_tgt = current_state[name]
+            assert (
+                weight_src.dim() == weight_tgt.dim()
+            ), "weight of source- and target 3D convolution should have same dimension"
+            if (
+                weight_src.dim() == 5
+                and weight_src.shape[2] == 1
+                and weight_tgt.shape[2] > 1
+            ):
+                # Find a source weight tensor where temporal dimension is 1. If the
+                # temporal dimension of the current weight tensor with the same name
+                # is larger than 1, we inflate the source weight tensor before
+                # loading it. Such parameter inflation was first introduced in
+                # the paper (https://arxiv.org/abs/1705.07750). It can achieve a
+                # better initialization compared to random initialization.
+                assert (
+                    weight_src.shape[-2:] == weight_tgt.shape[-2:]
+                    and weight_src.shape[:2] == weight_tgt.shape[:2]
+                ), "weight shapes of source- and target 3D convolution mismatch"
+                weight_src_inflated = (
+                    weight_src.repeat(1, 1, weight_tgt.shape[2], 1, 1)
+                    / weight_tgt.shape[2]
+                )
+                weight_src = weight_src_inflated
+            else:
+                assert all(
+                    weight_src.size(d) == weight_tgt.size(d)
+                    for d in range(weight_src.dim())
+                ), (
+                    "the shapes of source and target weight mismatch: %s Vs %s"
+                    % (str(weight_src.size()), str(weight_tgt.size()))
+                )
+
+            current_state[name] = weight_src.clone()
+        super().load_state_dict(current_state)
+
     def forward(self, x):
         """
         Args:
-            x (dict): video input {"video": torch.tensor, "audio": torch.tensor}
+            x (dict or torch.Tensor): video input.
+                When its type is dict, the dataset is a video dataset, and its
+                content is like {"video": torch.tensor, "audio": torch.tensor}.
+                When its type is torch.Tensor, the dataset is an image dataset.
         """
-        assert type(x) == dict, "input x should be a dictionary (%s)" % str(x)
-        assert self._input_key in x, "input key (%s) not in the input" % self._input_key
-        out = self.stem([x[self._input_key]])
+        assert isinstance(x, dict) or isinstance(
+            x, torch.Tensor
+        ), "x must be either a dictionary or a torch.Tensor"
+        if isinstance(x, dict):
+            assert self._input_key is not None and self._input_key in x, (
+                "input key (%s) not in the input" % self._input_key
+            )
+            x = x[self._input_key]
+        else:
+            assert (
+                self._input_key is None
+            ), "when input of forward pass is a tensor, input key should not be set"
+            assert x.dim() == 4 or x.dim() == 5, "tensor x must be 4D/5D tensor"
+            if x.dim() == 4:
+                # x is a 4D tensor of size N x C x H x W and is prepared from an
+                # image dataset. We insert a temporal axis make it 5D of size
+                # N x C x T x H x W
+                x = torch.unsqueeze(x, 2)
+
+        out = self.stem([x])
         out = self.stages(out)
 
         head_outputs = tuple(self.head_outputs.values())

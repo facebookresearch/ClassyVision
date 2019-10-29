@@ -56,9 +56,12 @@ class ClassyModel(nn.Module):
             model_state_dict = copy.deepcopy(model_state_dict)
         return model_state_dict
 
-    def set_classy_state(self, state):
+    def load_head_states(self, state):
         for block, head_states in state["model"]["heads"].items():
             self._attachable_blocks[block].load_head_states(head_states)
+
+    def set_classy_state(self, state):
+        self.load_head_states(state)
 
         current_state = self.state_dict()
         current_state.update(state["model"]["trunk"])
