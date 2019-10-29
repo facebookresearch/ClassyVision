@@ -14,8 +14,8 @@ class ClassyOptimizer:
         """
         Classy Optimizer constructor.
         """
-        self._lr_scheduler = lr_scheduler
-        self.lr = self._lr_scheduler(0)
+        self.lr_scheduler = lr_scheduler
+        self.lr = self.lr_scheduler(0)
         self._optimizer = None
         self.optimizer_params = None
 
@@ -117,25 +117,25 @@ class ClassyOptimizer:
         loss.backward()
 
     def update_schedule_on_epoch(self, where):
-        assert self._lr_scheduler.update_interval in [
+        assert self.lr_scheduler.update_interval in [
             UpdateInterval.EPOCH,
             UpdateInterval.STEP,
         ]
 
-        if self._lr_scheduler.update_interval == UpdateInterval.EPOCH:
+        if self.lr_scheduler.update_interval == UpdateInterval.EPOCH:
             self._update_schedule(where)
 
     def update_schedule_on_step(self, where):
-        assert self._lr_scheduler.update_interval in [
+        assert self.lr_scheduler.update_interval in [
             UpdateInterval.EPOCH,
             UpdateInterval.STEP,
         ]
 
-        if self._lr_scheduler.update_interval == UpdateInterval.STEP:
+        if self.lr_scheduler.update_interval == UpdateInterval.STEP:
             self._update_schedule(where)
 
     def _update_schedule(self, where):
-        self.lr = self._lr_scheduler(where)
+        self.lr = self.lr_scheduler(where)
         for group in self.optimizer.param_groups:
             group.update(self.parameters)
 

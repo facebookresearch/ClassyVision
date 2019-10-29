@@ -8,16 +8,20 @@ from enum import Enum
 
 
 class UpdateInterval(Enum):
-    EPOCH = 1
-    STEP = 2
+    EPOCH = "epoch"
+    STEP = "step"
 
 
 class ClassyParamScheduler(object):
     # To be used for comparisons with where
     WHERE_EPSILON = 1e-6
 
-    def __init__(self):
-        self.update_interval = UpdateInterval.EPOCH
+    def __init__(self, update_interval: UpdateInterval = UpdateInterval.EPOCH):
+        self.update_interval = update_interval
+
+    @classmethod
+    def from_config(cls, config):
+        raise NotImplementedError
 
     def __call__(self, where: float):
         """
