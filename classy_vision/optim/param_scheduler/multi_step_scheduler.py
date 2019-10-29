@@ -10,7 +10,7 @@ from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from classy_vision.generic.util import is_pos_int
 
-from . import ClassyParamScheduler, register_param_scheduler
+from . import ClassyParamScheduler, UpdateInterval, register_param_scheduler
 
 
 @register_param_scheduler("multistep")
@@ -38,10 +38,11 @@ class MultiStepParamScheduler(ClassyParamScheduler):
         self,
         values,
         num_epochs: int,
+        update_interval: UpdateInterval,
         warmup: Warmup = None,
         milestones: Optional[List[int]] = None,
     ):
-        super().__init__()
+        super().__init__(update_interval)
         self._param_schedule = values
         self._num_epochs = num_epochs
         self._milestones = milestones
@@ -99,10 +100,10 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             for name in ["init_lr", "epochs"]:
                 assert name in config["warmup"], "warmup requires parameter: %s" % name
             warmup = cls.Warmup(**config["warmup"])
-
         return cls(
             values=config["values"],
             num_epochs=config["num_epochs"],
+            update_interval=UpdateInterval(config.get("update_interval", "epoch")),
             warmup=warmup,
             milestones=milestones,
         )
