@@ -39,10 +39,7 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
         frames_per_clip,
         video_width,
         video_height,
-        video_min_dimension,
         audio_samples,
-        step_between_clips,
-        frame_rate,
         clips_per_video,
     ):
         super(SyntheticVideoClassificationDataset, self).__init__(
@@ -51,13 +48,6 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
             shuffle,
             transform,
             num_samples,
-            frames_per_clip,
-            video_width,
-            video_height,
-            video_min_dimension,
-            audio_samples,
-            step_between_clips,
-            frame_rate,
             clips_per_video,
         )
 
@@ -111,9 +101,6 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
             frames_per_clip,
             video_width,
             video_height,
-            video_min_dimension,
             audio_samples,
-            step_between_clips,
-            frame_rate,
             clips_per_video,
         )

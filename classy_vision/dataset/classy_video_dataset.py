@@ -31,26 +31,12 @@ class ClassyVideoDataset(ClassyDataset):
         shuffle,
         transform,
         num_samples,
-        frames_per_clip,
-        video_width,
-        video_height,
-        video_min_dimension,
-        audio_samples,
-        step_between_clips,
-        frame_rate,
         clips_per_video,
     ):
         super(ClassyVideoDataset, self).__init__(
             split, batchsize_per_replica, shuffle, transform, num_samples
         )
         # Assignments:
-        self.frames_per_clip = frames_per_clip
-        self.video_width = video_width
-        self.video_height = video_height
-        self.video_min_dimension = video_min_dimension
-        self.audio_samples = audio_samples
-        self.step_between_clips = step_between_clips
-        self.frame_rate = frame_rate
         self.clips_per_video = clips_per_video
 
     @classmethod
@@ -98,7 +84,8 @@ class ClassyVideoDataset(ClassyDataset):
             clips_per_video,
         )
 
-    def load_metadata(self, filepath, video_dir=None, update_file_path=False):
+    @classmethod
+    def load_metadata(cls, filepath, video_dir=None, update_file_path=False):
         metadata = torch.load(filepath)
         if video_dir is not None and update_file_path:
             # video path in meta data can be computed in a different root video folder
@@ -113,7 +100,8 @@ class ClassyVideoDataset(ClassyDataset):
                 )
         return metadata
 
-    def save_metadata(self, filepath):
+    @classmethod
+    def save_metadata(cls, metadata, filepath):
         filedir = os.path.dirname(filepath)
         if not os.path.exists(filedir):
             try:
@@ -123,7 +111,7 @@ class ClassyVideoDataset(ClassyDataset):
                 raise err
         logging.info(f"Save metadata to file: {filedir}")
         try:
-            torch.save(self.metadata, filepath)
+            torch.save(metadata, filepath)
         except ValueError:
             logging.warn(f"Fail to save metadata to file: {filepath}")
 

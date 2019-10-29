@@ -86,13 +86,6 @@ class Kinetics400Dataset(ClassyVideoDataset):
             shuffle,
             transform,
             num_samples,
-            frames_per_clip,
-            video_width,
-            video_height,
-            video_min_dimension,
-            audio_samples,
-            step_between_clips,
-            frame_rate,
             clips_per_video,
         )
         # dataset metadata includes the path of video file, the pts of frames in
@@ -103,7 +96,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         # Otherwise, we compute the meta data, and save it at "metadata_file" path.
         metadata = None
         if os.path.exists(metadata_filepath):
-            metadata = self.load_metadata(
+            metadata = Kinetics400Dataset.load_metadata(
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
@@ -120,9 +113,9 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
         )
-        self.metadata = dataset.metadata
-        if self.metadata and not os.path.exists(metadata_filepath):
-            self.save_metadata(metadata_filepath)
+        metadata = dataset.metadata
+        if metadata and not os.path.exists(metadata_filepath):
+            Kinetics400Dataset.save_metadata(metadata, metadata_filepath)
 
         self.dataset = WrapTorchVisionVideoDataset(dataset)
 
