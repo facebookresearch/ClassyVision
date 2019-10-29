@@ -52,3 +52,21 @@ def register_dataset(name):
 
 # automatically import any Python files in the dataset/ directory
 import_all_modules(FILE_ROOT, "classy_vision.dataset")
+
+from .classy_dataset import ClassyDataset  # isort:skip
+from .classy_hmdb51 import HMDB51Dataset  # isort:skip
+from .classy_kinetics400 import Kinetics400Dataset  # isort:skip
+from .classy_synthetic_image import SyntheticImageClassificationDataset  # isort:skip
+from .classy_synthetic_video import SyntheticVideoClassificationDataset  # isort:skip
+from .classy_ucf101 import UCF101Dataset  # isort:skip
+from .classy_video_dataset import ClassyVideoDataset  # isort:skip
+
+__all__ = [
+    "ClassyDataset",
+    "ClassyVideoDataset",
+    "HMDB51Dataset",
+    "Kinetics400Dataset",
+    "SyntheticImageClassificationDataset",
+    "SyntheticVideoClassificationDataset",
+    "UCF101Dataset",
+]
