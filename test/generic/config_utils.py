@@ -120,6 +120,56 @@ def get_test_classy_task():
     return task
 
 
+def get_test_mlp_task_config():
+    return {
+        "name": "classification_task",
+        "num_epochs": 10,
+        "loss": {"name": "CrossEntropyLoss"},
+        "dataset": {
+            "train": {
+                "name": "synthetic_image",
+                "split": "train",
+                "num_classes": 2,
+                "crop_size": 20,
+                "class_ratio": 0.5,
+                "num_samples": 10,
+                "seed": 0,
+                "batchsize_per_replica": 3,
+                "use_augmentation": False,
+                "use_shuffle": True,
+            },
+            "test": {
+                "name": "synthetic_image",
+                "split": "test",
+                "num_classes": 2,
+                "crop_size": 20,
+                "class_ratio": 0.5,
+                "num_samples": 10,
+                "seed": 0,
+                "batchsize_per_replica": 1,
+                "use_augmentation": False,
+                "use_shuffle": False,
+            },
+        },
+        "model": {
+            "name": "mlp",
+            # 3x20x20 = 1200
+            "input_dim": 1200,
+            "output_dim": 1000,
+            "hidden_dims": [10],
+        },
+        "meters": {"accuracy": {"topk": [1]}},
+        "optimizer": {
+            "name": "sgd",
+            "num_epochs": 10,
+            "lr": 0.1,
+            "weight_decay": 1e-4,
+            "weight_decay_batchnorm": 0.0,
+            "momentum": 0.9,
+        },
+    }
+
+
 def get_test_model_configs():
     return [
         # resnet 101
