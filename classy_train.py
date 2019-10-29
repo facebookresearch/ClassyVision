@@ -21,7 +21,7 @@ from classy_vision.hooks import (
     TimeMetricsHook,
     VisdomHook,
 )
-from classy_vision.tasks import build_task
+from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import DistributedTrainer
 from torchvision import set_video_backend
 
@@ -38,8 +38,16 @@ def main(args):
 
     # Load checkpoint, if available
     checkpoint = load_checkpoint(args.checkpoint_folder, args.device)
-
     task.set_checkpoint(checkpoint)
+
+    pretrained_checkpoint = load_checkpoint(
+        args.pretrained_checkpoint_folder, args.device
+    )
+    if pretrained_checkpoint is not None:
+        assert isinstance(
+            task, FineTuningTask
+        ), "Can only use a pretrained checkpoint for fine tuning tasks"
+        task.set_pretrained_checkpoint(pretrained_checkpoint)
 
     hooks = [
         LossLrMeterLoggingHook(args.log_freq),

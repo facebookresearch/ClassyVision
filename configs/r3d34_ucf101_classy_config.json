@@ -1,5 +1,5 @@
 {
-    "name": "classy_vision",
+    "name": "classification_task",
     "num_epochs": 300,
     "loss": {
         "name": "CrossEntropyLoss"
@@ -125,7 +125,7 @@
         "num_classes": 101,
         "heads": [
             {
-                "name": "resnext3d_basic_head",
+                "name": "fully_convolutional_linear",
                 "unique_id": "default_head",
                 "pool_size": [
                     4,

@@ -41,6 +41,16 @@ def add_generic_args(parser):
                         latest epoch checkpoint is at checkpoint.torch""",
     )
     parser.add_argument(
+        "--pretrained_checkpoint_folder",
+        default="",
+        type=str,
+        help="""folder to use for pre-trained checkpoints:
+                        epochal checkpoints are stored as model_<epoch>.torch,
+                        latest epoch checkpoint is at checkpoint.torch,
+                        checkpoint is used for fine-tuning task, and it will
+                        not resume training from the checkpoint""",
+    )
+    parser.add_argument(
         "--checkpoint_period",
         default=1,
         type=int,
@@ -105,7 +115,7 @@ def add_generic_args(parser):
         help="Logging frequency for LossLrMeterLoggingHook (default 5)",
     )
     parser.add_argument(
-        "--video-backend",
+        "--video_backend",
         default="pyav",
         type=str,
         help="torchvision video decoder backend (pyav or video_reader). Default pyav",
