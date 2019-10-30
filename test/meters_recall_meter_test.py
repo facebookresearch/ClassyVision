@@ -8,7 +8,7 @@ from test.generic.meter_test_utils import ClassificationMeterTest
 
 import torch
 from classy_vision import meters
-from classy_vision.meters.recall_meter import RecallAtKMeter
+from classy_vision.meters import RecallAtKMeter
 
 
 class TestRecallAtKMeter(ClassificationMeterTest):

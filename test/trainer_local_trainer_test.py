@@ -10,7 +10,7 @@ from test.generic.config_utils import get_test_mlp_task_config
 from classy_vision.dataset import build_dataset
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.losses import build_loss
-from classy_vision.meters.accuracy_meter import AccuracyMeter
+from classy_vision.meters import AccuracyMeter
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import ClassificationTask

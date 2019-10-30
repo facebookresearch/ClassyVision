@@ -7,7 +7,7 @@
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
 from classy_vision.generic.util import convert_to_one_hot, is_pos_int
-from classy_vision.meters.classy_meter import ClassyMeter
+from classy_vision.meters import ClassyMeter
 
 from . import register_meter
 
