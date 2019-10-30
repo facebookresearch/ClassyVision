@@ -7,7 +7,6 @@
 import argparse
 import os
 
-import classy_vision.generic.visualize as visualize
 import torch
 import torchvision
 from classy_vision.generic.util import is_pos_int
@@ -18,7 +17,7 @@ def add_generic_args(parser):
     Adds generic command-line arguments for convnet training / testing to parser.
     """
     parser.add_argument(
-        "--config", default="", type=str, help="path to config file for model"
+        "--config_file", default="", type=str, help="path to config file for model"
     )
     parser.add_argument(
         "--device",

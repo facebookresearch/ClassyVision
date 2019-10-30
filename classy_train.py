@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-import os
 
 import torch
 from classy_vision.generic.opts import parse_train_arguments
@@ -32,7 +31,7 @@ def main(args):
     set_video_backend(args.video_backend)
 
     # Loads config, sets up task
-    config = load_json(args.config)
+    config = load_json(args.config_file)
 
     task = build_task(config)
 
@@ -64,9 +63,13 @@ def main(args):
         except ImportError:
             logging.warning("tensorboardX not installed, skipping tensorboard hooks")
     if args.checkpoint_folder != "":
+        args_dict = vars(args)
+        args_dict["config"] = config
         hooks.append(
             CheckpointHook(
-                args.checkpoint_folder, args, checkpoint_period=args.checkpoint_period
+                args.checkpoint_folder,
+                args_dict,
+                checkpoint_period=args.checkpoint_period,
             )
         )
     if args.profiler:
