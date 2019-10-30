@@ -75,7 +75,6 @@ def build_model(config):
             head = build_head(updated_config)
             heads[fork_block][head.unique_id] = head
         model.set_heads(heads)
-    model._config_DO_NOT_USE = config
     return model
 
 

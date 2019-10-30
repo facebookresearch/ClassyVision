@@ -61,7 +61,6 @@ class VisdomHook(ClassyHook):
         """
         phase_type = task.phase_type
         metrics = self.metrics
-        config = task.get_config()
         batches = len(task.losses)
 
         if batches == 0:
@@ -99,8 +98,8 @@ class VisdomHook(ClassyHook):
         # update learning curve visualizations:
         phase_type = "train" if task.train else "test"
         title = "%s-%s-%d" % (
-            config["dataset"][phase_type]["name"],
-            config["model"]["name"],
+            phase_type,
+            task.base_model.__class__.__name__,
             task.base_model.model_depth,
         )
         title += self.title_suffix

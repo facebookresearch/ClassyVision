@@ -34,9 +34,12 @@ class TestCheckpointHook(unittest.TestCase):
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
         device = "cpu"
+        input_args = {"foo": "bar"}
 
         # create a checkpoint hook
-        checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
+        checkpoint_hook = CheckpointHook(
+            checkpoint_folder, input_args, phase_types=["train"]
+        )
 
         # checkpoint directory doesn't exist
         # call the on start function
@@ -66,12 +69,11 @@ class TestCheckpointHook(unittest.TestCase):
         # model should be checkpointed. load and compare
         checkpoint = load_checkpoint(checkpoint_folder, device)
         self.assertIsNotNone(checkpoint)
-        for key in ["input_args", "config", "classy_state_dict"]:
+        for key in ["input_args", "classy_state_dict"]:
             self.assertIn(key, checkpoint)
         # not testing for equality of classy_state_dict, that is tested in
         # a separate test
-        self.assertDictEqual(checkpoint["input_args"], {})
-        self.assertDictEqual(checkpoint["config"], task.get_config())
+        self.assertDictEqual(checkpoint["input_args"], input_args)
 
     def test_checkpoint_period(self) -> None:
         """

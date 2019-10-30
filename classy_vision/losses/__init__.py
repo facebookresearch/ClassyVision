@@ -28,9 +28,7 @@ def build_loss(config):
     assert "name" in config, f"name not provided for loss: {config}"
     name = config["name"]
     if name in LOSS_REGISTRY:
-        instance = LOSS_REGISTRY[name].from_config(config)
-        instance._config_DO_NOT_USE = config
-        return instance
+        return LOSS_REGISTRY[name].from_config(config)
 
     # the name should be available in torch.nn.modules.loss
     assert hasattr(torch_losses, name), (
@@ -43,9 +41,7 @@ def build_loss(config):
         # if we are passing weights, we need to change the weights from a list
         # to a tensor
         args["weight"] = torch.tensor(args["weight"], dtype=torch.float)
-    instance = getattr(torch_losses, name)(**args)
-    instance._config_DO_NOT_USE = config
-    return instance
+    return getattr(torch_losses, name)(**args)
 
 
 def register_loss(name):

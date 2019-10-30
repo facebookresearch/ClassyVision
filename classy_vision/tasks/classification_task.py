@@ -153,20 +153,6 @@ class ClassificationTask(ClassyTask):
     def get_data_iterator(self):
         return self.data_iterator
 
-    def get_config(self):
-        return {
-            "loss": self.loss._config_DO_NOT_USE,
-            "dataset": {
-                split: dataset._config_DO_NOT_USE
-                for split, dataset in self.datasets.items()
-            },
-            "meters": [meter._config_DO_NOT_USE for meter in self.meters],
-            "model": self.base_model._config_DO_NOT_USE,
-            "num_epochs": self.num_epochs,
-            "optimizer": self.optimizer._config_DO_NOT_USE,
-            "test_only": self.test_only,
-        }
-
     def get_total_training_phases(self):
         """
         Returns the total number of "train" phases in the list of execution
