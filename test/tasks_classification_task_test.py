@@ -57,7 +57,7 @@ class TestClassificationTask(unittest.TestCase):
         Tests the {set, get}_classy_state methods by running train_steps
         to make sure the train_steps run the same way.
         """
-        config = get_test_task_config()
+        config = get_fast_test_task_config()
         task = build_task(config).set_hooks([LossLrMeterLoggingHook()])
         task_2 = build_task(config).set_hooks([LossLrMeterLoggingHook()])
 

@@ -21,9 +21,7 @@ PARAM_SCHEDULER_REGISTRY = {}
 
 
 def build_param_scheduler(config):
-    name = config["name"]
-    del config["name"]
-    return PARAM_SCHEDULER_REGISTRY[name].from_config(config)
+    return PARAM_SCHEDULER_REGISTRY[config["name"]].from_config(config)
 
 
 def register_param_scheduler(name):
