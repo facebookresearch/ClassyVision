@@ -8,11 +8,12 @@ import unittest
 from unittest.mock import Mock
 
 from classy_vision.dataset import build_dataset
+from classy_vision.hooks import ClassyHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.optim.param_scheduler import UpdateInterval
-from classy_vision.tasks import ClassificationTask
+from classy_vision.tasks import ClassificationTask, ClassyTask
 from classy_vision.trainer import LocalTrainer
 
 
@@ -117,3 +118,37 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.
         self.assertEqual(where_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
+
+    def test_hook(self):
+        task = self._build_task(num_epochs=3)
+
+        lr_list = []
+
+        class TestHook(ClassyHook):
+            on_rendezvous = ClassyHook._noop
+            on_start = ClassyHook._noop
+            on_phase_start = ClassyHook._noop
+            on_sample = ClassyHook._noop
+            on_forward = ClassyHook._noop
+            on_loss = ClassyHook._noop
+            on_backward = ClassyHook._noop
+            on_phase_end = ClassyHook._noop
+            on_end = ClassyHook._noop
+
+            def on_update(self, task: ClassyTask, local_variables) -> None:
+                lr_list.append(task.optimizer.lr)
+
+        task.set_hooks([TestHook()])
+
+        def scheduler_mock(where):
+            return where
+
+        mock = Mock(side_effect=scheduler_mock)
+        mock.update_interval = UpdateInterval.STEP
+        task.optimizer.lr_scheduler = mock
+
+        trainer = LocalTrainer()
+        trainer.train(task)
+
+        # We have 10 samples, batch size is 5. Each epoch is done in two steps.
+        self.assertEqual(lr_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
