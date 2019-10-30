@@ -63,3 +63,19 @@ def register_meter(name):
 
 # automatically import any Python files in the meters/ directory
 import_all_modules(FILE_ROOT, "classy_vision.meters")
+
+from .accuracy_meter import AccuracyMeter  # isort:skip
+from .precision_meter import PrecisionAtKMeter  # isort:skip
+from .recall_meter import RecallAtKMeter  # isort:skip
+from .video_accuracy_meter import VideoAccuracyMeter  # isort:skip
+
+__all__ = [
+    "AccuracyMeter",
+    "ClassyMeter",
+    "PrecisionAtKMeter",
+    "RecallAtKMeter",
+    "VideoAccuracyMeter",
+    "build_meter",
+    "build_meters",
+    "register_meter",
+]

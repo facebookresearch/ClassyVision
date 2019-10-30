@@ -6,8 +6,8 @@
 
 import torch
 from classy_vision.generic.util import is_pos_int
+from classy_vision.meters import ClassyMeter
 from classy_vision.meters.accuracy_meter import AccuracyMeter
-from classy_vision.meters.classy_meter import ClassyMeter
 
 from . import register_meter
 

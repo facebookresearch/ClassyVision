@@ -8,7 +8,7 @@ from test.generic.meter_test_utils import ClassificationMeterTest
 
 import torch
 from classy_vision import meters
-from classy_vision.meters.precision_meter import PrecisionAtKMeter
+from classy_vision.meters import PrecisionAtKMeter
 
 
 class TestPrecisionAtKMeter(ClassificationMeterTest):
