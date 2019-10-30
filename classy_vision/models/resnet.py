@@ -25,6 +25,6 @@ class ResNet(ResNeXt):
 
     def __init__(self, **kwargs):
         assert (
-            kwargs["base_width_and_cardinality"] is None
+            kwargs.get("base_width_and_cardinality") is None
         ), "base_width_and_cardinality should be None for ResNet"
         super().__init__(**kwargs)
