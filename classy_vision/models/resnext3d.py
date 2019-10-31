@@ -9,9 +9,9 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
 
 from . import register_model
+from ._resnext3d_stage import ResStage
+from ._resnext3d_stem import ResNeXt3DStem
 from .classy_model import ClassyModel, ClassyModelEvaluationMode
-from .resnext3d_stage import ResStage
-from .resnext3d_stem import ResNeXt3DStem
 
 
 model_stems = {
