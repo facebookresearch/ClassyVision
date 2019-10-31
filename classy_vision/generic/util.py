@@ -437,12 +437,15 @@ def get_checkpoint_dict(task, input_args):
 
 
 # function that tries to load a checkpoint:
-def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
+def load_checkpoint(checkpoint_folder, device=None, checkpoint_file=CHECKPOINT_FILE):
     """
     Loads a state variable from the specified checkpoint folder.
     """
     if not checkpoint_folder:
         return None
+
+    if device is None:
+        device = "gpu" if torch.cuda.is_available() else "cpu"
 
     if not os.path.exists(checkpoint_folder):
         logging.warning("Checkpoint folder '%s' not found" % checkpoint_folder)
@@ -457,14 +460,16 @@ def load_checkpoint(checkpoint_folder, device, checkpoint_file=CHECKPOINT_FILE):
 
     # load and return the checkpoint:
     if device == "cpu":
-        return torch.load(filename, map_location=torch.device("cpu"))
+        checkpoint = torch.load(filename, map_location=torch.device("cpu"))
     else:
         assert device == "gpu"
         # Load model on current device and not on saved device for model.
-        return torch.load(
+        checkpoint = torch.load(
             filename,
             map_location=torch.device("cuda:{0}".format(torch.cuda.current_device())),
         )
+    logging.info(f"Loaded checkpoint from {filename}")
+    return checkpoint
 
 
 def update_classy_model(model, model_state_dict, reset_heads):
