@@ -87,7 +87,6 @@ from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .inception import Inception3  # isort:skip
 from .mlp import MLP  # isort:skip
-from .msdnet import MSDNet  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D, ResNeXt3DStem  # isort:skip
@@ -111,7 +110,6 @@ __all__ = [
     "Inception3",
     "DenseNet",
     "MLP",
-    "MSDNet",
     "ResNet",
     "ResNeXt",
     "ResBlock",
