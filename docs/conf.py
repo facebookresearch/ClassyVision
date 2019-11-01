@@ -39,6 +39,13 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
+primary_domain = "py"
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "pytorch": ("https://pytorch.org/docs/stable", None),
+}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
