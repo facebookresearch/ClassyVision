@@ -8,10 +8,16 @@ import torch.nn as nn
 
 
 class ClassyLoss(nn.Module):
+    """
+    Base class to calculate the loss during training.
+
+    This implementation of :class:`torch.nn.Module` allows building
+    the loss object from a configuration file.
+    """
+
     def __init__(self):
         """
-        ClassyLoss constructor. This stores the loss configuration for
-        future access and constructs the basic loss object.
+        Constructor for ClassyLoss.
         """
         super(ClassyLoss, self).__init__()
 
@@ -22,5 +28,7 @@ class ClassyLoss(nn.Module):
     def forward(self, output, target):
         """
         Compute the loss for the provided sample.
+
+        Refer to :class:`torch.nn.Module` for more details.
         """
         raise NotImplementedError
