@@ -50,6 +50,7 @@ import_all_modules(FILE_ROOT, "classy_vision.optim.param_scheduler")
 from .composite_scheduler import CompositeParamScheduler  # isort:skip
 from .constant_scheduler import ConstantParamScheduler  # isort:skip
 from .cosine_scheduler import CosineParamScheduler  # isort:skip
+from .linear_scheduler import LinearParamScheduler  # isort:skip
 from .multi_step_scheduler import MultiStepParamScheduler  # isort:skip
 from .polynomial_decay_scheduler import PolynomialDecayParamScheduler  # isort:skip
 from .step_scheduler import StepParamScheduler  # isort:skip
@@ -62,6 +63,7 @@ __all__ = [
     "CompositeParamScheduler",
     "ConstantParamScheduler",
     "CosineParamScheduler",
+    "LinearParamScheduler",
     "MultiStepParamScheduler",
     "PolynomialDecayParamScheduler",
     "StepParamScheduler",
