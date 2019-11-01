@@ -170,7 +170,14 @@ def get_parser():
     """
     Return a standard command-line parser.
     """
-    parser = argparse.ArgumentParser(description="Train convolutional network")
+    parser = argparse.ArgumentParser(
+        description="""Start a Classy Vision training job.
+
+    This can be used for training on your local machine, using CPU or GPU, and
+    for distributed training. This script also supports Tensorboard, Visdom and
+    checkpointing."""
+    )
+
     parser = add_generic_args(parser)
     return parser
 

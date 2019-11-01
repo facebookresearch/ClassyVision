@@ -3,6 +3,38 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+"""
+This is the main script used for training Classy Vision jobs.
+
+This can be used for training on your local machine, using CPU or GPU, and
+for distributed training. This script also supports Tensorboard, Visdom and
+checkpointing.
+
+Example:
+    For training locally, simply specify a configuration file and whether
+    to use CPU or GPU:
+
+        $ ./classy_train.py --device gpu --config configs/my_config.json
+
+    For distributed training, this can be invoked via
+    :func:`torch.distributed.launch`. For instance
+
+        $ python -m torch.distributed.launch \
+                 --nnodes=1 \
+                 --nproc_per_node=1 \
+                 --master_addr=127.0.0.1 \
+                 --master_port=29500 \
+                 --use_env \
+                 classy_train.py \
+                 --device=gpu \
+                 --config=configs/resnet50_synthetic_image_classy_config.json \
+                 --num_workers=1 \
+                 --log_freq=100
+
+    For other use cases, try
+
+        $ ./classy_train.py --help
+"""
 
 import logging
 
