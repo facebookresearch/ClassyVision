@@ -49,6 +49,17 @@ class TestCompositeScheduler(unittest.TestCase):
             "lengths": [0.5, 0.5],
         }
 
+    def _get_valid_linear_config(self):
+        return {
+            "name": "composite",
+            "schedulers": [
+                {"name": "linear", "start_lr": 0.0, "end_lr": 0.5},
+                {"name": "linear", "start_lr": 0.5, "end_lr": 1.0},
+            ],
+            "lengths": [0.5, 0.5],
+            "interval_scaling": ["rescaled", "rescaled"],
+        }
+
     def test_invalid_config(self):
         config = self._get_valid_mixed_config()
         bad_config = copy.deepcopy(config)
@@ -199,7 +210,6 @@ class TestCompositeScheduler(unittest.TestCase):
             for epoch_num in range(self._num_epochs)
         ]
         self.assertEqual(scaled_schedule, schedule)
-
         # Check warmup of rescaled then fixed
         config["interval_scaling"] = ["rescaled", "fixed"]
         scheduler = CompositeParamScheduler.from_config(config)
@@ -215,3 +225,30 @@ class TestCompositeScheduler(unittest.TestCase):
             for epoch_num in range(int(self._num_epochs / 2), self._num_epochs)
         ]
         self.assertEqual(fixed_schedule, expected_schedule)
+
+    def test_linear_scheduler_no_gaps(self):
+        config = self._get_valid_linear_config()
+
+        # Check rescaled
+        scheduler = CompositeParamScheduler.from_config(config)
+        schedule = [
+            scheduler(epoch_num / self._num_epochs)
+            for epoch_num in range(self._num_epochs)
+        ]
+        expected_schedule = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        self.assertEqual(expected_schedule, schedule)
+
+        # Check fixed composition gives same result as only 1 scheduler
+        config["schedulers"][1] = config["schedulers"][0]
+        config["interval_scaling"] = ["fixed", "fixed"]
+        scheduler = CompositeParamScheduler.from_config(config)
+        linear_scheduler = build_param_scheduler(config["schedulers"][0])
+        schedule = [
+            scheduler(epoch_num / self._num_epochs)
+            for epoch_num in range(self._num_epochs)
+        ]
+        expected_schedule = [
+            linear_scheduler(epoch_num / self._num_epochs)
+            for epoch_num in range(self._num_epochs)
+        ]
+        self.assertEqual(expected_schedule, schedule)
