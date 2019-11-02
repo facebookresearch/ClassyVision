@@ -20,14 +20,6 @@ class TestCosineScheduler(unittest.TestCase):
     def _get_valid_decay_config_intermediate_values(self):
         return [0.0976, 0.0905, 0.0794, 0.0655, 0.05, 0.0345, 0.0206, 0.0095, 0.0024]
 
-    def _get_valid_config_with_warmup(self):
-        return {
-            "name": "cosine",
-            "start_lr": 0.1,
-            "end_lr": 0.01,
-            "warmup": {"init_lr": 0.01, "length": 0.2},
-        }
-
     def test_invalid_config(self):
         # Invalid num epochs
         config = self._get_valid_decay_config()
@@ -101,30 +93,3 @@ class TestCosineScheduler(unittest.TestCase):
         config = self._get_valid_decay_config()
         scheduler = build_param_scheduler(config)
         self.assertTrue(isinstance(scheduler, CosineParamScheduler))
-
-    def test_build_cosine_scheduler_with_warmup(self):
-        config = self._get_valid_config_with_warmup()
-        scheduler = build_param_scheduler(config)
-        self.assertTrue(isinstance(scheduler, CosineParamScheduler))
-
-    def test_scheduler_with_warmup(self):
-        config = self._get_valid_config_with_warmup()
-
-        scheduler = CosineParamScheduler.from_config(config)
-        schedule = [
-            round(scheduler(epoch_num / self._num_epochs), 4)
-            for epoch_num in range(self._num_epochs)
-        ]
-        expected_schedule = [
-            0.01,
-            0.055,
-            0.1,
-            0.0966,
-            0.0868,
-            0.0722,
-            0.055,
-            0.0378,
-            0.0232,
-            0.0134,
-        ]
-        self.assertEqual(schedule, expected_schedule)

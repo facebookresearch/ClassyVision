@@ -142,13 +142,22 @@
     "optimizer": {
         "name": "sgd",
         "lr": {
-            "name": "cosine",
-            "start_lr": 0.04,
-            "end_lr": 0.00004,
-            "warmup": {
-                "init_lr": 0.005,
-                "length": 0.13
+            "name": "composite",
+            "schedulers": [
+              {
+                "name": "linear",
+                "start_lr": 0.005,
+                "end_lr": 0.04
+              },
+              {
+                "name": "cosine",
+                "start_lr": 0.04,
+                "end_lr": 0.00004
             }
+          ],
+          "lengths": [0.13, 0.87],
+          "update_interval": "epoch",
+          "interval_scaling": ["rescaled", "rescaled"]
         },
         "weight_decay": 0.005,
         "momentum": 0.9,

@@ -15,8 +15,6 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     """
     Decays the param value by gamma at equal number of steps so as to have the
     specified total number of decays.
-    Can also specify an optional warm up period where the lr is gradually
-    ramped up to the initial lr.
 
     Example:
       base_lr: 0.1
@@ -41,22 +39,14 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
                 isinstance(config[key], int) and config[key] > 0
             ), f"{key} must be a positive integer"
 
-        warmup = None
-        if "warmup" in config:
-            assert (
-                "epochs" in config["warmup"] and "init_lr" in config["warmup"]
-            ), "warmup config requires two keys: 'epoch' and 'init_lr'"
-            warmup = StepParamScheduler.Warmup(**config["warmup"])
-
         return cls(
             base_lr=config["base_lr"],
             num_decays=config["num_decays"],
             gamma=config["gamma"],
             num_epochs=config["num_epochs"],
-            warmup=warmup,
         )
 
-    def __init__(self, base_lr, num_decays, gamma, num_epochs, warmup=None):
+    def __init__(self, base_lr, num_decays, gamma, num_epochs):
         super().__init__()
 
         self.base_lr = base_lr
@@ -68,7 +58,7 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
             values.append(values[-1] * gamma)
 
         self._step_param_scheduler = StepParamScheduler(
-            num_epochs=num_epochs, values=values, warmup=warmup
+            num_epochs=num_epochs, values=values
         )
 
         # make this a STEP scheduler
