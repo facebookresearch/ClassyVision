@@ -89,15 +89,8 @@ from .inception import Inception3  # isort:skip
 from .mlp import MLP  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
-from .resnext3d import ResNeXt3D, ResNeXt3DStem  # isort:skip
-from .resnext3d_block import ResBlock  # isort:skip
-from .resnext3d_stage import ResStage  # isort:skip
+from .resnext3d import ResNeXt3D  # isort:skip
 from .vgg import VGG  # isort:skip
-from .resnext3d_stem import (  # isort:skip
-    ResNeXt3DStem,
-    ResNeXt3DStemMultiPathway,
-    ResNeXt3DStemSinglePathway,
-)
 
 
 __all__ = [
@@ -112,11 +105,6 @@ __all__ = [
     "MLP",
     "ResNet",
     "ResNeXt",
-    "ResBlock",
-    "ResStage",
-    "ResNeXt3DStem",
-    "ResNeXt3DStemSinglePathway",
-    "ResNeXt3DStemMultiPathway",
     "ResNeXt3D",
     "VGG",
 ]

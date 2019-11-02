@@ -6,7 +6,7 @@
 
 import torch.nn as nn
 
-from .resnext3d_block import ResBlock
+from ._resnext3d_block import ResBlock
 
 
 class ResStage(nn.Module):
