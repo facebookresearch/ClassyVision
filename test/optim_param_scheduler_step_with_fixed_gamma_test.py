@@ -20,7 +20,6 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
         return {
             "name": "step_with_fixed_gamma",
             "base_lr": 1,
-            "warmup": {"init_lr": 0.001, "epochs": 2},
             "gamma": 0.1,
             "num_decays": 3,
             "num_epochs": self._num_epochs,
@@ -28,17 +27,6 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
 
     def test_invalid_config(self):
         config = self._get_valid_config()
-
-        # No warmup - shouldn't raise an exception
-        no_warmup_config = copy.deepcopy(config)
-        del no_warmup_config["warmup"]
-        StepWithFixedGammaParamScheduler.from_config(no_warmup_config)
-
-        # Invalid warmup config
-        bad_config = copy.deepcopy(config)
-        bad_config["warmup"] = {"init_lr": 1}
-        with self.assertRaises(AssertionError):
-            StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid num epochs
         bad_config = copy.deepcopy(config)
@@ -72,8 +60,8 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
             for epoch_num in range(self._num_epochs)
         ]
         expected_schedule = [
-            0.001,
-            0.5005,
+            1,
+            1,
             1,
             0.1,
             0.1,

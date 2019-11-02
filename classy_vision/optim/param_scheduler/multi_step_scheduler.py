@@ -30,16 +30,11 @@ class MultiStepParamScheduler(ClassyParamScheduler):
     plus one.
     """
 
-    class Warmup(NamedTuple):
-        epochs: Union[int, float]
-        init_lr: float
-
     def __init__(
         self,
         values,
         num_epochs: int,
         update_interval: UpdateInterval,
-        warmup: Warmup = None,
         milestones: Optional[List[int]] = None,
     ):
         super().__init__(update_interval)
@@ -68,11 +63,6 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             )
             start_epoch = milestone
 
-        self._warmup = warmup
-        if self._warmup:
-            self._warmup_init_lr = warmup.init_lr
-            self._warmup_len = warmup.epochs / self._num_epochs
-
     @classmethod
     def from_config(cls, config: Dict[str, Any]):
         assert (
@@ -94,27 +84,13 @@ class MultiStepParamScheduler(ClassyParamScheduler):
                 "Non-Equi Step scheduler requires a list of %d epochs"
                 % (len(config["values"]) - 1)
             )
-        warmup = None
-        if "warmup" in config:
-            assert isinstance(config["warmup"], dict), "Warmup must be a dict"
-            for name in ["init_lr", "epochs"]:
-                assert name in config["warmup"], "warmup requires parameter: %s" % name
-            warmup = cls.Warmup(**config["warmup"])
         return cls(
             values=config["values"],
             num_epochs=config["num_epochs"],
             update_interval=UpdateInterval(config.get("update_interval", "epoch")),
-            warmup=warmup,
             milestones=milestones,
         )
 
     def __call__(self, where: float):
-        if self._warmup and where < self._warmup_len + self.WHERE_EPSILON:
-            # interpolate between init_lr and first lr value
-            warmup_progress = where / self._warmup_len
-            lr = self._param_schedule[0] * warmup_progress
-            lr += self._warmup_init_lr * (1 - warmup_progress)
-            return lr
-
         epoch_num = int((where + self.WHERE_EPSILON) * self._num_epochs)
         return self._param_schedule[bisect.bisect_right(self._milestones, epoch_num)]

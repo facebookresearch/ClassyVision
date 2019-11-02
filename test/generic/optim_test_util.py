@@ -207,9 +207,14 @@ class TestOptimizer(ABC):
         init_lr = 0.01
         warmup_epochs = 0.1
         config["lr"] = {
-            "name": "step",
-            "values": [0.1, 0.01, 0.001],
-            "warmup": {"init_lr": init_lr, "epochs": warmup_epochs},
+            "name": "composite",
+            "schedulers": [
+                {"name": "linear", "start_lr": init_lr, "end_lr": 0.1},
+                {"name": "step", "values": [0.1, 0.01, 0.001]},
+            ],
+            "update_interval": "epoch",
+            "interval_scaling": ["rescaled", "fixed"],
+            "lengths": [warmup_epochs / num_epochs, 1 - warmup_epochs / num_epochs],
         }
 
         opt = build_optimizer(config)

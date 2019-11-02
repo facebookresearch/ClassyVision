@@ -120,26 +120,6 @@ class TestMultiStepParamScheduler(unittest.TestCase):
         ]
         self._test_config_scheduler(default_config, expected_schedule)
 
-    def test_warmup(self):
-        config = self._get_valid_config()
-        warmup_config = copy.deepcopy(config)
-        warmup_config["warmup"] = {"init_lr": 0.01, "epochs": 3}
-        expected_schedule = [
-            0.01,
-            0.04,
-            0.07,
-            0.1,
-            0.01,
-            0.01,
-            0.001,
-            0.001,
-            0.0001,
-            0.0001,
-            0.0001,
-            0.0001,
-        ]
-        self._test_config_scheduler(warmup_config, expected_schedule)
-
     def test_build_non_equi_step_scheduler(self):
         config = self._get_valid_config()
         scheduler = build_param_scheduler(config)

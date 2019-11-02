@@ -30,7 +30,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
     would if it were the only scheduler. Default is 'fixed' for all schedulers.
 
     Example:
-      interval = "step"
+      update_interval = "step"
       schedulers = [
         {"name": "constant", "value": 0.42},
         {"name": "cosine_decay", "start_lr": 0.42, "end_lr": 0.0001}
@@ -98,6 +98,11 @@ class CompositeParamScheduler(ClassyParamScheduler):
             interval_scaling = [cls.IntervalScaling.RESCALED] * len(
                 config["schedulers"]
             )
+        if "num_epochs" in config:  # Propogate value to intermediate schedulers
+            config["schedulers"] = [
+                dict(schedule, **{"num_epochs": config["num_epochs"]})
+                for schedule in config["schedulers"]
+            ]
         return cls(
             schedulers=[
                 build_param_scheduler(scheduler) for scheduler in config["schedulers"]
