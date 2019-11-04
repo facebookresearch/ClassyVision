@@ -56,3 +56,20 @@ class TestClassyBlock(unittest.TestCase):
 
         head2.unique_id = "head_id2"
         model.set_heads(heads)
+
+    def test_set_heads(self):
+        model = self.DummyTestModel()
+        head = self.DummyTestHead()
+        self.assertEqual(
+            len(model.get_heads()), 0, "heads should be empty before set_heads"
+        )
+        model.set_heads({"dummy_block2": {head.unique_id: head}})
+        self.assertEqual(len(model.head_outputs), 0, "head outputs should be empty")
+        input = torch.randn(1, 2)
+        model(input)
+        self.assertEqual(len(model.head_outputs), 1, "should have output for one head")
+
+        # remove all heads
+        model.set_heads({})
+        self.assertEqual(len(model.get_heads()), 0, "heads should be empty")
+        self.assertEqual(len(model.head_outputs), 0, "head outputs should be empty")
