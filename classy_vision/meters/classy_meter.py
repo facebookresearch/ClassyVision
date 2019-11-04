@@ -4,84 +4,111 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict, Tuple
 
-class ClassyMeter(object):
-    """
-    Base class for meters to measure various metrics during
-    training and testing phases.
-    """
+import torch
 
-    def __init__(self, **kwargs):
-        """Init function with kwargs passed for meter configuration.
-        """
-        raise NotImplementedError
+
+class ClassyMeter:
+    """
+    Base class to measure various metrics during training and testing phases.
+
+    This can include meters like  Accuracy, Precision and Recall, etc.
+    """
 
     @classmethod
-    def from_config(cls, config):
-        raise NotImplementedError
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyMeter":
+        """
+        Instantiates a ClassyMeter using a configuration.
 
-    @property
-    def name(self):
-        """Name of the meter.
+        Args:
+            config: A configuration for the meter
+
+        Returns:
+            A ClassyMeter instance
         """
         raise NotImplementedError
 
     @property
-    def value(self):
-        """Value of meter based on local state, can be any python object.
+    def name(self) -> str:
+        """The name of the meter."""
+        raise NotImplementedError
 
-        Note: If there are multiple training processes then this
-        represents the local state of the meter. If sync meter is
-        implemented, then value will return the global state since the
-        last sync PLUS any local unsynced updates that have occurred
-        in the local process.
+    @property
+    def value(self) -> Any:
+        """
+        Value of meter based on local state, can be any python object.
+
+        Note:
+            If there are multiple training processes then this
+            represents the local state of the meter. If :method:`sync_meter` is
+            implemented, then value will return the global state since the
+            last sync PLUS any local unsynced updates that have occurred
+            in the local process.
         """
         raise NotImplementedError
 
-    def sync_state(self):
-        """Syncs state with all other meters in distributed training.
-
-        WARNING: Calls to sync_state could involve communications via
-        torch.distributed which can result in a loss of performance or
-        deadlocks if not coordinated among threads
+    def sync_state(self) -> None:
         """
-        # If not provided by child class this does nothing by default
-        # and meter only provides the local process stats. If
-        # implemented then the meter provides the global stats at last
-        # sync + any local updates since the last sync
+        Syncs state with all other meters in distributed training.
+
+        If not provided by child class this does nothing by default
+        and meter only provides the local process stats. If
+        implemented then the meter provides the global stats at last
+        sync + any local updates since the last sync.
+
+        Warning:
+            Calls to sync_state could involve communications via
+            :mod:`torch.distributed` which can result in a loss of performance or
+            deadlocks if not coordinated among threads.
+        """
         pass
 
     def reset(self):
-        """Resets any internal meter state.
-        Gets called at the end of each phase.
+        """
+        Resets any internal meter state.
+
+        Should normally be called at the end of a phase.
         """
         raise NotImplementedError
 
-    def update(self, model_output, target, **kwargs):
-        """Updates any internal state of meter.
-        Gets called after each batch processing of each phase.
+    def update(
+        self, model_output: torch.Tensor, target: torch.Tensor, **kwargs
+    ) -> None:
+        """
+        Updates any internal state of meter.
+
+        Should be called after each batch processing of each phase.
 
         Args:
-            model_output (torch.Tensor): Output of classy_model.
-            target       (torch.Tensor): Target provided by dataloader.
+            model_output: Output of a :class:`ClassyModel`.
+            target: Target provided by a dataloader from :class:`ClassyDataset`.
         """
         raise NotImplementedError
 
-    def validate(self, model_output_shape, target_shape):
-        """Validates if the meter can be calculated on the given model_output_shape
+    def validate(self, model_output_shape: Tuple, target_shape: Tuple) -> None:
+        """
+        Validate the meter.
+
+        Checks if the meter can be calculated on the given model_output_shape
         and target_shape.
         """
         raise NotImplementedError
 
-    def get_classy_state(self):
-        """Gets the state of the ClassyMeter.
+    def get_classy_state(self) -> Dict[str, Any]:
+        """
+        Get the state of the ClassyMeter.
+
+        Returns:
+            A state dictionary containing the state of the meter.
         """
         raise NotImplementedError
 
-    def set_classy_state(self, state):
-        """Sets the state of the ClassyMeter.
+    def set_classy_state(self, state: Dict[str, Any]) -> None:
+        """
+        Set the state of the ClassyMeter.
 
         Args:
-            state: State of the Meter to restore.
+            state: State of the meter to restore.
         """
         raise NotImplementedError
