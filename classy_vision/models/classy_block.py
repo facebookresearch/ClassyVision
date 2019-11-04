@@ -48,12 +48,16 @@ class ClassyBlock(nn.Module):
         if not all(isinstance(x, ClassyHead) for x in heads):
             raise ValueError("Head must extend ClassyHead")
 
-        self._heads = nn.ModuleDict()
+        self._clear_heads()
         for head in heads:
             self._heads[head.unique_id] = head
 
     def get_heads(self):
         return dict(self._heads)
+
+    def _clear_heads(self):
+        self._heads = nn.ModuleDict()
+        self._head_outputs = {}
 
     def forward(self, input):
         output = self._module(input)
