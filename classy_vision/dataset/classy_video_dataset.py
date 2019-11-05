@@ -116,20 +116,20 @@ class ClassyVideoDataset(ClassyDataset):
         except ValueError:
             logging.warn(f"Fail to save metadata to file: {filepath}")
 
+    @property
+    def video_clips(self):
+        return self.dataset.video_clips
+
     def _get_sampler(self, epoch):
         if self.split == "train":
             # For video model training, we don't necessarily want to use all possible
             # clips in the video in one training epoch. More often, we randomly
             # sample at most N clips per training video. In practice, N is often 1
-            clip_sampler = RandomClipSampler(
-                self.dataset.video_clips, self.clips_per_video
-            )
+            clip_sampler = RandomClipSampler(self.video_clips, self.clips_per_video)
         else:
             # For video model testing, we sample N evenly spaced clips per test
             # video. We will simply average predictions over them
-            clip_sampler = UniformClipSampler(
-                self.dataset.video_clips, self.clips_per_video
-            )
+            clip_sampler = UniformClipSampler(self.video_clips, self.clips_per_video)
         world_size = get_world_size()
         rank = get_rank()
         sampler = DistributedSampler(
@@ -138,7 +138,6 @@ class ClassyVideoDataset(ClassyDataset):
             rank=rank,
             shuffle=self.shuffle,
             group_size=self.clips_per_video,
-            num_samples=self.num_samples,
         )
         sampler.set_epoch(epoch)
         return sampler

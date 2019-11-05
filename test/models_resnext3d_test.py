@@ -58,8 +58,8 @@ class TestResNeXt3D(unittest.TestCase):
 
             block_idx = model_config["num_blocks"][-1]
             # attach the head at the last block
-            model_config["heads"][0]["fork_block"] = (
-                "pathway1-stage5-block%d" % block_idx
+            model_config["heads"][0]["fork_block"] = "pathway0-stage4-block%d" % (
+                block_idx - 1
             )
 
             self.model_configs.append(model_config)
@@ -152,7 +152,7 @@ class TestResNeXt3D(unittest.TestCase):
                     "pool_size": [1, 7, 7],
                     "activation_func": "softmax",
                     "num_classes": 1000,
-                    "fork_block": "pathway1-stage5-block3",
+                    "fork_block": "pathway0-stage4-block2",
                     "in_plane": 2048,
                     "use_dropout": False,
                 }
@@ -190,7 +190,7 @@ class TestResNeXt3D(unittest.TestCase):
                     "pool_size": [8, 7, 7],
                     "activation_func": "softmax",
                     "num_classes": 1000,
-                    "fork_block": "pathway1-stage5-block3",
+                    "fork_block": "pathway0-stage4-block2",
                     "in_plane": 2048,
                     "use_dropout": True,
                 }

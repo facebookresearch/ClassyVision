@@ -274,7 +274,7 @@ def get_test_video_task_config():
                     "pool_size": [8, 7, 7],
                     "activation_func": "softmax",
                     "num_classes": 50,
-                    "fork_block": "pathway1-stage5-block3",
+                    "fork_block": "pathway0-stage4-block2",
                     "in_plane": 512,
                     "use_dropout": True,
                 }
