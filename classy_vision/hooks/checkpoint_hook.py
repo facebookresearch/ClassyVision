@@ -61,6 +61,8 @@ class CheckpointHook(ClassyHook):
         self.phase_counter: int = 0
 
     def _save_checkpoint(self, task, filename):
+        if getattr(task, "test_only", False):
+            return
         assert os.path.exists(
             self.checkpoint_folder
         ), "Checkpoint folder '{}' deleted unexpectedly".format(self.checkpoint_folder)
@@ -84,6 +86,8 @@ class CheckpointHook(ClassyHook):
         """
         Check that the checkpoint folder actually exists. If not, raise an exception.
         """
+        if getattr(task, "test_only", False):
+            return
         if not os.path.exists(self.checkpoint_folder):
             err_msg = "Checkpoint folder '{}' does not exist.".format(
                 self.checkpoint_folder
