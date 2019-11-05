@@ -58,16 +58,17 @@ class TestDataset(classy_dataset.ClassyDataset):
         shuffle=False,
         transform=None,
     ):
+        input_tensors = [sample["input"] for sample in samples]
+        target_tensors = [sample["target"] for sample in samples]
+        dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
         super().__init__(
+            dataset=dataset,
             split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=shuffle,
             transform=transform,
             num_samples=len(samples) if num_samples is None else num_samples,
         )
-        input_tensors = [sample["input"] for sample in samples]
-        target_tensors = [sample["target"] for sample in samples]
-        self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
     def from_config(cls, config, *args, **kwargs):
@@ -86,16 +87,17 @@ class OtherTestDataset(classy_dataset.ClassyDataset):
         return ["split0", "split1"]
 
     def __init__(self, samples, batchsize_per_replica=1):
+        input_tensors = [sample["input"] for sample in samples]
+        target_tensors = [sample["target"] for sample in samples]
+        dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
         super().__init__(
+            dataset=dataset,
             split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
             transform=None,
             num_samples=len(samples),
         )
-        input_tensors = [sample["input"] for sample in samples]
-        target_tensors = [sample["target"] for sample in samples]
-        self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
     def from_config(cls, config, *args, **kwargs):

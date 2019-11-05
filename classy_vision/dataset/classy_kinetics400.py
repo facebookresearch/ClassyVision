@@ -83,14 +83,6 @@ class Kinetics400Dataset(ClassyVideoDataset):
             video_dir (str): path to video folder
             metadata_filepath (str): path to the dataset meta data
         """
-        super(Kinetics400Dataset, self).__init__(
-            split,
-            batchsize_per_replica,
-            shuffle,
-            transform,
-            num_samples,
-            clips_per_video,
-        )
         # dataset metadata includes the path of video file, the pts of frames in
         # the video and other meta info such as video fps, duration, audio sample rate.
         # Users do not need to know the details of metadata. The computing, loading
@@ -103,7 +95,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
-        self.dataset = Kinetics400(
+        dataset = Kinetics400(
             video_dir,
             frames_per_clip,
             step_between_clips=step_between_clips,
@@ -116,9 +108,19 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
         )
-        metadata = self.dataset.metadata
+        metadata = dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
             Kinetics400Dataset.save_metadata(metadata, metadata_filepath)
+
+        super().__init__(
+            dataset,
+            split,
+            batchsize_per_replica,
+            shuffle,
+            transform,
+            num_samples,
+            clips_per_video,
+        )
 
     @classmethod
     def from_config(cls, config):

@@ -30,10 +30,11 @@ class SyntheticImageClassificationDataset(ClassyDataset):
         seed,
         split=None,
     ):
-        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
-
-        self.dataset = RandomImageBinaryClassDataset(
+        dataset = RandomImageBinaryClassDataset(
             crop_size, class_ratio, num_samples, seed
+        )
+        super().__init__(
+            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod
