@@ -11,7 +11,6 @@ from torchvision.datasets.kinetics import Kinetics400
 
 from . import register_dataset
 from .classy_video_dataset import ClassyVideoDataset
-from .core import WrapTorchVisionVideoDataset
 from .transforms.util_video import build_video_field_transform_default
 
 
@@ -104,7 +103,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
-        dataset = Kinetics400(
+        self.dataset = Kinetics400(
             video_dir,
             frames_per_clip,
             step_between_clips=step_between_clips,
@@ -117,11 +116,9 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
         )
-        metadata = dataset.metadata
+        metadata = self.dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
             Kinetics400Dataset.save_metadata(metadata, metadata_filepath)
-
-        self.dataset = WrapTorchVisionVideoDataset(dataset)
 
     @classmethod
     def from_config(cls, config):
@@ -148,6 +145,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         extensions = config.get("extensions", ("mp4"))
 
         transform = build_video_field_transform_default(transform_config, split)
+
         return cls(
             split,
             batchsize_per_replica,
