@@ -4,22 +4,56 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import torch
+from typing import Any, Callable, Dict, Optional
 
-from .param_scheduler.classy_vision_param_scheduler import UpdateInterval
+import torch
+from classy_vision.models import ClassyModel
+
+from .param_scheduler.classy_vision_param_scheduler import (
+    ClassyParamScheduler,
+    UpdateInterval,
+)
 
 
 class ClassyOptimizer:
-    def __init__(self, lr_scheduler):
+    """
+    Base class for classy optimizers.
+
+    This wraps a :class:`torch.optim.Optimizer` instance, handles learning
+    rate scheduling by using a :class:`ClassyParamScheduler` and supports specifying
+    regularized and unregularized param groups. Specifying unregularized params is
+    especially useful to avoid applying weight decay on batch norm. See
+    :method:ClassyModel.get_optimizer_params for more information.
+
+    Deriving classes can extend functionality be overriding the appropriate functions.
+    """
+
+    def __init__(self, lr_scheduler: ClassyParamScheduler):
         """
-        Classy Optimizer constructor.
+        Constructor for ClassyOptimizer.
+
+        Args:
+            lr_scheduler: The learning rate scheduler to use.
         """
         self.lr_scheduler = lr_scheduler
         self.lr = self.lr_scheduler(0)
         self._optimizer = None
         self.optimizer_params = None
 
-    def _validate_and_get_optimizer_params(self, model):
+    def _validate_and_get_optimizer_params(self, model: ClassyModel) -> Dict[str, Any]:
+        """
+        Validate and return the optimizer params.
+
+        The optimizer params are fetched from
+        :method:`ClassyVision.get_optimizer_params`.
+
+        Args:
+            model: The model to get the params from.
+
+        Returns:
+            A dict containing "regularized_params" and "unregularized_params".
+            Weight decay will only be applied to "regularized_params".
+        """
         if isinstance(model, torch.nn.parallel.DistributedDataParallel):
             optimizer_params = model.module.get_optimizer_params()
         else:
@@ -46,13 +80,13 @@ class ClassyOptimizer:
         return optimizer_params
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
         raise NotImplementedError
 
     @property
-    def optimizer(self):
+    def optimizer(self) -> torch.optim.Optimizer:
         """
-        Return a torch.optim.optimizer.Optimizer instance.
+        Returns the underlying :class:`torch.optim.Optimizer` instance.
         """
         if self._optimizer is None:
             raise NotImplementedError
@@ -61,25 +95,31 @@ class ClassyOptimizer:
         return self._optimizer
 
     @property
-    def parameters(self):
+    def parameters(self) -> Dict[str, Any]:
         """
-        Return a kwarg dictionary that will be used to override optimizer
-        args stored in checkpoints. This allows us to load a checkpoint and
-        resume training using a different set of parameters, e.g., with a
-        different learning rate.
+        Get the parameters of the optimizer which need to be overridden. All optimizer
+        param groups will use these parameters.
+
+        Returns:
+            A kwarg dictionary that will be used to override optimizer args.
         """
         return {"lr": self.lr}
 
-    def init_pytorch_optimizer(self, model):
+    def init_pytorch_optimizer(self, model: ClassyModel) -> None:
         """
-        Using the provided model, create param groups for the optimizer
-        with a weight decay override for params which should be left unregularized.
+        Initialize the underlying :class:`torch.optim.Optimizer` instance.
 
-        This will be called only after the model has been moved to the correct device.
+        Using the provided model, create param groups for the optimizer with a
+        weight decay override for params which should be left unregularized.
 
-        NOTE: Deriving classes should initialize the underlying Pytorch optimizer
-        in this call. The simplest way to do this after a call to
-        super().init_pytorch_optimizer().
+        Note:
+            Deriving classes should initialize the underlying Pytorch optimizer
+            in this call. The simplest way to do this after a call to
+            super().init_pytorch_optimizer().
+
+        Warning:
+            This should called only after the model has been moved to the correct
+            device.
         """
         self.optimizer_params = self._validate_and_get_optimizer_params(model)
 
@@ -100,23 +140,50 @@ class ClassyOptimizer:
             )
         self.param_groups_override = param_groups_override
 
-    def get_classy_state(self):
+    def get_classy_state(self) -> Dict[str, Any]:
         """
-        Return the optimizer's state dict.
+        Get the state of the ClassyOptimizer. Needed for checkpointing.
+
+        Returns:
+            A state dictionary containing the state of the optimizer.
         """
         return {"optim": self.optimizer.state_dict(), "parameters": self.parameters}
 
-    def set_classy_state(self, state):
+    def set_classy_state(self, state: Dict[str, Any]) -> None:
+        """
+        Set the state of the ClassyOptimizer. Needed to load the correct state from a
+        checkpoint.
+
+        Args:
+            state: State of the optimizer to restore.
+        """
         self.optimizer.load_state_dict(state["optim"])
         for param_name, param_value in state["parameters"].items():
             setattr(self, param_name, param_value)
 
-    def backward(self, loss):
+    def backward(self, loss: torch.Tensor) -> None:
+        """
+        Computer gradients with respect to the loss.
+
+        Calls :method:`zero_grad` and then computes the gradient using
+        :func:`torch.Tensor.backward`. See :mod:`torch.autograd` for more information.
+        """
         # TODO (aadcock): Add gradient accumulation logic
         self.zero_grad()
         loss.backward()
 
-    def update_schedule_on_epoch(self, where):
+    def update_schedule_on_epoch(self, where: float) -> None:
+        """
+        Update the param schedule at the end of an epoch.
+
+        This should be called by the task at the end of every epoch to update the
+        schedule of epoch based param schedulers (See :class:`ClassyParamScheduler` for
+        more information).
+
+        Args:
+            where: where we are in terms of training progress (output of
+                :method:`ClassyTask.where`)
+        """
         assert self.lr_scheduler.update_interval in [
             UpdateInterval.EPOCH,
             UpdateInterval.STEP,
@@ -125,7 +192,18 @@ class ClassyOptimizer:
         if self.lr_scheduler.update_interval == UpdateInterval.EPOCH:
             self._update_schedule(where)
 
-    def update_schedule_on_step(self, where):
+    def update_schedule_on_step(self, where: float) -> None:
+        """
+        Update the param schedule at the end of a train step.
+
+        This should be called by the task at the end of every train step (
+        :method:`ClassyTask.train_step`) to update the schedule of step based param
+        schedulers (See :class:`ClassyParamScheduler` for more information).
+
+        Args:
+            where: where we are in terms of training progress (output of
+                :method:`ClassyTask.where`)
+        """
         assert self.lr_scheduler.update_interval in [
             UpdateInterval.EPOCH,
             UpdateInterval.STEP,
@@ -134,7 +212,12 @@ class ClassyOptimizer:
         if self.lr_scheduler.update_interval == UpdateInterval.STEP:
             self._update_schedule(where)
 
-    def _update_schedule(self, where):
+    def _update_schedule(self, where: float) -> None:
+        """
+        Args:
+            where: where we are in terms of training progress (output of
+                :method:`ClassyTask.where`)
+        """
         self.lr = self.lr_scheduler(where)
         for group in self.optimizer.param_groups:
             group.update(self.parameters)
@@ -147,14 +230,21 @@ class ClassyOptimizer:
         if self.contains_unregularized_params:
             self.optimizer.param_groups[0].update(weight_decay=0.0)
 
-    def step(self, closure=None):
+    def step(self, closure: Optional[Callable] = None):
         """
         Performs a single optimization step.
+
+        See :method:`torch.optim.Optimizer.step` for more information.
+
+        Args:
+            closure: A closure that re-evaluates the model and returns the loss
         """
         self.optimizer.step(closure)
 
     def zero_grad(self):
         """
         Clears the gradients of all optimized parameters.
+
+        See :method:`torch.optim.Optimizer.zero_grad` for more information.
         """
         self.optimizer.zero_grad()
