@@ -6,7 +6,7 @@
   },
   "dataset": {
     "train": {
-      "name": "hmdb51",
+      "name": "ucf101",
       "split": "train",
       "batchsize_per_replica": 16,
       "use_shuffle": true,
@@ -18,22 +18,18 @@
       "splits_dir": "",
       "metadata_file": "",
       "fold": 1,
-      "video_min_dimension": 128,
       "transforms": {
         "video": [
           {
             "name": "video_default_augment",
             "crop_size": 112,
-            "scale": [
-              128,
-              160
-            ]
+            "scale": [128, 160]
           }
         ]
       }
     },
     "test": {
-      "name": "hmdb51",
+      "name": "ucf101",
       "split": "test",
       "batchsize_per_replica": 10,
       "use_shuffle": false,
@@ -45,7 +41,6 @@
       "splits_dir": "",
       "metadata_file": "",
       "fold": 1,
-      "video_min_dimension": 128,
       "transforms": {
         "video": [
           {
@@ -57,16 +52,10 @@
   },
   "meters": {
     "accuracy": {
-      "topk": [
-        1,
-        5
-      ]
+      "topk": [1, 5]
     },
     "video_accuracy": {
-      "topk": [
-        1,
-        5
-      ],
+      "topk": [1, 5],
       "clips_per_video_train": 1,
       "clips_per_video_test": 10
     }
@@ -77,65 +66,28 @@
     "input_planes": 3,
     "clip_crop_size": 112,
     "skip_transformation_type": "postactivated_shortcut",
-    "transformation_type": "basic_transformation",
-    "num_blocks": [
-      3,
-      4,
-      6,
-      3
-    ],
+    "residual_transformation_type": "basic_transformation",
+    "num_blocks": [3, 4, 6, 3],
     "input_key": "video",
     "stem_name": "resnext3d_stem",
     "stem_planes": 64,
     "stem_temporal_kernel": 3,
     "stem_maxpool": false,
     "stage_planes": 64,
-    "stage_temporal_kernel_basis": [
-      [
-        3
-      ],
-      [
-        3
-      ],
-      [
-        3
-      ],
-      [
-        3
-      ]
-    ],
-    "temporal_conv_1x1": [
-      false,
-      false,
-      false,
-      false
-    ],
-    "stage_temporal_stride": [
-      1,
-      2,
-      2,
-      2
-    ],
-    "stage_spatial_stride": [
-      1,
-      2,
-      2,
-      2
-    ],
+    "stage_temporal_kernel_basis": [[3], [3], [3], [3]],
+    "temporal_conv_1x1": [false, false, false, false],
+    "stage_temporal_stride": [1, 2, 2, 2],
+    "stage_spatial_stride": [1, 2, 2, 2],
     "num_groups": 1,
     "width_per_group": 64,
-    "num_classes": 51,
+    "num_classes": 101,
     "heads": [
       {
         "name": "fully_convolutional_linear",
         "unique_id": "default_head",
-        "pool_size": [
-          4,
-          7,
-          7
-        ],
+        "pool_size": [4, 7, 7],
         "activation_func": "softmax",
-        "num_classes": 51,
+        "num_classes": 101,
         "fork_block": "pathway0-stage4-block2",
         "in_plane": 512
       }
@@ -157,9 +109,9 @@
           "end_lr": 0.00004
         }
       ],
+      "lengths": [0.13, 0.87],
       "update_interval": "epoch",
-      "interval_scaling": ["rescaled", "rescaled"],
-      "lengths": [0.13, 0.87]
+      "interval_scaling": ["rescaled", "rescaled"]
     },
     "weight_decay": 0.005,
     "momentum": 0.9,
