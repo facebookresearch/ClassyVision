@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from collections import OrderedDict
+
 import torch.nn as nn
 
 from .resnext3d_block import ResBlock
@@ -100,9 +102,8 @@ class ResStage(nn.Module):
             for i in range(len(temporal_kernel_basis))
         ]
 
-        self.blocks = nn.ModuleDict()
-
         for p in range(self.num_pathways):
+            blocks = []
             for i in range(self.num_blocks[p]):
                 # Retrieve the transformation function.
                 # Construct the block.
@@ -128,7 +129,7 @@ class ResStage(nn.Module):
                 block_name = self._block_name(stage_idx, p, i)
                 if block_callback:
                     res_block = block_callback(block_name, res_block)
-                self.blocks[block_name] = res_block
+                blocks.append((block_name, res_block))
 
             if final_stage and (
                 residual_transformation_type == "preactivated_bottleneck_transformation"
@@ -142,27 +143,21 @@ class ResStage(nn.Module):
                 activate_relu_name = "-".join([block_name, "relu"])
                 if block_callback:
                     activate_relu = block_callback(activate_relu_name, activate_relu)
-                self.blocks[activate_bn_name] = activate_bn
-                self.blocks[activate_relu_name] = activate_relu
+                blocks.append((activate_bn_name, activate_bn))
+                blocks.append((activate_relu_name, activate_relu))
+
+            self.add_module(self._pathway_name(p), nn.Sequential(OrderedDict(blocks)))
 
     def _block_name(self, stage_idx, path_idx, block_idx):
-        # offset path_idx by 1 and block_idx by 1 to conform to convention
-        return "pathway{}-stage{}-block{}".format(
-            path_idx + 1, stage_idx, block_idx + 1
-        )
+        return "pathway{}-stage{}-block{}".format(path_idx, stage_idx, block_idx)
+
+    def _pathway_name(self, path_idx):
+        return "pathway{}".format(path_idx)
 
     def forward(self, inputs):
         output = []
         for p in range(self.num_pathways):
             x = inputs[p]
-            for i in range(self.num_blocks[p]):
-                block_name = self._block_name(self.stage_idx, p, i)
-                x = self.blocks[block_name](x)
-            activate_bn_name = "-".join([block_name, "bn"])
-            activate_relu_name = "-".join([block_name, "relu"])
-            # check whether we need to activate feature map
-            if activate_bn_name in self.blocks and activate_relu_name in self.blocks:
-                x = self.blocks[activate_bn_name](x)
-                x = self.blocks[activate_relu_name](x)
-            output.append(x)
+            pathway_module = getattr(self, self._pathway_name(p))
+            output.append(pathway_module(x))
         return output
