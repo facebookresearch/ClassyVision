@@ -7,7 +7,6 @@
 from .list_dataset import ListDataset
 from .random_image_datasets import RandomImageBinaryClassDataset, RandomImageDataset
 from .random_video_datasets import RandomVideoDataset
-from .wrap_torchvision_video_dataset import WrapTorchVisionVideoDataset
 
 
 __all__ = [
@@ -15,5 +14,4 @@ __all__ = [
     "RandomImageBinaryClassDataset",
     "RandomImageDataset",
     "RandomVideoDataset",
-    "WrapTorchVisionVideoDataset",
 ]

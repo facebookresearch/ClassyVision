@@ -76,6 +76,37 @@ class VideoRandomScaleCrop(ClassyTransform):
         return clip
 
 
+@register_transform("video_tuple_to_map_transform")
+class VideoTupleToMapTransform(ClassyTransform):
+    """
+    This helper transform takes a sample of the form (video, audio, target)
+    and returns a sample of the form {"input": {"video" video,
+    "audio": audio}, "target": target}. If the sample is a map with these
+    keys already present, it will pass the sample through.
+
+    It's particularly useful for remapping torchvision samples which are
+    tuples of the form (video, audio, target).
+    """
+
+    def __call__(self, sample):
+        # If sample is a map and already has input / target keys, pass through
+        if isinstance(sample, dict):
+            assert "input" in sample and "target" in sample, (
+                "Input to tuple to map transform must be a tuple of length 3 "
+                "or a dict with keys 'input' and 'target'"
+            )
+            assert (
+                "video" in sample["input"] and "audio" in sample["input"]
+            ), "Input data must include video / audio fields"
+            return sample
+
+        # Should be a tuple (or other sequential) of length 3, transform to map
+        assert len(sample) == 3, "Sequential must be length 3 for conversion"
+        video, audio, target = sample
+        output_sample = {"input": {"video": video, "audio": audio}, "target": target}
+        return output_sample
+
+
 @register_transform("video_default_augment")
 class VideoDefaultAugmentTransform(ClassyTransform):
     def __init__(
@@ -166,9 +197,15 @@ def build_video_field_transform_default(
     split: str = "train",
     key: str = "input",
 ) -> Callable:
-    """
-    Returns a FieldTransform which applies a transform on the specified key.
+    """Returns transform that first maps sample to video keys, then
+    returns a transform on the specified key in dict.
+
+    Converts tuple (list, etc) sample to dict with input / target keys.
+    For a dict sample, verifies that dict has input / target keys.
+    For all other samples throws.
 
     """
     transform = ClassyVideoGenericTransform(config, split)
-    return FieldTransform(transform, key=key)
+    return transforms.Compose(
+        [VideoTupleToMapTransform(), FieldTransform(transform, key=key)]
+    )
