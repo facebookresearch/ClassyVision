@@ -91,12 +91,24 @@ class TupleToMapTransform(ClassyTransform):
 
     It is useful for mapping output from datasets like the PyTorch
     ImageFolder dataset (tuple) to dict with named data fields.
+
+    If sample is already a dict with the required keys, pass sample through.
     """
 
     def __init__(self, list_of_map_keys: List[str]):
         self._map_keys = list_of_map_keys
 
     def __call__(self, sample):
+        # If already a dict/map with appropriate keys, exit early
+        if isinstance(sample, dict):
+            for key in self._map_keys:
+                assert (
+                    key in sample
+                ), "Sample {sample} must be a tuple or a dict with keys {keys}".format(
+                    sample=str(sample), keys=str(self._map_keys)
+                )
+            return sample
+
         assert len(sample) == len(self._map_keys), (
             "Provided sample tuple must have same number of keys "
             "as provided to transform"
@@ -108,20 +120,38 @@ class TupleToMapTransform(ClassyTransform):
         return output_sample
 
 
+default_key_map = TupleToMapTransform(["input", "target"])
+
+
 def build_field_transform_default_imagenet(
     config: Optional[List[Dict[str, Any]]],
     default_transform: Optional[Callable] = None,
     split: Optional[bool] = None,
     key: str = "input",
+    key_map_transform: Optional[Callable] = default_key_map,
 ) -> Callable:
-    """
-    Returns a FieldTransform which applies a transform on the specified key.
+    """Returns a FieldTransform which applies a transform on the specified key.
 
     The transform is built from the config, if it is not None.
-    Otherwise, uses one of the two mutually exclusive args:
-        If default_transform is not None, it is used.
-        If split is not None, imagenet transforms are used, using augmentation
-            for "train", no augmentation otherwise.
+
+    Otherwise, uses one of the two mutually exclusive args: If
+    default_transform is not None, it is used.  If split is not None,
+    imagenet transforms are used, using augmentation for "train", no
+    augmentation otherwise.
+
+    This function also provides an additional
+    function for mapping from tuples (or other keys) to a desired set
+    of keys
+
+    Args:
+        config: field transform config
+        default_transform: used if config is None
+        split: split for dataset, e.g. "train" or "test"
+        key: Key to apply transform to
+        key_map_transform: Used to produce desired map / keys
+            (e.g. for torchvision datasets, default samples is a
+            tuple so this argument can be used to map
+            (input, target) -> {"input": input, "target": target})
     """
     assert (
         default_transform is None or split is None
@@ -139,7 +169,11 @@ def build_field_transform_default_imagenet(
             raise ValueError("No transform config provided with no defaults")
     else:
         transform = build_transforms(config)
-    return FieldTransform(transform, key=key)
+    return transforms.Compose(
+        [key_map_transform, FieldTransform(transform, key=key)]
+        if key_map_transform is not None
+        else [FieldTransform(transform, key=key)]
+    )
 
 
 def default_unnormalize(img):

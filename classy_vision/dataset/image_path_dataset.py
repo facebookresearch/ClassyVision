@@ -6,12 +6,26 @@
 
 import os.path
 
+import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
 from .classy_dataset import ClassyDataset
 from .core import ListDataset
-from .transforms.util import TupleToMapTransform, build_field_transform_default_imagenet
+from .transforms.util import build_field_transform_default_imagenet
+
+
+def _load_dataset(image_paths, targets):
+    if targets is None:
+        targets = [torch.tensor([]) for _ in image_paths]
+    if isinstance(image_paths, str):
+        assert os.path.isdir(
+            image_paths
+        ), "Expect image_paths to be a dir when it is a string"
+        dataset = datasets.ImageFolder(image_paths)
+    else:
+        dataset = ListDataset(image_paths, targets)
+    return dataset
 
 
 class ImagePathDataset(ClassyDataset):
@@ -45,9 +59,10 @@ class ImagePathDataset(ClassyDataset):
             "targets cannot be specified when image_paths is a directory containing "
             "the targets in the directory structure"
         )
-        super().__init__(split, batchsize_per_replica, shuffle, transform, num_samples)
-
-        self.dataset = self._load_dataset(image_paths, targets)
+        dataset = _load_dataset(image_paths, targets)
+        super().__init__(
+            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+        )
 
     @classmethod
     def from_config(cls, config, image_paths, targets=None, default_transform=None):
@@ -58,6 +73,7 @@ class ImagePathDataset(ClassyDataset):
             shuffle,
             num_samples,
         ) = cls.parse_config(config)
+
         transform = build_field_transform_default_imagenet(
             transform_config, default_transform=default_transform, split=split
         )
@@ -70,16 +86,3 @@ class ImagePathDataset(ClassyDataset):
             targets=targets,
             split=split,
         )
-
-    def _load_dataset(self, image_paths, targets):
-        if isinstance(image_paths, str):
-            assert os.path.isdir(
-                image_paths
-            ), "Expect image_paths to be a dir when it is a string"
-            dataset = datasets.ImageFolder(image_paths)
-            self.transform = transforms.Compose(
-                [TupleToMapTransform(["input", "target"]), self.transform]
-            )
-        else:
-            dataset = ListDataset(image_paths, targets)
-        return dataset

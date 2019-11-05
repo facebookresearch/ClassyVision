@@ -51,7 +51,12 @@ class TestVideoDataset(ClassyVideoDataset):
         clips_per_video,
         samples,
     ):
+        self.samples = samples
+        input_tensors = [sample["input"] for sample in samples]
+        target_tensors = [sample["target"] for sample in samples]
+        dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
         super(TestVideoDataset, self).__init__(
+            dataset,
             split,
             batchsize_per_replica,
             shuffle,
@@ -59,10 +64,6 @@ class TestVideoDataset(ClassyVideoDataset):
             num_samples,
             clips_per_video,
         )
-        self.samples = samples
-        input_tensors = [sample["input"] for sample in samples]
-        target_tensors = [sample["target"] for sample in samples]
-        self.dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
 
     @classmethod
     def from_config(cls, config, samples):

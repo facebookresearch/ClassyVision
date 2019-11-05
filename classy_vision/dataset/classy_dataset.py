@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.generic.distributed_util import get_rank, get_world_size
@@ -33,6 +33,7 @@ class ClassyDataset:
 
     def __init__(
         self,
+        dataset: Sequence,
         split: Optional[str],
         batchsize_per_replica: int,
         shuffle: bool,
@@ -66,7 +67,7 @@ class ClassyDataset:
         self.shuffle = shuffle
         self.transform = transform
         self.num_samples = num_samples
-        self.dataset = None
+        self.dataset = dataset
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyDataset":
@@ -106,7 +107,6 @@ class ClassyDataset:
         shuffle = config.get("use_shuffle")
         num_samples = config.get("num_samples")
         transform_config = config.get("transforms")
-
         return transform_config, batchsize_per_replica, shuffle, num_samples
 
     def __getitem__(self, idx: int):

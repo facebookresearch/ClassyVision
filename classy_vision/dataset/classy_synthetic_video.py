@@ -42,16 +42,7 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
         audio_samples,
         clips_per_video,
     ):
-        super(SyntheticVideoClassificationDataset, self).__init__(
-            split,
-            batchsize_per_replica,
-            shuffle,
-            transform,
-            num_samples,
-            clips_per_video,
-        )
-
-        self.dataset = RandomVideoDataset(
+        dataset = RandomVideoDataset(
             num_classes,
             split,
             num_samples,
@@ -59,6 +50,15 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
             video_width,
             video_height,
             audio_samples,
+            clips_per_video,
+        )
+        super().__init__(
+            dataset,
+            split,
+            batchsize_per_replica,
+            shuffle,
+            transform,
+            num_samples,
             clips_per_video,
         )
 

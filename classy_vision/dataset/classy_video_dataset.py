@@ -26,6 +26,7 @@ class ClassyVideoDataset(ClassyDataset):
 
     def __init__(
         self,
+        dataset,
         split,
         batchsize_per_replica,
         shuffle,
@@ -34,7 +35,7 @@ class ClassyVideoDataset(ClassyDataset):
         clips_per_video,
     ):
         super(ClassyVideoDataset, self).__init__(
-            split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
         )
         # Assignments:
         self.clips_per_video = clips_per_video
