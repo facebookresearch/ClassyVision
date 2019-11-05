@@ -11,7 +11,6 @@ from torchvision.datasets.ucf101 import UCF101
 
 from . import register_dataset
 from .classy_video_dataset import ClassyVideoDataset
-from .core import WrapTorchVisionVideoDataset
 from .transforms.util_video import build_video_field_transform_default
 
 
@@ -103,7 +102,7 @@ class UCF101Dataset(ClassyVideoDataset):
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
-        dataset = UCF101(
+        self.dataset = UCF101(
             video_dir,
             splits_dir,
             frames_per_clip,
@@ -118,11 +117,9 @@ class UCF101Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
         )
-        metadata = dataset.metadata
+        metadata = self.dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
             UCF101Dataset.save_metadata(metadata, metadata_filepath)
-
-        self.dataset = WrapTorchVisionVideoDataset(dataset)
 
     @classmethod
     def from_config(cls, config):
