@@ -179,7 +179,8 @@ class ClassyModel(nn.Module):
                     if params.requires_grad:
                         regularized_params.append(params)
             elif not bn_weight_decay and isinstance(
-                module, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)
+                module,
+                (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm),
             ):
                 for params in module.parameters():
                     if params.requires_grad:
