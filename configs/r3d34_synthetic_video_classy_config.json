@@ -63,7 +63,7 @@
             "pool_size": [4, 7, 7],
             "activation_func": "softmax",
             "num_classes": 50,
-            "fork_block": "pathway1-stage5-block2",
+            "fork_block": "pathway0-stage4-block1",
             "in_plane": 512
           }
         ]

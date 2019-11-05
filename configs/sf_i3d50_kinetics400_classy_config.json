@@ -134,7 +134,7 @@
         ],
         "activation_func": "softmax",
         "num_classes": 400,
-        "fork_block": "pathway1-stage5-block3",
+        "fork_block": "pathway0-stage4-block2",
         "in_plane": 2048,
         "use_dropout": true
       }

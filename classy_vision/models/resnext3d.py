@@ -117,7 +117,7 @@ class ResNeXt3D(ClassyModel):
         stages = []
         for s in range(num_stages):
             stage = ResStage(
-                s + 2,  # stem is viewed as stage 1, and following stages start from 2
+                s + 1,  # stem is viewed as stage 0, and following stages start from 1
                 [in_planes[s]],
                 [out_planes[s]],
                 [inner_planes[s]],
@@ -130,8 +130,8 @@ class ResNeXt3D(ClassyModel):
                 skip_transformation_type,
                 residual_transformation_type,
                 block_callback=self.build_attachable_block,
-                disable_pre_activation=True if s == 0 else False,
-                final_stage=True if s == (num_stages - 1) else False,
+                disable_pre_activation=(s == 0),
+                final_stage=(s == (num_stages - 1)),
             )
             stages.append(stage)
 
