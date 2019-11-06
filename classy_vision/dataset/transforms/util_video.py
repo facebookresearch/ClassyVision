@@ -192,10 +192,14 @@ class ClassyVideoGenericTransform(object):
         return video
 
 
+DEFAULT_KEY_MAP = VideoTupleToMapTransform()
+
+
 def build_video_field_transform_default(
     config: Optional[Dict[str, List[Dict[str, Any]]]],
     split: str = "train",
     key: str = "input",
+    key_map_transform: Optional[Callable] = DEFAULT_KEY_MAP,
 ) -> Callable:
     """Returns transform that first maps sample to video keys, then
     returns a transform on the specified key in dict.
@@ -205,7 +209,8 @@ def build_video_field_transform_default(
     For all other samples throws.
 
     """
-    transform = ClassyVideoGenericTransform(config, split)
-    return transforms.Compose(
-        [VideoTupleToMapTransform(), FieldTransform(transform, key=key)]
-    )
+    transform = FieldTransform(ClassyVideoGenericTransform(config, split), key=key)
+    if key_map_transform is None:
+        return transform
+
+    return transforms.Compose([key_map_transform, transform])
