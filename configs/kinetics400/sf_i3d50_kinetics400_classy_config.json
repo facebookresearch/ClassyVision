@@ -18,8 +18,6 @@
       "video_dir": "",
       "metadata_file": "",
       "extensions": "mp4",
-      "video_width": 342,
-      "video_height": 256,
       "transforms": {
         "video": [
           {
@@ -43,8 +41,6 @@
       "video_dir": "",
       "metadata_file": "",
       "extensions": "mp4",
-      "video_width": 342,
-      "video_height": 256,
       "transforms": {
         "video": [
           {
@@ -55,70 +51,34 @@
     }
   },
   "meters": {
-      "accuracy": {
-          "topk": [1, 5]
-      },
-      "video_accuracy": {
-          "topk": [1, 5],
-          "clips_per_video_train": 1,
-          "clips_per_video_test": 10
-      }
+    "accuracy": {
+      "topk": [1, 5]
+    },
+    "video_accuracy": {
+      "topk": [1, 5],
+      "clips_per_video_train": 1,
+      "clips_per_video_test": 10
+    }
   },
   "model": {
     "name": "resnext3d",
     "frames_per_clip": 8,
     "input_planes": 3,
     "clip_crop_size": 224,
-    "skip_transformation_type": "preactivated_shortcut",
-    "residual_transformation_type": "preactivated_bottleneck_transformation",
-    "num_blocks": [
-      3,
-      4,
-      6,
-      3
-    ],
+    "skip_transformation_type": "postactivated_shortcut",
+    "residual_transformation_type": "postactivated_bottleneck_transformation",
+    "num_blocks": [3, 4, 6, 3],
     "input_key": "video",
     "stem_name": "resnext3d_stem",
-    "stem_planes": 32,
-    "stem_temporal_kernel": 3,
-    "stem_spatial_kernel": 5,
+    "stem_planes": 64,
+    "stem_temporal_kernel": 5,
+    "stem_spatial_kernel": 7,
     "stem_maxpool": true,
     "stage_planes": 256,
-    "stage_temporal_kernel_basis": [
-      [
-        3
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        1,
-        3
-      ]
-    ],
-    "temporal_conv_1x1": [
-      true,
-      true,
-      true,
-      true
-    ],
-    "stage_temporal_stride": [
-      1,
-      2,
-      1,
-      1
-    ],
-    "stage_spatial_stride": [
-      1,
-      2,
-      2,
-      2
-    ],
+    "stage_temporal_kernel_basis": [[3], [3, 1], [3, 1], [1, 3]],
+    "temporal_conv_1x1": [true, true, true, true],
+    "stage_temporal_stride": [1, 1, 1, 1],
+    "stage_spatial_stride": [1, 2, 2, 2],
     "num_groups": 1,
     "width_per_group": 64,
     "num_classes": 400,
@@ -127,14 +87,10 @@
       {
         "name": "fully_convolutional_linear",
         "unique_id": "default_head",
-        "pool_size": [
-          4,
-          7,
-          7
-        ],
+        "pool_size": [8, 7, 7],
         "activation_func": "softmax",
         "num_classes": 400,
-        "fork_block": "pathway0-stage4-block2-relu",
+        "fork_block": "pathway0-stage4-block2",
         "in_plane": 2048,
         "use_dropout": true
       }
@@ -144,12 +100,8 @@
     "name": "sgd",
     "lr": {
       "name": "cosine",
-      "max_lr": 0.4,
-      "min_lr": 0.0004,
-      "warmup": {
-        "init_lr": 0.1,
-        "length": 0.05
-      }
+      "start_lr": 0.1,
+      "end_lr": 0.0001
     },
     "weight_decay": 0.0001,
     "momentum": 0.9,
