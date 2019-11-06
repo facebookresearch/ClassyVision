@@ -120,7 +120,7 @@ class TupleToMapTransform(ClassyTransform):
         return output_sample
 
 
-default_key_map = TupleToMapTransform(["input", "target"])
+DEFAULT_KEY_MAP = TupleToMapTransform(["input", "target"])
 
 
 def build_field_transform_default_imagenet(
@@ -128,7 +128,7 @@ def build_field_transform_default_imagenet(
     default_transform: Optional[Callable] = None,
     split: Optional[bool] = None,
     key: str = "input",
-    key_map_transform: Optional[Callable] = default_key_map,
+    key_map_transform: Optional[Callable] = DEFAULT_KEY_MAP,
 ) -> Callable:
     """Returns a FieldTransform which applies a transform on the specified key.
 
@@ -169,11 +169,12 @@ def build_field_transform_default_imagenet(
             raise ValueError("No transform config provided with no defaults")
     else:
         transform = build_transforms(config)
-    return transforms.Compose(
-        [key_map_transform, FieldTransform(transform, key=key)]
-        if key_map_transform is not None
-        else [FieldTransform(transform, key=key)]
-    )
+
+    transform = FieldTransform(transform, key=key)
+    if key_map_transform is None:
+        return transform
+
+    return transforms.Compose([key_map_transform, transform])
 
 
 def default_unnormalize(img):
