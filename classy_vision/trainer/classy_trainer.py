@@ -13,11 +13,14 @@ from classy_vision.tasks import ClassyTask
 
 
 class ClassyTrainer:
-    def __init__(self, use_gpu=None, num_dataloader_workers=0):
+    def __init__(
+        self, use_gpu=None, num_dataloader_workers=0, dataloader_mp_context=None
+    ):
         if use_gpu is None:
             use_gpu = torch.cuda.is_available()
         self.use_gpu = use_gpu
         self.num_dataloader_workers = num_dataloader_workers
+        self.dataloader_mp_context = dataloader_mp_context
 
     def train(self, task: ClassyTask):
         """
@@ -29,6 +32,7 @@ class ClassyTrainer:
             num_dataloader_workers=self.num_dataloader_workers,
             pin_memory=pin_memory,
             use_gpu=self.use_gpu,
+            dataloader_mp_context=self.dataloader_mp_context,
         )
         assert isinstance(task, ClassyTask)
 

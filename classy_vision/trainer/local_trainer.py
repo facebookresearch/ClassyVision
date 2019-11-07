@@ -12,8 +12,14 @@ from .classy_trainer import ClassyTrainer
 
 
 class LocalTrainer(ClassyTrainer):
-    def __init__(self, use_gpu=None, num_dataloader_workers=0):
-        super().__init__(use_gpu=use_gpu, num_dataloader_workers=num_dataloader_workers)
+    def __init__(
+        self, use_gpu=None, num_dataloader_workers=0, dataloader_mp_context=None
+    ):
+        super().__init__(
+            use_gpu=use_gpu,
+            num_dataloader_workers=num_dataloader_workers,
+            dataloader_mp_context=dataloader_mp_context,
+        )
         if self.use_gpu:
             logging.info("Using GPU, CUDA device index: {}".format(0))
             set_cuda_device_index(0)

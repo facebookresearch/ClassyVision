@@ -187,23 +187,42 @@ class ClassificationTask(ClassyTask):
 
         return [{"train": False} for _ in range(self.num_epochs)]
 
-    def build_dataloader(self, split, num_workers, pin_memory, **kwargs):
+    def build_dataloader(
+        self, split, num_workers, pin_memory, multiprocessing_context=None, **kwargs
+    ):
         return self.datasets[split].iterator(
-            num_workers=num_workers, pin_memory=pin_memory, **kwargs
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            multiprocessing_context=multiprocessing_context,
+            **kwargs,
         )
 
-    def build_dataloaders(self, num_workers, pin_memory, **kwargs):
+    def build_dataloaders(
+        self, num_workers, pin_memory, multiprocessing_context=None, **kwargs
+    ):
         return {
             split: self.build_dataloader(
-                split, num_workers=num_workers, pin_memory=pin_memory, **kwargs
+                split,
+                num_workers=num_workers,
+                pin_memory=pin_memory,
+                multiprocessing_context=multiprocessing_context,
+                **kwargs,
             )
             for split in self.datasets.keys()
         }
 
-    def prepare(self, num_dataloader_workers=0, pin_memory=False, use_gpu=False):
+    def prepare(
+        self,
+        num_dataloader_workers=0,
+        pin_memory=False,
+        use_gpu=False,
+        dataloader_mp_context=None,
+    ):
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
-            num_workers=num_dataloader_workers, pin_memory=pin_memory
+            num_workers=num_dataloader_workers,
+            pin_memory=pin_memory,
+            multiprocessing_context=dataloader_mp_context,
         )
 
         # move the model and loss to the right device
@@ -429,6 +448,11 @@ class ClassificationTask(ClassyTask):
         pin_memory = False
         if hasattr(self.dataloaders[phase_type], "pin_memory"):
             pin_memory = self.dataloaders[phase_type].pin_memory
+        multiprocessing_context = None
+        if hasattr(self.dataloaders[phase_type], "multiprocessing_context"):
+            multiprocessing_context = self.dataloaders[
+                phase_type
+            ].multiprocessing_context
         if phase_type == "test":
             current_phase_id = 0
         else:
@@ -438,6 +462,7 @@ class ClassificationTask(ClassyTask):
             split=phase_type,
             num_workers=num_workers,
             pin_memory=pin_memory,
+            multiprocessing_context=multiprocessing_context,
             current_phase_id=current_phase_id,
         )
 
