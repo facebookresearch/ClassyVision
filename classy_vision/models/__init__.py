@@ -21,25 +21,19 @@ MODEL_CLASS_NAMES = set()
 
 
 def register_model(name):
-    """
-    New models can be added to classy_vision with the
-    :func:`~classy_vision.models.register_model` function decorator.
-    For example::
+    """Registers a ClassyModel subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyModel from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyModel subclass, like this:
 
         @register_model('resnet')
         class ResidualNet(ClassyModel):
-            (...)
+            ...
 
-    .. note::
-
-        All Models must implement the :class:`~classy_vision.models.ClassyModel`
-        interface.
-
-    Please see the
-
-    Args:
-        name (str): the name of the model
-    """
+    To instantiate a model from a configuration file, see
+    :func:`build_model`."""
 
     def register_model_cls(cls):
         if name in MODEL_REGISTRY:

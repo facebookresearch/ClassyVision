@@ -19,25 +19,19 @@ HEAD_CLASS_NAMES = set()
 
 
 def register_head(name):
-    """
-    New heads can be added to classy_vision with the
-    :func:`~classy_vision.heads.register_head` function decorator.
-    For example::
+    """Registers a ClassyHead subclass.
 
-        @register_head('classification_head')
-        class FullyConnectedHead(ClassyHead):
-            (...)
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyHead from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyHead subclass, like this:
 
-    .. note::
+        @register_head("my_head")
+        class MyHead(ClassyHead):
+            ...
 
-        All Heads must implement the :class:`~classy_vision.heads.ClassyHead`
-        interface.
-
-    Please see the
-
-    Args:
-        name (str): the name of the head
-    """
+    To instantiate a head from a configuration file, see
+    :func:`build_head`."""
 
     def register_head_cls(cls):
         if name in HEAD_REGISTRY:
