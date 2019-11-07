@@ -18,6 +18,12 @@ DATASET_CLASS_NAMES = set()
 
 
 def build_dataset(config, *args, **kwargs):
+    """Builds a ClassyDataset from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    dataset class to instantiate. For instance, a config `{"name": "my_dataset",
+    "folder": "/data"}` will find a class that was registered as "my_dataset"
+    (see :func:`register_dataset`) and call .from_config on it."""
     return DATASET_REGISTRY[config["name"]].from_config(config, *args, **kwargs)
 
 

@@ -62,6 +62,13 @@ def register_model(name):
 
 
 def build_model(config):
+    """Builds a ClassyModel from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    model class to instantiate. For instance, a config `{"name": "my_model",
+    "foo": "bar"}` will find a class that was registered as "my_model"
+    (see :func:`register_model`) and call .from_config on it."""
+
     assert config["name"] in MODEL_REGISTRY, "unknown model"
     model = MODEL_REGISTRY[config["name"]].from_config(config)
     if "heads" in config:

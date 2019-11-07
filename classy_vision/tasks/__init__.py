@@ -19,6 +19,13 @@ TASK_CLASS_NAMES = set()
 
 
 def build_task(config):
+    """Builds a ClassyTask from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    task class to instantiate. For instance, a config `{"name": "my_task",
+    "foo": "bar"}` will find a class that was registered as "my_task"
+    (see :func:`register_task`) and call .from_config on it."""
+
     return TASK_REGISTRY[config["name"]].from_config(config)
 
 

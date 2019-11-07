@@ -18,6 +18,12 @@ METER_REGISTRY = {}
 
 
 def build_meter(config):
+    """Builds a ClassyMeter from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    meter class to instantiate. For instance, a config `{"name": "my_meter",
+    "foo": "bar"}` will find a class that was registered as "my_meter" (see
+    :func:`register_meter`) and call .from_config on it."""
     return METER_REGISTRY[config["name"]].from_config(config)
 
 
