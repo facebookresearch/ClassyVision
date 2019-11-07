@@ -60,6 +60,13 @@ def register_head(name):
 
 
 def build_head(config):
+    """Builds a ClassyHead from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    head class to instantiate. For instance, a config `{"name": "my_head",
+    "foo": "bar"}` will find a class that was registered as "my_head"
+    (see :func:`register_head`) and call .from_config on it."""
+
     assert "name" in config, "Expect name in config"
     assert "unique_id" in config, "Expect a global unique id in config"
     assert config["name"] in HEAD_REGISTRY, "unknown head"
