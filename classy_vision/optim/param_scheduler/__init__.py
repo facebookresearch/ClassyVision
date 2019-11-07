@@ -21,6 +21,13 @@ PARAM_SCHEDULER_REGISTRY = {}
 
 
 def build_param_scheduler(config):
+    """Builds a ClassyParamScheduler from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    param scheduler class to instantiate. For instance, a config `{"name":
+    "my_scheduler", "foo": "bar"}` will find a class that was registered as
+    "my_scheduler" (see :func:`register_param_scheduler`) and call .from_config
+    on it."""
     return PARAM_SCHEDULER_REGISTRY[config["name"]].from_config(config)
 
 

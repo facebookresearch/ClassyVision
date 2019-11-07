@@ -19,6 +19,12 @@ OPTIMIZER_CLASS_NAMES = set()
 
 
 def build_optimizer(config):
+    """Builds a ClassyOptimizer from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    optimizer class to instantiate. For instance, a config `{"name": "my_optimizer",
+    "foo": "bar"}` will find a class that was registered as "my_optimizer"
+    (see :func:`register_optimizer`) and call .from_config on it."""
     return OPTIMIZER_REGISTRY[config["name"]].from_config(config)
 
 
