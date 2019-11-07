@@ -66,31 +66,19 @@ def build_transforms(transforms_config: List[Dict[str, Any]]) -> Callable:
 
 
 def register_transform(name: str):
-    """
-    Decorator to register a new transform.
-    New transforms can be added with the
-    :func:`~classy_vision.transforms.register_transform` function decorator.
+    """Registers a ClassyTransform subclass.
 
-    For example::
-        @register_transform('???')
-        class ???:
-            (...)
-            def __call__():
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyTransform from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyTransform subclass like this:
 
-        @register_transform('???')
-        def ???:
-            (...)
-            return transform
+        @register_transform("my_transform")
+        class MyTransform(ClassyTransform):
+            ...
 
-    .. note::
-
-        All transforms must be callables which return a callable that applies the
-        transform. So, either a callable class or a function which returns a callable
-        transform.
-
-    Args:
-        name (str): the name of the transform.
-    """
+    To instantiate a transform from a configuration file, see
+    :func:`build_transform`."""
 
     def register_transform_cls(cls: Callable[..., Callable]):
         if name in TRANSFORM_REGISTRY:
