@@ -38,9 +38,11 @@ Example:
 """
 
 import logging
+from pathlib import Path
 
 import torch
 from classy_vision.generic.opts import parse_train_arguments
+from classy_vision.generic.registry_utils import import_all_packages_from_directory
 from classy_vision.generic.util import load_checkpoint, load_json
 from classy_vision.hooks import (
     CheckpointHook,
@@ -127,4 +129,14 @@ if __name__ == "__main__":
 
     logging.info("Generic convolutional network trainer.")
     args = parse_train_arguments()
+
+    # This imports all modules in the same directory as classy_train.py
+    # Because of the way Classy Vision's registration decorators work,
+    # importing a module has a side effect of registering it with Classy
+    # Vision. This means you can give classy_train.py a config referencing your
+    # custom module (e.g. my_dataset) and it'll actually know how to
+    # instantiate it.
+    file_root = Path(__file__).parent
+    import_all_packages_from_directory(file_root)
+
     main(args)

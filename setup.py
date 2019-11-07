@@ -31,8 +31,11 @@ if __name__ == "__main__":
         url="TBD",
         license=license,
         python_requires=">=3.6",
-        packages=find_packages(exclude=("configs", "tests")),
+        packages=find_packages(exclude=("tests",)),
         install_requires=reqs.strip().split("\n"),
+        package_data={"classy_vision": ["configs/*.json", "templates"]},
+        data_files=[("classy_vision", ["classy_train.py"])],
         include_package_data=True,
         test_suite="test.suites.unittests",
+        scripts=["bin/classy-project"],
     )
