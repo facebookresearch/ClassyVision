@@ -30,24 +30,18 @@ def build_task(config):
 
 
 def register_task(name):
-    """
-    New tasks can be added to classy_vision with the
-    :func:`~classy_vision.tasks.register_task` function decorator.
-    For example::
+    """Registers a ClassyTask subclass.
 
-        @register_task('classification')
-        class ClassificationTask(ClassyTask):
-            (...)
-    .. note::
+    This decorator allows Classy Vision to instantiate a subclass of ClassyTask
+    from a configuration file, even if the class itself is not part of the
+    Classy Vision framework. To use it, apply this decorator to a ClassyTask
+    subclass, like this:
 
-        All Tasks must implement the :class:`~classy_vision.tasks.ClassyTask`
-        interface.
+        @register_task('my_task')
+        class MyTask(ClassyTask):
+            ...
 
-    Please see the
-
-    Args:
-        name (str): the name of the task
-    """
+    To instantiate a task from a configuration file, see :func:`build_task`."""
 
     def register_task_cls(cls):
         if name in TASK_REGISTRY:

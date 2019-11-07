@@ -29,7 +29,19 @@ def build_optimizer(config):
 
 
 def register_optimizer(name):
-    """Decorator to register a new optimizer."""
+    """Registers a ClassyOptimizer subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyOptimizer from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyOptimizer subclass, like this:
+
+        @register_optimizer('my_optimizer')
+        class MyOptimizer(ClassyOptimizer):
+            ...
+
+    To instantiate an optimizer from a configuration file, see
+    :func:`build_optimizer`."""
 
     def register_optimizer_cls(cls):
         if name in OPTIMIZER_REGISTRY:

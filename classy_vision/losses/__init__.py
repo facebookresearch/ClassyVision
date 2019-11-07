@@ -57,7 +57,19 @@ def build_loss(config):
 
 
 def register_loss(name):
-    """Decorator to register a new loss."""
+    """Registers a ClassyLoss subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyLoss from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyLoss subclass, like this:
+
+        @register_loss("my_loss")
+        class MyLoss(ClassyLoss):
+            ...
+
+    To instantiate a loss from a configuration file, see
+    :func:`build_loss`."""
 
     def register_loss_cls(cls):
         if name in LOSS_REGISTRY:
