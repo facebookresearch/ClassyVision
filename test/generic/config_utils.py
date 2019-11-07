@@ -195,21 +195,6 @@ def get_test_model_configs():
                 }
             ],
         },
-        # vgg 19
-        {
-            "name": "vgg",
-            "num_classes": 1000,
-            "depth": 19,
-            "num_stages": 5,
-            "stride2_inds": [],
-            "max_pool_inds": [0, 1, 2, 3, 4],
-            "ds_mult": 1.0,
-            "ws_mult": 1.0,
-            "bn_epsilon": 1e-5,
-            "bn_momentum": 0.1,
-            "relu_inplace": True,
-            "small_input": False,
-        },
     ]
 
 

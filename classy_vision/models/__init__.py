@@ -85,12 +85,10 @@ from .classy_block import ClassyBlock  # isort:skip
 from .classy_model import ClassyModelEvaluationMode  # isort:skip
 from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
 from .densenet import DenseNet  # isort:skip
-from .inception import Inception3  # isort:skip
 from .mlp import MLP  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D  # isort:skip
-from .vgg import VGG  # isort:skip
 
 
 __all__ = [
@@ -100,11 +98,9 @@ __all__ = [
     "ClassyModel",
     "ClassyModelEvaluationMode",
     "ClassyModelWrapper",
-    "Inception3",
     "DenseNet",
     "MLP",
     "ResNet",
     "ResNeXt",
     "ResNeXt3D",
-    "VGG",
 ]
