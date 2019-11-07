@@ -139,7 +139,7 @@ def check_generic_args(args):
 
     # create checkpoint folder if it does not exist:
     if args.checkpoint_folder != "" and not os.path.exists(args.checkpoint_folder):
-        os.makedirs(args.checkpoint_folder)
+        os.makedirs(args.checkpoint_folder, exist_ok=True)
         assert os.path.exists(args.checkpoint_folder), (
             "could not create folder %s" % args.checkpoint_folder
         )
