@@ -21,10 +21,22 @@ LOSS_CLASS_NAMES = set()
 
 
 def build_loss(config):
+    """Builds a ClassyLoss from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    model class to instantiate. For instance, a config `{"name": "my_loss",
+    "foo": "bar"}` will find a class that was registered as "my_loss"
+    (see :func:`register_loss`) and call .from_config on it.
+
+    In addition to losses registered with :func:`register_loss`, we also
+    support instantiating losses available in the `torch.nn.modules.loss`
+    module. Any keys in the config will get expanded to parameters of the loss
+    constructor. For instance, the following call will instantiate a
+    :class:`torch.nn.modules.CrossEntropyLoss`:
+
+        build_loss({"name": "CrossEntropyLoss", "reduction": "sum"})
     """
-    Builds a loss, first searching for it in the registry and then in
-    torch.nn.modules.loss.
-    """
+
     assert "name" in config, f"name not provided for loss: {config}"
     name = config["name"]
     if name in LOSS_REGISTRY:

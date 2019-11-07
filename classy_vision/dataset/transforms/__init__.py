@@ -22,9 +22,21 @@ TRANSFORM_REGISTRY = {}
 
 
 def build_transform(transform_config: Dict[str, Any]) -> Callable:
-    """
-    Builds a transform, first searching for it in the registry and then in
-    torchvision.transforms.
+    """Builds a ClassyTransform from a config.
+
+    This assumes a 'name' key in the config which is used to determine what
+    transform class to instantiate. For instance, a config `{"name":
+    "my_transform", "foo": "bar"}` will find a class that was registered as
+    "my_transform" (see :func:`register_transform`) and call .from_config on
+    it.
+
+    In addition to transforms registered with :func:`register_transform`, we
+    also support instantiating transforms available in the
+    `torchvision.transforms` module. Any keys in the config will get expanded
+    to parameters of the transform constructor. For instance, the following
+    call will instantiate a :class:`torchvision.transforms.CenterCrop`:
+
+        build_transform({"name": "CenterCrop", "size": 224})
     """
     assert (
         "name" in transform_config
