@@ -315,22 +315,19 @@ class PostactivatedShortcutTransformation(nn.Module):
     ):
         super(PostactivatedShortcutTransformation, self).__init__()
         # Use skip connection with projection if dim or spatial/temporal res change.
-        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
-            self.branch1 = nn.Conv3d(
-                dim_in,
-                dim_out,
-                kernel_size=1,
-                stride=[temporal_stride, spatial_stride, spatial_stride],
-                padding=0,
-                bias=False,
-            )
-            self.branch1_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
+        assert (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1)
+        self.branch1 = nn.Conv3d(
+            dim_in,
+            dim_out,
+            kernel_size=1,
+            stride=[temporal_stride, spatial_stride, spatial_stride],
+            padding=0,
+            bias=False,
+        )
+        self.branch1_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
 
     def forward(self, x):
-        if hasattr(self, "branch1") and hasattr(self, "branch1_bn"):
-            return self.branch1_bn(self.branch1(x))
-        else:
-            return x
+        return self.branch1_bn(self.branch1(x))
 
 
 class PreactivatedShortcutTransformation(nn.Module):
@@ -353,24 +350,23 @@ class PreactivatedShortcutTransformation(nn.Module):
     ):
         super(PreactivatedShortcutTransformation, self).__init__()
         # Use skip connection with projection if dim or spatial/temporal res change.
-        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
-            if not disable_pre_activation:
-                self.branch1_bn = nn.BatchNorm3d(dim_in, eps=bn_eps, momentum=bn_mmt)
-                self.branch1_relu = nn.ReLU(inplace=inplace_relu)
-            self.branch1 = nn.Conv3d(
-                dim_in,
-                dim_out,
-                kernel_size=1,
-                stride=[temporal_stride, spatial_stride, spatial_stride],
-                padding=0,
-                bias=False,
-            )
+        assert (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1)
+        if not disable_pre_activation:
+            self.branch1_bn = nn.BatchNorm3d(dim_in, eps=bn_eps, momentum=bn_mmt)
+            self.branch1_relu = nn.ReLU(inplace=inplace_relu)
+        self.branch1 = nn.Conv3d(
+            dim_in,
+            dim_out,
+            kernel_size=1,
+            stride=[temporal_stride, spatial_stride, spatial_stride],
+            padding=0,
+            bias=False,
+        )
 
     def forward(self, x):
         if hasattr(self, "branch1_bn") and hasattr(self, "branch1_relu"):
             x = self.branch1_relu(self.branch1_bn(x))
-        if hasattr(self, "branch1"):
-            x = self.branch1(x)
+        x = self.branch1(x)
         return x
 
 
@@ -432,15 +428,17 @@ class ResBlock(nn.Module):
         assert skip_transformation_type in skip_transformations, (
             "unknown skip transformation: %s" % skip_transformation_type
         )
-        self.skip = skip_transformations[skip_transformation_type](
-            dim_in,
-            dim_out,
-            temporal_stride,
-            spatial_stride,
-            bn_eps=bn_eps,
-            bn_mmt=bn_mmt,
-            disable_pre_activation=disable_pre_activation,
-        )
+
+        if (dim_in != dim_out) or (spatial_stride != 1) or (temporal_stride != 1):
+            self.skip = skip_transformations[skip_transformation_type](
+                dim_in,
+                dim_out,
+                temporal_stride,
+                spatial_stride,
+                bn_eps=bn_eps,
+                bn_mmt=bn_mmt,
+                disable_pre_activation=disable_pre_activation,
+            )
 
         assert residual_transformation_type in residual_transformations, (
             "unknown residual transformation: %s" % residual_transformation_type
@@ -459,6 +457,9 @@ class ResBlock(nn.Module):
         self.relu = nn.ReLU(inplace_relu)
 
     def forward(self, x):
-        x = self.skip(x) + self.residual(x)
+        if hasattr(self, "skip"):
+            x = self.skip(x) + self.residual(x)
+        else:
+            x = x + self.residual(x)
         x = self.relu(x)
         return x
