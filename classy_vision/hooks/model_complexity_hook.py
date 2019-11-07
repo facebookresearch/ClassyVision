@@ -50,7 +50,7 @@ class ModelComplexityHook(ClassyHook):
         except NotImplementedError:
             logging.warning(
                 """Model contains unsupported modules:
-            Could not compute FLOPs for model forward pass"""
+            Could not compute FLOPs for model forward pass. Exception:""", exc_info=True
             )
         logging.info(
             "Number of parameters in model: %d" % count_params(task.base_model)
