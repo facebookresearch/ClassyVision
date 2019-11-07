@@ -11,7 +11,64 @@ import torch.nn as nn
 from .resnext3d_block import ResBlock
 
 
-class ResStage(nn.Module):
+class ResStageBase(nn.Module):
+    def __init__(
+        self,
+        stage_idx,
+        dim_in,
+        dim_out,
+        dim_inner,
+        temporal_kernel_basis,
+        temporal_conv_1x1,
+        temporal_stride,
+        spatial_stride,
+        num_blocks,
+        num_groups,
+    ):
+        super(ResStageBase, self).__init__()
+
+        assert (
+            len(
+                {
+                    len(dim_in),
+                    len(dim_out),
+                    len(temporal_kernel_basis),
+                    len(temporal_conv_1x1),
+                    len(temporal_stride),
+                    len(spatial_stride),
+                    len(num_blocks),
+                    len(dim_inner),
+                    len(num_groups),
+                }
+            )
+            == 1
+        )
+
+        self.stage_idx = stage_idx
+        self.num_blocks = num_blocks
+        self.num_pathways = len(self.num_blocks)
+
+        self.temporal_kernel_sizes = [
+            (temporal_kernel_basis[i] * num_blocks[i])[: num_blocks[i]]
+            for i in range(len(temporal_kernel_basis))
+        ]
+
+    def _block_name(self, pathway_idx, stage_idx, block_idx):
+        return "pathway{}-stage{}-block{}".format(pathway_idx, stage_idx, block_idx)
+
+    def _pathway_name(self, pathway_idx):
+        return "pathway{}".format(pathway_idx)
+
+    def forward(self, inputs):
+        output = []
+        for p in range(self.num_pathways):
+            x = inputs[p]
+            pathway_module = getattr(self, self._pathway_name(p))
+            output.append(pathway_module(x))
+        return output
+
+
+class ResStage(ResStageBase):
     """
     Stage of 3D ResNet. It expects to have one or more tensors as input for
         single pathway (C2D, I3D, SlowOnly), and multi-pathway (SlowFast) cases.
@@ -70,37 +127,24 @@ class ResStage(nn.Module):
                 num_groups>1 is for ResNeXt like networks.
             skip_transformation_type (str): the type of skip transformation
             residual_transformation_type (str): the type of residual transformation
+            block_callback (function object): a callback function to be called with
+                residual block and its name as input arguments
             disable_pre_activation (bool): If true, disable the preactivation,
                 which includes BatchNorm3D and ReLU.
             final_stage (bool): If true, this is the last stage in the model.
         """
-        super(ResStage, self).__init__()
-
-        assert (
-            len(
-                {
-                    len(dim_in),
-                    len(dim_out),
-                    len(temporal_kernel_basis),
-                    len(temporal_conv_1x1),
-                    len(temporal_stride),
-                    len(spatial_stride),
-                    len(num_blocks),
-                    len(dim_inner),
-                    len(num_groups),
-                }
-            )
-            == 1
+        super(ResStage, self).__init__(
+            stage_idx,
+            dim_in,
+            dim_out,
+            dim_inner,
+            temporal_kernel_basis,
+            temporal_conv_1x1,
+            temporal_stride,
+            spatial_stride,
+            num_blocks,
+            num_groups,
         )
-
-        self.stage_idx = stage_idx
-        self.num_blocks = num_blocks
-        self.num_pathways = len(self.num_blocks)
-
-        temporal_kernel_sizes = [
-            (temporal_kernel_basis[i] * num_blocks[i])[: num_blocks[i]]
-            for i in range(len(temporal_kernel_basis))
-        ]
 
         for p in range(self.num_pathways):
             blocks = []
@@ -114,7 +158,7 @@ class ResStage(nn.Module):
                     dim_in[p] if i == 0 else dim_out[p],
                     dim_out[p],
                     dim_inner[p],
-                    temporal_kernel_sizes[p][i],
+                    self.temporal_kernel_sizes[p][i],
                     temporal_conv_1x1[p],
                     temporal_stride[p] if i == 0 else 1,
                     spatial_stride[p] if i == 0 else 1,
@@ -126,7 +170,7 @@ class ResStage(nn.Module):
                     bn_mmt=bn_mmt,
                     disable_pre_activation=block_disable_pre_activation,
                 )
-                block_name = self._block_name(stage_idx, p, i)
+                block_name = self._block_name(p, stage_idx, i)
                 if block_callback:
                     res_block = block_callback(block_name, res_block)
                 blocks.append((block_name, res_block))
@@ -147,17 +191,3 @@ class ResStage(nn.Module):
                 blocks.append((activate_relu_name, activate_relu))
 
             self.add_module(self._pathway_name(p), nn.Sequential(OrderedDict(blocks)))
-
-    def _block_name(self, stage_idx, path_idx, block_idx):
-        return "pathway{}-stage{}-block{}".format(path_idx, stage_idx, block_idx)
-
-    def _pathway_name(self, path_idx):
-        return "pathway{}".format(path_idx)
-
-    def forward(self, inputs):
-        output = []
-        for p in range(self.num_pathways):
-            x = inputs[p]
-            pathway_module = getattr(self, self._pathway_name(p))
-            output.append(pathway_module(x))
-        return output
