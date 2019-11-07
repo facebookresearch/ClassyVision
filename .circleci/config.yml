@@ -91,6 +91,16 @@ jobs:
 
       - <<: *run_tests
 
+      - run:
+          name: Run classy-project tests
+          command: |
+            pip install .
+            classy-project my-project
+            pushd my-project
+            ./classy_train.py --device cpu --config configs/template_config.json
+            popd
+            rm -rf my-project
+
 
   gpu_tests:
     <<: *gpu
@@ -135,6 +145,7 @@ jobs:
           key: v1-gpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
+
 
 # -------------------------------------------------------------------------------------
 # Workflows
