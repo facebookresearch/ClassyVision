@@ -729,11 +729,21 @@ def bind_method_to_class(method, cls):
 def get_model_dummy_input(
     model, input_shape, input_key, batchsize=1, non_blocking=False
 ):
-    # add a dimension to represent minibatch axis
-    shape = (batchsize,) + tuple(input_shape)
-    input = torch.zeros(shape)
-    if next(model.parameters()).is_cuda:
-        input = input.cuda(non_blocking=non_blocking)
-    if input_key:
-        input = {input_key: input}
+    if isinstance(input_key, list):
+        # av mode, with multiple input keys
+        input = {}
+        for i, key in enumerate(input_key):
+            shape = (batchsize,) + tuple(input_shape[i])
+            cur_input = torch.zeros(shape)
+            if next(model.parameters()).is_cuda:
+                cur_input = cur_input.cuda(non_blocking=non_blocking)
+            input[key] = cur_input
+    else:
+        # add a dimension to represent minibatch axis
+        shape = (batchsize,) + tuple(input_shape)
+        input = torch.zeros(shape)
+        if next(model.parameters()).is_cuda:
+            input = input.cuda(non_blocking=non_blocking)
+        if input_key:
+            input = {input_key: input}
     return input
