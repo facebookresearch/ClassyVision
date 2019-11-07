@@ -9,12 +9,13 @@ import typing
 import unittest
 import unittest.mock as mock
 from pathlib import Path
-from test.generic.config_utils import get_fast_test_task_config
+from test.generic.config_utils import get_fast_test_task_config, get_test_model_configs
 from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
 from classy_vision.generic.util import update_classy_model, update_classy_state
+from classy_vision.models import build_model
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 
@@ -329,6 +330,37 @@ class TestUtilMethods(unittest.TestCase):
         self.assertTrue(torch.equal(torch.randn(10), random_tensor_1))
         torch.manual_seed(1)
         self.assertTrue(torch.equal(torch.randn(10), random_tensor_2))
+
+    def test_get_model_dummy_input(self):
+        for config in get_test_model_configs():
+            model = build_model(config)  # pass in a dummy model for the cuda check
+            batchsize = 8
+            # input_key is list
+            input_key = ["audio", "video"]
+            input_shape = [[3, 40, 100], [4, 16, 223, 223]]  # dummy input shapes
+            result = util.get_model_dummy_input(
+                model, input_shape, input_key, batchsize
+            )
+            self.assertEqual(result.keys(), {"audio", "video"})
+            for i in range(len(input_key)):
+                self.assertEqual(
+                    result[input_key[i]].size(), tuple([batchsize] + input_shape[i])
+                )
+            # input_key is string
+            input_key = "video"
+            input_shape = [4, 16, 223, 223]
+            result = util.get_model_dummy_input(
+                model, input_shape, input_key, batchsize
+            )
+            self.assertEqual(result.keys(), {"video"})
+            self.assertEqual(result[input_key].size(), tuple([batchsize] + input_shape))
+            # input_key is None
+            input_key = None
+            input_shape = [4, 16, 223, 223]
+            result = util.get_model_dummy_input(
+                model, input_shape, input_key, batchsize
+            )
+            self.assertEqual(result.size(), tuple([batchsize] + input_shape))
 
 
 class TestUpdateStateFunctions(unittest.TestCase):
