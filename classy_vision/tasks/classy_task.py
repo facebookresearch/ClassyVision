@@ -93,7 +93,11 @@ class ClassyTask(ABC):
 
     @abstractmethod
     def prepare(
-        self, num_dataloader_workers=0, pin_memory=False, use_gpu=False
+        self,
+        num_dataloader_workers=0,
+        pin_memory=False,
+        use_gpu=False,
+        dataloader_mp_context=None,
     ) -> None:
         """
         Prepares the task for training.
