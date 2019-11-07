@@ -33,23 +33,19 @@ def build_meters(config):
 
 
 def register_meter(name):
-    """Decorator to register a new meter.
-        New Meters can be added with the
-        :func:`~classy_vision.meters.register_meter` function decorator.
+    """Registers a ClassyMeter subclass.
 
-        For example::
-            @register_meter('accuracy')
-            class AccuracyMeter(ClassyMeter):
-                (...)
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyMeter from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyMeter subclass, like this:
 
-        .. note::
+        @register_meter('accuracy')
+        class AccuracyMeter(ClassyMeter):
+            ...
 
-            All Meters must implement the :class:`~classy_vision.meters.ClassyMeter`
-            interface.
-
-        Args:
-            name (str): the name of the meters.
-    """
+    To instantiate a meter from a configuration file, see
+    :func:`build_meter`."""
 
     def register_meter_cls(cls):
         if name in METER_REGISTRY:

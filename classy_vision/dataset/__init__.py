@@ -32,7 +32,19 @@ def get_available_splits(dataset_name):
 
 
 def register_dataset(name):
-    """Decorator to register a new dataset."""
+    """Registers a ClassyDataset subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyDataset from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyDataset subclass like this:
+
+        @register_dataset("my_dataset")
+        class MyDataset(ClassyDataset):
+            ...
+
+    To instantiate a dataset from a configuration file, see
+    :func:`build_dataset`."""
 
     def register_dataset_cls(cls):
         if name in DATASET_REGISTRY:

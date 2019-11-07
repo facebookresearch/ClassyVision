@@ -32,7 +32,19 @@ def build_param_scheduler(config):
 
 
 def register_param_scheduler(name):
-    """Decorator to register a new param scheduler."""
+    """Registers a ClassyParamScheduler subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    ClassyParamScheduler from a configuration file, even if the class itself is not
+    part of the Classy Vision framework. To use it, apply this decorator to a
+    ClassyParamScheduler subclass, like this:
+
+        @register_param_scheduler('my_scheduler')
+        class MyParamScheduler(ClassyParamScheduler):
+            ...
+
+    To instantiate a param scheduler from a configuration file, see
+    :func:`build_param_scheduler`."""
 
     def register_param_scheduler_cls(cls):
         if name in PARAM_SCHEDULER_REGISTRY:
