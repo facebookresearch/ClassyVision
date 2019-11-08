@@ -407,6 +407,7 @@ class ClassificationTask(ClassyTask):
         timer_train_step.record()
 
     def advance_phase(self):
+        logging.info("Advancing phase")
         # Reset meters for next phase / epoch
         for meter in self.meters:
             meter.reset()
