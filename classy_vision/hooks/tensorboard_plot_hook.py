@@ -101,6 +101,8 @@ class TensorboardPlotHook(ClassyHook):
         phase_type = task.phase_type
         phase_type_idx = task.train_phase_idx if task.train else task.eval_phase_idx
 
+        logging.info(f"Plotting to Tensorboard for {phase_type} phase {phase_type_idx}")
+
         phase_type = task.phase_type
         loss_key = f"{phase_type}_loss"
         learning_rate_key = f"{phase_type}_learning_rate_updates"
@@ -133,3 +135,5 @@ class TensorboardPlotHook(ClassyHook):
             for name, value in meter.value.items():
                 meter_key = f"{phase_type}_{meter.name}_{name}"
                 self.tb_writer.add_scalar(meter_key, value, global_step=phase_type_idx)
+
+        logging.info(f"Done plotting to Tensorboard")
