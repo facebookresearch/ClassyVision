@@ -29,11 +29,16 @@ class ClassyModel(nn.Module):
         raise NotImplementedError
 
     def get_classy_state(self, deep_copy=False):
-        """
-        Returns a dictionary containing the state stored inside the object.
+        """Get the state of the ClassyModel.
 
-        If deep_copy is True (default False), creates a deep copy. Otherwise,
-        the returned dict's attributes will be tied to the object's.
+        The returned state is used for checkpointing.
+
+        Args:
+            deep_copy: If True, creates a deep copy of the state dict. Otherwise, the
+                returned dict's state will be tied to the object's.
+
+        Returns:
+            A state dictionary containing the state of the model.
         """
         # If the model doesn't have head for fine-tuning, all of model's state
         # live in the trunk
@@ -61,6 +66,14 @@ class ClassyModel(nn.Module):
             self._attachable_blocks[block].load_head_states(head_states)
 
     def set_classy_state(self, state):
+        """Set the state of the ClassyModel.
+
+        Args:
+            state_dict: The state dictionary. Must be the output of a call to
+                :method:`get_classy_state`.
+
+        This is used to load the state of the model from a checkpoint.
+        """
         self.load_head_states(state)
 
         current_state = self.state_dict()

@@ -69,12 +69,13 @@ class ClassyTask(ABC):
 
     @abstractmethod
     def get_classy_state(self, deep_copy: bool = False) -> Dict[str, Any]:
-        """
-        Get the state of the ClassyTask.
+        """Get the state of the ClassyTask.
+
+        The returned state is used for checkpointing.
 
         Args:
-            deep_copy: Creates a deep copy of the state if True (default is False).
-                Otherwise, the returned dict's attributes will be tied to the object's.
+            deep_copy: If True, creates a deep copy of the state dict. Otherwise, the
+                returned dict's state will be tied to the object's.
 
         Returns:
             A state dictionary containing the state of the task.
@@ -83,11 +84,13 @@ class ClassyTask(ABC):
 
     @abstractmethod
     def set_classy_state(self, state):
-        """
-        Set the state of the ClassyTask.
+        """Set the state of the ClassyTask.
 
         Args:
-            state: State of the task to restore.
+            state_dict: The state dictionary. Must be the output of a call to
+                :method:`get_classy_state`.
+
+        This is used to load the state of the task from a checkpoint.
         """
         pass
 
