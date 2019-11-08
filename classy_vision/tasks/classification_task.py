@@ -277,7 +277,7 @@ class ClassificationTask(ClassyTask):
             "num_updates": self.num_updates,
             "num_samples_this_phase": self.num_samples_this_phase,
             "losses": self.losses,
-            "hooks": {hook.name(): hook.state_dict() for hook in self.hooks},
+            "hooks": {hook.name(): hook.get_classy_state() for hook in self.hooks},
         }
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
@@ -298,7 +298,7 @@ class ClassificationTask(ClassyTask):
             # we still want to be able to run when new hooks are added or old
             # hooks are removed
             if hook.name() in state["hooks"]:
-                hook.load_state_dict(state["hooks"][hook.name()])
+                hook.set_classy_state(state["hooks"][hook.name()])
             else:
                 logging.warn(f"No state found for hook: {hook.name()}")
         # TODO (mannatsingh): Figure out how to set the state of the dataloaders
