@@ -35,7 +35,7 @@ class RMSProp(ClassyOptimizer):
 
     def init_pytorch_optimizer(self, model):
         super().init_pytorch_optimizer(model)
-        self._optimizer = torch.optim.RMSprop(
+        self.optimizer = torch.optim.RMSprop(
             self.param_groups_override,
             lr=self.lr,
             momentum=self.momentum,
