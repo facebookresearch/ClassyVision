@@ -141,8 +141,9 @@ class ClassyOptimizer:
         self.param_groups_override = param_groups_override
 
     def get_classy_state(self) -> Dict[str, Any]:
-        """
-        Get the state of the ClassyOptimizer. Needed for checkpointing.
+        """Get the state of the ClassyOptimizer.
+
+        The returned state is used for checkpointing.
 
         Returns:
             A state dictionary containing the state of the optimizer.
@@ -150,12 +151,13 @@ class ClassyOptimizer:
         return {"optim": self.optimizer.state_dict(), "parameters": self.parameters}
 
     def set_classy_state(self, state: Dict[str, Any]) -> None:
-        """
-        Set the state of the ClassyOptimizer. Needed to load the correct state from a
-        checkpoint.
+        """Set the state of the ClassyOptimizer.
 
         Args:
-            state: State of the optimizer to restore.
+            state_dict: The state dictionary. Must be the output of a call to
+                :method:`get_classy_state`.
+
+        This is used to load the state of the optimizer from a checkpoint.
         """
         self.optimizer.load_state_dict(state["optim"])
         for param_name, param_value in state["parameters"].items():

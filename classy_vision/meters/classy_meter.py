@@ -96,8 +96,9 @@ class ClassyMeter:
         raise NotImplementedError
 
     def get_classy_state(self) -> Dict[str, Any]:
-        """
-        Get the state of the ClassyMeter.
+        """Get the state of the ClassyMeter.
+
+        The returned state is used for checkpointing.
 
         Returns:
             A state dictionary containing the state of the meter.
@@ -105,10 +106,12 @@ class ClassyMeter:
         raise NotImplementedError
 
     def set_classy_state(self, state: Dict[str, Any]) -> None:
-        """
-        Set the state of the ClassyMeter.
+        """Set the state of the ClassyMeter.
 
         Args:
-            state: State of the meter to restore.
+            state_dict: The state dictionary. Must be the output of a call to
+                :method:`get_classy_state`.
+
+        This is used to load the state of the meter from a checkpoint.
         """
         raise NotImplementedError
