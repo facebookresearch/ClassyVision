@@ -165,7 +165,22 @@ class ClassyHook(ABC):
         pass
 
     def get_classy_state(self) -> Dict[str, Any]:
+        """Get the state of the ClassyHook.
+
+        The returned state is used for checkpointing.
+
+        Returns:
+            A state dictionary containing the state of the hook.
+        """
         return self.state.get_classy_state()
 
     def set_classy_state(self, state_dict: Dict[str, Any]) -> None:
+        """Set the state of the ClassyHook.
+
+        Args:
+            state_dict: The state dictionary. Must be the output of a call to
+                :method:`get_classy_state`.
+
+        This is used to load the state of the hook from a checkpoint.
+        """
         self.state.set_classy_state(state_dict)
