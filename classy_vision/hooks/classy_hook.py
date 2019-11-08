@@ -35,10 +35,10 @@ class ClassyHookState:
     Any serializable data can be stored in the instance's attributes.
     """
 
-    def state_dict(self) -> Dict[str, Any]:
+    def get_classy_state(self) -> Dict[str, Any]:
         return self.__dict__
 
-    def load_state_dict(self, state_dict: Dict[str, Any]):
+    def set_classy_state(self, state_dict: Dict[str, Any]):
         self.__dict__ = state_dict
 
 
@@ -164,8 +164,8 @@ class ClassyHook(ABC):
         """
         pass
 
-    def state_dict(self) -> Dict[str, Any]:
-        return self.state.state_dict()
+    def get_classy_state(self) -> Dict[str, Any]:
+        return self.state.get_classy_state()
 
-    def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
-        self.state.load_state_dict(state_dict)
+    def set_classy_state(self, state_dict: Dict[str, Any]) -> None:
+        self.state.set_classy_state(state_dict)

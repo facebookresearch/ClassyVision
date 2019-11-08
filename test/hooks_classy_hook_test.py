@@ -32,9 +32,9 @@ class TestClassyHook(unittest.TestCase):
         a = 0
         b = {1: 2, 3: [4]}
         test_hook = TestHook(a, b)
-        state_dict = test_hook.state_dict()
+        state_dict = test_hook.get_classy_state()
         # create a new test_hook and set its state to the old hook's.
         test_hook = TestHook("", 0)
-        test_hook.load_state_dict(state_dict)
+        test_hook.set_classy_state(state_dict)
         self.assertEqual(test_hook.state.a, a)
         self.assertEqual(test_hook.state.b, b)
