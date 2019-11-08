@@ -10,6 +10,7 @@ from classy_vision.generic.registry_utils import import_all_modules
 
 from .checkpoint_hook import CheckpointHook
 from .classy_hook import ClassyHook, ClassyHookFunctions
+from .exponential_moving_average_model_hook import ExponentialMovingAverageModelHook
 from .loss_lr_meter_logging_hook import LossLrMeterLoggingHook
 from .model_complexity_hook import ModelComplexityHook
 from .model_tensorboard_hook import ModelTensorboardHook
@@ -24,6 +25,7 @@ __all__ = [
     "CheckpointHook",
     "ClassyHook",
     "ClassyHookFunctions",
+    "ExponentialMovingAverageModelHook",
     "LossLrMeterLoggingHook",
     "TensorboardPlotHook",
     "ModelComplexityHook",
