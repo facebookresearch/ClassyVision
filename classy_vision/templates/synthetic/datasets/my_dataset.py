@@ -6,13 +6,11 @@
 
 
 from classy_vision.dataset import register_dataset
-from classy_vision.dataset.classy_synthetic_image import (
-    SyntheticImageClassificationDataset,
-)
+from classy_vision.dataset.classy_synthetic_image import SyntheticImageDataset
 
 
 @register_dataset("my_dataset")
-class MyDataset(SyntheticImageClassificationDataset):
+class MyDataset(SyntheticImageDataset):
     @classmethod
     def get_available_splits(cls):
         return ["train", "test"]
