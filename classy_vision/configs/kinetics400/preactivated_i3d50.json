@@ -23,7 +23,7 @@
           {
             "name": "video_default_augment",
             "crop_size": 224,
-            "scale": [256, 320]
+            "size_range": [256, 320]
           }
         ]
       }
@@ -44,7 +44,8 @@
       "transforms": {
         "video": [
           {
-            "name": "video_default_no_augment"
+            "name": "video_default_no_augment",
+            "size": 256
           }
         ]
       }

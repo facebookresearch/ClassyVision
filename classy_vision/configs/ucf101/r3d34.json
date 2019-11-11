@@ -6,7 +6,7 @@
   },
   "dataset": {
     "train": {
-      "name": "hmdb51",
+      "name": "ucf101",
       "split": "train",
       "batchsize_per_replica": 16,
       "use_shuffle": true,
@@ -23,13 +23,13 @@
           {
             "name": "video_default_augment",
             "crop_size": 112,
-            "scale": [128, 160]
+            "size_range": [128, 160]
           }
         ]
       }
     },
     "test": {
-      "name": "hmdb51",
+      "name": "ucf101",
       "split": "test",
       "batchsize_per_replica": 10,
       "use_shuffle": false,
@@ -44,7 +44,8 @@
       "transforms": {
         "video": [
           {
-            "name": "video_default_no_augment"
+            "name": "video_default_no_augment",
+            "size": 128
           }
         ]
       }
@@ -80,14 +81,14 @@
     "stage_spatial_stride": [1, 2, 2, 2],
     "num_groups": 1,
     "width_per_group": 64,
-    "num_classes": 51,
+    "num_classes": 101,
     "heads": [
       {
         "name": "fully_convolutional_linear",
         "unique_id": "default_head",
         "pool_size": [4, 7, 7],
         "activation_func": "softmax",
-        "num_classes": 51,
+        "num_classes": 101,
         "fork_block": "pathway0-stage4-block2",
         "in_plane": 512
       }
@@ -109,9 +110,9 @@
           "end_lr": 0.00004
         }
       ],
+      "lengths": [0.13, 0.87],
       "update_interval": "epoch",
-      "interval_scaling": ["rescaled", "rescaled"],
-      "lengths": [0.13, 0.87]
+      "interval_scaling": ["rescaled", "rescaled"]
     },
     "weight_decay": 0.005,
     "momentum": 0.9,
