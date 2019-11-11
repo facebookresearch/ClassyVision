@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 
+from typing import Any, Callable, Dict, List, Optional
+
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from torch.utils.data.distributed import DistributedSampler
 
@@ -15,33 +17,49 @@ from .transforms.util_video import build_video_field_transform_default
 
 
 @register_dataset("synthetic_video")
-class SyntheticVideoClassificationDataset(ClassyVideoDataset):
-    """
-    This synthetic video classification dataset class randomly generates video
-    clip data and label on-the-fly. Compared with other realistc video datasets,
-    such as `HMDB51Dataset` and `Kinetics400Dataset`, it is fast to initialize
-    and is independent of actual video files. It is useful to speed up daily
-    dev work other than dataset class.
+class SyntheticVideoDataset(ClassyVideoDataset):
+    """Classy Dataset which produces random synthetic video clips.
+
+    Useful for testing since the dataset is much faster to initialize and fetch samples
+    from, compared to real world datasets.
+
+    Note: Unlike SyntheticImageDataset, this dataset generates targets randomly,
+        independent of the video clips.
     """
 
     @classmethod
-    def get_available_splits(cls):
+    def get_available_splits(cls) -> List[str]:
         return ["train", "val", "test"]
 
     def __init__(
         self,
-        num_classes,
-        split,
-        batchsize_per_replica,
-        shuffle,
-        transform,
-        num_samples,
-        frames_per_clip,
-        video_width,
-        video_height,
-        audio_samples,
-        clips_per_video,
+        num_classes: int,
+        split: str,
+        batchsize_per_replica: int,
+        shuffle: bool,
+        transform: Optional[Callable],
+        num_samples: int,
+        frames_per_clip: int,
+        video_width: int,
+        video_height: int,
+        audio_samples: int,
+        clips_per_video: int,
     ):
+        """
+        Args:
+            num_classes: Number of classes in the generated targets.
+            split: Split of dataset to use
+            batchsize_per_replica: Positive integer indicating batch size for each
+                replica
+            shuffle: Whether we should shuffle between epochs
+            transform: Transform to be applied to each sample
+            num_samples: Number of samples to return
+            frames_per_clip: Number of frames in a video clip
+            video_width: Width of the video clip
+            video_height: Height of the video clip
+            audio_samples: Audio sample rate
+            clips_per_video: Number of clips per video
+        """
         dataset = RandomVideoDataset(
             num_classes,
             split,
@@ -63,7 +81,26 @@ class SyntheticVideoClassificationDataset(ClassyVideoDataset):
         )
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "SyntheticVideoDataset":
+        """Instantiates a SyntheticVideoDataset from a configuration.
+
+        Args:
+            config: A configuration for the dataset. Should contain the following keys:
+                num_classes: See :method:`__init__`
+                split: See :method:`__init__`
+                batchsize_per_replica: See :method:`__init__`
+                shuffle: See :method:`__init__`
+                transform: The transform configuration. See :method:`build_transform`
+                num_samples: See :method:`__init__`
+                frames_per_clip: See :method:`__init__`
+                video_width: See :method:`__init__`
+                video_height: See :method:`__init__`
+                audio_samples: See :method:`__init__`
+                clips_per_video: See :method:`__init__`
+
+        Returns:
+            A SyntheticVideoDataset instance
+        """
         split = config["split"]
         num_classes = config["num_classes"]
         (

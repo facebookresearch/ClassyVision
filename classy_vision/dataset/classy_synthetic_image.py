@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 
+from typing import Any, Callable, Dict, List, Optional
+
 import torchvision.transforms as transforms
 
 from . import register_dataset
@@ -14,22 +16,43 @@ from .transforms.util import ImagenetConstants, build_field_transform_default_im
 
 
 @register_dataset("synthetic_image")
-class SyntheticImageClassificationDataset(ClassyDataset):
+class SyntheticImageDataset(ClassyDataset):
+    """Classy Dataset which produces random synthetic images with binary targets.
+
+    The underlying dataset sets targets based on the image channel, so users can
+    validate their setup by checking if they can get 100% accuracy on this dataset.
+    Useful for testing since the dataset is much faster to initialize and fetch samples
+    from, compared to real world datasets.
+    """
+
     @classmethod
-    def get_available_splits(cls):
+    def get_available_splits(cls) -> List[str]:
         return ["train", "val", "test"]
 
     def __init__(
         self,
-        batchsize_per_replica,
-        shuffle,
-        transform,
-        num_samples,
-        crop_size,
-        class_ratio,
-        seed,
-        split=None,
-    ):
+        batchsize_per_replica: int,
+        shuffle: bool,
+        transform: Optional[Callable],
+        num_samples: int,
+        crop_size: int,
+        class_ratio: float,
+        seed: int,
+        split: Optional[str] = None,
+    ) -> None:
+        """
+        Args:
+            batchsize_per_replica: Positive integer indicating batch size for each
+                replica
+            shuffle: Whether we should shuffle between epochs
+            transform: Transform to be applied to each sample
+            num_samples: Number of samples to return
+            crop_size: Image size, used for both height and width
+            class_ratio: Ratio of the distribution of target classes
+            seed: Seed used for image generation. Use the same seed to generate the same
+                set of samples.
+            split: Split of dataset to use
+        """
         dataset = RandomImageBinaryClassDataset(
             crop_size, class_ratio, num_samples, seed
         )
@@ -38,7 +61,23 @@ class SyntheticImageClassificationDataset(ClassyDataset):
         )
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "SyntheticImageDataset":
+        """Instantiates a SyntheticImageDataset from a configuration.
+
+        Args:
+            config: A configuration for the dataset. Should contain the following keys:
+                batchsize_per_replica: See :method:`__init__`
+                shuffle: See :method:`__init__`
+                transform: The transform configuration. See :method:`build_transform`
+                num_samples: See :method:`__init__`
+                crop_size: See :method:`__init__`
+                class_ratio: See :method:`__init__`
+                seed: See :method:`__init__`
+                split: See :method:`__init__`
+
+        Returns:
+            A SyntheticImageDataset instance
+        """
         assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
         split = config.get("split")
         crop_size = config["crop_size"]
