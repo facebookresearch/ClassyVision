@@ -22,14 +22,24 @@ class VideoConstants:
 
     MEAN = ImagenetConstants.MEAN
     STD = ImagenetConstants.STD
-    SCALE = (128, 160)
+    SIZE_RANGE = (128, 160)
     CROP_SIZE = 112
 
 
-@register_transform("video_random_scale_crop")
-class VideoRandomScaleCrop(ClassyTransform):
-    """Given a scale range, randomly choose a scale. Rescale the clip so that
-    its short edge equals to the chosen scale. Then randomly crop the video
+def _get_rescaled_size(scale, h, w):
+    if h < w:
+        new_h = scale
+        new_w = int(scale * w / h)
+    else:
+        new_w = scale
+        new_h = int(scale * h / w)
+    return new_h, new_w
+
+
+@register_transform("video_clip_random_resize_crop")
+class VideoClipRandomResizeCrop(ClassyTransform):
+    """Given a size range, randomly choose a size. Rescale the clip so that
+    its short edge equals to the chosen size. Then randomly crop the video
     clip with the specified size.
     Such training data augmengation is used in VGG net
     (https://arxiv.org/abs/1409.1556).
@@ -37,42 +47,60 @@ class VideoRandomScaleCrop(ClassyTransform):
         codebase.
 
     Args:
-        size (int or tuple): expected output size (height, width)
-        scale (2-tuple): the min- and max scale
+        crop_size (int or tuple): expected output crop_size (height, width)
+        size_range (2-tuple): the min- and max size
         interpolation_mode: Default: "bilinear"
     """
 
-    def __init__(self, size, scale, interpolation_mode="bilinear"):
-        if isinstance(size, tuple):
-            assert len(size) == 2, "size should be tuple (height, width)"
-            self.size = size
+    def __init__(self, crop_size, size_range, interpolation_mode="bilinear"):
+        if isinstance(crop_size, tuple):
+            assert len(crop_size) == 2, "crop_size should be tuple (height, width)"
+            self.crop_size = crop_size
         else:
-            self.size = (size, size)
+            self.crop_size = (crop_size, crop_size)
 
         self.interpolation_mode = interpolation_mode
-        self.scale = scale
+        self.size_range = size_range
 
     def __call__(self, clip):
         # clip size: C x T x H x W
-        h = clip.size()[2]
-        w = clip.size()[3]
-        rand_scale = random.randint(self.scale[0], self.scale[1])
-        if h < w:
-            new_h = rand_scale
-            new_w = int(rand_scale * w / h)
-        else:
-            new_w = rand_scale
-            new_h = int(rand_scale * h / w)
+        rand_size = random.randint(self.size_range[0], self.size_range[1])
+        new_h, new_w = _get_rescaled_size(rand_size, clip.size()[2], clip.size()[3])
         clip = torch.nn.functional.interpolate(
             clip, size=(new_h, new_w), mode=self.interpolation_mode
         )
         assert (
-            self.size[0] <= new_h and self.size[1] <= new_w
+            self.crop_size[0] <= new_h and self.crop_size[1] <= new_w
         ), "crop size can not be larger than video frame size"
 
-        i = random.randint(0, new_h - self.size[0])
-        j = random.randint(0, new_w - self.size[1])
-        clip = clip[:, :, i : i + self.size[0], j : j + self.size[1]]
+        i = random.randint(0, new_h - self.crop_size[0])
+        j = random.randint(0, new_w - self.crop_size[1])
+        clip = clip[:, :, i : i + self.crop_size[0], j : j + self.crop_size[1]]
+        return clip
+
+
+@register_transform("video_clip_resize")
+class VideoClipResize(ClassyTransform):
+    """Given an input size, rescale the clip so that its short edge equals to
+        the input size while aspect ratio is preserved.
+
+    Args:
+        size (int): input size
+        interpolation_mode: Default: "bilinear". See valid values in
+            (https://pytorch.org/docs/stable/nn.functional.html#torch.nn.functional.interpolate)
+    """
+
+    def __init__(self, size, interpolation_mode="bilinear"):
+        self.interpolation_mode = interpolation_mode
+        self.size = size
+
+    def __call__(self, clip):
+        # clip size: C x T x H x W
+        if not min(clip.size()[2], clip.size()[3]) == self.size:
+            new_h, new_w = _get_rescaled_size(self.size, clip.size()[2], clip.size()[3])
+            clip = torch.nn.functional.interpolate(
+                clip, size=(new_h, new_w), mode=self.interpolation_mode
+            )
         return clip
 
 
@@ -112,15 +140,15 @@ class VideoDefaultAugmentTransform(ClassyTransform):
     def __init__(
         self,
         crop_size: int = VideoConstants.CROP_SIZE,
-        scale: List[int] = VideoConstants.SCALE,
+        size_range: List[int] = VideoConstants.SIZE_RANGE,
         mean: List[float] = VideoConstants.MEAN,
         std: List[float] = VideoConstants.STD,
     ):
         self._transform = transforms.Compose(
             [
                 transforms_video.ToTensorVideo(),
-                # TODO(zyan3): migrate VideoRandomScaleCrop to TorchVision
-                VideoRandomScaleCrop(crop_size, scale),
+                # TODO(zyan3): migrate VideoClipRandomResizeCrop to TorchVision
+                VideoClipRandomResizeCrop(crop_size, size_range),
                 transforms_video.RandomHorizontalFlipVideo(),
                 transforms_video.NormalizeVideo(mean=mean, std=std),
             ]
@@ -134,6 +162,7 @@ class VideoDefaultAugmentTransform(ClassyTransform):
 class VideoDefaultNoAugmentTransform(ClassyTransform):
     def __init__(
         self,
+        size: int = VideoConstants.SIZE_RANGE[0],
         mean: List[float] = VideoConstants.MEAN,
         std: List[float] = VideoConstants.STD,
     ):
@@ -142,6 +171,7 @@ class VideoDefaultNoAugmentTransform(ClassyTransform):
             # conduct fully convolutional-style testing
             [
                 transforms_video.ToTensorVideo(),
+                VideoClipResize(size),
                 transforms_video.NormalizeVideo(mean=mean, std=std),
             ]
         )
