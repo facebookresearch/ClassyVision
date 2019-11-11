@@ -54,6 +54,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         video_height,
         video_min_dimension,
         audio_samples,
+        audio_channels,
         step_between_clips,
         frame_rate,
         clips_per_video,
@@ -107,6 +108,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_height=video_height,
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
+            _audio_channels=audio_channels,
         )
         metadata = dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
@@ -130,6 +132,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         ), f"The arguments {required_args} are all required."
 
         split = config["split"]
+        audio_channels = config.get("audio_channels", 0)
         (
             transform_config,
             batchsize_per_replica,
@@ -159,6 +162,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             video_height,
             video_min_dimension,
             audio_samples,
+            audio_channels,
             step_between_clips,
             frame_rate,
             clips_per_video,
