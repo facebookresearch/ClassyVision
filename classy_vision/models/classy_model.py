@@ -163,9 +163,6 @@ class ClassyModel(nn.Module):
             outputs.update(blk.head_outputs)
         return outputs
 
-    def validate(self, dataset_output_shape):
-        raise NotImplementedError
-
     def get_optimizer_params(self, bn_weight_decay=False):
         """
         Function to return dict of params with "keys" from

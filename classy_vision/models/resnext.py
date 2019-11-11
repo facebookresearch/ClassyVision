@@ -397,6 +397,3 @@ class ResNeXt(ClassyModel):
     @property
     def model_depth(self):
         return sum(self.num_blocks)
-
-    def validate(self, dataset_output_shape):
-        return self.input_shape == dataset_output_shape
