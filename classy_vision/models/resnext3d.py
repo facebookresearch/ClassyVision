@@ -286,12 +286,6 @@ class ResNeXt3DBase(ClassyModel):
     def input_key(self):
         return self._input_key
 
-    def validate(self, dataset_output_shape):
-        # video model input shape can vary from video to video at testing time.
-        # Thus, comparing it with dataset_output_shape will have varying results
-        # We skip validation and simply return True
-        return True
-
 
 @register_model("resnext3d")
 class ResNeXt3D(ResNeXt3DBase):
