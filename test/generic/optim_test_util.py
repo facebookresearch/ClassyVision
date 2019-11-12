@@ -175,16 +175,16 @@ class TestOptimizer(ABC):
         opt.init_pytorch_optimizer(mock_classy_vision_model)
 
         # Test initial learning rate
-        for group in opt._optimizer.param_groups:
+        for group in opt.optimizer.param_groups:
             self.assertEqual(group["lr"], 0.1)
 
         def _test_lr_schedule(optimizer, num_epochs, epochs, targets):
             for i in range(len(epochs)):
                 epoch = epochs[i]
                 target = targets[i]
-                param_groups = optimizer._optimizer.param_groups.copy()
+                param_groups = optimizer.optimizer.param_groups.copy()
                 optimizer.update_schedule_on_epoch(epoch / num_epochs)
-                for idx, group in enumerate(optimizer._optimizer.param_groups):
+                for idx, group in enumerate(optimizer.optimizer.param_groups):
                     self.assertEqual(group["lr"], target)
                     # Make sure all but LR is same
                     param_groups[idx]["lr"] = target
