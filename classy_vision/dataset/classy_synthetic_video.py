@@ -27,10 +27,6 @@ class SyntheticVideoDataset(ClassyVideoDataset):
         independent of the video clips.
     """
 
-    @classmethod
-    def get_available_splits(cls) -> List[str]:
-        return ["train", "val", "test"]
-
     def __init__(
         self,
         num_classes: int,

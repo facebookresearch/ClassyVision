@@ -25,10 +25,6 @@ class SyntheticImageDataset(ClassyDataset):
     from, compared to real world datasets.
     """
 
-    @classmethod
-    def get_available_splits(cls) -> List[str]:
-        return ["train", "val", "test"]
-
     def __init__(
         self,
         batchsize_per_replica: int,

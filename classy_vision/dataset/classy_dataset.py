@@ -27,10 +27,6 @@ class ClassyDataset:
     ClassyDataset can be used to instantiate datasets from a configuration file as well.
     """
 
-    @classmethod
-    def get_available_splits(cls):
-        return ["train", "test"]
-
     def __init__(
         self,
         dataset: Sequence,
