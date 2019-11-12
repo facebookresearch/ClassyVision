@@ -22,7 +22,7 @@ class SGD(ClassyOptimizer):
 
     def init_pytorch_optimizer(self, model):
         super().init_pytorch_optimizer(model)
-        self._optimizer = torch.optim.SGD(
+        self.optimizer = torch.optim.SGD(
             self.param_groups_override,
             lr=self.lr,
             nesterov=self.nesterov,

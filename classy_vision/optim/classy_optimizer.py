@@ -37,7 +37,7 @@ class ClassyOptimizer:
         """
         self.lr_scheduler = lr_scheduler
         self.lr = self.lr_scheduler(0)
-        self._optimizer = None
+        self.optimizer = None
         self.optimizer_params = None
 
     def _validate_and_get_optimizer_params(self, model: ClassyModel) -> Dict[str, Any]:
@@ -82,17 +82,6 @@ class ClassyOptimizer:
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
         raise NotImplementedError
-
-    @property
-    def optimizer(self) -> torch.optim.Optimizer:
-        """
-        Returns the underlying :class:`torch.optim.Optimizer` instance.
-        """
-        if self._optimizer is None:
-            raise NotImplementedError
-        if not isinstance(self._optimizer, torch.optim.Optimizer):
-            raise ValueError("_optimizer must be an instance of torch.optim.Optimizer")
-        return self._optimizer
 
     @property
     def parameters(self) -> Dict[str, Any]:
