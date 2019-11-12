@@ -50,7 +50,6 @@ install_dep: &install_dep
         which pip
         pip install --upgrade pip
         pip install --progress-bar off -r requirements.txt
-        pip install --progress-bar off --pre torchvision -f https://download.pytorch.org/whl/nightly/cu101/torch_nightly.html
         pip list
 
 run_tests: &run_tests
