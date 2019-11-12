@@ -27,10 +27,6 @@ def build_dataset(config, *args, **kwargs):
     return DATASET_REGISTRY[config["name"]].from_config(config, *args, **kwargs)
 
 
-def get_available_splits(dataset_name):
-    return DATASET_REGISTRY[dataset_name].get_available_splits()
-
-
 def register_dataset(name):
     """Registers a ClassyDataset subclass.
 

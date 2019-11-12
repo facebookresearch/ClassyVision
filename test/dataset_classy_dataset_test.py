@@ -11,7 +11,7 @@ from test.generic.utils import compare_batches, compare_samples
 
 import classy_vision.dataset.classy_dataset as classy_dataset
 import torch
-from classy_vision.dataset import build_dataset, get_available_splits, register_dataset
+from classy_vision.dataset import build_dataset, register_dataset
 from classy_vision.dataset.core import ListDataset
 from torch.utils.data import DataLoader
 
@@ -82,10 +82,6 @@ class OtherTestDataset(classy_dataset.ClassyDataset):
     type than TestDataset
     """
 
-    @classmethod
-    def get_available_splits(cls):
-        return ["split0", "split1"]
-
     def __init__(self, samples, batchsize_per_replica=1):
         input_tensors = [sample["input"] for sample in samples]
         target_tensors = [sample["target"] for sample in samples]
@@ -112,16 +108,6 @@ class TestRegistryFunctions(unittest.TestCase):
     def test_build_model(self):
         dataset = build_dataset(DUMMY_CONFIG, DUMMY_SAMPLES_1)
         self.assertTrue(isinstance(dataset, TestDataset))
-
-    def test_get_available_splits(self):
-        # Test default classy splits
-        splits = get_available_splits("test_dataset")
-        self.assertEqual(splits, ["train", "test"])
-
-    def test_get_available_splits_non_default(self):
-        # Test default classy splits
-        splits = get_available_splits("other_test_dataset")
-        self.assertEqual(splits, ["split0", "split1"])
 
 
 class TestClassyDataset(unittest.TestCase):

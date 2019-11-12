@@ -11,9 +11,5 @@ from classy_vision.dataset.classy_synthetic_image import SyntheticImageDataset
 
 @register_dataset("my_dataset")
 class MyDataset(SyntheticImageDataset):
-    @classmethod
-    def get_available_splits(cls):
-        return ["train", "test"]
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
