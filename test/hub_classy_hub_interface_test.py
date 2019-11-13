@@ -36,7 +36,9 @@ class TestClassyHubInterface(unittest.TestCase):
         shutil.rmtree(self.base_dir)
 
     def _test_predict_and_extract_features(self, hub_interface: ClassyHubInterface):
-        dataset = hub_interface.create_image_dataset([self.image_path], split="test")
+        dataset = hub_interface.create_image_dataset(
+            [self.image_path], phase_type="test"
+        )
         data_iterator = hub_interface.get_data_iterator(dataset)
         input = next(data_iterator)
         # set the model to eval mode
@@ -69,11 +71,13 @@ class TestClassyHubInterface(unittest.TestCase):
         self._test_predict_and_extract_features(hub_interface)
 
         # test that the correct transform is picked up
-        split = "test"
+        phase_type = "test"
         test_transform = TestTransform()
-        task.datasets[split].transform = test_transform
+        task.datasets[phase_type].transform = test_transform
         hub_interface = ClassyHubInterface.from_task(task)
-        dataset = hub_interface.create_image_dataset([self.image_path], split=split)
+        dataset = hub_interface.create_image_dataset(
+            [self.image_path], phase_type=phase_type
+        )
         self.assertIsInstance(dataset.transform, TestTransform)
 
     def test_from_model(self):

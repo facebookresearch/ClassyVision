@@ -64,8 +64,8 @@ class ClassificationTask(ClassyTask):
         self.num_epochs = num_epochs
         return self
 
-    def set_dataset(self, dataset: ClassyDataset, split: str):
-        self.datasets[split] = dataset
+    def set_dataset(self, dataset: ClassyDataset, phase_type: str):
+        self.datasets[phase_type] = dataset
         return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
@@ -106,9 +106,9 @@ class ClassificationTask(ClassyTask):
         optimizer_config["num_epochs"] = config["num_epochs"]
 
         datasets = {}
-        splits = ["train", "test"]
-        for split in splits:
-            datasets[split] = build_dataset(config["dataset"][split])
+        phase_types = ["train", "test"]
+        for phase_type in phase_types:
+            datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         test_only = config.get("test_only", False)
         meters = build_meters(config.get("meters", {}))
@@ -127,8 +127,8 @@ class ClassificationTask(ClassyTask):
             .set_optimizer(optimizer)
             .set_meters(meters)
         )
-        for split in splits:
-            task.set_dataset(datasets[split], split)
+        for phase_type in phase_types:
+            task.set_dataset(datasets[phase_type], phase_type)
 
         return task
 
@@ -188,9 +188,14 @@ class ClassificationTask(ClassyTask):
         return [{"train": False} for _ in range(self.num_epochs)]
 
     def build_dataloader(
-        self, split, num_workers, pin_memory, multiprocessing_context=None, **kwargs
+        self,
+        phase_type,
+        num_workers,
+        pin_memory,
+        multiprocessing_context=None,
+        **kwargs,
     ):
-        return self.datasets[split].iterator(
+        return self.datasets[phase_type].iterator(
             num_workers=num_workers,
             pin_memory=pin_memory,
             multiprocessing_context=multiprocessing_context,
@@ -201,14 +206,14 @@ class ClassificationTask(ClassyTask):
         self, num_workers, pin_memory, multiprocessing_context=None, **kwargs
     ):
         return {
-            split: self.build_dataloader(
-                split,
+            phase_type: self.build_dataloader(
+                phase_type,
                 num_workers=num_workers,
                 pin_memory=pin_memory,
                 multiprocessing_context=multiprocessing_context,
                 **kwargs,
             )
-            for split in self.datasets.keys()
+            for phase_type in self.datasets.keys()
         }
 
     def prepare(
@@ -460,7 +465,7 @@ class ClassificationTask(ClassyTask):
             current_phase_id = max(self.train_phase_idx, 0)
 
         self.dataloaders[phase_type] = self.build_dataloader(
-            split=phase_type,
+            phase_type=phase_type,
             num_workers=num_workers,
             pin_memory=pin_memory,
             multiprocessing_context=multiprocessing_context,
