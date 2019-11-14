@@ -63,13 +63,13 @@ html body {
 .splashLogo {
   display: block;
   margin: 0 auto;
-  height: 150px;
-  width: 150px;
+  height: 158px;
+  width: 250px;
 }
 
 .primaryLogoImage{
   height: 100%;
-  width:100%;
+  width: 100%;
 }
 
 .projectTitle {
