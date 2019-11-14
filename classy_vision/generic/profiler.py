@@ -64,8 +64,24 @@ def _layer_flops(layer, x):
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
     batchsize_per_replica = x.size()[0]
+    # 1D convolution:
+    if layer_type in ["Conv1d"]:
+        # x shape is N x C x W
+        out_w = int(
+            (x.size()[2] + 2 * layer.padding[0] - layer.kernel_size[0])
+            / layer.stride[0]
+            + 1
+        )
+        return (
+            batchsize_per_replica
+            * layer.in_channels
+            * layer.out_channels
+            * layer.kernel_size[0]
+            * out_w
+            / layer.groups
+        )
     # 2D convolution:
-    if layer_type in ["Conv2d"]:
+    elif layer_type in ["Conv2d"]:
         out_h = int(
             (x.size()[2] + 2 * layer.padding[0] - layer.kernel_size[0])
             / layer.stride[0]
