@@ -89,7 +89,7 @@ class ClassyHubInterface:
         shuffle: bool = True,
         transform: Optional[Callable] = None,
         num_samples: Optional[int] = None,
-        split: str = "train",
+        phase_type: str = "train",
     ) -> ClassyDataset:
         """Create a ClassyDataset which reads images from image_paths.
 
@@ -106,22 +106,22 @@ class ClassyHubInterface:
             batchsize_per_replica: Minibatch size per replica (i.e. samples per GPU)
             shuffle: If true, data is shuffled between epochs
             transform: Transform to apply to sample. If left as None, the dataset's
-                split is used to determine the transform to apply. The transform for the
-                split is searched for in self.task, falling back to imagenet
-                transformations if it is not found there.
+                phase_type is used to determine the transform to apply. The transform
+                for the phase_type is searched for in self.task, falling back to
+                imagenet transformations if it is not found there.
             num_samples: If specified, limits the number of samples returned by
                 the dataset
-            split: String specifying the split of data used, e.g. "train" or "test"
+            phase_type: String specifying the phase_type, e.g. "train" or "test"
         """
         if transform is None:
-            if self.task is not None and split in self.task.datasets:
-                # use the transform from the dataset for the split
-                dataset = self.task.datasets[split]
+            if self.task is not None and phase_type in self.task.datasets:
+                # use the transform from the dataset for the phase_type
+                dataset = self.task.datasets[phase_type]
                 transform = dataset.transform
                 assert transform is not None, "Cannot infer transform from the task"
             else:
                 transform = build_field_transform_default_imagenet(
-                    config=None, split=split
+                    config=None, split=phase_type
                 )
         return ImagePathDataset(
             batchsize_per_replica,
@@ -130,7 +130,7 @@ class ClassyHubInterface:
             num_samples,
             image_paths,
             targets=targets,
-            split=split,
+            split=phase_type,
         )
 
     @staticmethod
