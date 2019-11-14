@@ -72,7 +72,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
         self.assertAlmostEqual(crit(outputs, targets).item(), 1.0 + 2.0 + 3.0)
 
         # Verify changing losses works
-        new_config = config.copy()
+        new_config = copy.deepcopy(config)
         new_config.update(
             {"losses": [{"name": "mock_a"}, {"name": "mock_b"}], "weights": [1.0, 1.0]}
         )
@@ -80,7 +80,7 @@ class TestSumArbitraryLoss(unittest.TestCase):
         self.assertAlmostEqual(crit(outputs, targets).item(), 1.0 + 2.0)
 
         # Verify changing weights works
-        new_config = config.copy()
+        new_config = copy.deepcopy(config)
         new_config.update({"weights": [1.0, 2.0, 3.0]})
         crit = SumArbitraryLoss.from_config(new_config)
         self.assertAlmostEqual(

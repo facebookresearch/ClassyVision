@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
+import copy
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
@@ -42,7 +43,7 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
         "name" in transform_config
     ), f"name not provided for transform: {transform_config}"
     name = transform_config["name"]
-    transform_args = transform_config.copy()
+    transform_args = copy.deepcopy(transform_config)
     del transform_args["name"]
     if name in TRANSFORM_REGISTRY:
         return TRANSFORM_REGISTRY[name].from_config(transform_args)
