@@ -18,7 +18,31 @@ class ClassyModelEvaluationMode(Enum):
 
 
 class ClassyModel(nn.Module):
+    """Base class for models in classy vision.
+
+    A model refers either to a specific architecture (e.g. ResNet50) or a
+    family of architectures (e.g. ResNet). Models can take arguments in the
+    constructor in order to configure different behavior (e.g.
+    hyperparameters).  Classy Models must implement :method:`from_config` in
+    order to allow instantiation from a configuration file. Like regular
+    PyTorch models, Classy Models must also implement :method:`forward`, where
+    the bulk of the inference logic lives.
+
+    Classy Models also have some advanced functionality for production
+    fine-tuning systems. For example, we allow users to train a trunk
+    model and then attach heads to the model via the attachable
+    blocks.  Making your model support the trunk-heads paradigm is
+    completely optional.
+
+    """
+
     def __init__(self, num_classes):
+        """Constructor for ClassyModel.
+
+        Args:
+            num_classes: Number of classes, used by output function.
+                Not necessary for training
+        """
         super().__init__()
 
         self._num_classes = num_classes
@@ -26,6 +50,13 @@ class ClassyModel(nn.Module):
 
     @classmethod
     def from_config(cls, config):
+        """Implemented by children.
+
+        This is a factory method for generating the class from a config.
+
+        Args:
+            config (Dict): Contains params for constructing the model
+        """
         raise NotImplementedError
 
     def get_classy_state(self, deep_copy=False):
@@ -34,8 +65,8 @@ class ClassyModel(nn.Module):
         The returned state is used for checkpointing.
 
         Args:
-            deep_copy: If True, creates a deep copy of the state dict. Otherwise, the
-                returned dict's state will be tied to the object's.
+            deep_copy: If True, creates a deep copy of the state Dict. Otherwise, the
+                returned Dict's state will be tied to the object's.
 
         Returns:
             A state dictionary containing the state of the model.
@@ -62,6 +93,16 @@ class ClassyModel(nn.Module):
         return model_state_dict
 
     def load_head_states(self, state):
+        """Load only the state (weights) of the heads.
+
+        For a trunk-heads model, this function allows the user to
+        only update the head state of the model. Useful for attaching
+        fine-tuned heads to a pre-trained trunk.
+
+        Args:
+            state (Dict): Contains the classy model state under key "model"
+
+        """
         for block, head_states in state["model"]["heads"].items():
             self._attachable_blocks[block].load_head_states(head_states)
 
@@ -95,11 +136,6 @@ class ClassyModel(nn.Module):
         """
         return self.forward(x)
 
-    # TODO (changhan): was planning to re-implement pytorch-summary but it's
-    # based on a dummy forward pass. Will leave it to a separate diff
-    def summarize(self):
-        raise NotImplementedError
-
     def build_attachable_block(self, name, module):
         """
         Add a wrapper to the module to allow to attach heads to the module.
@@ -123,13 +159,21 @@ class ClassyModel(nn.Module):
             block.set_heads([])
 
     def set_heads(self, heads):
-        """
-        Attach all the heads to corresponding blocks.
-        A head is a neural network which takes input from an interior block of
-        another model and produces an output to be used externally from the
-        model / model trunk.
-        heads -- a mapping between fork block name and dictionary of heads
-                 (e.g. {"block15": {"team1": head1, "team2": head2}})
+        """Attach all the heads to corresponding blocks.
+
+        A head is expected to be a ClassyHead object. For more
+        details, see :class:`ClassyHead`.
+
+        Args:
+            heads (Dict): a mapping between attachable block name
+                and a dictionary of heads attached to that block. For
+                example, if you have two different teams that want to
+                attach two different heads for downstream classifiers to
+                the 15th block, then they would use:
+                heads = {"block15":
+                    {"team1": classifier_head1, "team2": classifier_head2}
+                }
+
         """
         self._clear_heads()
 
@@ -146,6 +190,12 @@ class ClassyModel(nn.Module):
             self._attachable_blocks[block_name].set_heads(heads.values())
 
     def get_heads(self):
+        """Returns the heads on the model
+
+        Function returns the heads a dictionary of block names to
+        nn.modules attached to that block.
+
+        """
         all_heads = {}
         for name, block in self._attachable_blocks.items():
             heads = block.get_heads()
@@ -155,8 +205,9 @@ class ClassyModel(nn.Module):
 
     @property
     def head_outputs(self):
-        """
-        Return outputs of all heads in the format of dict<head_id, output>
+        """Return outputs of all heads in the format of Dict[head_id, output]
+
+        Head outputs are cached during a forward pass.
         """
         outputs = {}
         for blk in self._attachable_blocks.values():
@@ -164,7 +215,8 @@ class ClassyModel(nn.Module):
         return outputs
 
     def get_optimizer_params(self, bn_weight_decay=False):
-        """
+        """Returns param groups for optimizer.
+
         Function to return dict of params with "keys" from
         {"regularized_params", "unregularized_params"}
         to "values" a list of torch Params.
@@ -177,6 +229,9 @@ class ClassyModel(nn.Module):
         unregularized_params if bn_weight_decay is False.
 
         Override this function for any custom behavior.
+
+        Args:
+            bn_weight_decay (bool): Apply weight decay to bn params if true
         """
         unregularized_params = []
         regularized_params = []
@@ -206,16 +261,28 @@ class ClassyModel(nn.Module):
 
     @property
     def input_shape(self):
+        """If implemented, returns expected input tensor shape
+        """
         raise NotImplementedError
 
     @property
     def output_shape(self):
+        """If implemented, returns expected output tensor shape
+        """
         raise NotImplementedError
 
     @property
     def model_depth(self):
+        """If implemented, returns number of layers in model
+        """
         raise NotImplementedError
 
     @property
     def evaluation_mode(self):
+        """Used by video models for averaging over contiguous clips.
+
+        TODO: Remove this once we have a video task, this logic should
+        live in a video specific task
+
+        """
         return ClassyModelEvaluationMode.DEFAULT
