@@ -43,9 +43,9 @@ class TestClassificationTask(unittest.TestCase):
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
         )
-        for split in ["train", "test"]:
-            dataset = build_dataset(config["dataset"][split])
-            task.set_dataset(dataset, split)
+        for phase_type in ["train", "test"]:
+            dataset = build_dataset(config["dataset"][phase_type])
+            task.set_dataset(dataset, phase_type)
 
         task.prepare(num_dataloader_workers=1, pin_memory=False)
 
