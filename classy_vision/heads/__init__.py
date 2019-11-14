@@ -74,12 +74,14 @@ def build_head(config):
 import_all_modules(FILE_ROOT, "classy_vision.heads")
 
 from .fully_connected_head import FullyConnectedHead  # isort:skip
+from .fully_convolutional_linear_head import FullyConvolutionalLinearHead  # isort:skip
 from .identity_head import IdentityHead  # isort:skip
 
 
 __all__ = [
     "ClassyHead",
     "FullyConnectedHead",
+    "FullyConvolutionalLinearHead",
     "IdentityHead",
     "build_head",
     "register_head",
