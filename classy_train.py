@@ -41,9 +41,9 @@ import logging
 from pathlib import Path
 
 import torch
-from classy_vision.generic.opts import parse_train_arguments
+from classy_vision.generic.args import parse_args
 from classy_vision.generic.registry_utils import import_all_packages_from_directory
-from classy_vision.generic.util import load_checkpoint, load_json
+from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import (
     CheckpointHook,
     LossLrMeterLoggingHook,
@@ -60,13 +60,10 @@ from classy_vision.trainer import DistributedTrainer
 from torchvision import set_video_backend
 
 
-def main(args):
+def main(args, config):
     # Global settings
     torch.manual_seed(0)
     set_video_backend(args.video_backend)
-
-    # Loads config, sets up task
-    config = load_json(args.config_file)
 
     task = build_task(config)
 
@@ -128,7 +125,6 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
 
     logging.info("Generic convolutional network trainer.")
-    args = parse_train_arguments()
 
     # This imports all modules in the same directory as classy_train.py
     # Because of the way Classy Vision's registration decorators work,
@@ -139,4 +135,5 @@ if __name__ == "__main__":
     file_root = Path(__file__).parent
     import_all_packages_from_directory(file_root)
 
-    main(args)
+    args, config = parse_args()
+    main(args, config)

@@ -1,0 +1,12 @@
+config:
+  dataset:
+    train:
+      name: imagenet
+      split: train
+      batchsize_per_replica: 32
+      use_shuffle: true
+    test:
+      name: imagenet
+      split: val
+      batchsize_per_replica: 32
+      use_shuffle: false

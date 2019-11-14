@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 from pathlib import Path
 
 import torch
@@ -47,7 +48,7 @@ def build_loss(config):
         f"{name} isn't a registered loss"
         ", nor is it available in torch.nn.modules.loss"
     )
-    args = config.copy()
+    args = copy.deepcopy(config)
     del args["name"]
     if "weight" in args:
         # if we are passing weights, we need to change the weights from a list
