@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import json
 import os
 import subprocess
@@ -19,7 +20,7 @@ import torch
 class TestDistributedTrainer(unittest.TestCase):
     def setUp(self):
         config = get_test_mlp_task_config()
-        invalid_config = config.copy()
+        invalid_config = copy.deepcopy(config)
         invalid_config["name"] = "invalid_task"
         self.config_files = {}
         for config_key, config in [

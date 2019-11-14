@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 from collections import defaultdict
 from pathlib import Path
 
@@ -70,7 +71,7 @@ def build_model(config):
         for head_config in config["heads"]:
             assert "fork_block" in head_config, "Expect fork_block in config"
             fork_block = head_config["fork_block"]
-            updated_config = head_config.copy()
+            updated_config = copy.deepcopy(head_config)
             del updated_config["fork_block"]
 
             head = build_head(updated_config)

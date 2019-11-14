@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -65,7 +66,7 @@ def build_head(config):
     assert "unique_id" in config, "Expect a global unique id in config"
     assert config["name"] in HEAD_REGISTRY, "unknown head"
     name = config["name"]
-    head_config = config.copy()
+    head_config = copy.deepcopy(config)
     del head_config["name"]
     return HEAD_REGISTRY[name].from_config(head_config)
 
