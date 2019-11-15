@@ -76,7 +76,14 @@ const siteConfig = {
   },
 
   // Add custom scripts here that would be placed in <script> tags.
-  scripts: ['https://buttons.github.io/buttons.js'],
+  scripts: [
+      'https://buttons.github.io/buttons.js',
+      // Copy-to-clipboard button for code blocks
+      `${baseUrl}js/code_block_buttons.js`,
+  ],
+
+  // CSS sources to load
+  stylesheets: [`${baseUrl}css/code_block_buttons.css`],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',
@@ -86,6 +93,8 @@ const siteConfig = {
   // Open Graph and Twitter card images.
   ogImage: 'img/undraw_online.svg',
   twitterImage: 'img/undraw_tweetstorm.svg',
+
+  wrapPagesHTML: true,
 
   // For sites with a sizable amount of content, set collapsible to true.
   // Expand/collapse the links and subcategories under categories.
