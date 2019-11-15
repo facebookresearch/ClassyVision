@@ -130,7 +130,7 @@ class DenseNet(ClassyModel):
             layers. These settings are useful when
             training Siamese networks.
         """
-        super().__init__(num_classes)
+        super().__init__()
 
         # assertions:
         assert type(num_blocks) == list
@@ -142,6 +142,7 @@ class DenseNet(ClassyModel):
         assert type(small_input) == bool
 
         # initial convolutional block:
+        self._num_classes = num_classes
         self.num_blocks = num_blocks
         self.small_input = small_input
         if self.small_input:

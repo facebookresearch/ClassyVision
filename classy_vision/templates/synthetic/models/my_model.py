@@ -11,7 +11,7 @@ from classy_vision.models import ClassyModel, register_model
 @register_model("my_model")
 class MyModel(ClassyModel):
     def __init__(self):
-        super().__init__(2)
+        super().__init__()
         self.resnet = models.resnet18()
 
     def forward(self, x):
