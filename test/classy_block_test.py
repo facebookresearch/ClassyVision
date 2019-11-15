@@ -22,7 +22,7 @@ class TestClassyBlock(unittest.TestCase):
 
     class DummyTestModel(ClassyModel):
         def __init__(self):
-            super().__init__({})
+            super().__init__()
             self.layer1 = self.build_attachable_block(
                 "dummy_block", torch.nn.Linear(2, 2)
             )
