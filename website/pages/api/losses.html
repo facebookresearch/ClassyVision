@@ -1,0 +1,195 @@
+
+<script type="text/javascript" id="documentation_options" data-url_root="./"
+  src="/js/documentation_options.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/doctools.js"></script>
+<script type="text/javascript" src="/js/language_data.js"></script>
+<script type="text/javascript" src="/js/searchtools.js"></script>
+<div class="sphinx"><div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<div class="section" id="module-classy_vision.losses">
+<span id="losses"></span><h1>Losses<a class="headerlink" href="#module-classy_vision.losses" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="classy_vision.losses.BarronLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">BarronLoss</code><span class="sig-paren">(</span><em class="sig-param">alpha</em>, <em class="sig-param">size_average</em>, <em class="sig-param">c</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.BarronLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This implements the Barron loss: <a class="reference external" href="https://arxiv.org/pdf/1701.03077.pdf">https://arxiv.org/pdf/1701.03077.pdf</a></p>
+<p>Constructor for ClassyLoss.</p>
+<dl class="method">
+<dt id="classy_vision.losses.BarronLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">prediction</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.BarronLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the loss for the provided sample.</p>
+<p>Refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for more details.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.losses.ClassyLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">ClassyLoss</code><a class="headerlink" href="#classy_vision.losses.ClassyLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class to calculate the loss during training.</p>
+<p>This implementation of <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> allows building
+the loss object from a configuration file.</p>
+<p>Constructor for ClassyLoss.</p>
+<dl class="method">
+<dt id="classy_vision.losses.ClassyLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">output</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.ClassyLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the loss for the provided sample.</p>
+<p>Refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for more details.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">LabelSmoothingCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param">ignore_index</em>, <em class="sig-param">reduction</em>, <em class="sig-param">smoothing_param</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intializer for the label smoothed cross entropy loss.
+This decreases gap between output scores and encourages generalization.
+Targets provided to forward can be one-hot vectors (NxC) or class indices(Nx1)</p>
+<p>Config params:
+‘weight’: weight of sample (not yet implemented),
+‘ignore_index’: sample should be ignored for loss (optional),
+‘smoothing_param’: value to be added to each target entry</p>
+<dl class="method">
+<dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss.compute_valid_targets">
+<code class="sig-name descname">compute_valid_targets</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">classes</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss.compute_valid_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes one-hot or index target vectors and computes valid one-hot
+target vectors, based on ignore index value</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">output</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the loss for the provided sample.</p>
+<p>Refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for more details.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss.smooth_targets">
+<code class="sig-name descname">smooth_targets</code><span class="sig-paren">(</span><em class="sig-param">valid_targets</em>, <em class="sig-param">classes</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss.smooth_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes valid (No ignore values present) one-hot target vectors
+and computes smoothed target vectors (normalized) according to the loss’s
+smoothing parameter</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.losses.MultiOutputSumLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">MultiOutputSumLoss</code><span class="sig-paren">(</span><em class="sig-param">loss</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.MultiOutputSumLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the provided loss to the list of outputs (or single output) and sums
+up the losses.</p>
+<p>Constructor for ClassyLoss.</p>
+<dl class="method">
+<dt id="classy_vision.losses.MultiOutputSumLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">output</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.MultiOutputSumLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the loss for the provided sample.</p>
+<p>Refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for more details.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.losses.SoftTargetCrossEntropyLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">SoftTargetCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param">ignore_index</em>, <em class="sig-param">reduction</em>, <em class="sig-param">normalize_targets</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intializer for the soft target cross-entropy loss loss.
+This allows the targets for the cross entropy loss to be multilabel</p>
+<p>Config params:
+‘weight’: weight of sample (not yet implemented),
+‘ignore_index’: sample should be ignored for loss (optional),
+‘reduction’: specifies reduction to apply to the output (optional),</p>
+<dl class="method">
+<dt id="classy_vision.losses.SoftTargetCrossEntropyLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">output</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>for N examples and C classes
+- output: N x C these are raw outputs (without softmax/sigmoid)
+- target: N x C corresponding targets</p>
+<p>Target elements set to ignore_index contribute 0 loss.</p>
+<p>Samples where all entries are ignore_index do not contribute to the loss
+reduction.</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.losses.SumArbitraryLoss">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">SumArbitraryLoss</code><span class="sig-paren">(</span><em class="sig-param">losses</em>, <em class="sig-param">weights=None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SumArbitraryLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sums a collection of (weighted) torch.nn losses.</p>
+<p>NOTE: this applies all the losses to the same output and does not support
+taking a list of outputs as input.</p>
+<p>Constructor for ClassyLoss.</p>
+<dl class="method">
+<dt id="classy_vision.losses.SumArbitraryLoss.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">prediction</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SumArbitraryLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the loss for the provided sample.</p>
+<p>Refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for more details.</p>
+</dd></dl>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.losses.build_loss">
+<code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">build_loss</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a ClassyLoss from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine what
+model class to instantiate. For instance, a config <cite>{“name”: “my_loss”,
+“foo”: “bar”}</cite> will find a class that was registered as “my_loss”
+(see <a class="reference internal" href="#classy_vision.losses.register_loss" title="classy_vision.losses.register_loss"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_loss()</span></code></a>) and call .from_config on it.</p>
+<p>In addition to losses registered with <a class="reference internal" href="#classy_vision.losses.register_loss" title="classy_vision.losses.register_loss"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_loss()</span></code></a>, we also
+support instantiating losses available in the <cite>torch.nn.modules.loss</cite>
+module. Any keys in the config will get expanded to parameters of the loss
+constructor. For instance, the following call will instantiate a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.CrossEntropyLoss</span></code>:</p>
+<blockquote>
+<div><p>build_loss({“name”: “CrossEntropyLoss”, “reduction”: “sum”})</p>
+</div></blockquote>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.losses.register_loss">
+<code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">register_loss</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.register_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a ClassyLoss subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of
+ClassyLoss from a configuration file, even if the class itself is not
+part of the Classy Vision framework. To use it, apply this decorator to a
+ClassyLoss subclass, like this:</p>
+<blockquote>
+<div><p>@register_loss(“my_loss”)
+class MyLoss(ClassyLoss):</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</div></blockquote>
+<p>To instantiate a loss from a configuration file, see
+<a class="reference internal" href="#classy_vision.losses.build_loss" title="classy_vision.losses.build_loss"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_loss()</span></code></a>.</p>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<div aria-label="main navigation" class="sphinxsidebar" role="navigation">
+<div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+<li><a href="index.html">Documentation overview</a><ul>
+<li>Previous: <a href="hooks.html" title="previous chapter">Hooks</a></li>
+<li>Next: <a href="meters.html" title="next chapter">Meters</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="searchbox" role="search" style="display: none">
+<h3 id="searchlabel">Quick search</h3>
+<div class="searchformwrapper">
+<form action="search.html" class="search" method="get">
+<input aria-labelledby="searchlabel" name="q" type="text"/>
+<input type="submit" value="Go"/>
+</form>
+</div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+</div>
+</div>
+<div class="clearer"></div>
+</div></div>

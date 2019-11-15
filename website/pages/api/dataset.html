@@ -1,0 +1,514 @@
+
+<script type="text/javascript" id="documentation_options" data-url_root="./"
+  src="/js/documentation_options.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/doctools.js"></script>
+<script type="text/javascript" src="/js/language_data.js"></script>
+<script type="text/javascript" src="/js/searchtools.js"></script>
+<div class="sphinx"><div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<div class="section" id="module-classy_vision.dataset">
+<span id="dataset"></span><h1>Dataset<a class="headerlink" href="#module-classy_vision.dataset" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="classy_vision.dataset.ClassyDataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">ClassyDataset</code><span class="sig-paren">(</span><em class="sig-param">dataset: Sequence, split: Optional[str], batchsize_per_replica: int, shuffle: bool, transform: Union[classy_vision.dataset.transforms.classy_transform.ClassyTransform, Callable, None], num_samples: Optional[int]</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a dataset abstraction.</p>
+<p>This class wraps a <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.Dataset</span></code></a> via the <cite>dataset</cite> attribute
+and configures the dataloaders needed to access the datasets.
+Transforms which need to be applied to the data should be specified in this class.
+ClassyDataset can be used to instantiate datasets from a configuration file as well.</p>
+<p>Constructor for a ClassyDataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> – Split of dataset to use (“train”, “test”)</p></li>
+<li><p><strong>batchsize_per_replica</strong> – Positive integer indicating batch size for each
+replica</p></li>
+<li><p><strong>shuffle</strong> – Whether we should shuffle between epochs</p></li>
+<li><p><strong>transform</strong> – Transform to be applied to each sample</p></li>
+<li><p><strong>num_samples</strong> – When set, this restricts the number of samples provided by
+the dataset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyDataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.dataset.classy_dataset.ClassyDataset<a class="headerlink" href="#classy_vision.dataset.ClassyDataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a ClassyDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ClassyDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyDataset.get_batchsize_per_replica">
+<code class="sig-name descname">get_batchsize_per_replica</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyDataset.get_batchsize_per_replica" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the batch size per replica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The batch size for each replica.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyDataset.get_global_batchsize">
+<code class="sig-name descname">get_global_batchsize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyDataset.get_global_batchsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the global batch size, combined over all the replicas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The overall batch size of the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyDataset.iterator">
+<code class="sig-name descname">iterator</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyDataset.iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterable which can be used to iterate over the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shuffle_seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – Seed for the shuffle</p></li>
+<li><p><strong>current_phase_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – The epoch being fetched. Needed so that
+each epoch has a different shuffle order</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterable over the data</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyDataset.parse_config">
+<em class="property">classmethod </em><code class="sig-name descname">parse_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyDataset.parse_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function parses out common config options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – <p>A dict with the following string keys:
+batchsize_per_replica (int): Must be a positive int, batch size for each</p>
+<blockquote>
+<div><p>replica</p>
+</div></blockquote>
+<p>use_shuffle (bool): Whether to enable shuffling for the dataset
+num_samples (int, optional): When set, restricts the number of samples</p>
+<blockquote>
+<div><p>in a dataset</p>
+</div></blockquote>
+<p>transforms: list of tranform configurations to be applied in order</p>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>transform_config: Config for the dataset transform. Can be passed to</dt><dd><p><code class="xref py py-func docutils literal notranslate"><span class="pre">build_transform()</span></code></p>
+</dd>
+</dl>
+<p>batchsize_per_replica: Batch size per replica
+shuffle: Whether we should shuffle between epochs
+num_samples: When set, restricts the number of samples in a dataset</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A tuple containing the following variables</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.ClassyVideoDataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">ClassyVideoDataset</code><span class="sig-paren">(</span><em class="sig-param">dataset</em>, <em class="sig-param">split</em>, <em class="sig-param">batchsize_per_replica</em>, <em class="sig-param">shuffle</em>, <em class="sig-param">transform</em>, <em class="sig-param">num_samples</em>, <em class="sig-param">clips_per_video</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyVideoDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface specifying what a Classy Vision video dataset can be expected to provide.</p>
+<p>Constructor for a ClassyDataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> – Split of dataset to use (“train”, “test”)</p></li>
+<li><p><strong>batchsize_per_replica</strong> – Positive integer indicating batch size for each
+replica</p></li>
+<li><p><strong>shuffle</strong> – Whether we should shuffle between epochs</p></li>
+<li><p><strong>transform</strong> – Transform to be applied to each sample</p></li>
+<li><p><strong>num_samples</strong> – When set, this restricts the number of samples provided by
+the dataset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyVideoDataset.iterator">
+<code class="sig-name descname">iterator</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyVideoDataset.iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterable which can be used to iterate over the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shuffle_seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – Seed for the shuffle</p></li>
+<li><p><strong>current_phase_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – The epoch being fetched. Needed so that
+each epoch has a different shuffle order</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterable over the data</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.dataset.ClassyVideoDataset.parse_config">
+<em class="property">classmethod </em><code class="sig-name descname">parse_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.ClassyVideoDataset.parse_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function parses out common config options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – <p>A dict with the following string keys:
+batchsize_per_replica (int): Must be a positive int, batch size for each</p>
+<blockquote>
+<div><p>replica</p>
+</div></blockquote>
+<p>use_shuffle (bool): Whether to enable shuffling for the dataset
+num_samples (int, optional): When set, restricts the number of samples</p>
+<blockquote>
+<div><p>in a dataset</p>
+</div></blockquote>
+<p>transforms: list of tranform configurations to be applied in order</p>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>transform_config: Config for the dataset transform. Can be passed to</dt><dd><p><code class="xref py py-func docutils literal notranslate"><span class="pre">build_transform()</span></code></p>
+</dd>
+</dl>
+<p>batchsize_per_replica: Batch size per replica
+shuffle: Whether we should shuffle between epochs
+num_samples: When set, restricts the number of samples in a dataset</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A tuple containing the following variables</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.HMDB51Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">HMDB51Dataset</code><span class="sig-paren">(</span><em class="sig-param">split</em>, <em class="sig-param">batchsize_per_replica</em>, <em class="sig-param">shuffle</em>, <em class="sig-param">transform</em>, <em class="sig-param">num_samples</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">video_width</em>, <em class="sig-param">video_height</em>, <em class="sig-param">video_min_dimension</em>, <em class="sig-param">audio_samples</em>, <em class="sig-param">step_between_clips</em>, <em class="sig-param">frame_rate</em>, <em class="sig-param">clips_per_video</em>, <em class="sig-param">video_dir</em>, <em class="sig-param">splits_dir</em>, <em class="sig-param">fold</em>, <em class="sig-param">metadata_filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.HMDB51Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>HMDB51 is an action recognition video dataset, and it has 51 classes.
+&lt;<a class="reference external" href="http://serre-lab.clps.brown.edu/resource/hmdb-a-large-human-motion-database/">http://serre-lab.clps.brown.edu/resource/hmdb-a-large-human-motion-database/</a>&gt;</p>
+<p>This dataset consider every video as a collection of video clips of fixed size,
+specified by <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code>, where the step in frames between each clip
+is given by <code class="docutils literal notranslate"><span class="pre">step_between_clips</span></code>. It uses clip sampler to sample clips
+from each video. For training set, a random clip sampler is used to
+sample a small number of clips (e.g. 1) from each video
+For testing set, a uniform clip sampler is used to evenly sample a large
+number of clips (e.g. 10) from the video.</p>
+<p>To give an example, for 2 videos with 10 and 15 frames respectively,
+if <code class="docutils literal notranslate"><span class="pre">frames_per_clip=5</span></code> and <code class="docutils literal notranslate"><span class="pre">step_between_clips=5</span></code>, the dataset size
+will be (2 + 3) = 5, where the first two elements will come from video 1,
+and the next three elements from video 2. Note that we drop clips which do
+not have exactly <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code> elements, so not all frames in a video
+might be present.</p>
+<p>It is built on top of HMDB51 dataset class in TorchVision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – dataset split which can be either “train” or “test”</p></li>
+<li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, shuffle the dataset</p></li>
+<li><p><strong>transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – a dict where transforms video and audio data</p></li>
+<li><p><strong>num_samples</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – if not None, it will subsample dataset</p></li>
+<li><p><strong>frames_per_clip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the No. of frames in a video clip</p></li>
+<li><p><strong>video_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video width. If 0, keep original width</p></li>
+<li><p><strong>video_height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video height. If 0, keep original height</p></li>
+<li><p><strong>video_min_dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescale video so that min(height, width) =
+video_min_dimension. If 0, keep original video resolution. Note
+only one of (video_width, video_height) and (video_min_dimension)
+can be set</p></li>
+<li><p><strong>audio_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – desired audio sample rate. If 0, keep original
+audio sample rate.</p></li>
+<li><p><strong>step_between_clips</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of frames between each clip.</p></li>
+<li><p><strong>frame_rate</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – desired video frame rate. If None, keep
+orignal video frame rate.</p></li>
+<li><p><strong>clips_per_video</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of clips to sample from each video</p></li>
+<li><p><strong>video_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to video folder</p></li>
+<li><p><strong>splits_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to dataset splitting file folder</p></li>
+<li><p><strong>fold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – HMDB51 dataset has 3 folds. Valid values are 1, 2 and 3.</p></li>
+<li><p><strong>metadata_filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to the dataset meta data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.HMDB51Dataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.HMDB51Dataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a ClassyDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ClassyDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.Kinetics400Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">Kinetics400Dataset</code><span class="sig-paren">(</span><em class="sig-param">split</em>, <em class="sig-param">batchsize_per_replica</em>, <em class="sig-param">shuffle</em>, <em class="sig-param">transform</em>, <em class="sig-param">num_samples</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">video_width</em>, <em class="sig-param">video_height</em>, <em class="sig-param">video_min_dimension</em>, <em class="sig-param">audio_samples</em>, <em class="sig-param">audio_channels</em>, <em class="sig-param">step_between_clips</em>, <em class="sig-param">frame_rate</em>, <em class="sig-param">clips_per_video</em>, <em class="sig-param">video_dir</em>, <em class="sig-param">extensions</em>, <em class="sig-param">metadata_filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.Kinetics400Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kinetics-400 is an action recognition video dataset, and it has 400 classes.
+&lt;<a class="reference external" href="https://deepmind.com/research/open-source/open-source-datasets/kinetics/">https://deepmind.com/research/open-source/open-source-datasets/kinetics/</a>&gt;
+It is originally published in (<a class="reference external" href="https://arxiv.org/pdf/1705.06950.pdf">https://arxiv.org/pdf/1705.06950.pdf</a>).</p>
+<p>This dataset consider every video as a collection of video clips of fixed size,
+specified by <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code>, where the step in frames between each clip
+is given by <code class="docutils literal notranslate"><span class="pre">step_between_clips</span></code>. It uses clip sampler to sample clips
+from each video. For training set, a random clip sampler is used to
+sample a small number of clips (e.g. 1) from each video
+For testing set, a uniform clip sampler is used to evenly sample a large
+number of clips (e.g. 10) from the video.</p>
+<p>To give an example, for 2 videos with 10 and 15 frames respectively, if
+<code class="docutils literal notranslate"><span class="pre">frames_per_clip=5</span></code> and <code class="docutils literal notranslate"><span class="pre">step_between_clips=5</span></code>, the dataset size
+will be (2 + 3) = 5, where the first two elements will come from video 1,
+and the next three elements from video 2. Note that we drop clips which do
+not have exactly <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code> elements, so not all frames in a video
+might be present.</p>
+<p>We assume videos are already trimmed to 10-second clip, and are stored in a
+folder.</p>
+<p>It is built on top of Kinetics400 dataset class in TorchVision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – dataset split which can be either “train” or “test”</p></li>
+<li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, shuffle the dataset</p></li>
+<li><p><strong>transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – a dict where transforms video and audio data</p></li>
+<li><p><strong>num_samples</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – if not None, it will subsample dataset</p></li>
+<li><p><strong>frames_per_clip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the No. of frames in a video clip</p></li>
+<li><p><strong>video_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video width. If 0, keep original width</p></li>
+<li><p><strong>video_height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video height. If 0, keep original height</p></li>
+<li><p><strong>video_min_dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescale video so that min(height, width) =
+video_min_dimension. If 0, keep original video resolution. Note
+only one of (video_width, video_height) and (video_min_dimension)
+can be set</p></li>
+<li><p><strong>audio_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – desired audio sample rate. If 0, keep original
+audio sample rate.</p></li>
+<li><p><strong>step_between_clips</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of frames between each clip.</p></li>
+<li><p><strong>frame_rate</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – desired video frame rate. If None, keep
+orignal video frame rate.</p></li>
+<li><p><strong>clips_per_video</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of clips to sample from each video</p></li>
+<li><p><strong>video_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to video folder</p></li>
+<li><p><strong>metadata_filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to the dataset meta data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.Kinetics400Dataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.Kinetics400Dataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a ClassyDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ClassyDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.SyntheticImageDataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">SyntheticImageDataset</code><span class="sig-paren">(</span><em class="sig-param">batchsize_per_replica: int, shuffle: bool, transform: Optional[Callable], num_samples: int, crop_size: int, class_ratio: float, seed: int, split: Optional[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.SyntheticImageDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classy Dataset which produces random synthetic images with binary targets.</p>
+<p>The underlying dataset sets targets based on the image channel, so users can
+validate their setup by checking if they can get 100% accuracy on this dataset.
+Useful for testing since the dataset is much faster to initialize and fetch samples
+from, compared to real world datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batchsize_per_replica</strong> – Positive integer indicating batch size for each
+replica</p></li>
+<li><p><strong>shuffle</strong> – Whether we should shuffle between epochs</p></li>
+<li><p><strong>transform</strong> – Transform to be applied to each sample</p></li>
+<li><p><strong>num_samples</strong> – Number of samples to return</p></li>
+<li><p><strong>crop_size</strong> – Image size, used for both height and width</p></li>
+<li><p><strong>class_ratio</strong> – Ratio of the distribution of target classes</p></li>
+<li><p><strong>seed</strong> – Seed used for image generation. Use the same seed to generate the same
+set of samples.</p></li>
+<li><p><strong>split</strong> – Split of dataset to use</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.SyntheticImageDataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.dataset.classy_synthetic_image.SyntheticImageDataset<a class="headerlink" href="#classy_vision.dataset.SyntheticImageDataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a SyntheticImageDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset. Should contain the following keys:
+batchsize_per_replica: See <a href="#id1"><span class="problematic" id="id2">:method:`__init__`</span></a>
+shuffle: See <a href="#id3"><span class="problematic" id="id4">:method:`__init__`</span></a>
+transform: The transform configuration. See <a href="#id5"><span class="problematic" id="id6">:method:`build_transform`</span></a>
+num_samples: See <a href="#id7"><span class="problematic" id="id8">:method:`__init__`</span></a>
+crop_size: See <a href="#id9"><span class="problematic" id="id10">:method:`__init__`</span></a>
+class_ratio: See <a href="#id11"><span class="problematic" id="id12">:method:`__init__`</span></a>
+seed: See <a href="#id13"><span class="problematic" id="id14">:method:`__init__`</span></a>
+split: See <a href="#id15"><span class="problematic" id="id16">:method:`__init__`</span></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A SyntheticImageDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.SyntheticVideoDataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">SyntheticVideoDataset</code><span class="sig-paren">(</span><em class="sig-param">num_classes: int, split: str, batchsize_per_replica: int, shuffle: bool, transform: Optional[Callable], num_samples: int, frames_per_clip: int, video_width: int, video_height: int, audio_samples: int, clips_per_video: int</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.SyntheticVideoDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classy Dataset which produces random synthetic video clips.</p>
+<p>Useful for testing since the dataset is much faster to initialize and fetch samples
+from, compared to real world datasets.</p>
+<dl class="simple">
+<dt>Note: Unlike SyntheticImageDataset, this dataset generates targets randomly,</dt><dd><p>independent of the video clips.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> – Number of classes in the generated targets.</p></li>
+<li><p><strong>split</strong> – Split of dataset to use</p></li>
+<li><p><strong>batchsize_per_replica</strong> – Positive integer indicating batch size for each
+replica</p></li>
+<li><p><strong>shuffle</strong> – Whether we should shuffle between epochs</p></li>
+<li><p><strong>transform</strong> – Transform to be applied to each sample</p></li>
+<li><p><strong>num_samples</strong> – Number of samples to return</p></li>
+<li><p><strong>frames_per_clip</strong> – Number of frames in a video clip</p></li>
+<li><p><strong>video_width</strong> – Width of the video clip</p></li>
+<li><p><strong>video_height</strong> – Height of the video clip</p></li>
+<li><p><strong>audio_samples</strong> – Audio sample rate</p></li>
+<li><p><strong>clips_per_video</strong> – Number of clips per video</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.SyntheticVideoDataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.dataset.classy_synthetic_video.SyntheticVideoDataset<a class="headerlink" href="#classy_vision.dataset.SyntheticVideoDataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a SyntheticVideoDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset. Should contain the following keys:
+num_classes: See <a href="#id17"><span class="problematic" id="id18">:method:`__init__`</span></a>
+split: See <a href="#id19"><span class="problematic" id="id20">:method:`__init__`</span></a>
+batchsize_per_replica: See <a href="#id21"><span class="problematic" id="id22">:method:`__init__`</span></a>
+shuffle: See <a href="#id23"><span class="problematic" id="id24">:method:`__init__`</span></a>
+transform: The transform configuration. See <a href="#id25"><span class="problematic" id="id26">:method:`build_transform`</span></a>
+num_samples: See <a href="#id27"><span class="problematic" id="id28">:method:`__init__`</span></a>
+frames_per_clip: See <a href="#id29"><span class="problematic" id="id30">:method:`__init__`</span></a>
+video_width: See <a href="#id31"><span class="problematic" id="id32">:method:`__init__`</span></a>
+video_height: See <a href="#id33"><span class="problematic" id="id34">:method:`__init__`</span></a>
+audio_samples: See <a href="#id35"><span class="problematic" id="id36">:method:`__init__`</span></a>
+clips_per_video: See <a href="#id37"><span class="problematic" id="id38">:method:`__init__`</span></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A SyntheticVideoDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.dataset.UCF101Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">UCF101Dataset</code><span class="sig-paren">(</span><em class="sig-param">split</em>, <em class="sig-param">batchsize_per_replica</em>, <em class="sig-param">shuffle</em>, <em class="sig-param">transform</em>, <em class="sig-param">num_samples</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">video_width</em>, <em class="sig-param">video_height</em>, <em class="sig-param">video_min_dimension</em>, <em class="sig-param">audio_samples</em>, <em class="sig-param">step_between_clips</em>, <em class="sig-param">frame_rate</em>, <em class="sig-param">clips_per_video</em>, <em class="sig-param">video_dir</em>, <em class="sig-param">splits_dir</em>, <em class="sig-param">fold</em>, <em class="sig-param">metadata_filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.UCF101Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>UCF101 is an action recognition video dataset, and it has 101 classes.
+&lt;<a class="reference external" href="https://www.crcv.ucf.edu/data/UCF101.php">https://www.crcv.ucf.edu/data/UCF101.php</a>&gt;</p>
+<p>This dataset consider every video as a collection of video clips of fixed size,
+specified by <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code>, where the step in frames between each clip
+is given by <code class="docutils literal notranslate"><span class="pre">step_between_clips</span></code>. It uses clip sampler to sample clips
+from each video. For training set, a random clip sampler is used to
+sample a small number of clips (e.g. 1) from each video
+For testing set, a uniform clip sampler is used to evenly sample a large
+number of clips (e.g. 10) from the video.</p>
+<p>To give an example, for 2 videos with 10 and 15 frames respectively,
+if <code class="docutils literal notranslate"><span class="pre">frames_per_clip=5``and</span> <span class="pre">``step_between_clips=5</span></code>,
+the dataset size will be (2 + 3) = 5, where the first two elements will come
+from video 1, and the next three elements from video 2. Note that we drop
+clips which do not have exactly <code class="docutils literal notranslate"><span class="pre">frames_per_clip</span></code> elements, so not all
+frames in a video might be present.</p>
+<p>It is built on top of UCF101 dataset class in TorchVision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – dataset split which can be either “train” or “test”</p></li>
+<li><p><strong>shuffle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, shuffle the dataset</p></li>
+<li><p><strong>transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – a dict where transforms video and audio data</p></li>
+<li><p><strong>num_samples</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – if not None, it will subsample dataset</p></li>
+<li><p><strong>frames_per_clip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the No. of frames in a video clip</p></li>
+<li><p><strong>video_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video width. If 0, keep original width</p></li>
+<li><p><strong>video_height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescaled video height. If 0, keep original height</p></li>
+<li><p><strong>video_min_dimension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – rescale video so that min(height, width) =
+video_min_dimension. If 0, keep original video resolution. Note
+only one of (video_width, video_height) and (video_min_dimension)
+can be set</p></li>
+<li><p><strong>audio_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – desired audio sample rate. If 0, keep original
+audio sample rate.</p></li>
+<li><p><strong>step_between_clips</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of frames between each clip.</p></li>
+<li><p><strong>frame_rate</strong> (<em>optional</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>)</em>) – desired video frame rate. If None, keep
+orignal video frame rate.</p></li>
+<li><p><strong>clips_per_video</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of clips to sample from each video</p></li>
+<li><p><strong>video_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to video folder</p></li>
+<li><p><strong>splits_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to dataset splitting file folder</p></li>
+<li><p><strong>fold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – UCF101 dataset has 3 folds. Valid values are 1, 2 and 3.</p></li>
+<li><p><strong>metadata_filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to the dataset meta data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.dataset.UCF101Dataset.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.UCF101Dataset.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a ClassyDataset from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ClassyDataset instance</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<div aria-label="main navigation" class="sphinxsidebar" role="navigation">
+<div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+<li><a href="index.html">Documentation overview</a><ul>
+<li>Previous: <a href="index.html" title="previous chapter">Welcome to Classy Vision’s documentation!</a></li>
+<li>Next: <a href="heads.html" title="next chapter">Heads</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="searchbox" role="search" style="display: none">
+<h3 id="searchlabel">Quick search</h3>
+<div class="searchformwrapper">
+<form action="search.html" class="search" method="get">
+<input aria-labelledby="searchlabel" name="q" type="text"/>
+<input type="submit" value="Go"/>
+</form>
+</div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+</div>
+</div>
+<div class="clearer"></div>
+</div></div>

@@ -38,7 +38,7 @@ class ResNeXt3DBase(ClassyModel):
         ResNeXt3DBase implements everything in ResNeXt3D model except the
         construction of 4 stages. See more details in ResNeXt3D.
         """
-        super(ResNeXt3DBase, self).__init__()
+        super(ResNeXt3DBase, self).__init__(num_classes=None)
 
         self._input_key = input_key
         self.input_planes = input_planes
@@ -272,7 +272,7 @@ class ResNeXt3DBase(ClassyModel):
 
     @property
     def output_shape(self):
-        return (1, None)
+        return (1, self._num_classes)
 
     @property
     def model_depth(self):

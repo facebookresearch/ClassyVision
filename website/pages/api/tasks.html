@@ -1,0 +1,317 @@
+
+<script type="text/javascript" id="documentation_options" data-url_root="./"
+  src="/js/documentation_options.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/doctools.js"></script>
+<script type="text/javascript" src="/js/language_data.js"></script>
+<script type="text/javascript" src="/js/searchtools.js"></script>
+<div class="sphinx"><div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<div class="section" id="module-classy_vision.tasks">
+<span id="tasks"></span><h1>Tasks<a class="headerlink" href="#module-classy_vision.tasks" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="classy_vision.tasks.ClassyTask">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.tasks.</code><code class="sig-name descname">ClassyTask</code><a class="headerlink" href="#classy_vision.tasks.ClassyTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>An abstract base class for a training task.</p>
+<p>A ClassyTask encapsulates all the components and steps needed
+to train using a <code class="xref py py-func docutils literal notranslate"><span class="pre">ClassyTrainer()</span></code>.</p>
+<p>Constructs a ClassyTask.</p>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.advance_phase">
+<em class="property">abstract </em><code class="sig-name descname">advance_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.ClassyTask.advance_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance the task a phase.</p>
+<p>Called when one phase of reading from <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyDataset</span></code> is over.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.done_training">
+<em class="property">abstract </em><code class="sig-name descname">done_training</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → bool<a class="headerlink" href="#classy_vision.tasks.ClassyTask.done_training" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells if we are done training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A boolean telling if training is over.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.get_classy_state">
+<em class="property">abstract </em><code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param">deep_copy: bool = False</em><span class="sig-paren">)</span> → Dict[str, Any]<a class="headerlink" href="#classy_vision.tasks.ClassyTask.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the state of the ClassyTask.</p>
+<p>The returned state is used for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>deep_copy</strong> – If True, creates a deep copy of the state dict. Otherwise, the
+returned dict’s state will be tied to the object’s.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A state dictionary containing the state of the task.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.init_distributed_data_parallel_model">
+<em class="property">abstract </em><code class="sig-name descname">init_distributed_data_parallel_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.ClassyTask.init_distributed_data_parallel_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.parallel.distributed.DistributedDataParallel</span></code>.</p>
+<p>Needed for distributed training. This is where a model should be wrapped by DDP.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.prepare">
+<em class="property">abstract </em><code class="sig-name descname">prepare</code><span class="sig-paren">(</span><em class="sig-param">num_dataloader_workers=0</em>, <em class="sig-param">pin_memory=False</em>, <em class="sig-param">use_gpu=False</em>, <em class="sig-param">dataloader_mp_context=None</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.ClassyTask.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the task for training.</p>
+<p>Will be called by the <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTrainer</span></code> to prepare the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_dataloader_workers</strong> – Number of workers to create for the dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – Whether the dataloaders should copy the Tensors into CUDA
+pinned memory (default False)</p></li>
+<li><p><strong>use_gpu</strong> – True if training on GPUs, False otherwise</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.run_hooks">
+<code class="sig-name descname">run_hooks</code><span class="sig-paren">(</span><em class="sig-param">local_variables: Dict[str, Any], hook_function: str</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.ClassyTask.run_hooks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that runs a hook function for all the :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>ClassyHook`s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_variables</strong> – Local variables created in <a href="#id3"><span class="problematic" id="id4">:method:`train_step`</span></a></p></li>
+<li><p><strong>hook_function</strong> – One of the hook functions in the <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHookFunctions</span></code>
+enum.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.set_classy_state">
+<em class="property">abstract </em><code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassyTask.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the ClassyTask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state_dict</strong> – The state dictionary. Must be the output of a call to
+<a href="#id5"><span class="problematic" id="id6">:method:`get_classy_state`</span></a>.</p>
+</dd>
+</dl>
+<p>This is used to load the state of the task from a checkpoint.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.train_step">
+<em class="property">abstract </em><code class="sig-name descname">train_step</code><span class="sig-paren">(</span><em class="sig-param">use_gpu</em>, <em class="sig-param">local_variables: Optional[Dict] = None</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.ClassyTask.train_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a train step.</p>
+<p>This corresponds to training over one batch of data from the dataloaders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_gpu</strong> – True if training on GPUs, False otherwise</p></li>
+<li><p><strong>local_variables</strong> – Local variables created in the function. Can be passed to
+custom :class:<a href="#id7"><span class="problematic" id="id8">`</span></a>ClassyHook`s.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassyTask.where">
+<em class="property">abstract property </em><code class="sig-name descname">where</code><a class="headerlink" href="#classy_vision.tasks.ClassyTask.where" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells how far along (where) we are during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A float in [0, 1) which tells the training progress.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.tasks.FineTuningTask">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.tasks.</code><code class="sig-name descname">FineTuningTask</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.FineTuningTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ClassyTask.</p>
+<dl class="method">
+<dt id="classy_vision.tasks.FineTuningTask.prepare">
+<code class="sig-name descname">prepare</code><span class="sig-paren">(</span><em class="sig-param">num_dataloader_workers: int = 0</em>, <em class="sig-param">pin_memory: bool = False</em>, <em class="sig-param">use_gpu: bool = False</em>, <em class="sig-param">dataloader_mp_context=None</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.tasks.FineTuningTask.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the task for training.</p>
+<p>Will be called by the <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTrainer</span></code> to prepare the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_dataloader_workers</strong> – Number of workers to create for the dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – Whether the dataloaders should copy the Tensors into CUDA
+pinned memory (default False)</p></li>
+<li><p><strong>use_gpu</strong> – True if training on GPUs, False otherwise</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.tasks.build_task">
+<code class="sig-prename descclassname">classy_vision.tasks.</code><code class="sig-name descname">build_task</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.build_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a ClassyTask from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine what
+task class to instantiate. For instance, a config <cite>{“name”: “my_task”,
+“foo”: “bar”}</cite> will find a class that was registered as “my_task”
+(see <a class="reference internal" href="#classy_vision.tasks.register_task" title="classy_vision.tasks.register_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_task()</span></code></a>) and call .from_config on it.</p>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.tasks.register_task">
+<code class="sig-prename descclassname">classy_vision.tasks.</code><code class="sig-name descname">register_task</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.register_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a ClassyTask subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of ClassyTask
+from a configuration file, even if the class itself is not part of the
+Classy Vision framework. To use it, apply this decorator to a ClassyTask
+subclass, like this:</p>
+<blockquote>
+<div><p>@register_task(‘my_task’)
+class MyTask(ClassyTask):</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</div></blockquote>
+<p>To instantiate a task from a configuration file, see <a class="reference internal" href="#classy_vision.tasks.build_task" title="classy_vision.tasks.build_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_task()</span></code></a>.</p>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.tasks.ClassificationTask">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.tasks.</code><code class="sig-name descname">ClassificationTask</code><a class="headerlink" href="#classy_vision.tasks.ClassificationTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ClassyTask.</p>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.advance_phase">
+<code class="sig-name descname">advance_phase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.advance_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance the task a phase.</p>
+<p>Called when one phase of reading from <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyDataset</span></code> is over.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.done_training">
+<code class="sig-name descname">done_training</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.done_training" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells if we are done training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A boolean telling if training is over.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.get_classy_state">
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param">deep_copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the state of the ClassyTask.</p>
+<p>The returned state is used for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>deep_copy</strong> – If True, creates a deep copy of the state dict. Otherwise, the
+returned dict’s state will be tied to the object’s.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A state dictionary containing the state of the task.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.get_total_training_phases">
+<code class="sig-name descname">get_total_training_phases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.get_total_training_phases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of “train” phases in the list of execution
+phases</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.init_distributed_data_parallel_model">
+<code class="sig-name descname">init_distributed_data_parallel_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.init_distributed_data_parallel_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.parallel.distributed.DistributedDataParallel</span></code>.</p>
+<p>Needed for distributed training. This is where a model should be wrapped by DDP.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.prepare">
+<code class="sig-name descname">prepare</code><span class="sig-paren">(</span><em class="sig-param">num_dataloader_workers=0</em>, <em class="sig-param">pin_memory=False</em>, <em class="sig-param">use_gpu=False</em>, <em class="sig-param">dataloader_mp_context=None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the task for training.</p>
+<p>Will be called by the <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTrainer</span></code> to prepare the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_dataloader_workers</strong> – Number of workers to create for the dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – Whether the dataloaders should copy the Tensors into CUDA
+pinned memory (default False)</p></li>
+<li><p><strong>use_gpu</strong> – True if training on GPUs, False otherwise</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.set_classy_state">
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the ClassyTask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state_dict</strong> – The state dictionary. Must be the output of a call to
+<a href="#id9"><span class="problematic" id="id10">:method:`get_classy_state`</span></a>.</p>
+</dd>
+</dl>
+<p>This is used to load the state of the task from a checkpoint.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.train_step">
+<code class="sig-name descname">train_step</code><span class="sig-paren">(</span><em class="sig-param">use_gpu</em>, <em class="sig-param">local_variables=None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.train_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a train step.</p>
+<p>This corresponds to training over one batch of data from the dataloaders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_gpu</strong> – True if training on GPUs, False otherwise</p></li>
+<li><p><strong>local_variables</strong> – Local variables created in the function. Can be passed to
+custom :class:<a href="#id11"><span class="problematic" id="id12">`</span></a>ClassyHook`s.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.where">
+<em class="property">property </em><code class="sig-name descname">where</code><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.where" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells how far along (where) we are during training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A float in [0, 1) which tells the training progress.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<div aria-label="main navigation" class="sphinxsidebar" role="navigation">
+<div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+<li><a href="index.html">Documentation overview</a><ul>
+<li>Previous: <a href="optim.html" title="previous chapter">Optimizers</a></li>
+<li>Next: <a href="trainer.html" title="next chapter">Trainer</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="searchbox" role="search" style="display: none">
+<h3 id="searchlabel">Quick search</h3>
+<div class="searchformwrapper">
+<form action="search.html" class="search" method="get">
+<input aria-labelledby="searchlabel" name="q" type="text"/>
+<input type="submit" value="Go"/>
+</form>
+</div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+</div>
+</div>
+<div class="clearer"></div>
+</div></div>

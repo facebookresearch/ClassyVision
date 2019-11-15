@@ -63,6 +63,7 @@ class TestClassyModelWrapper(unittest.TestCase):
         model_depth = 1
         classy_model = ClassyModelWrapper(
             model,
+            num_classes=num_classes,
             input_shape=input_shape,
             output_shape=output_shape,
             model_depth=model_depth,

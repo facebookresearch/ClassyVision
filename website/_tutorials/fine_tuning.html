@@ -1,0 +1,807 @@
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js">
+</script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js">
+</script>
+<div class="notebook">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Let-us-begin-by-pre-training-a-model-using-a-head-with-1000-classes">Let us begin by pre-training a model using a head with 1000 classes<a class="anchor-link" href="#Let-us-begin-by-pre-training-a-model-using-a-head-with-1000-classes">¶</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We want to train for 4 epochs.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [6]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will be using synthetic train and test datasets for this example.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [7]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">SyntheticImageClassificationDataset</span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">SyntheticImageClassificationDataset</span><span class="o">.</span><span class="n">from_config</span><span class="p">({</span>
+    <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s2">"num_samples"</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="s2">"crop_size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">,</span>
+    <span class="s2">"class_ratio"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s2">"seed"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"use_shuffle"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"split"</span><span class="p">:</span> <span class="s2">"train"</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">SyntheticImageClassificationDataset</span><span class="o">.</span><span class="n">from_config</span><span class="p">({</span>
+    <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="s2">"num_samples"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="s2">"crop_size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">,</span>
+    <span class="s2">"class_ratio"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s2">"seed"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"use_shuffle"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"split"</span><span class="p">:</span> <span class="s2">"test"</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us create a ResNet 50 model now.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [8]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.models</span> <span class="k">import</span> <span class="n">ResNet</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ResNet</span><span class="o">.</span><span class="n">from_config</span><span class="p">({</span>
+    <span class="s2">"num_blocks"</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="s2">"small_input"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"zero_init_bn_residuals"</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, we will create a head with 1000 classes.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [9]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.heads</span> <span class="k">import</span> <span class="n">FullyConnectedHead</span>
+
+<span class="n">head</span> <span class="o">=</span> <span class="n">FullyConnectedHead</span><span class="p">(</span><span class="n">unique_id</span><span class="o">=</span><span class="s2">"default_head"</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">in_plane</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us attach the head to the final block of the model.</p>
+<p>For ResNet 50, we want to attach to the <code>3</code><sup>rd</sup> block in the <code>4</code><sup>th</sup> layer (based on <code>[3, 4, 6, 3]</code>). The blocks use 0 indexing, so this maps to <code>"block3-2"</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [10]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">set_heads</span><span class="p">({</span><span class="s2">"block3-2"</span><span class="p">:</span> <span class="p">{</span><span class="n">head</span><span class="o">.</span><span class="n">unique_id</span><span class="p">:</span> <span class="n">head</span><span class="p">}})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can use a cross entropy loss from Pytorch.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [11]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">torch.nn.modules.loss</span> <span class="k">import</span> <span class="n">CrossEntropyLoss</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">CrossEntropyLoss</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For the optimizer, we will be using SGD.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [12]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.optim</span> <span class="k">import</span> <span class="n">build_optimizer</span>
+
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">build_optimizer</span><span class="p">({</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"sgd"</span><span class="p">,</span>
+    <span class="s2">"lr"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"step"</span><span class="p">,</span> <span class="s2">"values"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]},</span>
+    <span class="s2">"weight_decay"</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s2">"momentum"</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+    <span class="s2">"num_epochs"</span><span class="p">:</span> <span class="n">num_epochs</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We want to track the top-1 and top-5 accuracies of the model.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [13]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.meters</span> <span class="k">import</span> <span class="n">AccuracyMeter</span>
+
+<span class="n">meters</span> <span class="o">=</span> <span class="p">[</span><span class="n">AccuracyMeter</span><span class="p">(</span><span class="n">topk</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's create a directory to save the checkpoints.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [14]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">pretrain_checkpoint_dir</span> <span class="o">=</span> <span class="n">f</span><span class="s2">"/tmp/checkpoint_{time.time()}"</span>
+<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">pretrain_checkpoint_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Add <code>ProgressBarHook</code> to monitor the progress, <code>LossLrMeterLoggingHook</code> to monitor the loss and <code>CheckpointHook</code> to save the checkpoints.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [15]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.hooks</span> <span class="k">import</span> <span class="n">CheckpointHook</span><span class="p">,</span> <span class="n">LossLrMeterLoggingHook</span><span class="p">,</span> <span class="n">ProgressBarHook</span>
+
+<span class="n">hooks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">ProgressBarHook</span><span class="p">(),</span>
+    <span class="n">LossLrMeterLoggingHook</span><span class="p">(),</span>
+    <span class="n">CheckpointHook</span><span class="p">(</span><span class="n">pretrain_checkpoint_dir</span><span class="p">,</span> <span class="n">input_args</span><span class="o">=</span><span class="p">{})</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We have all the components ready to setup our pre-training task which trains for 4 epochs.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [16]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="k">import</span> <span class="n">ClassificationTask</span>
+
+<span class="n">pretrain_task</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">ClassificationTask</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">set_num_epochs</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_meters</span><span class="p">(</span><span class="n">meters</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_hooks</span><span class="p">(</span><span class="n">hooks</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_dataset</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_dataset</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us train using a local trainer instance.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [17]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.trainer</span> <span class="k">import</span> <span class="n">LocalTrainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">LocalTrainer</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>I1031 123603.710 local_trainer.py:18] Using GPU, CUDA device index: 0
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, we can start training!</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [18]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">pretrain_task</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>I1031 123606.480 classification_task.py:425] Recreating data loader for new phase
+I1031 123738.429 classy_trainer.py:53] Syncing meters on phase end...#########|
+I1031 123738.430 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 123738.431 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 123738.432 loss_lr_meter_logging_hook.py:88] Rank: 0, train phase: 0, processed batches: 63
+train loss: 0.14879648647611105, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 0.968999981880188, 'top_5': 0.984000027179718}}
+I1031 123738.433 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 123739.342 classification_task.py:425] Recreating data loader for new phase
+I1031 123747.718 classy_trainer.py:53] Syncing meters on phase end...         |
+I1031 123747.719 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 123747.720 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 123747.721 loss_lr_meter_logging_hook.py:88] Rank: 0, test phase: 0, processed batches: 7
+test loss: 0.0, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 123747.722 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 123748.721 classification_task.py:425] Recreating data loader for new phase
+I1031 123911.751 classy_trainer.py:53] Syncing meters on phase end...#########|
+I1031 123911.752 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 123911.754 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 123911.755 loss_lr_meter_logging_hook.py:88] Rank: 0, train phase: 1, processed batches: 63
+train loss: 0.0, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 123911.755 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 123912.665 classification_task.py:425] Recreating data loader for new phase
+I1031 123920.143 classy_trainer.py:53] Syncing meters on phase end...         |
+I1031 123920.144 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 123920.145 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 123920.147 loss_lr_meter_logging_hook.py:88] Rank: 0, test phase: 1, processed batches: 7
+test loss: 0.0, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 123920.147 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 123921.002 classification_task.py:425] Recreating data loader for new phase
+I1031 124042.216 classy_trainer.py:53] Syncing meters on phase end...#########|
+I1031 124042.216 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124042.217 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124042.218 loss_lr_meter_logging_hook.py:88] Rank: 0, train phase: 2, processed batches: 63
+train loss: 0.0, LR rate: 0.01
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 124042.219 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 124043.124 classification_task.py:425] Recreating data loader for new phase
+I1031 124050.833 classy_trainer.py:53] Syncing meters on phase end...         |
+I1031 124050.834 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124050.835 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124050.836 loss_lr_meter_logging_hook.py:88] Rank: 0, test phase: 2, processed batches: 7
+test loss: 0.0, LR rate: 0.01
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 124050.837 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 124051.733 classification_task.py:425] Recreating data loader for new phase
+I1031 124211.692 classy_trainer.py:53] Syncing meters on phase end...#########|
+I1031 124211.692 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124211.694 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124211.695 loss_lr_meter_logging_hook.py:88] Rank: 0, train phase: 3, processed batches: 63
+train loss: 0.0, LR rate: 0.01
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 124211.695 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+I1031 124212.599 classification_task.py:425] Recreating data loader for new phase
+I1031 124219.856 classy_trainer.py:53] Syncing meters on phase end...         |
+I1031 124219.857 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124219.858 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124219.859 loss_lr_meter_logging_hook.py:88] Rank: 0, test phase: 3, processed batches: 7
+test loss: 0.0, LR rate: 0.01
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0, 'top_5': 1.0}}
+I1031 124219.860 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550558.022384'...
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Training is done! Let us now load the saved checkpoint, we will use this later for fine tuning.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [19]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.generic.util</span> <span class="k">import</span> <span class="n">load_checkpoint</span>
+
+<span class="n">pretrained_checkpoint</span> <span class="o">=</span> <span class="n">load_checkpoint</span><span class="p">(</span><span class="n">pretrain_checkpoint_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>I1031 124220.689 util.py:453] Attempting to load checkpoint from '/tmp/checkpoint_1572550558.022384'
+I1031 124220.872 util.py:471] Loaded checkpoint from /tmp/checkpoint_1572550558.022384/checkpoint.torch
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Now-we-will-fine-tune-a-model-using-a-head-with-2-classes">Now we will fine tune a model using a head with 2 classes<a class="anchor-link" href="#Now-we-will-fine-tune-a-model-using-a-head-with-2-classes">¶</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We only want to train our fine tuning task for 1 just epoch.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [20]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can re-use the same synthetic datasets as before.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us again create a ResNet 50 model.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [21]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.models</span> <span class="k">import</span> <span class="n">ResNet</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ResNet</span><span class="o">.</span><span class="n">from_config</span><span class="p">({</span>
+    <span class="s2">"num_blocks"</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="s2">"small_input"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">"zero_init_bn_residuals"</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For fine tuning, we will create a head with just 2 classes</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [22]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.heads</span> <span class="k">import</span> <span class="n">FullyConnectedHead</span>
+
+<span class="n">head</span> <span class="o">=</span> <span class="n">FullyConnectedHead</span><span class="p">(</span><span class="n">unique_id</span><span class="o">=</span><span class="s2">"default_head"</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">in_plane</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us attach the head to the final block of the model, like before.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [23]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">set_heads</span><span class="p">({</span><span class="s2">"block3-2"</span><span class="p">:</span> <span class="p">{</span><span class="n">head</span><span class="o">.</span><span class="n">unique_id</span><span class="p">:</span> <span class="n">head</span><span class="p">}})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For the optimizer, we will be using RMSProp this time.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [24]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.optim</span> <span class="k">import</span> <span class="n">build_optimizer</span>
+
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">build_optimizer</span><span class="p">({</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"rmsprop"</span><span class="p">,</span>
+    <span class="s2">"lr"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"step"</span><span class="p">,</span> <span class="s2">"values"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]},</span>
+    <span class="s2">"weight_decay"</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s2">"momentum"</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+    <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+    <span class="s2">"eps"</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+    <span class="s2">"num_epochs"</span><span class="p">:</span> <span class="n">num_epochs</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We want to track the top-1 accuracy of the model.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [27]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.meters</span> <span class="k">import</span> <span class="n">AccuracyMeter</span>
+
+<span class="n">meters</span> <span class="o">=</span> <span class="p">[</span><span class="n">AccuracyMeter</span><span class="p">(</span><span class="n">topk</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will create a new directory to save the checkpoints for our fine tuning run.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [28]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">fine_tuning_checkpoint_dir</span> <span class="o">=</span> <span class="n">f</span><span class="s2">"/tmp/checkpoint_{time.time()}"</span>
+<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">fine_tuning_checkpoint_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Hooks are also the same as before.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [29]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.hooks</span> <span class="k">import</span> <span class="n">CheckpointHook</span><span class="p">,</span> <span class="n">LossLrMeterLoggingHook</span><span class="p">,</span> <span class="n">ProgressBarHook</span>
+
+<span class="n">hooks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">ProgressBarHook</span><span class="p">(),</span>
+    <span class="n">LossLrMeterLoggingHook</span><span class="p">(),</span>
+    <span class="n">CheckpointHook</span><span class="p">(</span><span class="n">fine_tuning_checkpoint_dir</span><span class="p">,</span> <span class="n">input_args</span><span class="o">=</span><span class="p">{})</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can setup our fine tuning task.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [30]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="k">import</span> <span class="n">FineTuningTask</span>
+
+<span class="n">fine_tuning_task</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">FineTuningTask</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">set_num_epochs</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_meters</span><span class="p">(</span><span class="n">meters</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_hooks</span><span class="p">(</span><span class="n">hooks</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_dataset</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_dataset</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Since this is a fine tuning task, there are some other configurations which need to be done.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We don't want to re-train the trunk, so we will be freezing it. This is optional.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [31]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">fine_tuning_task</span><span class="o">.</span><span class="n">set_freeze_trunk</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[31]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;classy_vision.tasks.fine_tuning_task.FineTuningTask at 0x7f4df4feb850&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We want to start training the heads from scratch, so we will be resetting them. This is required in this example since the pre-trained heads are not compatible with the heads in fine tuning (they have different number of classes). Otherwise, this is also optional.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [32]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">fine_tuning_task</span><span class="o">.</span><span class="n">set_reset_heads</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[32]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;classy_vision.tasks.fine_tuning_task.FineTuningTask at 0x7f4df4feb850&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We need to give our task the pre-trained checkpoint, which it'll need to start pre-training on.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [33]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">fine_tuning_task</span><span class="o">.</span><span class="n">set_pretrained_checkpoint</span><span class="p">(</span><span class="n">pretrained_checkpoint</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[33]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;classy_vision.tasks.fine_tuning_task.FineTuningTask at 0x7f4df4feb850&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us fine tune!</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [34]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">fine_tuning_task</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>I1031 124223.451 util.py:493] Model state load successful
+I1031 124223.453 classification_task.py:425] Recreating data loader for new phase
+I1031 124338.734 classy_trainer.py:53] Syncing meters on phase end...#########|
+I1031 124338.735 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124338.736 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124338.737 loss_lr_meter_logging_hook.py:88] Rank: 0, train phase: 0, processed batches: 63
+train loss: 0.008974908836304194, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0}}
+I1031 124338.738 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550943.3209333'...
+I1031 124339.084 classification_task.py:425] Recreating data loader for new phase
+I1031 124346.480 classy_trainer.py:53] Syncing meters on phase end...         |
+I1031 124346.481 classy_trainer.py:56] ...meters synced
+100% |########################################################################|
+I1031 124346.482 loss_lr_meter_logging_hook.py:60] End of phase metric values:
+I1031 124346.483 loss_lr_meter_logging_hook.py:88] Rank: 0, test phase: 0, processed batches: 7
+test loss: 0.0, LR rate: 0.1
+Meters:
+{'name': 'accuracy', 'value': {'top_1': 1.0}}
+I1031 124346.484 checkpoint_hook.py:69] Saving checkpoint to '/tmp/checkpoint_1572550943.3209333'...
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

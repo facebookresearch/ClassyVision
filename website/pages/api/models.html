@@ -1,0 +1,552 @@
+
+<script type="text/javascript" id="documentation_options" data-url_root="./"
+  src="/js/documentation_options.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/doctools.js"></script>
+<script type="text/javascript" src="/js/language_data.js"></script>
+<script type="text/javascript" src="/js/searchtools.js"></script>
+<div class="sphinx"><div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<div class="section" id="module-classy_vision.models">
+<span id="models"></span><h1>Models<a class="headerlink" href="#module-classy_vision.models" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="classy_vision.models.build_model">
+<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.build_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a ClassyModel from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine what
+model class to instantiate. For instance, a config <cite>{“name”: “my_model”,
+“foo”: “bar”}</cite> will find a class that was registered as “my_model”
+(see <a class="reference internal" href="#classy_vision.models.register_model" title="classy_vision.models.register_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_model()</span></code></a>) and call .from_config on it.</p>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.models.register_model">
+<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">register_model</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.register_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a ClassyModel subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of
+ClassyModel from a configuration file, even if the class itself is not
+part of the Classy Vision framework. To use it, apply this decorator to a
+ClassyModel subclass, like this:</p>
+<blockquote>
+<div><p>@register_model(‘resnet’)
+class ResidualNet(ClassyModel):</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</div></blockquote>
+<p>To instantiate a model from a configuration file, see
+<a class="reference internal" href="#classy_vision.models.build_model" title="classy_vision.models.build_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_model()</span></code></a>.</p>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ClassyBlock">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyBlock</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">module</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="method">
+<dt id="classy_vision.models.ClassyBlock.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyBlock.load_head_states">
+<code class="sig-name descname">load_head_states</code><span class="sig-paren">(</span><em class="sig-param">head_states</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.load_head_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>load state dict for all the heads
+:param head_states: mapping between head id and state dict
+:type head_states: dict</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyBlock.set_heads">
+<code class="sig-name descname">set_heads</code><span class="sig-paren">(</span><em class="sig-param">heads</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.set_heads" title="Permalink to this definition">¶</a></dt>
+<dd><p>attach heads to current block.
+:param heads: a list of ClassyHead
+:type heads: list</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ClassyModel">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModel</code><span class="sig-paren">(</span><em class="sig-param">num_classes</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for models in classy vision.</p>
+<p>A model refers either to a specific architecture (e.g. ResNet50) or a
+family of architectures (e.g. ResNet). Models can take arguments in the
+constructor in order to configure different behavior (e.g.
+hyperparameters).  Classy Models must implement <a href="#id1"><span class="problematic" id="id2">:method:`from_config`</span></a> in
+order to allow instantiation from a configuration file. Like regular
+PyTorch models, Classy Models must also implement <a href="#id3"><span class="problematic" id="id4">:method:`forward`</span></a>, where
+the bulk of the inference logic lives.</p>
+<p>Classy Models also have some advanced functionality for production
+fine-tuning systems. For example, we allow users to train a trunk
+model and then attach heads to the model via the attachable
+blocks.  Making your model support the trunk-heads paradigm is
+completely optional.</p>
+<p>Constructor for ClassyModel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_classes</strong> – Number of classes, used by output function.
+Not necessary for training</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.attachable_block_names">
+<em class="property">property </em><code class="sig-name descname">attachable_block_names</code><a class="headerlink" href="#classy_vision.models.ClassyModel.attachable_block_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return names of all attachable blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.build_attachable_block">
+<code class="sig-name descname">build_attachable_block</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">module</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.build_attachable_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a wrapper to the module to allow to attach heads to the module.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.evaluation_mode">
+<em class="property">property </em><code class="sig-name descname">evaluation_mode</code><a class="headerlink" href="#classy_vision.models.ClassyModel.evaluation_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used by video models for averaging over contiguous clips.</p>
+<p>TODO: Remove this once we have a video task, this logic should
+live in a video specific task</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.extract_features">
+<code class="sig-name descname">extract_features</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.extract_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract features from the model.</p>
+<p>Derived classes can implement this method to extract the features before
+applying the final fc layer.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implemented by children.</p>
+<p>This is a factory method for generating the class from a config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Contains params for constructing the model</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.get_classy_state">
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param">deep_copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the state of the ClassyModel.</p>
+<p>The returned state is used for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>deep_copy</strong> – If True, creates a deep copy of the state Dict. Otherwise, the
+returned Dict’s state will be tied to the object’s.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A state dictionary containing the state of the model.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.get_heads">
+<code class="sig-name descname">get_heads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_heads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the heads on the model</p>
+<p>Function returns the heads a dictionary of block names to
+nn.modules attached to that block.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.get_optimizer_params">
+<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><em class="sig-param">bn_weight_decay=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns param groups for optimizer.</p>
+<p>Function to return dict of params with “keys” from
+{“regularized_params”, “unregularized_params”}
+to “values” a list of torch Params.</p>
+<p>“weight_decay” provided as part of optimizer is only used
+for “regularized_params”. For “unregularized_params”, weight_decay is set
+to 0.0</p>
+<p>This implementation sets BatchNorm’s all trainable params to be
+unregularized_params if bn_weight_decay is False.</p>
+<p>Override this function for any custom behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bn_weight_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Apply weight decay to bn params if true</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.head_outputs">
+<em class="property">property </em><code class="sig-name descname">head_outputs</code><a class="headerlink" href="#classy_vision.models.ClassyModel.head_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return outputs of all heads in the format of Dict[head_id, output]</p>
+<p>Head outputs are cached during a forward pass.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModel.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.load_head_states">
+<code class="sig-name descname">load_head_states</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.load_head_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load only the state (weights) of the heads.</p>
+<p>For a trunk-heads model, this function allows the user to
+only update the head state of the model. Useful for attaching
+fine-tuned heads to a pre-trained trunk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>Dict</em>) – Contains the classy model state under key “model”</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ClassyModel.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModel.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.set_classy_state">
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the ClassyModel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state_dict</strong> – The state dictionary. Must be the output of a call to
+<a href="#id5"><span class="problematic" id="id6">:method:`get_classy_state`</span></a>.</p>
+</dd>
+</dl>
+<p>This is used to load the state of the model from a checkpoint.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.set_heads">
+<code class="sig-name descname">set_heads</code><span class="sig-paren">(</span><em class="sig-param">heads</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_heads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach all the heads to corresponding blocks.</p>
+<p>A head is expected to be a ClassyHead object. For more
+details, see <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHead</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>heads</strong> (<em>Dict</em>) – <p>a mapping between attachable block name
+and a dictionary of heads attached to that block. For
+example, if you have two different teams that want to
+attach two different heads for downstream classifiers to
+the 15th block, then they would use:
+heads = {“block15”:</p>
+<blockquote>
+<div><p>{“team1”: classifier_head1, “team2”: classifier_head2}</p>
+</div></blockquote>
+<p>}</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ClassyModelEvaluationMode">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelEvaluationMode</code><a class="headerlink" href="#classy_vision.models.ClassyModelEvaluationMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ClassyModelWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelWrapper</code><span class="sig-paren">(</span><em class="sig-param">model: torch.nn.modules.module.Module</em>, <em class="sig-param">num_classes: Optional[int] = None</em>, <em class="sig-param">input_shape: Optional[Tuple] = None</em>, <em class="sig-param">output_shape: Optional[Tuple] = None</em>, <em class="sig-param">model_depth: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class which wraps an nn.Module within a ClassyModel.</p>
+<p>The only required argument is the model, the additional args are needed
+to get some additional capabilities from Classy Vision to work.</p>
+<p>Constructor for ClassyModel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_classes</strong> – Number of classes, used by output function.
+Not necessary for training</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.extract_features">
+<code class="sig-name descname">extract_features</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.extract_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract features from the model.</p>
+<p>Derived classes can implement this method to extract the features before
+applying the final fc layer.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.DenseNet">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">DenseNet</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">num_classes</em>, <em class="sig-param">init_planes</em>, <em class="sig-param">growth_rate</em>, <em class="sig-param">expansion</em>, <em class="sig-param">small_input</em>, <em class="sig-param">final_bn_relu</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of a standard densely connected network (DenseNet).</p>
+<p>Set <cite>small_input</cite> to <cite>True</cite> for 32x32 sized image inputs.</p>
+<p>Set <cite>final_bn_relu</cite> to <cite>False</cite> to exclude the final batchnorm and ReLU
+layers. These settings are useful when
+training Siamese networks.</p>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implemented by children.</p>
+<p>This is a factory method for generating the class from a config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Contains params for constructing the model</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.get_optimizer_params">
+<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns param groups for optimizer.</p>
+<p>Function to return dict of params with “keys” from
+{“regularized_params”, “unregularized_params”}
+to “values” a list of torch Params.</p>
+<p>“weight_decay” provided as part of optimizer is only used
+for “regularized_params”. For “unregularized_params”, weight_decay is set
+to 0.0</p>
+<p>This implementation sets BatchNorm’s all trainable params to be
+unregularized_params if bn_weight_decay is False.</p>
+<p>Override this function for any custom behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bn_weight_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Apply weight decay to bn params if true</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.DenseNet.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.DenseNet.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.MLP">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">MLP</code><span class="sig-paren">(</span><em class="sig-param">input_dim</em>, <em class="sig-param">output_dim</em>, <em class="sig-param">hidden_dims</em>, <em class="sig-param">dropout</em>, <em class="sig-param">first_dropout</em>, <em class="sig-param">use_batchnorm</em>, <em class="sig-param">first_batchnorm</em>, <em class="sig-param">num_classes</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>MLP model using ReLU. Useful for testing on CPUs.</p>
+<p>Constructor for ClassyModel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_classes</strong> – Number of classes, used by output function.
+Not necessary for training</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implemented by children.</p>
+<p>This is a factory method for generating the class from a config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Contains params for constructing the model</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.MLP.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.MLP.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.MLP.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ResNet">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNet</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>ResNet is a special case of ResNeXt.</p>
+<p>Implementation of ResNeXt (<a class="reference external" href="https://arxiv.org/pdf/1611.05431.pdf">https://arxiv.org/pdf/1611.05431.pdf</a>).</p>
+<p>Set <cite>small_input</cite> to <cite>True</cite> for 32x32 sized image inputs.</p>
+<p>Set <cite>final_bn_relu</cite> to <cite>False</cite> to exclude the final batchnorm and ReLU
+layersSet. These settings are useful when training Siamese networks.</p>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ResNeXt">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">init_planes</em>, <em class="sig-param">reduction</em>, <em class="sig-param">small_input</em>, <em class="sig-param">zero_init_bn_residuals</em>, <em class="sig-param">base_width_and_cardinality</em>, <em class="sig-param">basic_layer</em>, <em class="sig-param">final_bn_relu</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of ResNeXt (<a class="reference external" href="https://arxiv.org/pdf/1611.05431.pdf">https://arxiv.org/pdf/1611.05431.pdf</a>).</p>
+<p>Set <cite>small_input</cite> to <cite>True</cite> for 32x32 sized image inputs.</p>
+<p>Set <cite>final_bn_relu</cite> to <cite>False</cite> to exclude the final batchnorm and ReLU
+layersSet. These settings are useful when training Siamese networks.</p>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implemented by children.</p>
+<p>This is a factory method for generating the class from a config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Contains params for constructing the model</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ResNeXt.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.ResNeXt3D">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt3D</code><span class="sig-paren">(</span><em class="sig-param">input_key</em>, <em class="sig-param">input_planes</em>, <em class="sig-param">clip_crop_size</em>, <em class="sig-param">skip_transformation_type</em>, <em class="sig-param">residual_transformation_type</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">num_blocks</em>, <em class="sig-param">stem_name</em>, <em class="sig-param">stem_planes</em>, <em class="sig-param">stem_temporal_kernel</em>, <em class="sig-param">stem_spatial_kernel</em>, <em class="sig-param">stem_maxpool</em>, <em class="sig-param">stage_planes</em>, <em class="sig-param">stage_temporal_kernel_basis</em>, <em class="sig-param">temporal_conv_1x1</em>, <em class="sig-param">stage_temporal_stride</em>, <em class="sig-param">stage_spatial_stride</em>, <em class="sig-param">num_groups</em>, <em class="sig-param">width_per_group</em>, <em class="sig-param">zero_init_residual_transform</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><dl class="simple">
+<dt>Implementation of</dt><dd><p>1) conventional post-activated 3D ResNe(X)t
+(<a class="reference external" href="https://arxiv.org/abs/1812.03982">https://arxiv.org/abs/1812.03982</a>).
+2) pre-activated 3D ResNe(X)t
+(<a class="reference external" href="https://arxiv.org/abs/1811.12814">https://arxiv.org/abs/1811.12814</a>).</p>
+</dd>
+<dt>The model consists of one stem, a number of stages, and one or multiple</dt><dd><p>heads that are attached to different blocks in the stage.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – a key that can index into model input of dict type.</p></li>
+<li><p><strong>input_planes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the channel dimension of the input. Normally 3 is used
+for rgb input.</p></li>
+<li><p><strong>clip_crop_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – spatial cropping size of video clip at train time.</p></li>
+<li><p><strong>skip_transformation_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the type of skip transformation.</p></li>
+<li><p><strong>residual_transformation_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the type of residual transformation.</p></li>
+<li><p><strong>frames_per_clip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of frames in a video clip.</p></li>
+<li><p><strong>num_blocks</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of the number of blocks in stages.</p></li>
+<li><p><strong>stem_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of model stem.</p></li>
+<li><p><strong>stem_planes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the output dimension of the convolution in the model
+stem.</p></li>
+<li><p><strong>stem_temporal_kernel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the temporal kernel size of the convolution
+in the model stem.</p></li>
+<li><p><strong>stem_spatial_kernel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the spatial kernel size of the convolution
+in the model stem.</p></li>
+<li><p><strong>stem_maxpool</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If true, perform max pooling.</p></li>
+<li><p><strong>stage_planes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the output channel dimension of the 1st residual stage</p></li>
+<li><p><strong>stage_temporal_kernel_basis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Basis of temporal kernel sizes for
+each of the stage.</p></li>
+<li><p><strong>temporal_conv_1x1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Only useful for BottleneckTransformation.
+In a pathaway, if True, do temporal convolution in the first 1x1
+Conv3d. Otherwise, do it in the second 3x3 Conv3d.</p></li>
+<li><p><strong>stage_temporal_stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the temporal stride of the residual
+transformation.</p></li>
+<li><p><strong>stage_spatial_stride</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the spatial stride of the the residual
+transformation.</p></li>
+<li><p><strong>num_groups</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of groups for the convolution.
+num_groups = 1 is for standard ResNet like networks, and
+num_groups &gt; 1 is for ResNeXt like networks.</p></li>
+<li><p><strong>width_per_group</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – No. of channels per group in 2nd (group) conv in the
+residual transformation in the first stage</p></li>
+<li><p><strong>zero_init_residual_transform</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – if true, the weight of last
+op, which could be either BatchNorm3D in post-activated transformation
+or Conv3D in pre-activated transformation, in the residual
+transformation is initialized to zero</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.models.ResNeXt3D.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implemented by children.</p>
+<p>This is a factory method for generating the class from a config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Contains params for constructing the model</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<div aria-label="main navigation" class="sphinxsidebar" role="navigation">
+<div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+<li><a href="index.html">Documentation overview</a><ul>
+<li>Previous: <a href="meters.html" title="previous chapter">Meters</a></li>
+<li>Next: <a href="optim.html" title="next chapter">Optimizers</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="searchbox" role="search" style="display: none">
+<h3 id="searchlabel">Quick search</h3>
+<div class="searchformwrapper">
+<form action="search.html" class="search" method="get">
+<input aria-labelledby="searchlabel" name="q" type="text"/>
+<input type="submit" value="Go"/>
+</form>
+</div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+</div>
+</div>
+<div class="clearer"></div>
+</div></div>

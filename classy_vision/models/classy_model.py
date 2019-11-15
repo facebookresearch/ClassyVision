@@ -36,10 +36,16 @@ class ClassyModel(nn.Module):
 
     """
 
-    def __init__(self):
-        """Constructor for ClassyModel."""
+    def __init__(self, num_classes):
+        """Constructor for ClassyModel.
+
+        Args:
+            num_classes: Number of classes, used by output function.
+                Not necessary for training
+        """
         super().__init__()
 
+        self._num_classes = num_classes
         self._attachable_blocks = {}
 
     @classmethod

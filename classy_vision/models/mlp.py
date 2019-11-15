@@ -25,8 +25,9 @@ class MLP(ClassyModel):
         first_dropout,
         use_batchnorm,
         first_batchnorm,
+        num_classes,
     ):
-        super().__init__()
+        super().__init__(num_classes)
 
         layers = []
         # If first_batchnorm is set, must be using batchnorm
@@ -67,6 +68,7 @@ class MLP(ClassyModel):
             first_dropout=config.get("first_dropout", False),
             use_batchnorm=config.get("use_batchnorm", False),
             first_batchnorm=config.get("first_batchnorm", False),
+            num_classes=output_dim,
         )
 
     def forward(self, x):

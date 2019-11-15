@@ -243,7 +243,7 @@ class ResNeXt(ClassyModel):
             Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
             layersSet. These settings are useful when training Siamese networks.
         """
-        super().__init__()
+        super().__init__(num_classes=None)
 
         # assertions on inputs:
         assert type(num_blocks) == list

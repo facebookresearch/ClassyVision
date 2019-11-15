@@ -1,0 +1,126 @@
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js">
+</script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js">
+</script>
+<div class="notebook">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Creating-a-Classy-Loss">Creating a Classy Loss<a class="anchor-link" href="#Creating-a-Classy-Loss">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Creating a new loss in Classy Vision is as simple as adding a new loss within PyTorch. The loss has to derive from <code>ClassyLoss</code> (which inherits from <a href="https://pytorch.org/docs/stable/nn.html#module"><code>torch.nn.Module</code></a>), and implement a <code>forward</code> method.</p>
+<p><strong>Note</strong>: The forward method should take the right arguments depending on the task the loss will be used for. For instance, a <code>ClassificationTask</code> passes the <code>output</code> and <code>target</code> to <code>forward</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [5]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.losses</span> <span class="k">import</span> <span class="n">ClassyLoss</span>
+
+<span class="k">class</span> <span class="nc">MyLoss</span><span class="p">(</span><span class="n">ClassyLoss</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">output</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can start using this loss for training.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="k">import</span> <span class="n">ClassificationTask</span>
+
+<span class="n">my_loss</span> <span class="o">=</span> <span class="n">MyLoss</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">my_task</span> <span class="o">=</span> <span class="n">ClassificationTask</span><span class="p">()</span><span class="o">.</span><span class="n">set_loss</span><span class="p">(</span><span class="n">my_loss</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To be able to use the registration mechanism to be able to pick up the loss from a configuration, we need to do two additional things -</p>
+<ul>
+<li>Implement a <code>from_config</code> method</li>
+<li>Add the <code>register_loss</code> decorator to <code>MyLoss</code></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.losses</span> <span class="k">import</span> <span class="n">ClassyLoss</span><span class="p">,</span> <span class="n">register_loss</span>
+
+<span class="nd">@register_loss</span><span class="p">(</span><span class="s2">"my_loss"</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MyLoss</span><span class="p">(</span><span class="n">ClassyLoss</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">"alpha"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Need "alpha" in config for MyLoss'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"alpha"</span><span class="p">])</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">output</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can start using this loss in our configurations.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.losses</span> <span class="k">import</span> <span class="n">build_loss</span>
+
+<span class="n">loss_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"my_loss"</span><span class="p">,</span>
+    <span class="s2">"alpha"</span><span class="p">:</span> <span class="mi">5</span>
+<span class="p">}</span>
+<span class="n">my_loss</span> <span class="o">=</span> <span class="n">build_loss</span><span class="p">(</span><span class="n">loss_config</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">my_loss</span><span class="p">,</span> <span class="n">MyLoss</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>

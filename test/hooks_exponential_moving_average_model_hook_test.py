@@ -16,7 +16,7 @@ from classy_vision.models import ClassyModel
 
 class TestModel(ClassyModel):
     def __init__(self):
-        super().__init__()
+        super().__init__(None)
         self.fc = nn.Linear(10, 10)
         self.bn = nn.BatchNorm1d(10)
 

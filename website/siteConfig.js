@@ -42,10 +42,9 @@ const siteConfig = {
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/favicon.png',
+  headerIcon: 'img/favicon.ico',
   //footerIcon: 'img/favicon.ico',
-  favicon: 'img/favicon.png',
-  logo: 'img/cv-icon.png',
+  favicon: 'img/favicon.ico',
 
   // colors for website
   colors: {
@@ -75,11 +74,32 @@ const siteConfig = {
     theme: 'default',
   },
 
-  // Add custom scripts here that would be placed in <script> tags.
-  scripts: ['https://buttons.github.io/buttons.js'],
+
+  // custom scripts that are placed in <head></head> of each page
+  scripts: [
+    // Github buttons
+    "https://buttons.github.io/buttons.js",
+    // Copy-to-clipboard button for code blocks
+    `${baseUrl}js/code_block_buttons.js`,
+    "https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js",
+    // Mathjax for rendering math content
+    `${baseUrl}js/mathjax.js`,
+    "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_HTML"
+  ],
+
+  // CSS sources to load
+  stylesheets: [`${baseUrl}css/code_block_buttons.css`],
+
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',
+
+  // enable scroll to top button a the bottom of the site
+  scrollToTop: true,
+
+  // if true, expand/collapse links & subcategories in sidebar
+  docsSideNavCollapsible: false,
+
   // No .html extensions for paths.
   cleanUrl: true,
 

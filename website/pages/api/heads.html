@@ -1,0 +1,178 @@
+
+<script type="text/javascript" id="documentation_options" data-url_root="./"
+  src="/js/documentation_options.js"></script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/doctools.js"></script>
+<script type="text/javascript" src="/js/language_data.js"></script>
+<script type="text/javascript" src="/js/searchtools.js"></script>
+<div class="sphinx"><div class="document">
+<div class="documentwrapper">
+<div class="bodywrapper">
+<div class="body" role="main">
+<div class="section" id="module-classy_vision.heads">
+<span id="heads"></span><h1>Heads<a class="headerlink" href="#module-classy_vision.heads" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="classy_vision.heads.ClassyHead">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">ClassyHead</code><span class="sig-paren">(</span><em class="sig-param">unique_id: Optional[str] = None</em>, <em class="sig-param">num_classes: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.ClassyHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for heads that can be attached to <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModel</span></code>.</p>
+<p>A head is a regular <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> that can be attached to a
+pretrained model. This enables a form of transfer learning: utilizing a
+model trained for one dataset to extract features that can be used for
+other problems. A head must be attached to a <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModule</span></code> within a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModel</span></code>.</p>
+<p>Constructs a ClassyHead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unique_id</strong> – A unique identifier for the head. Multiple instances of
+the same head might be attached to a model, and unique_id is used
+to refer to them.</p></li>
+<li><p><strong>num_classes</strong> – Number of classes for the head.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.heads.ClassyHead.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.ClassyHead.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on the head.</p>
+<p>This is a regular PyTorch method, refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for
+more details</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.heads.FullyConnectedHead">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">FullyConnectedHead</code><span class="sig-paren">(</span><em class="sig-param">unique_id</em>, <em class="sig-param">num_classes</em>, <em class="sig-param">in_plane</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.FullyConnectedHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ClassyHead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unique_id</strong> – A unique identifier for the head. Multiple instances of
+the same head might be attached to a model, and unique_id is used
+to refer to them.</p></li>
+<li><p><strong>num_classes</strong> – Number of classes for the head.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.heads.FullyConnectedHead.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.FullyConnectedHead.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on the head.</p>
+<p>This is a regular PyTorch method, refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for
+more details</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.heads.FullyConvolutionalLinearHead">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">FullyConvolutionalLinearHead</code><span class="sig-paren">(</span><em class="sig-param">unique_id</em>, <em class="sig-param">num_classes</em>, <em class="sig-param">in_plane</em>, <em class="sig-param">pool_size</em>, <em class="sig-param">activation_func</em>, <em class="sig-param">use_dropout</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.FullyConvolutionalLinearHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ClassyHead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unique_id</strong> – A unique identifier for the head. Multiple instances of
+the same head might be attached to a model, and unique_id is used
+to refer to them.</p></li>
+<li><p><strong>num_classes</strong> – Number of classes for the head.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.heads.FullyConvolutionalLinearHead.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.FullyConvolutionalLinearHead.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on the head.</p>
+<p>This is a regular PyTorch method, refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for
+more details</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.heads.IdentityHead">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">IdentityHead</code><span class="sig-paren">(</span><em class="sig-param">unique_id: Optional[str] = None</em>, <em class="sig-param">num_classes: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.IdentityHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ClassyHead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unique_id</strong> – A unique identifier for the head. Multiple instances of
+the same head might be attached to a model, and unique_id is used
+to refer to them.</p></li>
+<li><p><strong>num_classes</strong> – Number of classes for the head.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.heads.IdentityHead.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.IdentityHead.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs inference on the head.</p>
+<p>This is a regular PyTorch method, refer to <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module" title="(in PyTorch vmaster (1.3.0a0+ee77ccb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> for
+more details</p>
+</dd></dl>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.heads.build_head">
+<code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">build_head</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.build_head" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a ClassyHead from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine what
+head class to instantiate. For instance, a config <cite>{“name”: “my_head”,
+“foo”: “bar”}</cite> will find a class that was registered as “my_head”
+(see <a class="reference internal" href="#classy_vision.heads.register_head" title="classy_vision.heads.register_head"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_head()</span></code></a>) and call .from_config on it.</p>
+</dd></dl>
+<dl class="function">
+<dt id="classy_vision.heads.register_head">
+<code class="sig-prename descclassname">classy_vision.heads.</code><code class="sig-name descname">register_head</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.heads.register_head" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a ClassyHead subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of
+ClassyHead from a configuration file, even if the class itself is not
+part of the Classy Vision framework. To use it, apply this decorator to a
+ClassyHead subclass, like this:</p>
+<blockquote>
+<div><p>@register_head(“my_head”)
+class MyHead(ClassyHead):</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</div></blockquote>
+<p>To instantiate a head from a configuration file, see
+<a class="reference internal" href="#classy_vision.heads.build_head" title="classy_vision.heads.build_head"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_head()</span></code></a>.</p>
+</dd></dl>
+</div>
+</div>
+</div>
+</div>
+<div aria-label="main navigation" class="sphinxsidebar" role="navigation">
+<div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+<li><a href="index.html">Documentation overview</a><ul>
+<li>Previous: <a href="dataset.html" title="previous chapter">Dataset</a></li>
+<li>Next: <a href="hooks.html" title="next chapter">Hooks</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="searchbox" role="search" style="display: none">
+<h3 id="searchlabel">Quick search</h3>
+<div class="searchformwrapper">
+<form action="search.html" class="search" method="get">
+<input aria-labelledby="searchlabel" name="q" type="text"/>
+<input type="submit" value="Go"/>
+</form>
+</div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+</div>
+</div>
+<div class="clearer"></div>
+</div></div>

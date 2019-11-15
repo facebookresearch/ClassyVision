@@ -1,0 +1,1017 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hooks &#8212; Classy Vision 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Losses" href="losses.html" />
+    <link rel="prev" title="Heads" href="heads.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-classy_vision.hooks">
+<span id="hooks"></span><h1>Hooks<a class="headerlink" href="#module-classy_vision.hooks" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="classy_vision.hooks.CheckpointHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">CheckpointHook</code><span class="sig-paren">(</span><em class="sig-param">checkpoint_folder: str</em>, <em class="sig-param">input_args: Any</em>, <em class="sig-param">phase_types: Optional[Collection[str]] = None</em>, <em class="sig-param">checkpoint_period: int = 1</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.CheckpointHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook to checkpoint a model’s task.</p>
+<p>Saves the checkpoints in checkpoint_folder.
+:param checkpoint_folder - Folder to store checkpoints in:
+:param input_args - Any arguments to save about the runtime setup:
+:param phase_types - If phase_types is specified, only checkpoint on those phase types:
+:param checkpoint_period - Checkpoint at the end of every x phases:
+:type checkpoint_period - Checkpoint at the end of every x phases: default 1</p>
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checkpoint the task every checkpoint_period phases.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the checkpoint folder actually exists. If not, raise an exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.CheckpointHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ClassyHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHook</code><a class="headerlink" href="#classy_vision.hooks.ClassyHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract class for hooks to plug in to the classy workflow at various points
+to add various functionalities such as logging and reporting.</p>
+<p>Deriving classes should call super().__init__() and store any state in
+self.state. Any state added to this property should be serializable.
+E.g. -
+class MyHook(ClassyHook):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def __init__(self, a, b):</dt><dd><p>super().__init__()
+self.state.a = [1,2,3]
+self.state.b = “my_hook”
+# the following line is not allowed
+# self.state.my_lambda = lambda x: x^2</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.get_classy_state">
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict[str, Any]<a class="headerlink" href="#classy_vision.hooks.ClassyHook.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the state of the ClassyHook.</p>
+<p>The returned state is used for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A state dictionary containing the state of the hook.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.name">
+<em class="property">classmethod </em><code class="sig-name descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#classy_vision.hooks.ClassyHook.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_backward">
+<em class="property">abstract </em><code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time a backward step is performed on the loss.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_end">
+<em class="property">abstract </em><code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of training.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_forward">
+<em class="property">abstract </em><code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time forward pass is triggered.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_loss">
+<em class="property">abstract </em><code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time a loss has been computed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_phase_end">
+<em class="property">abstract </em><code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of each phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_phase_start">
+<em class="property">abstract </em><code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of each phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_rendezvous">
+<em class="property">abstract </em><code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the trainers rendezvous.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_sample">
+<em class="property">abstract </em><code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time trainer obtained a sample.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_start">
+<em class="property">abstract </em><code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.on_update">
+<em class="property">abstract </em><code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time parameters have been updated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.set_classy_state">
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state_dict: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the ClassyHook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state_dict</strong> – The state dictionary. Must be the output of a call to
+<a href="#id1"><span class="problematic" id="id2">:method:`get_classy_state`</span></a>.</p>
+</dd>
+</dl>
+<p>This is used to load the state of the hook from a checkpoint.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ClassyHookFunctions">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHookFunctions</code><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumeration of all the hook functions in the ClassyHook class.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ExponentialMovingAverageModelHook</code><span class="sig-paren">(</span><em class="sig-param">decay: float</em>, <em class="sig-param">consider_bn_buffers: bool = True</em>, <em class="sig-param">device: str = 'cpu'</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook which keeps a track of the exponential moving average (EMA) of the model’s
+parameters and applies the EMA params to the model during the test phases.</p>
+<p>Saving the state in cpu will save gpu memory, but will make training slower since
+the model parameters will need to be moved to cpu before the averaging.</p>
+<dl class="simple">
+<dt>Note: This hooks stores two additional copies of the model’s parameters, which will</dt><dd><p>increase memory usage significantly.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decay</strong> – EMA decay factor, should be in [0, 1]. A decay of 0 corresponds to
+always using the latest value (no EMA) and a decay of 1 corresponds to
+not updating weights after initialization.</p></li>
+<li><p><strong>consider_bn_buffers</strong> – Whether to apply EMA to batch norm buffers</p></li>
+<li><p><strong>device</strong> – Device to store the model state.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator">
+<code class="sig-name descname">get_model_state_iterator</code><span class="sig-paren">(</span><em class="sig-param">model: torch.nn.modules.module.Module</em><span class="sig-paren">)</span> &#x2192; Iterable[Tuple[str, Any]]<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an iterator over the model state to apply EMA to.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of each phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of each phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called each time parameters have been updated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state">
+<code class="sig-name descname">set_model_state</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask</em>, <em class="sig-param">use_ema: bool</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depending on use_ema, set the appropriate state for the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">LossLrMeterLoggingHook</code><span class="sig-paren">(</span><em class="sig-param">log_freq: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs the loss, optimizer LR, and meters. Logs at the end of a phase.</p>
+<p>if log_freq is specified, logs every log_freq batches also.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log metrics every log_freq batches, if log_freq is not None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log the loss, optimizer LR, and meters for the phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.TensorboardPlotHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TensorboardPlotHook</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook for writing the losses, learning rates and meters to tensorboard.</p>
+<p>Global steps are counted in terms of the number of samples processed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tb_writer</strong> – Tensorboard SummaryWriter instance</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store the observed learning rates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the losses and learning rates to tensorboard.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize losses and learning_rates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ModelComplexityHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelComplexityHook</code><a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs the number of paramaters and forward pass FLOPs of the model.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure number of parameters and number of FLOPs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ModelTensorboardHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelTensorboardHook</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the model graph in TensorBoard.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the model on Tensorboard.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ModelTensorboardHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ProfilerHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ProfilerHook</code><a class="headerlink" href="#classy_vision.hooks.ProfilerHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook to profile a model.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Profile the forward pass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProfilerHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.ProgressBarHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ProgressBarHook</code><a class="headerlink" href="#classy_vision.hooks.ProgressBarHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a progress bar to show progress in processing batches.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the progress bar at the end of the phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and display a progress bar with 0 progress.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.ProgressBarHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the progress bar with the batch size.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.TimeMetricsHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TimeMetricsHook</code><span class="sig-paren">(</span><em class="sig-param">log_freq: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and prints performance metrics. Logs at the end of a phase.</p>
+<p>if log_freq is specified, logs every log_freq batches also.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log metrics every log_freq batches, if log_freq is not None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log metrics at the end of a phase if log_freq is None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize start time and reset perf stats</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.TimeMetricsHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.TimeMetricsHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="classy_vision.hooks.VisdomHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">VisdomHook</code><span class="sig-paren">(</span><em class="sig-param">server: str</em>, <em class="sig-param">port: str</em>, <em class="sig-param">env: str = 'main'</em>, <em class="sig-param">title_suffix: str = ''</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.VisdomHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots metrics on to visdom.</p>
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_backward">
+<code class="sig-name descname">on_backward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_forward">
+<code class="sig-name descname">on_forward</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_loss">
+<code class="sig-name descname">on_loss</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the metrics on visdom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_rendezvous">
+<code class="sig-name descname">on_rendezvous</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_rendezvous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_sample">
+<code class="sig-name descname">on_sample</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="classy_vision.hooks.VisdomHook.on_update">
+<code class="sig-name descname">on_update</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask, local_variables: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this if they want those
+hook functions to not do anything.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Classy Vision</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Library Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meters.html">Meters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="heads.html" title="previous chapter">Heads</a></li>
+      <li>Next: <a href="losses.html" title="next chapter">Losses</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      
+      
+      
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/hooks.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
