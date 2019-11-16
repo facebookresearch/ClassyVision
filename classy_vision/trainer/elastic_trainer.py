@@ -89,7 +89,7 @@ class ElasticTrainer(ClassyTrainer):
 
     def _run_step(self, state, local_variables, use_gpu):
         # Check for training complete but only terminate when the last phase is done
-        if state.task.done_training() and state.task.advance_to_next_phase:
+        if state.task.done_training() and state.advance_to_next_phase:
             raise StopIteration
 
         if state.advance_to_next_phase:
