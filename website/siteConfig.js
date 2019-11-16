@@ -33,7 +33,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     { href: `${baseUrl}tutorials/`, label: "Tutorials" },
-    { href: `${baseUrl}api/`, label: "Docs" },
+    { href: `${baseUrl}api/`, label: "API Reference" },
     { href: "https://github.com/facebookresearch/ClassyVision", label: "GitHub" },
     { search: true } // position search box to the very right
   ],
