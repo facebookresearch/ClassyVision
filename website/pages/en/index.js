@@ -102,7 +102,7 @@ class Index extends React.Component {
           {
             content:
               'This is another description of how this project is useful',
-            image: `${baseUrl}img/classy-vision-icon.png`,
+            image: `${baseUrl}img/cv-icon.png`,
             imageAlign: 'right',
             title: 'Description',
           },
@@ -112,57 +112,9 @@ class Index extends React.Component {
     // getStartedSection
     const pre = '```';
     // Example for model fitting
-    const createModelExample = `${pre}python
-import numpy as np
-
-import torch
-import torch.nn as nn
-
-from classyvision.attr import (
-    IntegratedGradients
-)
-
-class ToyModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.lin1 = nn.Linear(3, 3)
-        self.relu = nn.ReLU()
-        self.lin2 = nn.Linear(3, 2)
-
-        # initialize weights and biases
-        self.lin1.weight = nn.Parameter(torch.arange(-4.0, 5.0).view(3, 3))
-        self.lin1.bias = nn.Parameter(torch.zeros(1,3))
-        self.lin2.weight = nn.Parameter(torch.arange(-3.0, 3.0).view(2, 3))
-        self.lin2.bias = nn.Parameter(torch.ones(1,2))
-
-    def forward(self, input):
-        return self.lin2(self.relu(self.lin1(input)))
-
-
-model = ToyModel()
-model.eval()
-    `;
-    // Example for defining an acquisition function
-    const defineInputBaseline = `${pre}python
-input = torch.rand(2, 3)
-baseline = torch.zeros(2, 3)
-    `;
-
-    const randomSeedsDefinition = `${pre}python
-torch.manual_seed(123)
-np.random.seed(123)
-    `;
-    // Example for optimizing candidates
-    const instantiateApply = `${pre}python
-ig = IntegratedGradients(model)
-attributions, delta = ig.attribute(input, baseline, target=0, return_convergence_delta=True)
-print('IG Attributions: ', attributions, ' Convergence Delta: ', delta)
-    `;
-
-    const igOutput = `${pre}python
-IG Attributions:  tensor([[-0.5922, -1.5497, -1.0067],
-                          [ 0.0000, -0.2219, -5.1991]])
-Convergence Delta: tensor([2.3842e-07, -4.7684e-07])
+    const createProject = `${pre}bash
+classy-project my-project
+cd my-project
     `;
     //
     const QuickStart = () => (
@@ -175,30 +127,16 @@ Convergence Delta: tensor([2.3842e-07, -4.7684e-07])
           <ol>
             <li>
               <h4>Install Classy Vision:</h4>
-              <a>via conda (recommended):</a>
-              <MarkdownBlock>{bash`conda install classyvision -c pytorch`}</MarkdownBlock>
               <a>via pip:</a>
-              <MarkdownBlock>{bash`pip install classyvision`}</MarkdownBlock>
+              <MarkdownBlock>{bash`pip install classy_vision`}</MarkdownBlock>
             </li>
             <li>
-              <h4>Create and prepare model:</h4>
-              <MarkdownBlock>{createModelExample}</MarkdownBlock>
+              <h4>Create your first project:</h4>
+              <MarkdownBlock>{createProject}</MarkdownBlock>
             </li>
             <li>
-              <h4>To make computations deterministic, let's fix random seeds:</h4>
-              <MarkdownBlock>{randomSeedsDefinition}</MarkdownBlock>
-            </li>
-            <li>
-              <h4>Define input and baseline tensors:</h4>
-              <MarkdownBlock>{defineInputBaseline}</MarkdownBlock>
-            </li>
-            <li>
-              <h4>Select algorithm to instantiate and apply (Integrated Gradients in this example):</h4>
-              <MarkdownBlock>{instantiateApply}</MarkdownBlock>
-            </li>
-            <li>
-              <h4>View Output:</h4>
-              <MarkdownBlock>{igOutput}</MarkdownBlock>
+              <h4>Start training!</h4>
+              <MarkdownBlock>{bash`./classy_train.py --config configs/template_config.json`}</MarkdownBlock>
             </li>
           </ol>
         </Container>
@@ -207,7 +145,6 @@ Convergence Delta: tensor([2.3842e-07, -4.7684e-07])
 
     const Features = () => (
     <div className="productShowcaseSection" style={{textAlign: 'center'}}>
-      <h2>Key Features</h2>
       <Block layout="threeColumn">
         {[
           {
