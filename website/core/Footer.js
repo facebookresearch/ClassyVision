@@ -65,9 +65,7 @@ class Footer extends React.Component {
             </a>
           )}
           <div className="footerSection">
-            <h5>Docs</h5>
-            <a href={this.docUrl("introduction")}>Introduction</a>
-            <a href={this.docUrl("getting_started")}>Getting Started</a>
+            <h5>Documentation</h5>
             <a href={`${this.props.config.baseUrl}tutorials/`}>Tutorials</a>
             <a href={`${this.props.config.baseUrl}api/`}>API Reference</a>
           </div>
@@ -90,7 +88,6 @@ class Footer extends React.Component {
           {this.props.config.copyright && (
             <span>{this.props.config.copyright}</span>
           )}{" "}
-          Copyright &copy; {currentYear} Facebook Inc.
         </section>
         {process.env.NODE_ENV !== 'development' &&
           <script dangerouslySetInnerHTML={{__html:`
