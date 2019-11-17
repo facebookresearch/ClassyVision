@@ -6,6 +6,7 @@
 
 import logging
 import os
+from typing import Optional
 
 import torch
 from classy_vision.generic.distributed_util import (
@@ -19,6 +20,8 @@ from .classy_trainer import ClassyTrainer
 
 
 def _init_env_vars():
+    """Function sets up default environment variables for distributed training.
+    """
     if "WORLD_SIZE" not in os.environ or "RANK" not in os.environ:
         os.environ["WORLD_SIZE"] = "1"
         os.environ["RANK"] = "0"
@@ -29,9 +32,14 @@ def _init_env_vars():
         os.environ["MASTER_PORT"] = "29500"
 
 
-def _init_distributed(use_gpu):
-    """ perform distributed setup, requires the script to be started with
-        torch.distributed.launch script.
+def _init_distributed(use_gpu: bool):
+    """Function perform distributed setup for DDP.
+
+    Requires the script to be started with torch.distributed.launch
+    script and uses environment variables for node finding.
+
+    Args:
+        use_gpu (bool): If true, use distributed GPU training, else use CPU
     """
     distributed_world_size = int(os.environ["WORLD_SIZE"])
     distributed_rank = int(os.environ["RANK"])
@@ -45,9 +53,27 @@ def _init_distributed(use_gpu):
 
 
 class DistributedTrainer(ClassyTrainer):
+    """Distributed trainer for using multiple training processes
+    """
+
     def __init__(
-        self, use_gpu=None, num_dataloader_workers=0, dataloader_mp_context=None
+        self,
+        use_gpu: Optional[bool] = None,
+        num_dataloader_workers: int = 0,
+        dataloader_mp_context: Optional[str] = None,
     ):
+        """Constructor for DistributedTrainer.
+
+        Args:
+            use_gpu (Optional[bool]): If true, then use GPU 0 for training.
+                If None, then check if we have GPUs available, if we do
+                then use GPU for training.
+            num_dataloader_workers (int): Number of CPU processes doing dataloading
+                per GPU. If 0, then dataloading is done on main thread.
+            dataloader_mp_context (Optional[str]): Determines how to launch
+                new processes for dataloading. Must be one of "fork", "forkserver",
+                "spawn". If None, process launching is inherited from parent.
+        """
         super().__init__(
             use_gpu=use_gpu,
             num_dataloader_workers=num_dataloader_workers,
