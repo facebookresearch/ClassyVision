@@ -1,6 +1,9 @@
 {
   "Using Classy Vision": [
      {
+      "id": "getting_started",
+      "title": "Getting started"
+     },{
       "id": "fine_tuning",
       "title": "Fine Tuning"
      },{
