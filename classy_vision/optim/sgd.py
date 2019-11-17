@@ -6,14 +6,23 @@
 
 import torch.optim
 from classy_vision.generic.util import is_pos_float
-from classy_vision.optim.param_scheduler import build_param_scheduler
+from classy_vision.optim.param_scheduler import (
+    ClassyParamScheduler,
+    build_param_scheduler
+)
 
 from . import ClassyOptimizer, register_optimizer
 
 
 @register_optimizer("sgd")
 class SGD(ClassyOptimizer):
-    def __init__(self, lr_scheduler, momentum, weight_decay, nesterov=False):
+    def __init__(
+        self,
+        lr_scheduler: ClassyParamScheduler,
+        momentum: float = 0,
+        weight_decay: float = 0,
+        nesterov=False,
+    ):
         super().__init__(lr_scheduler=lr_scheduler)
 
         self.momentum = momentum
