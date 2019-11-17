@@ -25,17 +25,17 @@ class TutorialHome extends React.Component {
         <Container className="mainContainer documentContainer postContainer">
           <div className="post">
             <header className="postHeader">
-              <h1 className="postHeaderTitle">Captum Tutorials</h1>
+              <h1 className="postHeaderTitle">Classy Tutorials</h1>
             </header>
             <body>
               <p>
-                The tutorials here will help you understand and use Captum. They assume that you are familiar with PyTorch and its basic features.
+                The tutorials here will help you understand and use Classy Vision. They assume that you are familiar with PyTorch and its basic features.
               </p>
               <p>
-                If you are new to Captum, the easiest way to get started is
+                If you are new to Classy Vision, the easiest way to get started is
                 with the{' '}
                 <a href="Titanic_Basic_Interpret">
-                  Getting started with Captum
+                  Getting started with Classy Vision
                 </a>{' '}
                 tutorial.
               </p>
@@ -46,41 +46,6 @@ class TutorialHome extends React.Component {
                   What is PyTorch?
                 </a>{' '}
                 tutorial.
-              </p>
-
-              <p>
-                <h4>Getting started with Captum:</h4>
-                In this tutorial we create and train a simple neural network on the Titanic survival dataset.
-                We then use Integrated Gradients to analyze feature importance.  We then deep dive the network to assess layer and neuron importance
-                using conductance.  Finally, we analyze a specific
-                neuron to understand feature importance for that specific neuron.  Find the tutorial <a href="Titanic_Basic_Interpret">here</a>.
-
-                <h4>Interpreting text models:</h4>
-                In this tutorial we use a pre-trained CNN model for sentiment analysis on an IMDB dataset.
-                We use Captum and Integrated Gradients to interpret model predictions by show which specific
-                words have highest attribution to the model output.  Find the tutorial <a href="IMDB_TorchText_Interpret">here </a>.
-
-                <h4>Interpreting vision with CIFAR:</h4>
-                This tutorial demonstrates how to use Captum for interpreting vision focused models.
-                First we create and train (or use a pre-trained) a simple CNN model on the CIFAR dataset.
-                We then interpret the output of an example with a series of overlays using Integrated Gradients and DeepLIFT.
-                Find the tutorial <a href="CIFAR_TorchVision_Interpret">here</a>.
-
-                <h4>Interpreting vision with Resnet:</h4>
-                Like the CIFAR based tutorial above, this tutorial demonstrates how to use Captum for interpreting vision focused models.
-                This tutorial begins with a pretrained resnet18 model and demonstrates how to use Intergrated Gradients along with Noise Tunnel.
-                The tutorial finishes with a demonstration of how to use GradientShap.
-                Find the tutorial <a href="Resnet_TorchVision_Interpret">here</a>.
-
-                <h4>Interpreting multimodal models:</h4>
-                To demonstrate interpreting multimodal models we have chosen to look at an open source Visual Question Answer (VQA) model.
-                Using Captum and Integrated Gradients we interpret the output of several test questions and analyze the attribution scores
-                of the text and visual parts of the model. Find the tutorial <a href="Multimodal_VQA_Interpret">here</a>.
-
-                <h4>Getting Started with Captum Insights:</h4>
-                This tutorial demonstrates how to use Captum Insights for a vision model in a notebook setting.  A simple pretrained torchvision
-                CNN model is loaded and then used on the CIFAR dataset.  Captum Insights is then loaded to visualize the interpretation of specific examples.
-                Find the tutorial <a href="CIFAR_TorchVision_Captum_Insights">here</a>.
               </p>
             </body>
           </div>
