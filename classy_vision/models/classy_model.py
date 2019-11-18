@@ -6,8 +6,11 @@
 
 import copy
 from enum import Enum
+from typing import Dict
 
+import torch
 import torch.nn as nn
+from classy_vision.heads.classy_head import ClassyHead
 
 from .classy_block import ClassyBlock
 
@@ -41,6 +44,8 @@ class ClassyModel(nn.Module):
         super().__init__()
 
         self._attachable_blocks = {}
+        self._heads = nn.ModuleDict()
+        self._head_outputs = {}
 
     @classmethod
     def from_config(cls, config):
@@ -77,7 +82,7 @@ class ClassyModel(nn.Module):
         head_state_dict = {}
         for block, heads in attached_heads.items():
             head_state_dict[block] = {
-                head.unique_id: head.state_dict() for head in heads.values()
+                head_name: head.state_dict() for head_name, head in heads.items()
             }
         model_state_dict = {
             "model": {"trunk": trunk_state_dict, "heads": head_state_dict}
@@ -97,8 +102,9 @@ class ClassyModel(nn.Module):
             state (Dict): Contains the classy model state under key "model"
 
         """
-        for block, head_states in state["model"]["heads"].items():
-            self._attachable_blocks[block].load_head_states(head_states)
+        for block_name, head_states in state["model"]["heads"].items():
+            for head_name, head_state in head_states.items():
+                self._heads[block_name][head_name].load_state_dict(head_state)
 
     def set_classy_state(self, state):
         """Set the state of the ClassyModel.
@@ -149,10 +155,10 @@ class ClassyModel(nn.Module):
 
     def _clear_heads(self):
         # clear all existing heads
-        for block in self._attachable_blocks.values():
-            block.set_heads([])
+        self._heads.clear()
+        self._head_outputs.clear()
 
-    def set_heads(self, heads):
+    def set_heads(self, heads: Dict[str, Dict[str, ClassyHead]]):
         """Attach all the heads to corresponding blocks.
 
         A head is expected to be a ClassyHead object. For more
@@ -167,21 +173,21 @@ class ClassyModel(nn.Module):
                 heads = {"block15":
                     {"team1": classifier_head1, "team2": classifier_head2}
                 }
-
         """
         self._clear_heads()
 
         head_ids = set()
-        for block_name, heads in heads.items():
-            for head in heads.values():
-                if head.unique_id in head_ids:
-                    raise ValueError("head id {} already exists".format(head.unique_id))
-                head_ids.add(head.unique_id)
+        for block_name, block_heads in heads.items():
             if block_name not in self._attachable_blocks:
                 raise ValueError(
                     "block {} does not exist or can not be attached".format(block_name)
                 )
-            self._attachable_blocks[block_name].set_heads(heads.values())
+            self._attachable_blocks[block_name].set_cache_output()
+            for head in block_heads.values():
+                if head.unique_id in head_ids:
+                    raise ValueError("head id {} already exists".format(head.unique_id))
+                head_ids.add(head.unique_id)
+            self._heads[block_name] = nn.ModuleDict(block_heads)
 
     def get_heads(self):
         """Returns the heads on the model
@@ -190,12 +196,7 @@ class ClassyModel(nn.Module):
         nn.modules attached to that block.
 
         """
-        all_heads = {}
-        for name, block in self._attachable_blocks.items():
-            heads = block.get_heads()
-            if len(heads) > 0:
-                all_heads[name] = heads
-        return all_heads
+        return {block_name: dict(heads) for block_name, heads in self._heads.items()}
 
     @property
     def head_outputs(self):
@@ -203,9 +204,21 @@ class ClassyModel(nn.Module):
 
         Head outputs are cached during a forward pass.
         """
+        return self._head_outputs.copy()
+
+    def get_block_outputs(self) -> Dict[str, torch.Tensor]:
         outputs = {}
-        for blk in self._attachable_blocks.values():
-            outputs.update(blk.head_outputs)
+        for name, block in self._attachable_blocks.items():
+            outputs[name] = block.output
+        return outputs
+
+    def execute_heads(self) -> Dict[str, torch.Tensor]:
+        block_outs = self.get_block_outputs()
+        outputs = {}
+        for block_name, heads in self._heads.items():
+            for head in heads.values():
+                outputs[head.unique_id] = head(block_outs[block_name])
+        self._head_outputs = outputs
         return outputs
 
     def get_optimizer_params(self, bn_weight_decay=False):

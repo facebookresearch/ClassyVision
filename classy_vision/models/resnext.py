@@ -375,11 +375,11 @@ class ResNeXt(ClassyModel):
         # By default the classification layer is implemented as one head on top
         # of the last block. The head is automatically computed right after the
         # last block.
-        head_outputs = tuple(self.head_outputs.values())
+        head_outputs = self.execute_heads()
         if len(head_outputs) == 0:
             raise Exception("Expecting at least one head that generates output")
         elif len(head_outputs) == 1:
-            return head_outputs[0]
+            return list(head_outputs.values())[0]
         else:
             return head_outputs
 
