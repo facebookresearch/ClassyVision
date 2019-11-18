@@ -39,7 +39,7 @@ class TensorboardPlotHook(ClassyHook):
     on_sample = ClassyHook._noop
     on_forward = ClassyHook._noop
     on_backward = ClassyHook._noop
-    on_update = ClassyHook._noop
+    on_loss = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(self, tb_writer) -> None:
@@ -64,7 +64,7 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times = []
         self.num_steps_global = []
 
-    def on_loss(
+    def on_update(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
