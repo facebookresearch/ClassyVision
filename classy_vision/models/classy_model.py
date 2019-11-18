@@ -45,7 +45,6 @@ class ClassyModel(nn.Module):
 
         self._attachable_blocks = {}
         self._heads = nn.ModuleDict()
-        self._head_outputs = {}
 
     @classmethod
     def from_config(cls, config):
@@ -156,7 +155,6 @@ class ClassyModel(nn.Module):
     def _clear_heads(self):
         # clear all existing heads
         self._heads.clear()
-        self._head_outputs.clear()
 
     def set_heads(self, heads: Dict[str, Dict[str, ClassyHead]]):
         """Attach all the heads to corresponding blocks.
@@ -198,14 +196,6 @@ class ClassyModel(nn.Module):
         """
         return {block_name: dict(heads) for block_name, heads in self._heads.items()}
 
-    @property
-    def head_outputs(self):
-        """Return outputs of all heads in the format of Dict[head_id, output]
-
-        Head outputs are cached during a forward pass.
-        """
-        return self._head_outputs.copy()
-
     def get_block_outputs(self) -> Dict[str, torch.Tensor]:
         outputs = {}
         for name, block in self._attachable_blocks.items():
@@ -218,7 +208,6 @@ class ClassyModel(nn.Module):
         for block_name, heads in self._heads.items():
             for head in heads.values():
                 outputs[head.unique_id] = head(block_outs[block_name])
-        self._head_outputs = outputs
         return outputs
 
     def get_optimizer_params(self, bn_weight_decay=False):
