@@ -8,11 +8,15 @@ import unittest
 
 import torch
 from classy_vision.dataset import build_dataset, register_dataset
-from classy_vision.dataset.classy_video_dataset import ClassyVideoDataset
+from classy_vision.dataset.classy_video_dataset import (
+    ClassyVideoDataset,
+    MaxLengthClipSampler,
+)
 from classy_vision.dataset.core import ListDataset
 from classy_vision.dataset.transforms.util_video import (
     build_video_field_transform_default,
 )
+from torch.utils.data import Sampler
 
 
 DUMMY_SAMPLES_1 = [
@@ -35,6 +39,18 @@ DUMMY_CONFIG = {
     "frames_per_clip": 8,
     "video_dir": "dummy_video_dir",
 }
+
+
+class MockClipSampler(Sampler):
+    def __init__(self, full_size=1000):
+        self.full_size = full_size
+
+    def __iter__(self):
+        indices = list(range(self.full_size))
+        return iter(indices)
+
+    def __len__(self):
+        return self.full_size
 
 
 @register_dataset("test_video_dataset")
@@ -104,7 +120,7 @@ class TestRegistryFunctions(unittest.TestCase):
         self.assertTrue(isinstance(dataset, TestVideoDataset))
 
 
-class TestClassyDataset(unittest.TestCase):
+class TestClassyVideoDataset(unittest.TestCase):
     """
     Tests member functions of ClassyVideoDataset.
     """
@@ -127,3 +143,12 @@ class TestClassyDataset(unittest.TestCase):
             frame_rate,
             clips_per_video,
         ) = self.dataset.parse_config(DUMMY_CONFIG)
+
+    def test_max_length_clip_sampler(self):
+        clip_sampler = MockClipSampler(full_size=1000)
+        clip_sampler = MaxLengthClipSampler(clip_sampler, num_samples=64)
+        count = 0
+        for _clip_index in iter(clip_sampler):
+            count += 1
+        self.assertEqual(count, 64)
+        self.assertEqual(len(clip_sampler), 64)
