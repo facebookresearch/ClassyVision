@@ -17,13 +17,13 @@ def add_generic_args(parser):
     Adds generic command-line arguments for convnet training / testing to parser.
     """
     parser.add_argument(
-        "--config_file", default="", type=str, help="path to config file for model"
+        "--config_file", type=str, help="path to config file for model", required=True
     )
     parser.add_argument(
         "--device",
-        default="gpu",
+        default=None,
         type=str,
-        help="device to use: cpu or gpu (default = gpu)",
+        help="device to use: either 'cpu' or 'gpu'. If unspecified, will use GPU when available and CPU otherwise.",
     )
     parser.add_argument(
         "--num_workers",
@@ -54,12 +54,6 @@ def add_generic_args(parser):
         default=1,
         type=int,
         help="""Checkpoint every x phases (default 1)""",
-    )
-    parser.add_argument(
-        "--test_only",
-        default=False,
-        action="store_true",
-        help="do not perform training: only test model",
     )
     parser.add_argument(
         "--show_progress",
@@ -131,7 +125,9 @@ def check_generic_args(args):
     # check types and values:
     assert is_pos_int(args.num_workers), "incorrect number of workers"
     assert is_pos_int(args.visdom_port), "incorrect visdom port"
-    assert args.device == "cpu" or args.device == "gpu", "unknown device"
+    assert (
+        args.device is None or args.device == "cpu" or args.device == "gpu"
+    ), "unknown device"
 
     # check that CUDA is available:
     if args.device == "gpu":

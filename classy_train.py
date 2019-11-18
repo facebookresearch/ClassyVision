@@ -113,8 +113,12 @@ def main(args, config):
 
     task.set_hooks(hooks)
 
+    use_gpu = None
+    if args.device is not None:
+        use_gpu = args.device == "gpu"
+
     trainer = DistributedTrainer(
-        args.device == "gpu", num_dataloader_workers=args.num_workers
+        use_gpu=use_gpu, num_dataloader_workers=args.num_workers
     )
     trainer.train(task)
 
