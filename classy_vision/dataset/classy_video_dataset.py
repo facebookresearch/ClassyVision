@@ -10,6 +10,7 @@ import os
 
 import torch
 from classy_vision.generic.distributed_util import get_rank, get_world_size
+from torch.utils.data import Sampler
 from torchvision.datasets.samplers.clip_sampler import (
     DistributedSampler,
     RandomClipSampler,
@@ -17,6 +18,41 @@ from torchvision.datasets.samplers.clip_sampler import (
 )
 
 from .classy_dataset import ClassyDataset
+
+
+class MaxLengthClipSampler(Sampler):
+    """MaxLengthClipSampler is a thin wrapper on top of clip samplers in TorchVision
+        It takes as input a TorchVision clip sampler, and an optional argument
+        `num_samples` to limit the number of samples.
+    """
+
+    def __init__(self, clip_sampler, num_samples=None):
+        """
+        Args:
+            clip_sampler: clip sampler without a limit on the total number of clips
+                it can sample, such as RandomClipSampler and UniformClipSampler.
+            num_samples: if provided, it denotes the maximal number of clips the sampler
+                will return
+        """
+        self.clip_sampler = clip_sampler
+        self.num_samples = num_samples
+
+    def __iter__(self):
+        num_samples = len(self)
+        n = 0
+        for clip in self.clip_sampler:
+            if n < num_samples:
+                yield clip
+                n += 1
+            else:
+                break
+
+    def __len__(self):
+        full_size = len(self.clip_sampler)
+        if self.num_samples is None:
+            return full_size
+
+        return min(full_size, self.num_samples)
 
 
 class ClassyVideoDataset(ClassyDataset):
@@ -130,6 +166,7 @@ class ClassyVideoDataset(ClassyDataset):
             # For video model testing, we sample N evenly spaced clips per test
             # video. We will simply average predictions over them
             clip_sampler = UniformClipSampler(self.video_clips, self.clips_per_video)
+        clip_sampler = MaxLengthClipSampler(clip_sampler, num_samples=self.num_samples)
         world_size = get_world_size()
         rank = get_rank()
         sampler = DistributedSampler(
