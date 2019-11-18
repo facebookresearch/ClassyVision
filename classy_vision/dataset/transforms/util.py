@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 import torchvision.transforms as transforms
 
@@ -13,6 +13,16 @@ from . import ClassyTransform, build_transforms, register_transform
 
 
 class ImagenetConstants:
+    """Constant variables related to the image classification.
+
+    MEAN: often used to be subtracted from image RGB value. Computed on ImageNet.
+    STD: often used to divide the image RGB value after mean centering. Computed
+        on ImageNet.
+    CROP_SIZE: the size of image cropping which is often the input to deep network.
+    RESIZE: the size of rescaled image.
+
+    """
+
     MEAN = [0.485, 0.456, 0.406]
     STD = [0.229, 0.224, 0.225]
     CROP_SIZE = 224
@@ -20,16 +30,28 @@ class ImagenetConstants:
 
 
 class FieldTransform:
-    """
-    Serializable class that applies a transform on specific field in samples.
+    """Serializable class that applies a transform on specific field in samples.
     """
 
     def __init__(self, transform: Callable, key: str = "input") -> None:
+        """The constructor method of FieldTransform class.
+
+        Args:
+            transform: a callable function that takes sample data of type dict as input
+            key: the key in sample dict whose corresponding value will undergo
+                the transform
+
+        """
         self.key: str = key
         self.transform: Callable = transform
 
     def __call__(self, sample: Dict[str, Any]) -> Dict[str, Any]:
-        """Updates sample by applying a transform and to the appropriate key."""
+        """Updates sample by applying a transform and to the appropriate key.
+
+        Args:
+            sample: input sample which will be transformed
+
+        """
         if sample is None:
             return sample
 
@@ -42,12 +64,28 @@ class FieldTransform:
 
 @register_transform("imagenet_augment")
 class ImagenetAugmentTransform(ClassyTransform):
+    """The default image transform with data augmentation.
+
+    It is often useful for training models on Imagenet. It sequentially resizes
+    the image into a random scale, takes a random spatial cropping, randomly flips
+    the image horizontally, transforms PIL image data into a torch.Tensor and
+    normalizes the pixel values by mean subtraction and standard deviation division.
+    """
+
     def __init__(
         self,
         crop_size: int = ImagenetConstants.CROP_SIZE,
         mean: List[float] = ImagenetConstants.MEAN,
         std: List[float] = ImagenetConstants.STD,
     ):
+        """The constructor method of ImagenetAugmentTransform class.
+
+        Args:
+            crop_size: expected output size of random cropping
+            mean: a 3-tuple denoting the pixel RGB mean
+            std: a 3-tuple denoting the pixel RGB standard deviation
+
+        """
         self.transform = transforms.Compose(
             [
                 transforms.RandomResizedCrop(crop_size),
@@ -58,11 +96,26 @@ class ImagenetAugmentTransform(ClassyTransform):
         )
 
     def __call__(self, img):
+        """Callable function which applies the tranform to the input image.
+
+        Args:
+            image: input image that will undergo the transform
+
+        """
         return self.transform(img)
 
 
 @register_transform("imagenet_no_augment")
 class ImagenetNoAugmentTransform(ClassyTransform):
+    """The default image transform without data augmentation.
+
+    It is often useful for testing models on Imagenet. It sequentially resizes
+    the image, takes a central  cropping, transforms PIL image data into a
+    torch.Tensor and normalizes the pixel values by mean subtraction and standard
+    deviation division.
+
+    """
+
     def __init__(
         self,
         resize: int = ImagenetConstants.RESIZE,
@@ -70,6 +123,15 @@ class ImagenetNoAugmentTransform(ClassyTransform):
         mean: List[float] = ImagenetConstants.MEAN,
         std: List[float] = ImagenetConstants.STD,
     ):
+        """The constructor method of ImagenetNoAugmentTransform class.
+
+        Args:
+            resize: expected image size after resizing
+            crop_size: expected size of central cropping
+            mean: a 3-tuple denoting the pixel RGB mean
+            std: a 3-tuple denoting the pixel RGB standard deviation
+
+        """
         self.transform = transforms.Compose(
             [
                 transforms.Resize(resize),
@@ -80,12 +142,19 @@ class ImagenetNoAugmentTransform(ClassyTransform):
         )
 
     def __call__(self, img):
+        """Callable function which applies the tranform to the input image.
+
+        Args:
+            image: input image that will undergo the transform
+
+        """
         return self.transform(img)
 
 
 @register_transform("tuple_to_map")
 class TupleToMapTransform(ClassyTransform):
-    """
+    """A transform which maps image data from tuple to dict.
+
     This transform takes a sample of the form (data1, data2, ...) and
     returns a sample of the form {key1: data1, key2: data2, ...}
 
@@ -93,12 +162,26 @@ class TupleToMapTransform(ClassyTransform):
     ImageFolder dataset (tuple) to dict with named data fields.
 
     If sample is already a dict with the required keys, pass sample through.
+
     """
 
     def __init__(self, list_of_map_keys: List[str]):
+        """The constructor method of TupleToMapTransform class.
+
+        Args:
+            list_of_map_keys: a list of dict keys that will be mapped to item
+                in the input sample of data type list
+
+        """
         self._map_keys = list_of_map_keys
 
     def __call__(self, sample):
+        """Transform sample from type tuple to type dict.
+
+        Args:
+            sample: input sample which will be transformed
+
+        """
         # If already a dict/map with appropriate keys, exit early
         if isinstance(sample, dict):
             for key in self._map_keys:
@@ -152,6 +235,7 @@ def build_field_transform_default_imagenet(
             (e.g. for torchvision datasets, default samples is a
             tuple so this argument can be used to map
             (input, target) -> {"input": input, "target": target})
+
     """
     assert (
         default_transform is None or split is None
@@ -178,6 +262,14 @@ def build_field_transform_default_imagenet(
 
 
 def default_unnormalize(img):
+    """Default unnormalization transform which undo the "transforms.Normalize".
+
+        Specially, it cancels out mean subtraction and standard deviation division.
+
+    Args:
+        img (torch.Tensor): image data to which the transform will be applied
+
+    """
     # TODO T39752655: Allow this to be configurable
     img = img.clone()
     for channel, std, mean in zip(img, ImagenetConstants.STD, ImagenetConstants.MEAN):
