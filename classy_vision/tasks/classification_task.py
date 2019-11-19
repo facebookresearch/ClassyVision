@@ -32,7 +32,48 @@ from .classy_task import ClassyTask
 
 @register_task("classification_task")
 class ClassificationTask(ClassyTask):
+    """Basic classification training task.
+
+    This task encapsultates all of the components and steps needed to
+    train a classifier using a :obj:`ClassyTrainer`.
+
+    Assumes a train / test phase per each epoch and that the datasets
+    have the same API as the map-style Dataset class in
+    torch.utils.data.dataset (in particular, this task makes use of
+    the len).  If you are using an IterableDataset then a custom task
+    may be appropriate.
+
+    Attributes:
+        loss: Loss (see :obj:`ClassyLoss`) function used for computing the loss in
+            each forward pass
+        datasets: Mapping from a phase_type in ["train", "test']
+            to dataset used for training (or testing)
+        meters: List of meters (see :obj:`ClassyMeter`) to calculate during training
+        num_epochs: Number of epochs (passes over dataset) to train
+        test_only: Used to only run the test phase
+        base_model: Model to be trained, unwrapped in DDP or DP wrappers
+        optimizer: Optimizer used in train step
+        checkpoint: Serializable dict which represents state in training
+        phases: List of phase specific information, e.g. if phase is
+            train / test.
+        hooks: List of hooks to apply during training
+        train: Phase type, if true it means we are training,
+            false means testing
+        distributed_model: Base model, but wrapped in DDP (DistributedDataParallel)
+        phase_idx: Current phase id, first phase is 0, if task has not started
+            training then returns -1
+        train_phase_idx: Only counts train phases
+        num_updates: Number of total parameter updates applied to model
+            by the optimizer
+        data_iterator: Iterator which can be used to obtain batches
+        num_samples_this_phase: Number of samples ran this phase
+        losses: Loss curve
+
+    """
+
     def __init__(self):
+        """Constructs a ClassificationTask
+        """
         super().__init__()
 
         self.loss = None
@@ -55,32 +96,72 @@ class ClassificationTask(ClassyTask):
         self.losses = []
 
     def set_checkpoint(self, checkpoint):
+        """Sets checkpoint on task.
+
+        Args:
+            checkpoint: A serializable dict representing current task state
+        """
         assert (
             checkpoint is None or "classy_state_dict" in checkpoint
         ), "Checkpoint does not contain classy_state_dict"
         self.checkpoint = checkpoint
 
     def set_num_epochs(self, num_epochs: Union[int, float]):
+        """Set number of epochs to be run.
+
+        Args:
+           num_epochs: Number of epochs to run task
+        """
         self.num_epochs = num_epochs
         return self
 
     def set_dataset(self, dataset: ClassyDataset, phase_type: str):
+        """Set dataset for phase type on task
+
+        Args:
+            dataset: ClassyDataset for returning samples.
+            phase_type: str must be one of "train" or "test"
+        """
+        assert phase_type in [
+            "train",
+            "test",
+        ], "phase_type must be in ['train', 'test']"
         self.datasets[phase_type] = dataset
         return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
+        """Set optimizer for task
+
+        Args:
+            optimizer: optimizer for task
+        """
         self.optimizer = optimizer
         return self
 
     def set_loss(self, loss: ClassyLoss):
+        """Set loss function for task
+
+        Args:
+            loss: loss for task
+        """
         self.loss = loss
         return self
 
     def set_meters(self, meters: List["ClassyMeter"]):
+        """Set meters for task
+
+        Args:
+            meters: list of meters to compute during training
+        """
         self.meters = meters
         return self
 
     def set_hooks(self, hooks: List["ClassyHook"]):
+        """Set hooks for task
+
+        Args:
+            hooks: List of hooks to apply during training
+        """
         from classy_vision.hooks import ClassyHook
 
         assert isinstance(hooks, list)
@@ -93,10 +174,20 @@ class ClassificationTask(ClassyTask):
         return self
 
     def set_model(self, model: ClassyModel):
+        """Set model for task
+
+        Args:
+            model: Model to be trained
+        """
         self.base_model = model
         return self
 
     def set_test_only(self, test_only: bool):
+        """Set test only flag
+
+        Args:
+            test_only: If true, only test phases will be run
+        """
         self.test_only = test_only
         return self
 
@@ -134,29 +225,38 @@ class ClassificationTask(ClassyTask):
 
     @property
     def num_batches_per_phase(self):
+        """Returns number of batches in current phase iterator
+        """
         return len(self.data_iterator)
 
     @property
     def model(self):
+        """Returns model used in training (can be wrapped with DDP)
+        """
         return (
             self.distributed_model if is_distributed_training_run() else self.base_model
         )
 
     @property
     def phase_type(self):
+        """Returns current phase type. String with value "train" or "test"
+        """
         return "train" if self.train else "test"
 
     @property
     def eval_phase_idx(self):
+        """Returns current evaluation phase
+        """
         return self.phase_idx - self.train_phase_idx - 1
 
     def get_data_iterator(self):
+        """Returns data iterator for current phase
+        """
         return self.data_iterator
 
     def get_total_training_phases(self):
         """
-        Returns the total number of "train" phases in the list of execution
-        phases
+        Returns the total number of "train" phases in the task
         """
         num_training_phases = 0
         for phase in self.phases:
@@ -165,8 +265,9 @@ class ClassificationTask(ClassyTask):
         return num_training_phases
 
     def _build_phases(self):
-        """
-        Returns list of phases from config.  These phases will look like:
+        """Returns list of phases from config.
+
+        These phases will look like:
         {
           train: is this a train or test phase?
           optimizer: optimizer settings
@@ -195,6 +296,23 @@ class ClassificationTask(ClassyTask):
         multiprocessing_context=None,
         **kwargs,
     ):
+        """Buildss a dataloader iterable for a particular phase type.
+
+        Args:
+            phase_type: "train" or "test" iterable
+            num_workers: Number of dataloading processes. If 0,
+                dataloading is done on main process. See PyTorch dataloader
+                documentation for more details on num_workers and the usage
+                of python multiprocessing in dataloaders
+            pin_memory: if true pin memory on GPU. See PyTorch dataloader
+                documentation for details on pin_memory.
+            multiprocessing_context: Determines how processes are spawned.
+                Value must be one of None, "spawn", "fork", "forkserver".
+                If None, then context is inherited from parent process
+
+        Returns:
+            Returns a iterable over the dataset
+        """
         return self.datasets[phase_type].iterator(
             num_workers=num_workers,
             pin_memory=pin_memory,
@@ -205,6 +323,22 @@ class ClassificationTask(ClassyTask):
     def build_dataloaders(
         self, num_workers, pin_memory, multiprocessing_context=None, **kwargs
     ):
+        """Build a dataloader for each phase type
+
+        Args:
+            num_workers: Number of dataloading processes. If 0,
+                dataloading is done on main process. See PyTorch dataloader
+                documentation for more details on num_workers and the usage
+                of python multiprocessing in dataloaders
+            pin_memory: if true pin memory on GPU. See PyTorch dataloader
+                documentation for details on pin_memory.
+            multiprocessing_context: Determines how processes are spawned.
+                Value must be one of None, "spawn", "fork", "forkserver".
+                If None, then context is inherited from parent process
+
+        Returns:
+            Returns an iterable over the dataset associated with each phase_type
+        """
         return {
             phase_type: self.build_dataloader(
                 phase_type,
@@ -223,6 +357,17 @@ class ClassificationTask(ClassyTask):
         use_gpu=False,
         dataloader_mp_context=None,
     ):
+        """Prepares task for training, populates all derived attributes
+
+        Args:
+            num_dataloader_workers: Number of dataloading processes. If 0,
+                dataloading is done on main process
+            pin_memory: if true pin memory on GPU
+            use_gpu: if true, load model, optimizer, loss, etc on GPU
+            dataloader_mp_context: Determines how processes are spawned.
+                Value must be one of None, "spawn", "fork", "forkserver".
+                If None, then context is inherited from parent process
+        """
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
             num_workers=num_dataloader_workers,
@@ -255,6 +400,8 @@ class ClassificationTask(ClassyTask):
             ), "Update classy state from checkpoint was unsuccessful."
 
     def init_distributed_data_parallel_model(self):
+        """Sets up distributed dataparallel and wraps model in DDP
+        """
         assert (
             self.distributed_model is None
         ), "init_ddp_non_elastic must only be called once"
@@ -263,6 +410,10 @@ class ClassificationTask(ClassyTask):
 
     @property
     def where(self):
+        """Returns the proportion of training that has completed.
+
+        Returned value is a float in the range [0, 1)
+        """
         current_step = self.num_updates / self.get_global_batchsize()
         num_steps = self.get_total_training_phases() * self.num_batches_per_phase
         where = current_step / num_steps
@@ -271,7 +422,12 @@ class ClassificationTask(ClassyTask):
 
         return where
 
-    def get_classy_state(self, deep_copy=False):
+    def get_classy_state(self, deep_copy: bool = False):
+        """Returns serialiable state of task
+
+        Args:
+            deep_copy: If true, does a deep copy of state before returning.
+        """
         classy_state_dict = {
             "train": self.train,
             "base_model": self.base_model.get_classy_state(),
@@ -289,6 +445,11 @@ class ClassificationTask(ClassyTask):
         return classy_state_dict
 
     def set_classy_state(self, state):
+        """Set task state
+
+        Args:
+            state: Dict containing state of a task
+        """
         self.train = state["train"]
         self.base_model.set_classy_state(state["base_model"])
         for meter, meter_state in zip(self.meters, state["meters"]):
@@ -315,6 +476,13 @@ class ClassificationTask(ClassyTask):
         self._set_model_train_mode()
 
     def train_step(self, use_gpu, local_variables=None):
+        """Train step to be executed in train loop
+
+        Args:
+            use_gpu: if true, execute training on GPU
+            local_variables: Dict containing intermediate values
+                in train_step for access by hooks
+        """
         from classy_vision.hooks import ClassyHookFunctions
 
         if local_variables is None:
@@ -412,6 +580,12 @@ class ClassificationTask(ClassyTask):
         timer_train_step.record()
 
     def advance_phase(self):
+        """Performs bookkeeping / task updates between phases
+
+        Increments phase idx, resets meters, resets loss history,
+        resets counters, shuffles dataset, rebuilds iterators, and
+        sets the train / test state for phase.
+        """
         logging.info("Advancing phase")
         # Reset meters for next phase / epoch
         for meter in self.meters:
@@ -436,6 +610,8 @@ class ClassificationTask(ClassyTask):
         self._set_model_train_mode()
 
     def done_training(self):
+        """Stop condition for training
+        """
         return self.phase_idx + 1 >= len(self.phases)
 
     def _recreate_data_loader_from_dataset(self, phase_type=None):
@@ -473,7 +649,8 @@ class ClassificationTask(ClassyTask):
         )
 
     def _reshuffle_data(self):
-        # (Re-)Shuffle data if needed
+        """Shuffles the dataset if needed.
+        """
         if hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle"):
             self.dataloaders[self.phase_type].dataset.do_shuffle(
                 epoch_num=self.phase_idx
@@ -481,28 +658,38 @@ class ClassificationTask(ClassyTask):
             logging.info("Data shuffled.")
 
     def create_data_iterator(self):
+        """Creates data iterator for phase.
+        """
         # Delete iterator explicitly so that all dataloader processes
         # are cleaned up.
         del self.data_iterator
         self.data_iterator = iter(self.dataloaders[self.phase_type])
 
     def _set_model_train_mode(self):
+        """Set train mode for model
+        """
         phase = self.phases[self.phase_idx]
         self.base_model.train(phase["train"])
 
         if self.train and self.train_phase_idx >= 0:
             self.optimizer.update_schedule_on_epoch(self.where)
 
-    # Functions below should be better abstracted into the dataloader
+    # TODO: Functions below should be better abstracted into the dataloader
     # abstraction
     def get_batchsize_per_replica(self):
+        """Return local replica's batchsize for dataset (e.g. batchsize per GPU)
+        """
         # TODO(T47573564) - cleaner abstraction
         return self.dataloaders[self.phase_type].dataset.get_batchsize_per_replica()
 
     def get_global_batchsize(self):
+        """Return global batchsize across all trainers
+        """
         return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
 
     def get_total_samples_trained_this_phase(self):
+        """Returns the total number of samples processed in current phase
+        """
         # TODO(T47573564) - cleaner abstraction
         # TODO(T47387605) - instead of get_world_size, we need the max world
         # size for elasticity to match parity with Uru and other systems,
