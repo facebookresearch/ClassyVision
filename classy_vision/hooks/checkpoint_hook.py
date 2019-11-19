@@ -21,11 +21,6 @@ class CheckpointHook(ClassyHook):
     Hook to checkpoint a model's task.
 
     Saves the checkpoints in checkpoint_folder.
-    Args:
-        checkpoint_folder - Folder to store checkpoints in
-        input_args - Any arguments to save about the runtime setup
-        phase_types - If phase_types is specified, only checkpoint on those phase types
-        checkpoint_period - Checkpoint at the end of every x phases (default 1)
     """
 
     on_rendezvous = ClassyHook._noop
@@ -44,6 +39,17 @@ class CheckpointHook(ClassyHook):
         phase_types: Optional[Collection[str]] = None,
         checkpoint_period: int = 1,
     ) -> None:
+        """The constructor method of CheckpointHook.
+
+        Args:
+            checkpoint_folder - Folder to store checkpoints in
+            input_args - Any arguments to save about the runtime setup. For example,
+                it is useful to store the config that was used to instantiate the model.
+            phase_types - If phase_types is specified, only checkpoint on those phase
+                types. Each item in phase_types must be either "train" or "test".
+            checkpoint_period - Checkpoint at the end of every x phases (default 1)
+
+        """
         super().__init__()
         self.checkpoint_folder: str = checkpoint_folder
         self.input_args: Any = input_args
@@ -83,9 +89,6 @@ class CheckpointHook(ClassyHook):
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Check that the checkpoint folder actually exists. If not, raise an exception.
-        """
         if getattr(task, "test_only", False):
             return
         if not os.path.exists(self.checkpoint_folder):
@@ -97,8 +100,9 @@ class CheckpointHook(ClassyHook):
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Checkpoint the task every checkpoint_period phases.
+        """Checkpoint the task every checkpoint_period phases.
+
+        We do not necessarily checkpoint the task at the end of every phase.
         """
         if not is_master() or task.phase_type not in self.phase_types:
             return

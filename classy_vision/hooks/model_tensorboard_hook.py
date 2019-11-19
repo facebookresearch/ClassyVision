@@ -37,6 +37,12 @@ class ModelTensorboardHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, tb_writer) -> None:
+        """The constructor method of ModelTensorboardHook.
+
+        Args:
+            tb_writer: Tensorboard SummaryWriter instance
+
+        """
         super().__init__()
         if not tbx_available:
             raise RuntimeError(
