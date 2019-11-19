@@ -28,7 +28,7 @@
     },
     "meters": {
         "accuracy": {
-            "topk": [1, 5]
+            "topk": [1]
         }
     },
     "model": {
