@@ -11,7 +11,8 @@ from classy_vision.losses import ClassyLoss, register_loss
 @register_loss("my_loss")
 class MyLoss(ClassyLoss):
     def forward(self, input, target):
-        return F.cross_entropy(input, target)
+        labels = F.one_hot(target, num_classes=2).float()
+        return F.binary_cross_entropy(input, labels)
 
     @classmethod
     def from_config(cls, config):
