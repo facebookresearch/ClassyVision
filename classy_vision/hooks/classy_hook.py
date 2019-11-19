@@ -29,8 +29,7 @@ class ClassyHookFunctions(Enum):
 
 
 class ClassyHookState:
-    """
-    Class to store state within instances of ClassyHook.
+    """Class to store state within instances of ClassyHook.
 
     Any serializable data can be stored in the instance's attributes.
     """
@@ -43,9 +42,13 @@ class ClassyHookState:
 
 
 class ClassyHook(ABC):
-    """
-    Abstract class for hooks to plug in to the classy workflow at various points
-    to add various functionalities such as logging and reporting.
+    """Base class for hooks.
+
+    Hooks allow to inject behavior at different places of the training loop, which
+        are listed below in the chronological order.
+
+    on_start -> on_phase_start -> on_sample -> on_forward -> on_loss ->
+        on_backward -> on_update -> on_phase_end -> on_end
 
     Deriving classes should call super().__init__() and store any state in
     self.state. Any state added to this property should be serializable.
@@ -57,111 +60,91 @@ class ClassyHook(ABC):
             self.state.b = "my_hook"
             # the following line is not allowed
             # self.state.my_lambda = lambda x: x^2
+
     """
 
     def __init__(self):
         self.state = ClassyHookState()
 
     def _noop(self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]) -> None:
-        """
-        Derived classes can set their hook functions to this if they want those
-        hook functions to not do anything.
+        """Derived classes can set their hook functions to this.
+
+        This is useful if they want those hook functions to not do anything.
+
         """
         pass
 
     @classmethod
     def name(cls) -> str:
-        """
-        Returns the name of the class.
-        """
+        """Returns the name of the class."""
         return cls.__name__
 
     @abstractmethod
     def on_rendezvous(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called when the trainers rendezvous.
-        """
+        """Called when the trainers rendezvous."""
         pass
 
     @abstractmethod
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called at the start of training.
-        """
+        """Called at the start of training."""
         pass
 
     @abstractmethod
     def on_phase_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called at the start of each phase.
-        """
+        """Called at the start of each phase."""
         pass
 
     @abstractmethod
     def on_sample(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called each time trainer obtained a sample.
-        """
+        """Called each time trainer obtained a sample from the dataset."""
         pass
 
     @abstractmethod
     def on_forward(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called each time forward pass is triggered.
-        """
+        """Called each time forward pass is done in the model."""
         pass
 
     @abstractmethod
     def on_loss(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called each time a loss has been computed.
-        """
+        """Called each time after a loss has been computed."""
         pass
 
     @abstractmethod
     def on_backward(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called each time a backward step is performed on the loss.
-        """
+        """Called each time a backward step is performed on the loss."""
         pass
 
     @abstractmethod
     def on_update(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called each time parameters have been updated.
-        """
+        """Called each time after parameters have been updated by the optimizer."""
         pass
 
     @abstractmethod
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Called at the end of each phase.
-        """
+        """Called at the end of each phase (epoch)."""
         pass
 
     @abstractmethod
     def on_end(self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]) -> None:
-        """
-        Called at the end of training.
-        """
+        """Called at the end of training."""
         pass
 
     def get_classy_state(self) -> Dict[str, Any]:
@@ -170,7 +153,8 @@ class ClassyHook(ABC):
         The returned state is used for checkpointing.
 
         Returns:
-            A state dictionary containing the state of the hook.
+            A state dictionary containing the state of the hook.\
+
         """
         return self.state.get_classy_state()
 
@@ -182,5 +166,6 @@ class ClassyHook(ABC):
                 :method:`get_classy_state`.
 
         This is used to load the state of the hook from a checkpoint.
+
         """
         self.state.set_classy_state(state_dict)

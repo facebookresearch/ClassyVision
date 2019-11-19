@@ -30,9 +30,7 @@ class ModelComplexityHook(ClassyHook):
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Measure number of parameters and number of FLOPs.
-        """
+        """Measure number of parameters and number of FLOPs."""
         try:
             num_flops = compute_flops(
                 task.base_model,
@@ -50,7 +48,8 @@ class ModelComplexityHook(ClassyHook):
         except NotImplementedError:
             logging.warning(
                 """Model contains unsupported modules:
-            Could not compute FLOPs for model forward pass. Exception:""", exc_info=True
+            Could not compute FLOPs for model forward pass. Exception:""",
+                exc_info=True,
             )
         logging.info(
             "Number of parameters in model: %d" % count_params(task.base_model)

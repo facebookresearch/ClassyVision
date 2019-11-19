@@ -29,9 +29,6 @@ class TensorboardPlotHook(ClassyHook):
     Hook for writing the losses, learning rates and meters to tensorboard.
 
     Global steps are counted in terms of the number of samples processed.
-
-    Args:
-        tb_writer: Tensorboard SummaryWriter instance
     """
 
     on_rendezvous = ClassyHook._noop
@@ -43,6 +40,11 @@ class TensorboardPlotHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, tb_writer) -> None:
+        """The constructor method of TensorboardPlotHook.
+
+        Args:
+            tb_writer: Tensorboard SummaryWriter instance
+        """
         super().__init__()
         if not tbx_available:
             raise RuntimeError(
@@ -57,9 +59,7 @@ class TensorboardPlotHook(ClassyHook):
     def on_phase_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Initialize losses and learning_rates.
-        """
+        """Initialize losses and learning_rates."""
         self.learning_rates = []
         self.wall_times = []
         self.num_steps_global = []
@@ -67,9 +67,7 @@ class TensorboardPlotHook(ClassyHook):
     def on_update(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Store the observed learning rates.
-        """
+        """Store the observed learning rates."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")
             return
@@ -87,9 +85,7 @@ class TensorboardPlotHook(ClassyHook):
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Add the losses and learning rates to tensorboard.
-        """
+        """Add the losses and learning rates to tensorboard."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")
             return

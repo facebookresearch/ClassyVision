@@ -15,8 +15,6 @@ from classy_vision.hooks.classy_hook import ClassyHook
 class LossLrMeterLoggingHook(ClassyHook):
     """
     Logs the loss, optimizer LR, and meters. Logs at the end of a phase.
-
-    if log_freq is specified, logs every log_freq batches also.
     """
 
     on_rendezvous = ClassyHook._noop
@@ -28,6 +26,12 @@ class LossLrMeterLoggingHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
+        """The constructor method of LossLrMeterLoggingHook.
+
+        Args:
+            log_freq: if specified, logs every log_freq batches also.
+
+        """
         super().__init__()
         self.log_freq: Optional[int] = log_freq
 

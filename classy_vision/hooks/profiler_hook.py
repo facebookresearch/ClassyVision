@@ -14,7 +14,8 @@ from classy_vision.hooks.classy_hook import ClassyHook
 
 class ProfilerHook(ClassyHook):
     """
-    Hook to profile a model.
+    Hook to profile a model and to show model runtime information, such as
+        the time breakdown in milliseconds of forward/backward pass.
     """
 
     on_rendezvous = ClassyHook._noop
@@ -30,9 +31,7 @@ class ProfilerHook(ClassyHook):
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Profile the forward pass.
-        """
+        """Profile the forward pass."""
         logging.info("Profiling forward pass...")
         batchsize_per_replica = getattr(
             task.dataloaders[task.phase_type].dataset, "batchsize_per_replica", 1

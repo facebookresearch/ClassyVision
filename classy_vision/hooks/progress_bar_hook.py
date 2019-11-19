@@ -33,6 +33,7 @@ class ProgressBarHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self) -> None:
+        """The constructor method of ProgressBarHook."""
         super().__init__()
         self.progress_bar: Optional[progressbar.ProgressBar] = None
         self.bar_size: int = 0
@@ -41,9 +42,7 @@ class ProgressBarHook(ClassyHook):
     def on_phase_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Create and display a progress bar with 0 progress.
-        """
+        """Create and display a progress bar with 0 progress."""
         if not progressbar_available:
             raise RuntimeError(
                 "progressbar module not installed, cannot use ProgressBarHook"
@@ -58,9 +57,7 @@ class ProgressBarHook(ClassyHook):
     def on_update(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Update the progress bar with the batch size.
-        """
+        """Update the progress bar with the batch size."""
         if is_master() and self.progress_bar is not None:
             self.batches += 1
             self.progress_bar.update(min(self.batches, self.bar_size))
@@ -68,8 +65,6 @@ class ProgressBarHook(ClassyHook):
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """
-        Clear the progress bar at the end of the phase.
-        """
+        """Clear the progress bar at the end of the phase."""
         if is_master() and self.progress_bar is not None:
             self.progress_bar.finish()
