@@ -36,7 +36,8 @@ class ExponentialMovingAverageModelHook(ClassyHook):
     def __init__(
         self, decay: float, consider_bn_buffers: bool = True, device: str = "cpu"
     ) -> None:
-        """
+        """The constructor method of ExponentialMovingAverageModelHook.
+
         Args:
             decay: EMA decay factor, should be in [0, 1]. A decay of 0 corresponds to
                 always using the latest value (no EMA) and a decay of 1 corresponds to

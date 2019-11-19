@@ -24,8 +24,13 @@ except ImportError:
 
 
 class VisdomHook(ClassyHook):
-    """
-    Plots metrics on to visdom.
+    """Plots metrics on to Visdom.
+
+    Visdom is a flexible tool for creating, organizing, and sharing visualizations
+        of live, rich data. It supports Python.
+
+    See more details at https://github.com/facebookresearch/visdom.
+
     """
 
     on_rendezvous = ClassyHook._noop
@@ -41,6 +46,13 @@ class VisdomHook(ClassyHook):
     def __init__(
         self, server: str, port: str, env: str = "main", title_suffix: str = ""
     ) -> None:
+        """
+        Args:
+            server: host name of the visdom server
+            port: port of visdom server, such as 8097
+            env: environment of visdom
+            title_suffix: suffix that will be appended to the title
+        """
         super().__init__()
         if not visdom_available:
             raise RuntimeError("Visdom is not installed, cannot use VisdomHook")

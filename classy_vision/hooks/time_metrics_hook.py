@@ -17,8 +17,6 @@ from classy_vision.hooks.classy_hook import ClassyHook
 class TimeMetricsHook(ClassyHook):
     """
     Computes and prints performance metrics. Logs at the end of a phase.
-
-    if log_freq is specified, logs every log_freq batches also.
     """
 
     on_rendezvous = ClassyHook._noop
@@ -30,6 +28,10 @@ class TimeMetricsHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
+        """
+        Args:
+            log_freq: if specified, logs every log_freq batches also.
+        """
         super().__init__()
         self.log_freq: Optional[int] = log_freq
         self.start_time: Optional[float] = None
