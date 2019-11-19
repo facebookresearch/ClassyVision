@@ -28,8 +28,10 @@ encrypted data on multiple AWS instances. See :doc:`aws`.
     meters
     models
     optim
+    param_scheduler
     tasks
     trainer
+    transforms
 
 
 Indices and tables
