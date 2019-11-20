@@ -113,6 +113,13 @@ def add_generic_args(parser):
         type=str,
         help="torchvision video decoder backend (pyav or video_reader). Default pyav",
     )
+    parser.add_argument(
+        "--distributed_backend",
+        default="none",
+        type=str,
+        help="""Distributed backend: either 'none' (for non-distributed runs)
+             or 'ddp' (for distributed runs). Default none.""",
+    )
 
     return parser
 
