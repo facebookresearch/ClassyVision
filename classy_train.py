@@ -56,7 +56,7 @@ from classy_vision.hooks import (
     VisdomHook,
 )
 from classy_vision.tasks import FineTuningTask, build_task
-from classy_vision.trainer import DistributedTrainer
+from classy_vision.trainer import DistributedTrainer, LocalTrainer
 from torchvision import set_video_backend
 
 
@@ -117,9 +117,11 @@ def main(args, config):
     if args.device is not None:
         use_gpu = args.device == "gpu"
 
-    trainer = DistributedTrainer(
-        use_gpu=use_gpu, num_dataloader_workers=args.num_workers
-    )
+    trainer_class = {"none": LocalTrainer, "ddp": DistributedTrainer}[
+        args.distributed_backend
+    ]
+
+    trainer = trainer_class(use_gpu=use_gpu, num_dataloader_workers=args.num_workers)
     trainer.train(task)
 
 
