@@ -53,6 +53,14 @@ class ClassyModel(nn.Module):
         """
         raise NotImplementedError
 
+    @classmethod
+    def from_checkpoint(cls, checkpoint):
+        from . import build_model
+
+        model = build_model(checkpoint["input_args"]["config"]["model"])
+        model.set_classy_state(checkpoint["classy_state_dict"]["base_model"])
+        return model
+
     def get_classy_state(self, deep_copy=False):
         """Get the state of the ClassyModel.
 
