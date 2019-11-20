@@ -29,7 +29,7 @@ class UCF101Dataset(ClassyVideoDataset):
     number of clips (e.g. 10) from the video.
 
     To give an example, for 2 videos with 10 and 15 frames respectively,
-    if ``frames_per_clip=5``and ``step_between_clips=5``,
+    if ``frames_per_clip=5`` and ``step_between_clips=5``,
     the dataset size will be (2 + 3) = 5, where the first two elements will come
     from video 1, and the next three elements from video 2. Note that we drop
     clips which do not have exactly ``frames_per_clip`` elements, so not all

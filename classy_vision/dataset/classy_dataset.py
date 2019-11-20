@@ -84,20 +84,22 @@ class ClassyDataset:
         This function parses out common config options.
 
         Args:
-            config: A dict with the following string keys:
-                batchsize_per_replica (int): Must be a positive int, batch size for each
-                    replica
-                use_shuffle (bool): Whether to enable shuffling for the dataset
-                num_samples (int, optional): When set, restricts the number of samples
-                    in a dataset
-                transforms: list of tranform configurations to be applied in order
+            config: A dict with the following string keys -
+
+                | batchsize_per_replica (int): Must be a positive int, batch size
+                |    for each replica
+                | use_shuffle (bool): Whether to enable shuffling for the dataset
+                | num_samples (int, optional): When set, restricts the number of samples
+                |    in a dataset
+                | transforms: list of tranform configurations to be applied in order
+
         Returns:
-            A tuple containing the following variables:
-                transform_config: Config for the dataset transform. Can be passed to
-                    :func:`build_transform`
-                batchsize_per_replica: Batch size per replica
-                shuffle: Whether we should shuffle between epochs
-                num_samples: When set, restricts the number of samples in a dataset
+            A tuple containing the following variables -
+                | transform_config: Config for the dataset transform. Can be passed to
+                |    :func:`build_transform`
+                | batchsize_per_replica: Batch size per replica
+                | shuffle: Whether we should shuffle between epochs
+                | num_samples: When set, restricts the number of samples in a dataset
         """
         batchsize_per_replica = config.get("batchsize_per_replica")
         shuffle = config.get("use_shuffle")
