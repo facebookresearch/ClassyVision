@@ -4,11 +4,14 @@
       "id": "getting_started",
       "title": "Getting started"
      },{
+      "id": "classy_loss",
+      "title": "Creating a custom loss"
+     },{
+      "id": "video_classification",
+      "title": "How to do video classification"
+     },{
       "id": "fine_tuning",
       "title": "Fine Tuning"
-     },{
-      "id": "classy_loss",
-      "title": "Classy Loss"
      },{
       "id": "wsl_model_predict",
       "title": "WSL Model Predict"
