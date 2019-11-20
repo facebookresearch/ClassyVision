@@ -81,18 +81,8 @@ class SyntheticVideoDataset(ClassyVideoDataset):
         """Instantiates a SyntheticVideoDataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. Should contain the following keys:
-                num_classes: See :method:`__init__`
-                split: See :method:`__init__`
-                batchsize_per_replica: See :method:`__init__`
-                shuffle: See :method:`__init__`
-                transform: The transform configuration. See :method:`build_transform`
-                num_samples: See :method:`__init__`
-                frames_per_clip: See :method:`__init__`
-                video_width: See :method:`__init__`
-                video_height: See :method:`__init__`
-                audio_samples: See :method:`__init__`
-                clips_per_video: See :method:`__init__`
+            config: A configuration for the dataset. See :func:`__init__` for parameters
+                expected in the config.
 
         Returns:
             A SyntheticVideoDataset instance
