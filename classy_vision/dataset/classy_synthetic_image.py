@@ -61,15 +61,8 @@ class SyntheticImageDataset(ClassyDataset):
         """Instantiates a SyntheticImageDataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. Should contain the following keys:
-                batchsize_per_replica: See :method:`__init__`
-                shuffle: See :method:`__init__`
-                transform: The transform configuration. See :method:`build_transform`
-                num_samples: See :method:`__init__`
-                crop_size: See :method:`__init__`
-                class_ratio: See :method:`__init__`
-                seed: See :method:`__init__`
-                split: See :method:`__init__`
+            config: A configuration for the dataset. See :func:`__init__` for parameters
+                expected in the config.
 
         Returns:
             A SyntheticImageDataset instance

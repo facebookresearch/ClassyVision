@@ -35,9 +35,9 @@ def register_dataset(name):
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyDataset subclass like this:
 
-        @register_dataset("my_dataset")
-        class MyDataset(ClassyDataset):
-            ...
+    |    @register_dataset("my_dataset")
+    |    class MyDataset(ClassyDataset):
+    |        ...
 
     To instantiate a dataset from a configuration file, see
     :func:`build_dataset`."""
@@ -81,4 +81,6 @@ __all__ = [
     "SyntheticImageDataset",
     "SyntheticVideoDataset",
     "UCF101Dataset",
+    "build_dataset",
+    "register_dataset",
 ]
