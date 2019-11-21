@@ -11,7 +11,24 @@ from classy_vision.heads import ClassyHead, register_head
 
 @register_head("fully_connected")
 class FullyConnectedHead(ClassyHead):
-    def __init__(self, unique_id, num_classes, in_plane):
+    """This head defines a 2d average pooling layer
+    (:class:`torch.nn.AdaptiveAvgPool2d`) followed by a fully connected
+    layer (:class:`torch.nn.Linear`).
+    """
+
+    def __init__(self, unique_id: str, num_classes: int, in_plane: int):
+        """Constructor for FullyConnectedHead
+
+        Args:
+            unique_id: A unique identifier for the head. Multiple instances of
+                the same head might be attached to a model, and unique_id is used
+                to refer to them.
+
+            num_classes: Number of classes for the head. If None, then the fully
+                connected layer is not applied.
+
+            in_plane: Input size for the fully connected layer.
+        """
         super().__init__(unique_id, num_classes)
         assert num_classes is None or is_pos_int(num_classes)
         assert is_pos_int(in_plane)
