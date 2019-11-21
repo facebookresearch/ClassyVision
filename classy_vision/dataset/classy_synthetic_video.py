@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict
 
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from torch.utils.data.distributed import DistributedSampler
@@ -33,7 +33,7 @@ class SyntheticVideoDataset(ClassyVideoDataset):
         split: str,
         batchsize_per_replica: int,
         shuffle: bool,
-        transform: Optional[Callable],
+        transform: Callable,
         num_samples: int,
         frames_per_clip: int,
         video_width: int,
@@ -41,12 +41,12 @@ class SyntheticVideoDataset(ClassyVideoDataset):
         audio_samples: int,
         clips_per_video: int,
     ):
-        """
+        """The constructor of SyntheticVideoDataset.
+
         Args:
             num_classes: Number of classes in the generated targets.
             split: Split of dataset to use
-            batchsize_per_replica: Positive integer indicating batch size for each
-                replica
+            batchsize_per_replica: batch size per model replica
             shuffle: Whether we should shuffle between epochs
             transform: Transform to be applied to each sample
             num_samples: Number of samples to return

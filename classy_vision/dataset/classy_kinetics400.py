@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+from typing import Any, Callable, Dict, List, Optional
 
 import torch
 from torchvision.datasets.kinetics import Kinetics400
@@ -16,9 +17,9 @@ from .transforms.util_video import build_video_field_transform_default
 
 @register_dataset("kinetics400")
 class Kinetics400Dataset(ClassyVideoDataset):
-    """
-    Kinetics-400 is an action recognition video dataset, and it has 400 classes.
-    <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
+    """Kinetics-400 is an action recognition video dataset, and it has 400 classes.
+
+    Page: <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
     It is originally published in (https://arxiv.org/pdf/1705.06950.pdf).
 
     This dataset consider every video as a collection of video clips of fixed size,
@@ -40,49 +41,57 @@ class Kinetics400Dataset(ClassyVideoDataset):
     folder.
 
     It is built on top of Kinetics400 dataset class in TorchVision.
+
     """
 
     def __init__(
         self,
-        split,
-        batchsize_per_replica,
-        shuffle,
-        transform,
-        num_samples,
-        frames_per_clip,
-        video_width,
-        video_height,
-        video_min_dimension,
-        audio_samples,
-        audio_channels,
-        step_between_clips,
-        frame_rate,
-        clips_per_video,
-        video_dir,
-        extensions,
-        metadata_filepath,
+        split: str,
+        batchsize_per_replica: int,
+        shuffle: bool,
+        transform: Callable,
+        num_samples: Optional[int],
+        frames_per_clip: int,
+        video_width: int,
+        video_height: int,
+        video_min_dimension: int,
+        audio_samples: int,
+        audio_channels: int,
+        step_between_clips: int,
+        frame_rate: Optional[int],
+        clips_per_video: int,
+        video_dir: str,
+        extensions: List[str],
+        metadata_filepath: str,
     ):
-        """
+        """The constructor of Kinetics400Dataset.
+
         Args:
-            split (str): dataset split which can be either "train" or "test"
-            shuffle (bool): If true, shuffle the dataset
-            transform (dict): a dict where transforms video and audio data
-            num_samples (optional(int)): if not None, it will subsample dataset
-            frames_per_clip (int): the No. of frames in a video clip
-            video_width (int): rescaled video width. If 0, keep original width
-            video_height (int): rescaled video height. If 0, keep original height
-            video_min_dimension (int): rescale video so that min(height, width) =
+            split: dataset split which can be either "train" or "test"
+            batchsize_per_replica: batch size per model replica
+            shuffle: If true, shuffle the dataset
+            transform: a dict where transforms video and audio data
+            num_samples: if provided, it will subsample dataset
+            frames_per_clip: the No. of frames in a video clip
+            video_width: rescaled video width. If 0, keep original width
+            video_height: rescaled video height. If 0, keep original height
+            video_min_dimension: rescale video so that min(height, width) =
                 video_min_dimension. If 0, keep original video resolution. Note
                 only one of (video_width, video_height) and (video_min_dimension)
                 can be set
-            audio_samples (int): desired audio sample rate. If 0, keep original
-                audio sample rate.
-            step_between_clips (int): No. of frames between each clip.
-            frame_rate (optional(int)): desired video frame rate. If None, keep
+            audio_samples: desired audio sample rate. If 0, keep original
+                audio sample rate
+            audio_channels: desire No. of audio channel. If 0, keep original audio
+                channels
+            step_between_clips: No. of frames between each clip.
+            frame_rate: desired video frame rate. If None, keep
                 orignal video frame rate.
-            clips_per_video (int): No. of clips to sample from each video
-            video_dir (str): path to video folder
-            metadata_filepath (str): path to the dataset meta data
+            clips_per_video: No. of clips to sample from each video
+            video_dir: path to video folder
+            extensions: A list of file extensions, such as "avi" and "mp4". Only
+                video matching those file extensions are added to the dataset
+            metadata_filepath: path to the dataset meta data
+
         """
         # dataset metadata includes the path of video file, the pts of frames in
         # the video and other meta info such as video fps, duration, audio sample rate.
@@ -125,7 +134,32 @@ class Kinetics400Dataset(ClassyVideoDataset):
         )
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "Kinetics400Dataset":
+        """Instantiates a UCF101Dataset from a configuration.
+
+        Args:
+            config: A configuration for the dataset. Should contain the following keys,
+                and by default see :method:`__init__` for their meaning
+                - split
+                - batchsize_per_replica
+                - shuffle
+                - transform: The transform configuration. See :method:`build_transform`
+                - num_samples
+                - frames_per_clip
+                – video_width
+                – video_height
+                – audio_samples
+                - audio_channels
+                - step_between_clips
+                – frame_rate
+                – clips_per_video
+                - video_dir
+                – extensions
+                - metadata_filepath
+        Returns:
+            A Kinetics400Dataset instance
+
+        """
         required_args = ["split", "metadata_file", "video_dir"]
         assert all(
             arg in config for arg in required_args
