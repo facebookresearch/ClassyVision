@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torchvision.transforms as transforms
 
-from . import ClassyTransform, build_transforms, register_transform
+from . import ClassyTransform, build_transform, build_transforms, register_transform
 
 
 class ImagenetConstants:
@@ -29,6 +29,7 @@ class ImagenetConstants:
     RESIZE = 256
 
 
+@register_transform("apply_transform_to_key")
 class ApplyTransformToKey:
     """Serializable class that applies a transform to a key specified field in samples.
     """
@@ -44,6 +45,15 @@ class ApplyTransformToKey:
         """
         self.key: Union[int, str] = key
         self.transform: Callable = transform
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]):
+        if isinstance(config["transform"], list):
+            transform = build_transforms(config["transform"])
+        else:
+            transform = build_transform(config["transform"])
+
+        return cls(transform=transform, key=config["key"])
 
     def __call__(
         self, sample: Union[Tuple[Any], Dict[str, Any]]
