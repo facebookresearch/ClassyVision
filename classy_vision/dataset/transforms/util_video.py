@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 import torchvision.transforms._transforms_video as transforms_video
 
 from . import ClassyTransform, build_transforms, register_transform
-from .util import FieldTransform, ImagenetConstants
+from .util import ApplyTransformToKey, ImagenetConstants
 
 
 class VideoConstants:
@@ -371,7 +371,7 @@ def build_video_field_transform_default(
             as an example
 
     """
-    transform = FieldTransform(ClassyVideoGenericTransform(config, split), key=key)
+    transform = ApplyTransformToKey(ClassyVideoGenericTransform(config, split), key=key)
     if key_map_transform is None:
         return transform
 
