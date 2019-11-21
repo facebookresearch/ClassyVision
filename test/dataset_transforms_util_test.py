@@ -10,6 +10,7 @@ import torch
 import torchvision.transforms as transforms
 from classy_vision.dataset.core.random_image_datasets import (
     RandomImageBinaryClassDataset,
+    SampleType,
 )
 from classy_vision.dataset.transforms.util import (
     ImagenetNoAugmentTransform,
@@ -18,13 +19,17 @@ from classy_vision.dataset.transforms.util import (
 
 
 class DatasetTransformsUtilTest(unittest.TestCase):
-    def get_test_image_dataset(self):
+    def get_test_image_dataset(self, sample_type):
         return RandomImageBinaryClassDataset(
-            crop_size=224, class_ratio=0.5, num_samples=100, seed=0
+            crop_size=224,
+            class_ratio=0.5,
+            num_samples=100,
+            seed=0,
+            sample_type=sample_type,
         )
 
-    def test_build_field_transform_default_imagenet(self):
-        dataset = self.get_test_image_dataset()
+    def test_build_dict_field_transform_default_imagenet(self):
+        dataset = self.get_test_image_dataset(SampleType.DICT)
 
         # should apply the transform in the config
         config = [{"name": "ToTensor"}]
@@ -56,6 +61,45 @@ class DatasetTransformsUtilTest(unittest.TestCase):
         sample = dataset[0]
         input_image = dataset[0]["input"]
         output_image = transform(sample)["input"]
+        self.assertTrue(
+            torch.allclose(output_image, ImagenetNoAugmentTransform()(input_image))
+        )
+
+    def test_build_tuple_field_transform_default_imagenet(self):
+        dataset = self.get_test_image_dataset(SampleType.TUPLE)
+
+        # should apply the transform in the config
+        config = [{"name": "ToTensor"}]
+        default_transform = transforms.Compose(
+            [transforms.CenterCrop(100), transforms.ToTensor()]
+        )
+        transform = build_field_transform_default_imagenet(
+            config, default_transform=default_transform, key=0, key_map_transform=None
+        )
+        sample = dataset[0]
+        input_image = dataset[0][0]
+        output_image = transform(sample)[0]
+        self.assertTrue(
+            torch.allclose(output_image, transforms.ToTensor()(input_image))
+        )
+
+        # should apply default_transform
+        config = None
+        transform = build_field_transform_default_imagenet(
+            config, default_transform=default_transform, key=0, key_map_transform=None
+        )
+        sample = dataset[0]
+        input_image = dataset[0][0]
+        output_image = transform(sample)[0]
+        self.assertTrue(torch.allclose(output_image, default_transform(input_image)))
+
+        # should apply the transform for a test split
+        transform = build_field_transform_default_imagenet(
+            config, split="test", key=0, key_map_transform=None
+        )
+        sample = dataset[0]
+        input_image = dataset[0][0]
+        output_image = transform(sample)[0]
         self.assertTrue(
             torch.allclose(output_image, ImagenetNoAugmentTransform()(input_image))
         )
