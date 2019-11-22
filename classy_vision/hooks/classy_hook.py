@@ -21,7 +21,7 @@ class ClassyHookFunctions(Enum):
     on_phase_start = auto()
     on_sample = auto()
     on_forward = auto()
-    on_loss = auto()
+    on_loss_and_meter = auto()
     on_backward = auto()
     on_update = auto()
     on_phase_end = auto()
@@ -47,7 +47,7 @@ class ClassyHook(ABC):
     Hooks allow to inject behavior at different places of the training loop, which
         are listed below in the chronological order.
 
-    on_start -> on_phase_start -> on_sample -> on_forward -> on_loss ->
+    on_start -> on_phase_start -> on_sample -> on_forward -> on_loss_and_meter ->
         on_backward -> on_update -> on_phase_end -> on_end
 
     Deriving classes should call super().__init__() and store any state in
@@ -115,10 +115,10 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_loss(
+    def on_loss_and_meter(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """Called each time after a loss has been computed."""
+        """Called each time after a loss has been computed and meters are updated."""
         pass
 
     @abstractmethod
