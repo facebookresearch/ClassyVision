@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from collections.abc import Sequence
+from typing import List, Optional
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
@@ -12,21 +13,7 @@ from classy_vision.heads import ClassyHead, register_head
 
 
 class FullyConvolutionalLinear(nn.Module):
-    """
-    FC layer in ResNe(X)t 3D head.
-    This layer performs a fully-connected projection during training, when the
-    input size is 1x1x1. It performs a convolutional projection during testing
-    when the input size is larger than 1x1x1.
-    """
-
     def __init__(self, dim_in, num_classes, act_func="softmax"):
-        """
-        Args:
-            dim_in (int): No. channels of input tensor
-            num_classes (int): No. channels of output tensor
-            act_func (string): activation function to use. 'softmax': applies
-                softmax on the output. 'sigmoid': applies sigmoid on the output.
-        """
         super(FullyConvolutionalLinear, self).__init__()
         # Perform FC in a fully convolutional manner. The FC layer will be
         # initialized with a different std comparing to convolutional layers.
@@ -56,9 +43,37 @@ class FullyConvolutionalLinear(nn.Module):
 
 @register_head("fully_convolutional_linear")
 class FullyConvolutionalLinearHead(ClassyHead):
+    """
+    This head defines a 3d average pooling layer (:class:`torch.nn.AvgPool3d`)
+    followed by a fully convolutional linear layer. This layer performs a
+    fully-connected projection during training, when the input size is 1x1x1.
+    It performs a convolutional projection during testing when the input size
+    is larger than 1x1x1.
+    """
+
     def __init__(
-        self, unique_id, num_classes, in_plane, pool_size, activation_func, use_dropout
+        self,
+        unique_id: str,
+        num_classes: int,
+        in_plane: int,
+        pool_size: List[int],
+        activation_func: str,
+        use_dropout: Optional[bool] = None,
     ):
+        """
+        Constructor for FullyConvolutionalLinearHead.
+
+        Args:
+            unique_id: A unique identifier for the head. Multiple instances of
+                the same head might be attached to a model, and unique_id is used
+                to refer to them.
+            num_classes: Number of classes for the head.
+            in_plane: Input size for the fully connected layer.
+            pool_size: Kernel size for the 3d pooling layer.
+            activation_func: activation function to use. 'softmax': applies
+                softmax on the output. 'sigmoid': applies sigmoid on the output.
+            use_dropout: Whether to apply dropout after the pooling layer.
+        """
         super().__init__(unique_id, num_classes)
         self.final_avgpool = nn.AvgPool3d(pool_size, stride=1)
         if use_dropout:
