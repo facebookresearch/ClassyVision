@@ -28,7 +28,7 @@ class ProgressBarHook(ClassyHook):
     on_start = ClassyHook._noop
     on_sample = ClassyHook._noop
     on_forward = ClassyHook._noop
-    on_loss = ClassyHook._noop
+    on_loss_and_meter = ClassyHook._noop
     on_backward = ClassyHook._noop
     on_end = ClassyHook._noop
 

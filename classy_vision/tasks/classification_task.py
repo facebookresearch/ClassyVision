@@ -547,8 +547,6 @@ class ClassificationTask(ClassyTask):
                 * local_variables["target"].size(0)
             )
 
-            self.run_hooks(local_variables, ClassyHookFunctions.on_loss.name)
-
             model_output_cpu = model_output.cpu() if use_gpu else model_output
 
             # Update meters
@@ -557,6 +555,9 @@ class ClassificationTask(ClassyTask):
                     meter.update(
                         model_output_cpu, target.detach().cpu(), is_train=self.train
                     )
+            # After both loss and meters are updated, we run hooks. Among hooks,
+            # `LossLrMeterLoggingHook` will log both loss and meter status
+            self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
 
         num_samples_in_step = self.get_global_batchsize()
         self.num_samples_this_phase += num_samples_in_step

@@ -51,6 +51,9 @@ class VideoAccuracyMeter(ClassyMeter):
     def value(self):
         return self._accuracy_meter.value
 
+    def sync_state(self):
+        self._accuracy_meter.sync_state()
+
     def get_classy_state(self):
         """Contains the states of the meter.
         """

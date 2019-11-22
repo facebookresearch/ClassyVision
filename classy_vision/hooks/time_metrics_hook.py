@@ -45,7 +45,7 @@ class TimeMetricsHook(ClassyHook):
         self.start_time = time.time()
         local_variables["perf_stats"] = PerfStats()
 
-    def on_loss(
+    def on_loss_and_meter(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """

@@ -45,7 +45,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
             # create a loss lr meter hook
             loss_lr_meter_hook = LossLrMeterLoggingHook(log_freq=log_freq)
 
-            # check that _log_loss_meters() is called after on_loss() every
+            # check that _log_loss_meters() is called after on_loss_and_meter() every
             # log_freq batches and after on_phase_end()
             # and _log_lr() is called after on_update() every log_freq batches
             # and after on_phase_end()
@@ -55,7 +55,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
 
                     for i in range(num_batches):
                         task.losses = list(range(i))
-                        loss_lr_meter_hook.on_loss(task, local_variables)
+                        loss_lr_meter_hook.on_loss_and_meter(task, local_variables)
                         loss_lr_meter_hook.on_update(task, local_variables)
                         if log_freq is not None and i and i % log_freq == 0:
                             mock_fn.assert_called_with(task, local_variables)

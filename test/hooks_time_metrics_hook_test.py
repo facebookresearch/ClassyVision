@@ -57,8 +57,8 @@ class TestTimeMetricsHook(unittest.TestCase):
             except Exception as e:
                 self.fail("Received Exception when losses is []: {}".format(e))
 
-            # check that _log_performance_metrics() is called after on_loss() every
-            # log_freq batches and after on_phase_end()
+            # check that _log_performance_metrics() is called after on_loss_and_meter()
+            # every log_freq batches and after on_phase_end()
             with mock.patch.object(
                 time_metrics_hook, "_log_performance_metrics"
             ) as mock_fn:
@@ -66,7 +66,7 @@ class TestTimeMetricsHook(unittest.TestCase):
 
                 for i in range(num_batches):
                     task.losses = list(range(i))
-                    time_metrics_hook.on_loss(task, local_variables)
+                    time_metrics_hook.on_loss_and_meter(task, local_variables)
                     if log_freq is not None and i and i % log_freq == 0:
                         mock_fn.assert_called_with(task, local_variables)
                         mock_fn.reset_mock()

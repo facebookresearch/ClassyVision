@@ -33,7 +33,7 @@ def _run(qin, qout, qerr, func, *args):
         qerr.put(e)
 
 
-def _meter_worker(qin, qout, meter, world_size, rank, filename):
+def _meter_worker(qin, qout, meter, is_train, world_size, rank, filename):
     backend = "gloo"
     torch.distributed.init_process_group(
         backend=backend,
@@ -49,7 +49,7 @@ def _meter_worker(qin, qout, meter, world_size, rank, filename):
             continue
 
         if signal == UPDATE_SIGNAL:
-            meter.update(val[0], val[1])
+            meter.update(val[0], val[1], is_train=is_train)
 
         elif signal == VALUE_SIGNAL:
             meter.sync_state()
@@ -212,7 +212,7 @@ class ClassificationMeterTest(unittest.TestCase):
                 msg="{0} meter value mismatch from ground truth!".format(key),
             )
 
-    def _spawn_all_meter_workers(self, world_size, meters):
+    def _spawn_all_meter_workers(self, world_size, meters, is_train):
         filename = tempfile.NamedTemporaryFile(delete=True).name
         qins = []
         qerrs = []
@@ -220,7 +220,7 @@ class ClassificationMeterTest(unittest.TestCase):
 
         for i in range(world_size):
             qin, qout, qerr = self._spawn(
-                _meter_worker, meters[i], world_size, i, filename
+                _meter_worker, meters[i], is_train, world_size, i, filename
             )
             qins.append(qin)
             qouts.append(qout)
@@ -228,7 +228,9 @@ class ClassificationMeterTest(unittest.TestCase):
 
         return qins, qouts, qerrs
 
-    def meter_distributed_test(self, meters, model_outputs, targets, expected_values):
+    def meter_distributed_test(
+        self, meters, model_outputs, targets, expected_values, is_train=False
+    ):
         """
         Sets up two processes each with a given meter on that process.
         Verifies that sync code path works.
@@ -248,7 +250,9 @@ class ClassificationMeterTest(unittest.TestCase):
             "second is result of applying all 4 updates to meter"
         )
 
-        qins, qouts, qerrs = self._spawn_all_meter_workers(world_size, meters)
+        qins, qouts, qerrs = self._spawn_all_meter_workers(
+            world_size, meters, is_train=is_train
+        )
 
         # First update each meter, then get value from each meter
         qins[0].put_nowait((UPDATE_SIGNAL, (model_outputs[0], targets[0])))

@@ -43,16 +43,12 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
-from torchvision import set_video_backend
-
 from classy_vision.generic.args import parse_args
 from classy_vision.generic.registry_utils import import_all_packages_from_directory
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import (
     CheckpointHook,
     LossLrMeterLoggingHook,
-    ModelComplexityHook,
-    ModelTensorboardHook,
     ProfilerHook,
     ProgressBarHook,
     TensorboardPlotHook,
@@ -61,6 +57,7 @@ from classy_vision.hooks import (
 )
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import DistributedTrainer, LocalTrainer
+from torchvision import set_video_backend
 
 
 def main(args, config):
@@ -106,9 +103,7 @@ def main(args, config):
 
     output_folder = Path(args.checkpoint_folder).resolve()
     logging.info("Training successful!")
-    logging.info(
-        f'Results of this training run are available at: "{output_folder}"'
-    )
+    logging.info(f'Results of this training run are available at: "{output_folder}"')
 
 
 def configure_hooks(args):
