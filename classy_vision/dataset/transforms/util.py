@@ -29,6 +29,7 @@ class ImagenetConstants:
     RESIZE = 256
 
 
+@register_transform("apply_transform_to_key")
 class ApplyTransformToKey:
     """Serializable class that applies a transform to a key specified field in samples.
     """
@@ -44,6 +45,12 @@ class ApplyTransformToKey:
         """
         self.key: Union[int, str] = key
         self.transform: Callable = transform
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]):
+        transform = build_transforms(config["transforms"])
+
+        return cls(transform=transform, key=config["key"])
 
     def __call__(
         self, sample: Union[Tuple[Any], Dict[str, Any]]
