@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torchvision.transforms as transforms
 
@@ -29,24 +29,26 @@ class ImagenetConstants:
     RESIZE = 256
 
 
-class FieldTransform:
-    """Serializable class that applies a transform on specific field in samples.
+class ApplyTransformToKey:
+    """Serializable class that applies a transform to a key specified field in samples.
     """
 
-    def __init__(self, transform: Callable, key: str = "input") -> None:
-        """The constructor method of FieldTransform class.
+    def __init__(self, transform: Callable, key: Union[int, str] = "input") -> None:
+        """The constructor method of ApplyTransformToKey class.
 
         Args:
             transform: a callable function that takes sample data of type dict as input
-            key: the key in sample dict whose corresponding value will undergo
+            key: the key in sample whose corresponding value will undergo
                 the transform
 
         """
-        self.key: str = key
+        self.key: Union[int, str] = key
         self.transform: Callable = transform
 
-    def __call__(self, sample: Dict[str, Any]) -> Dict[str, Any]:
-        """Updates sample by applying a transform and to the appropriate key.
+    def __call__(
+        self, sample: Union[Tuple[Any], Dict[str, Any]]
+    ) -> Union[Tuple[Any], Dict[str, Any]]:
+        """Updates sample by applying a transform to the value at the specified key.
 
         Args:
             sample: input sample which will be transformed
@@ -55,10 +57,26 @@ class FieldTransform:
         if sample is None:
             return sample
 
-        assert isinstance(sample, dict) and self.key in sample, (
-            "This transform only supports dicts with key '%s'" % self.key
-        )
+        # Asserts + deal with tuple immutability
+        convert_to_tuple = False
+        if isinstance(sample, dict):
+            assert (
+                self.key in sample
+            ), "This transform only supports dicts with key '{}'".format(self.key)
+        elif isinstance(sample, (tuple, list)):
+            assert self.key < len(
+                sample
+            ), "This transform only supports tuples / lists with key less "
+            "than {length}, key provided {key}".format(length=len(sample), key=self.key)
+            # Convert to list for transformation
+            if isinstance(sample, tuple):
+                convert_to_tuple = True
+            sample = list(sample)
+
         sample[self.key] = self.transform(sample[self.key])
+        if convert_to_tuple:
+            sample = tuple(sample)
+
         return sample
 
 
@@ -210,10 +228,10 @@ def build_field_transform_default_imagenet(
     config: Optional[List[Dict[str, Any]]],
     default_transform: Optional[Callable] = None,
     split: Optional[bool] = None,
-    key: str = "input",
+    key: Union[int, str] = "input",
     key_map_transform: Optional[Callable] = DEFAULT_KEY_MAP,
 ) -> Callable:
-    """Returns a FieldTransform which applies a transform on the specified key.
+    """Returns a ApplyTransformToKey which applies a transform on the specified key.
 
     The transform is built from the config, if it is not None.
 
@@ -254,7 +272,7 @@ def build_field_transform_default_imagenet(
     else:
         transform = build_transforms(config)
 
-    transform = FieldTransform(transform, key=key)
+    transform = ApplyTransformToKey(transform, key=key)
     if key_map_transform is None:
         return transform
 
