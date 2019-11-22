@@ -16,7 +16,7 @@ class ClassyHead(nn.Module):
     A head is a regular :class:`torch.nn.Module` that can be attached to a
     pretrained model. This enables a form of transfer learning: utilizing a
     model trained for one dataset to extract features that can be used for
-    other problems. A head must be attached to a :class:`ClassyModule` within a
+    other problems. A head must be attached to a :class:`ClassyBlock` within a
     :class:`ClassyModel`.
     """
 
