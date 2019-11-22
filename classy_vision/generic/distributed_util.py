@@ -82,6 +82,23 @@ def all_reduce_sum(tensor):
     return tensor
 
 
+def gather_from_all(tensor):
+    """
+    Wrapper over torch.distributed.all_gather for performing
+    'gather' of 'tensor' over all processes in both distributed /
+    non-distributed scenarios.
+    """
+    if tensor.ndim == 0:
+        # 0 dim tensors cannot be gathered. so unsqueeze
+        tensor = tensor.unsqueeze(0)
+    gathered_tensor = [
+        torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
+    ]
+    torch.distributed.all_gather(gathered_tensor, tensor)
+    gathered_tensor = torch.cat(gathered_tensor, 0)
+    return gathered_tensor
+
+
 def barrier():
     """
     Wrapper over torch.distributed.barrier, returns without waiting
