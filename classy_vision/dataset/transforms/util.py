@@ -176,6 +176,83 @@ class ImagenetNoAugmentTransform(ClassyTransform):
         return self.transform(img)
 
 
+@register_transform("generic_image_transform")
+class GenericImageTransform(ClassyTransform):
+    """Default transform for images used in the classification task
+
+    This transform does several things. First, it expects a tuple or
+    list input (torchvision datasets supply tuples / lists). Second,
+    it applies a user-provided image transforms to the first entry in
+    the tuple (again, matching the torchvision tuple format). Third,
+    it transforms the tuple to a dict sample with entries "input" and
+    "target".
+
+    The defaults are for the standard imagenet augmentations
+
+    This is just a convenience wrapper to cover the common
+    use-case. You can get the same behavior by composing torchvision
+    transforms + ApplyTransformToKey + TupleToMap.
+
+    """
+
+    def __init__(
+        self, transform: Optional[Callable] = None, split: Optional[str] = None
+    ):
+        """Constructor for GenericImageTransfrom
+
+        Args:
+            transform: A callable or ClassyTransform to be applied to the image only
+            split: 'train' or 'test'. Only one of the two arguments
+                should be specified
+        """
+        assert (
+            transform is not None or split is not None
+        ), "One of transform / split must be specified"
+        assert (
+            transform is None or split is None
+        ), "Only one of transform / split should be specified"
+        assert split in [None, "train", "test"], (
+            "If specified, split should be either 'train' or 'test', "
+            "instead got {}".format(split)
+        )
+
+        if transform is not None:
+            self._transform = transform
+
+        if split is not None:
+            self._transform = (
+                ImagenetAugmentTransform()
+                if split == "train"
+                else ImagenetNoAugmentTransform()
+            )
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]):
+        transform = None
+        if "transforms" in config:
+            transform = build_transforms(config["transforms"])
+        split = config.get("split")
+        return cls(transform, split)
+
+    def __call__(self, sample: Tuple[Any]):
+        """Applied transform to sample
+
+        Args:
+            sample: A tuple with length >= 2. The first entry should
+                be the image data, the second entry should be the
+                target data.
+        """
+        image = sample[0]
+        transformed_image = self._transform(image)
+        new_sample = {"input": transformed_image, "target": sample[1]}
+        # Any additional metadata is just appended under index of tuple
+        if len(sample) > 2:
+            for i in range(2, len(sample)):
+                new_sample[str(i)] = sample[i]
+
+        return new_sample
+
+
 @register_transform("tuple_to_map")
 class TupleToMapTransform(ClassyTransform):
     """A transform which maps image data from tuple to dict.

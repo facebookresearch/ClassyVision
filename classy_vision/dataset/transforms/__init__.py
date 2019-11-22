@@ -101,4 +101,10 @@ __all__ = [
     "LightingTransform",
     "register_transform",
     "build_transform",
+    "build_transforms",
+    "ApplyTransformToKey",
+    "ImagenetAugmentTransform",
+    "ImagenetNoAugmentTransform",
+    "GenericImageTransform",
+    "TupleToMapTransform",
 ]
