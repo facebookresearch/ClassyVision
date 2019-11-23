@@ -40,8 +40,8 @@ class TestClassyBlock(unittest.TestCase):
         model.set_heads({"dummy_block2": {head.unique_id: head}})
         input = torch.randn(1, 2)
         output = model(input)
-        head_output = model.head_outputs["head_id"]
-        self.assertTrue(torch.allclose(head(output), head_output))
+        head_output = model.execute_heads()
+        self.assertTrue(torch.allclose(head(output), head_output["head_id"]))
 
     def test_duplicated_head_ids(self):
         model = self.DummyTestModel()
@@ -64,12 +64,11 @@ class TestClassyBlock(unittest.TestCase):
             len(model.get_heads()), 0, "heads should be empty before set_heads"
         )
         model.set_heads({"dummy_block2": {head.unique_id: head}})
-        self.assertEqual(len(model.head_outputs), 0, "head outputs should be empty")
         input = torch.randn(1, 2)
         model(input)
-        self.assertEqual(len(model.head_outputs), 1, "should have output for one head")
+        head_outputs = model.execute_heads()
+        self.assertEqual(len(head_outputs), 1, "should have output for one head")
 
         # remove all heads
         model.set_heads({})
         self.assertEqual(len(model.get_heads()), 0, "heads should be empty")
-        self.assertEqual(len(model.head_outputs), 0, "head outputs should be empty")
