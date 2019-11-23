@@ -4,6 +4,9 @@
       "id": "getting_started",
       "title": "Getting started"
      },{
+      "id": "classy_model",
+      "title": "Creating a custom model"
+     },{
       "id": "classy_loss",
       "title": "Creating a custom loss"
      },{
@@ -12,9 +15,6 @@
      },{
       "id": "fine_tuning",
       "title": "Fine Tuning"
-     },{
-      "id": "wsl_model_predict",
-      "title": "WSL Model Predict"
      }
   ]
 }
