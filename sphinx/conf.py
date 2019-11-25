@@ -48,7 +48,8 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
-autodoc_default_options = {"special-members": "__init__"}
+autodoc_default_flags = ["undoc-members"]
+autodoc_default_options = {"special-members": "__init__", "autodoc_typehints": "none"}
 
 primary_domain = "py"
 

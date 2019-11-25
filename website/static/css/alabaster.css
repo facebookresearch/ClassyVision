@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* -- page layout ----------------------------------------------------------- */
 
 div.sphinx div.document {
-  width: 940px;
+  width: 1200px;
   margin: 30px auto;
 }
 
@@ -57,7 +57,7 @@ div.sphinx div.bodywrapper {
 }
 
 div.sphinx div.sphinxsidebar {
-  width: 220px;
+  width: 250px;
   font-size: 14px;
   line-height: 1.5;
 }
