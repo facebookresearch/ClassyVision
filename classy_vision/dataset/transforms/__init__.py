@@ -94,17 +94,23 @@ def register_transform(name: str):
 import_all_modules(FILE_ROOT, "classy_vision.dataset.transforms")
 
 from .lighting_transform import LightingTransform  # isort:skip
+from .util import ApplyTransformToKey  # isort:skip
+from .util import ImagenetAugmentTransform  # isort:skip
+from .util import ImagenetAugmentTransform  # isort:skip
+from .util import ImagenetNoAugmentTransform  # isort:skip
+from .util import GenericImageTransform  # isort:skip
+from .util import TupleToMapTransform  # isort:skip
 
 
 __all__ = [
     "ClassyTransform",
+    "ImagenetAugmentTransform",
+    "ImagenetNoAugmentTransform",
+    "GenericImageTransform",
+    "ApplyTransformToKey",
+    "TupleToMapTransform",
     "LightingTransform",
     "register_transform",
     "build_transform",
     "build_transforms",
-    "ApplyTransformToKey",
-    "ImagenetAugmentTransform",
-    "ImagenetNoAugmentTransform",
-    "GenericImageTransform",
-    "TupleToMapTransform",
 ]

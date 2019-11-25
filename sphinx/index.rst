@@ -3,23 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Classy Vision's documentation!
+Classy Vision's API Reference
 =========================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-Examples on AWS
----------------
-
-CrypTen also provides a script ``aws_launcher`` to launch examples with
-encrypted data on multiple AWS instances. See :doc:`aws`.
+This is an exhaustive reference for APIs in Classy Vision. Please refer to our
+tutorials <https://classyvision.ai/tutorials/> for high-level information about
+how these abstractions can used together.
 
 .. toctree::
     :maxdepth: 3
-    :caption: Library Reference
 
     dataset
     heads
