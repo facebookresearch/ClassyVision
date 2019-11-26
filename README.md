@@ -4,11 +4,19 @@
 
 --------------------------------------------------------------------------------
 
-[Classy Vision](http://classyvision.ai) is a PyTorch framework for image and video classification.
+[Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutia of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
+
+* Ease of use. The library features a modular, flexible design that allows anyone to train machine learning models on top of PyTorch using very simple abstractions. The system also has out-of-the-box integration with Amazon Web Services (AWS), facilitating research at scale and making it simple to move between research and production.
+* High performance. Researchers can use the framework to train Resnet50 on ImageNet in as little as 15 minutes, for example.
+* Demonstrated success in production at scale. The framework is currently in use at Facebook, where we’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
+* Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
+* Elastic training. We have also added experimental integration with PyTorch Elastic, which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
+
+Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
 
 ## Getting started
 
-Make sure you have an up-to-date installation of PyTorch (1.3.1) and torchvision. To install Classy Vision:
+Make sure you have an up-to-date installation of PyTorch (1.3.1), Python (3.6) and torchvision. To install Classy Vision:
 ```bash
 pip install classy_vision
 ```
@@ -44,7 +52,7 @@ If you use Classy Vision in your work, please use the following BibTeX entry:
 ```
 @article{adcock2019classy,
   title={Classy Vision},
-  author={{Adcock}, A. and {Reis}, V. and {Singh}, M. and {Yan}, Z. {van der Maaten} L., and {Zhang}, K. and {Motwani}, S. and {Guerin}, J. and {Goyal}, N.},
+  author={{Adcock}, A. and {Reis}, V. and {Singh}, M. and {Yan}, Z. and {van der Maaten} L., and {Zhang}, K. and {Motwani}, S. and {Guerin}, J. and {Goyal}, N. and {Misra}, I. and {Gustafson}, L. and {Changhan}, C. and {Goyal}, P.},
   howpublished = {\url{https://github.com/facebookresearch/ClassyVision}},
   year={2019}
 }
