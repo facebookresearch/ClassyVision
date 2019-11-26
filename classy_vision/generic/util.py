@@ -430,11 +430,14 @@ def compute_pr_curves(class_hist, total_hist):
     return {"prec": final_prec, "recall": final_recall, "ap": final_ap}
 
 
-def get_checkpoint_dict(task, input_args):
+def get_checkpoint_dict(task, input_args, deep_copy=False):
     assert isinstance(
         input_args, dict
     ), f"Unexpected input_args of type: {type(input_args)}"
-    return {"input_args": input_args, "classy_state_dict": task.get_classy_state()}
+    return {
+        "input_args": input_args,
+        "classy_state_dict": task.get_classy_state(deep_copy=deep_copy),
+    }
 
 
 # function that tries to load a checkpoint:

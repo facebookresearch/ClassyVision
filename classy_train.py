@@ -69,14 +69,12 @@ def main(args, config):
 
     # Load checkpoint, if available. This automatically resumes from an
     # existing checkpoint, in case training is being restarted.
-    checkpoint = load_checkpoint(args.checkpoint_folder, args.device)
+    checkpoint = load_checkpoint(args.checkpoint_folder)
     task.set_checkpoint(checkpoint)
 
     # Load a checkpoint contraining a pre-trained model. This is how we
     # implement fine-tuning of existing models.
-    pretrained_checkpoint = load_checkpoint(
-        args.pretrained_checkpoint_folder, args.device
-    )
+    pretrained_checkpoint = load_checkpoint(args.pretrained_checkpoint_folder)
     if pretrained_checkpoint is not None:
         assert isinstance(
             task, FineTuningTask

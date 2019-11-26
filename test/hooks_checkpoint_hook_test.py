@@ -8,12 +8,13 @@ import os
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_test_task_config
+from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 
 import torch
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
 from classy_vision.tasks import build_task
+from classy_vision.trainer import LocalTrainer
 
 
 class TestCheckpointHook(unittest.TestCase):
@@ -34,7 +35,6 @@ class TestCheckpointHook(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = torch.device("cpu")
         input_args = {"foo": "bar"}
 
         # create a checkpoint hook
@@ -50,7 +50,7 @@ class TestCheckpointHook(unittest.TestCase):
         with self.assertRaises(AssertionError):
             checkpoint_hook.on_phase_end(task, local_variables)
         # try loading a non-existent checkpoint
-        checkpoint = load_checkpoint(checkpoint_folder, device)
+        checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNone(checkpoint)
 
         # create checkpoint dir, verify on_start hook runs
@@ -61,14 +61,14 @@ class TestCheckpointHook(unittest.TestCase):
         task.train = False
         # call the on end phase function
         checkpoint_hook.on_phase_end(task, local_variables)
-        checkpoint = load_checkpoint(checkpoint_folder, device)
+        checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNone(checkpoint)
 
         task.train = True
         # call the on end phase function
         checkpoint_hook.on_phase_end(task, local_variables)
         # model should be checkpointed. load and compare
-        checkpoint = load_checkpoint(checkpoint_folder, device)
+        checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNotNone(checkpoint)
         for key in ["input_args", "classy_state_dict"]:
             self.assertIn(key, checkpoint)
@@ -86,7 +86,6 @@ class TestCheckpointHook(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = torch.device("cpu")
         checkpoint_period = 10
 
         for phase_types in [["train"], ["train", "test"]]:
@@ -112,7 +111,7 @@ class TestCheckpointHook(unittest.TestCase):
                 task.train = count % 2 == 0
                 # call the on end phase function
                 checkpoint_hook.on_phase_end(task, local_variables)
-                checkpoint = load_checkpoint(checkpoint_folder, device)
+                checkpoint = load_checkpoint(checkpoint_folder)
                 self.assertIsNone(checkpoint)
                 valid_phase_count += 1 if task.phase_type in phase_types else 0
                 count += 1
@@ -122,7 +121,44 @@ class TestCheckpointHook(unittest.TestCase):
             # call the on end phase function
             checkpoint_hook.on_phase_end(task, local_variables)
             # model should be checkpointed. load and compare
-            checkpoint = load_checkpoint(checkpoint_folder, device)
+            checkpoint = load_checkpoint(checkpoint_folder)
             self.assertIsNotNone(checkpoint)
             # delete the checkpoint dir
             shutil.rmtree(checkpoint_folder)
+
+    def test_checkpointing(self):
+        # make checkpoint directory
+        checkpoint_folder = self.base_dir + "/checkpoint/"
+        os.mkdir(checkpoint_folder)
+
+        config = get_fast_test_task_config()
+        cuda_available = torch.cuda.is_available()
+        task = build_task(config)
+
+        task.prepare(use_gpu=cuda_available)
+
+        local_variables = {}
+
+        # create a checkpoint hook
+        checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
+
+        # call the on end phase function
+        checkpoint_hook.on_phase_end(task, local_variables)
+
+        # we should be able to train a task using the checkpoint on all available
+        # devices
+        for use_gpu in {False, cuda_available}:
+            # load the checkpoint
+            checkpoint = load_checkpoint(checkpoint_folder)
+
+            # create a new task
+            task = build_task(config)
+
+            # set the checkpoint
+            task.set_checkpoint(checkpoint)
+
+            task.prepare(use_gpu=use_gpu)
+
+            # we should be able to run the trainer using the checkpoint
+            trainer = LocalTrainer(use_gpu=use_gpu)
+            trainer.train(task)

@@ -10,6 +10,7 @@ from test.generic.utils import compare_model_state, compare_samples, compare_sta
 
 import torch
 from classy_vision.dataset import build_dataset
+from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
@@ -52,10 +53,10 @@ class TestClassificationTask(unittest.TestCase):
         task = build_task(config)
         task.prepare(num_dataloader_workers=1, pin_memory=False)
 
-    def test_get_set_state(self):
+    def test_checkpointing(self):
         """
-        Tests the {set, get}_classy_state methods by running train_steps
-        to make sure the train_steps run the same way.
+        Tests checkpointing by running train_steps to make sure the train_steps
+        run the same way after loading from a checkpoint.
         """
         config = get_fast_test_task_config()
         task = build_task(config).set_hooks([LossLrMeterLoggingHook()])
@@ -66,14 +67,16 @@ class TestClassificationTask(unittest.TestCase):
 
         # prepare the tasks for the right device
         task.prepare(use_gpu=use_gpu)
-        task_2.prepare(use_gpu=use_gpu)
 
         # test in both train and test mode
         for _ in range(2):
             task.advance_phase()
 
+            # set task's state as task_2's checkpoint
+            task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
+            task_2.prepare(use_gpu=use_gpu)
+
             # task 2 should have the same state
-            task_2.set_classy_state(task.get_classy_state(deep_copy=True))
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
             # this tests that both states' iterators return the same samples
@@ -88,25 +91,17 @@ class TestClassificationTask(unittest.TestCase):
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
-    def test_get_set_state_different_devices(self):
+    def test_checkpointing_different_device(self):
         config = get_fast_test_task_config()
         task = build_task(config)
         task_2 = build_task(config)
 
         for use_gpu in [True, False]:
             task.prepare(use_gpu=use_gpu)
-            task_2.prepare(use_gpu=not use_gpu)
 
-            task_2.set_classy_state(task.get_classy_state(deep_copy=True))
-
-            # the parameters are in different devices
-            with self.assertRaises(Exception):
-                self._compare_states(task.get_classy_state(), task_2.get_classy_state())
-
-            # prepare the task for the right device
-            task_2.prepare(use_gpu=use_gpu)
-            self._compare_states(task.get_classy_state(), task_2.get_classy_state())
+            # set task's state as task_2's checkpoint
+            task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
 
             # we should be able to run the trainer using state from a different device
-            trainer = LocalTrainer(use_gpu=use_gpu)
+            trainer = LocalTrainer(use_gpu=not use_gpu)
             trainer.train(task_2)

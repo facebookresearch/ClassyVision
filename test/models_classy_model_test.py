@@ -47,7 +47,6 @@ class TestClassyModel(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = torch.device("cpu")
         input_args = {"config": config}
 
         # Simulate training by setting the model parameters to zero
@@ -66,7 +65,7 @@ class TestClassyModel(unittest.TestCase):
         checkpoint_hook.on_phase_end(task, local_variables)
 
         # Model should be checkpointed. load and compare
-        checkpoint = load_checkpoint(checkpoint_folder, device)
+        checkpoint = load_checkpoint(checkpoint_folder)
 
         model = ClassyModel.from_checkpoint(checkpoint)
         self.assertTrue(isinstance(model, MyModel))
