@@ -135,7 +135,8 @@ class ElasticTrainer(ClassyTrainer):
 
     class _ClassyWorkerStats(WorkerStats):
         """
-        ClassyVision-specific implementation of WorkerStats, which is used by PET loop
+        ClassyVision-specific implementation of WorkerStats,
+        which is used by torchelastic train_loop
         to detect (and correct stragglers), or other progress-impeding issues.
         """
 
@@ -146,26 +147,28 @@ class ElasticTrainer(ClassyTrainer):
             return self.progress_rate
 
     class _ClassyElasticState(torchelastic.State):
+        """
+        Rollback is disabled on this state since currently, data loaders are
+        too expensive to snapshot on every train_step
+        """
+
         def __init__(self, task: ClassyTask, input_args: Any):
             self.task = task
             self.input_args = input_args if input_args else {}
             self.advance_to_next_phase = True
             self.skip_current_phase = False
 
-        def deep_copy(self):
-            raise RuntimeError("Unsupported method")
-
         def broadcast_state(self, rank, src_rank):
             data = None
             if rank == src_rank:
                 save_stream = io.BytesIO()
-                self.serialize(save_stream)
+                self.save(save_stream)
                 # Note: save_stream.getbuffer() will return a memoryview, which
                 # cannot be convert to a tensor, need convert it to np array first
                 data = numpy.asarray(save_stream.getbuffer())
             data = dist.broadcast_binary(data, src_rank)
             load_stream = io.BytesIO(data)
-            self.deserialize(load_stream)
+            self.load(load_stream)
 
         def sync(self, world_size, rank):
             self._recreate_ddp_model()
@@ -209,10 +212,6 @@ class ElasticTrainer(ClassyTrainer):
             # Set up pytorch module in train vs eval mode, update optimizer.
             self.task._set_model_train_mode()
 
-        def supports_rollback(self):
-            # Dataloaders are too expensive to deep copy on every train iter for now
-            return False
-
         def should_save_checkpoint(self, rank):
             # should_save_checkpoint need to return same value for all trainers
             # we take checkpoint when a phase completed
@@ -222,18 +221,17 @@ class ElasticTrainer(ClassyTrainer):
             # consider the cost it is not very necessary to do checkpoint for test phase
             return self.task.train and self.advance_to_next_phase
 
-        def serialize(self, stream):
+        def save(self, stream):
             checkpoint_state = get_checkpoint_dict(self.task, self.input_args)
             checkpoint_state["advance_to_next_phase"] = self.advance_to_next_phase
             torch.save(checkpoint_state, stream)
 
-        def deserialize(self, stream):
+        def load(self, stream):
             checkpoint_state = torch.load(stream)
             state = checkpoint_state["classy_state_dict"]
             self.task.set_classy_state(state)
             if "advance_to_next_phase" in checkpoint_state:
                 self.advance_to_next_phase = checkpoint_state["advance_to_next_phase"]
-            return self
 
         def _recreate_ddp_model(self):
             # Delete & re-create the DDP module wrapper. This is required because
