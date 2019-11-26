@@ -18,8 +18,8 @@ from classy_vision.models import ClassyModel, register_model
 from classy_vision.tasks import build_task
 
 
-@register_model("my_model")
-class MyModel(ClassyModel):
+@register_model("my_test_model")
+class MyTestModel(ClassyModel):
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(10, 5)
@@ -41,7 +41,7 @@ class TestClassyModel(unittest.TestCase):
 
     def test_from_checkpoint(self):
         config = get_test_task_config()
-        config["model"] = {"name": "my_model"}
+        config["model"] = {"name": "my_test_model"}
         task = build_task(config)
         task.prepare()
 
@@ -69,7 +69,7 @@ class TestClassyModel(unittest.TestCase):
         checkpoint = load_checkpoint(checkpoint_folder, device)
 
         model = ClassyModel.from_checkpoint(checkpoint)
-        self.assertTrue(isinstance(model, MyModel))
+        self.assertTrue(isinstance(model, MyTestModel))
 
         # All parameters must be zero
         for param in model.parameters():
