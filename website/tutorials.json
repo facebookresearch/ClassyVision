@@ -14,7 +14,10 @@
       "title": "How to do video classification"
      },{
       "id": "fine_tuning",
-      "title": "Fine Tuning"
+      "title": "Fine Tuning a model"
+     },{
+      "id": "pet_aws",
+      "title": "Elastic training on AWS"
      }
   ]
 }
