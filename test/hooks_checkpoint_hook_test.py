@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from test.generic.config_utils import get_test_task_config
 
+import torch
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
 from classy_vision.tasks import build_task
@@ -33,7 +34,7 @@ class TestCheckpointHook(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = "cpu"
+        device = torch.device("cpu")
         input_args = {"foo": "bar"}
 
         # create a checkpoint hook
@@ -85,7 +86,7 @@ class TestCheckpointHook(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = "cpu"
+        device = torch.device("cpu")
         checkpoint_period = 10
 
         for phase_types in [["train"], ["train", "test"]]:

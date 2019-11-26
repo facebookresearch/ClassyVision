@@ -12,7 +12,6 @@ from test.generic.config_utils import get_test_task_config
 
 import torch
 import torch.nn as nn
-
 from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
 from classy_vision.models import ClassyModel, register_model
@@ -48,7 +47,7 @@ class TestClassyModel(unittest.TestCase):
 
         local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
-        device = "cpu"
+        device = torch.device("cpu")
         input_args = {"config": config}
 
         # Simulate training by setting the model parameters to zero
