@@ -23,6 +23,7 @@ from torch._six import container_abcs
 
 # constants:
 CHECKPOINT_FILE = "checkpoint.torch"
+CPU_DEVICE = torch.device("cpu")
 
 
 def is_pos_int(number):
@@ -437,15 +438,19 @@ def get_checkpoint_dict(task, input_args):
 
 
 # function that tries to load a checkpoint:
-def load_checkpoint(checkpoint_folder, device=None, checkpoint_file=CHECKPOINT_FILE):
+def load_checkpoint(
+    checkpoint_folder, device=CPU_DEVICE, checkpoint_file=CHECKPOINT_FILE
+):
     """
     Loads a state variable from the specified checkpoint folder.
     """
     if not checkpoint_folder:
         return None
 
-    if device is None:
-        device = "gpu" if torch.cuda.is_available() else "cpu"
+    assert device is not None, "Please specify what device to load checkpoint on"
+    assert device.type in ["cpu", "cuda"], f"Unknown device: {device}"
+    if device.type == "cuda":
+        assert torch.cuda.is_available()
 
     if not os.path.exists(checkpoint_folder):
         logging.warning("Checkpoint folder '%s' not found" % checkpoint_folder)
@@ -458,16 +463,9 @@ def load_checkpoint(checkpoint_folder, device=None, checkpoint_file=CHECKPOINT_F
         logging.warning("Checkpoint file %s not found." % filename)
         return None
 
-    # load and return the checkpoint:
-    if device == "cpu":
-        checkpoint = torch.load(filename, map_location=torch.device("cpu"))
-    else:
-        assert device == "gpu"
-        # Load model on current device and not on saved device for model.
-        checkpoint = torch.load(
-            filename,
-            map_location=torch.device("cuda:{0}".format(torch.cuda.current_device())),
-        )
+    # load model on specified device and not on saved device for model and return
+    # the checkpoint
+    checkpoint = torch.load(filename, map_location=device)
     logging.info(f"Loaded checkpoint from {filename}")
     return checkpoint
 
