@@ -52,6 +52,12 @@ install_dep: &install_dep
         pip install --progress-bar off -r requirements.txt
         pip list
 
+install_dev_dep: &install_dev_dep
+  - run:
+      name: Install Dev Dependencies
+      command: |
+        pip install .[dev]
+
 run_tests: &run_tests
   - run:
       name: Run Tests
@@ -87,6 +93,20 @@ jobs:
           paths:
             - ~/venv
           key: v2-cpu-dependencies-{{ checksum "requirements.txt" }}
+
+      - <<: *install_dev_dep
+
+      - run:
+          name: black
+          working_directory: ~/ClassyVision
+          command: |
+            bash ./scripts/check_formatting.sh -b
+
+      - run:
+          name: isort
+          working_directory: ~/ClassyVision
+          command: |
+            bash ./scripts/check_formatting.sh -s
 
       - <<: *run_tests
 

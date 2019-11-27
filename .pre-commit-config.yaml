@@ -1,0 +1,16 @@
+repos:
+-   repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+    - id: black
+      language_version: python3.6
+
+-   repo: https://github.com/timothycrosley/isort
+    rev: stable
+    hooks:
+    - id: isort
+      name: isort
+      entry: isort
+      require_serial: true
+      language: python
+      types: [python]
