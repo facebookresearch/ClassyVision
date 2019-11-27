@@ -82,7 +82,7 @@ def main(args, config):
         task.set_pretrained_checkpoint(pretrained_checkpoint)
 
     # Configure hooks to do tensorboard logging, checkpoints and so on
-    task.set_hooks(configure_hooks(args))
+    task.set_hooks(configure_hooks(args, config))
 
     use_gpu = None
     if args.device is not None:
@@ -104,7 +104,7 @@ def main(args, config):
     logging.info(f'Results of this training run are available at: "{output_folder}"')
 
 
-def configure_hooks(args):
+def configure_hooks(args, config):
     hooks = [LossLrMeterLoggingHook(args.log_freq), TimeMetricsHook()]
 
     # Make a folder to store checkpoints and tensorboard logging outputs
@@ -112,9 +112,10 @@ def configure_hooks(args):
     base_folder = Path(__file__).parent / f"output_{suffix}"
     if args.checkpoint_folder == "":
         args.checkpoint_folder = base_folder / "checkpoints"
-        os.makedirs(args.checkpoint_folder)
+        os.makedirs(args.checkpoint_folder, exist_ok=True)
 
     logging.info(f"Logging outputs to {base_folder.resolve()}")
+    logging.info(f"Logging checkpoints to {args.checkpoint_folder}")
 
     if not args.skip_tensorboard:
         try:
