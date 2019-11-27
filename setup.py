@@ -48,7 +48,17 @@ if __name__ == "__main__":
         python_requires=">=3.6",
         packages=find_packages(exclude=("tests",)),
         install_requires=reqs.strip().split("\n"),
-        extras_require={"dev": ["black", "sphinx", "isort", "bs4", "nbconvert"]},
+        extras_require={
+            "dev": [
+                "GitPython",
+                "black",
+                "sphinx",
+                "isort",
+                "bs4",
+                "nbconvert",
+                "pre-commit",
+            ]
+        },
         package_data={"classy_vision": ["configs/*.json", "templates"]},
         data_files=[("classy_vision", ["classy_train.py"])],
         include_package_data=True,
