@@ -18,6 +18,9 @@
      },{
       "id": "pet_aws",
       "title": "Elastic training on AWS"
+     },{
+      "id": "torchscript",
+      "title": "Productionizing models"
      }
   ]
 }
