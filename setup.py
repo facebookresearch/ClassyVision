@@ -28,23 +28,21 @@ if __name__ == "__main__":
     with open("README.md", encoding="utf8") as f:
         readme = f.read()
 
-    with open("LICENSE") as f:
-        license = f.read()
-
     with open("requirements.txt") as f:
         reqs = f.read()
 
     setup(
         name="classy_vision",
         version=version,
-        description="An end-to-end computer vision framework.",
+        description="An end-to-end PyTorch framework for image and video classification.",
+        long_description_content_type="text/markdown",
         long_description=readme,
         url="https://classyvision.ai",
         project_urls={
             "Documentation": "https://classyvision.ai",
             "Source": "https://github.com/facebookresearch/ClassyVision",
         },
-        license=license,
+        license="MIT License",
         python_requires=">=3.6",
         packages=find_packages(exclude=("tests",)),
         install_requires=reqs.strip().split("\n"),
