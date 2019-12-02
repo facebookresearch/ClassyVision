@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from enum import Enum, auto
-from typing import Sequence
+from typing import Any, Dict, Sequence
 
 from . import (
     ClassyParamScheduler,
@@ -61,7 +61,16 @@ class CompositeParamScheduler(ClassyParamScheduler):
         self._interval_scaling = interval_scaling
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "CompositeParamScheduler":
+        """Instantiates a CompositeParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a CompositeParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A CompositeParamScheduler instance.
+        """
         assert (
             "schedulers" in config and "lengths" in config
         ), "Composite scheduler needs both a list of schedulers and lengths"

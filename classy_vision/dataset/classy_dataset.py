@@ -67,16 +67,15 @@ class ClassyDataset:
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyDataset":
-        """
-        Instantiates a ClassyDataset from a configuration.
+        """Instantiates a ClassyDataset from a configuration.
 
         Args:
-            config: A configuration for the dataset
+            config: A configuration for the ClassyDataset.
 
         Returns:
-            A ClassyDataset instance
+            A ClassyDataset instance.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @classmethod
     def parse_config(cls, config: Dict[str, Any]):

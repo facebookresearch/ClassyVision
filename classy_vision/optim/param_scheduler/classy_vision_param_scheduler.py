@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from enum import Enum
+from typing import Any, Dict
 
 
 class UpdateInterval(Enum):
@@ -42,7 +43,15 @@ class ClassyParamScheduler(object):
         self.update_interval = update_interval
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyParamScheduler":
+        """Instantiates a ClassyParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for the ClassyParamScheduler.
+
+        Returns:
+            A ClassyParamScheduler instance.
+        """
         raise NotImplementedError
 
     def __call__(self, where: float):

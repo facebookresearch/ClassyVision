@@ -6,6 +6,8 @@
 
 """MLP model."""
 
+from typing import Any, Dict
+
 import torch.nn as nn
 
 from . import register_model
@@ -55,7 +57,16 @@ class MLP(ClassyModel):
         self.mlp = nn.Sequential(*layers)
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "MLP":
+        """Instantiates a MLP from a configuration.
+
+        Args:
+            config: A configuration for a MLP.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A MLP instance.
+        """
         assert (key in config for key in ["input_dim", "output_dim", "hidden_dims"])
 
         output_dim = config["output_dim"]

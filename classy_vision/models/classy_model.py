@@ -6,7 +6,7 @@
 
 import copy
 from enum import Enum
-from typing import Dict
+from typing import Any, Dict
 
 import torch
 import torch.nn as nn
@@ -48,13 +48,14 @@ class ClassyModel(nn.Module):
         self._head_outputs = {}
 
     @classmethod
-    def from_config(cls, config):
-        """Implemented by children.
-
-        This is a factory method for generating the class from a config.
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyModel":
+        """Instantiates a ClassyModel from a configuration.
 
         Args:
-            config (Dict): Contains params for constructing the model
+            config: A configuration for the ClassyModel.
+
+        Returns:
+            A ClassyModel instance.
         """
         raise NotImplementedError
 

@@ -26,6 +26,14 @@ class ClassyTask(ABC):
     @classmethod
     @abstractmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyTask":
+        """Instantiates a ClassyTask from a configuration.
+
+        Args:
+            config: A configuration for a ClassyTask.
+
+        Returns:
+            A ClassyTask instance.
+        """
         raise NotImplementedError()
 
     @abstractmethod

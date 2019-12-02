@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 from . import ClassyParamScheduler, register_param_scheduler
 
 
@@ -28,7 +30,16 @@ class PolynomialDecayParamScheduler(ClassyParamScheduler):
         self._power = power
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "PolynomialDecayParamScheduler":
+        """Instantiates a PolynomialDecayParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a PolynomialDecayParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A PolynomialDecayParamScheduler instance.
+        """
         assert (
             "base_lr" in config and "power" in config
         ), "Polynomial decay scheduler requires a base lr and a power of decay"

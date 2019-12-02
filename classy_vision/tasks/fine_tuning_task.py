@@ -20,6 +20,15 @@ class FineTuningTask(ClassificationTask):
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "FineTuningTask":
+        """Instantiates a FineTuningTask from a configuration.
+
+        Args:
+            config: A configuration for a FineTuningTask.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A FineTuningTask instance.
+        """
         task = super().from_config(config)
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))

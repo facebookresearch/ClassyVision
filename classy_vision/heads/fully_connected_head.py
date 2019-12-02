@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 from classy_vision.heads import ClassyHead, register_head
@@ -36,7 +38,16 @@ class FullyConnectedHead(ClassyHead):
         self.fc = None if num_classes is None else nn.Linear(in_plane, num_classes)
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "FullyConnectedHead":
+        """Instantiates a FullyConnectedHead from a configuration.
+
+        Args:
+            config: A configuration for a FullyConnectedHead.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A FullyConnectedHead instance.
+        """
         num_classes = config.get("num_classes", None)
         in_plane = config["in_plane"]
         return cls(config["unique_id"], num_classes, in_plane)

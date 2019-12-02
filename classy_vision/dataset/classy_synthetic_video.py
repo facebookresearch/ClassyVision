@@ -81,11 +81,11 @@ class SyntheticVideoDataset(ClassyVideoDataset):
         """Instantiates a SyntheticVideoDataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. See :func:`__init__` for parameters
-                expected in the config.
+            config: A configuration for a SyntheticVideoDataset.
+                See :func:`__init__` for parameters expected in the config.
 
         Returns:
-            A SyntheticVideoDataset instance
+            A SyntheticVideoDataset instance.
         """
         split = config["split"]
         num_classes = config["num_classes"]

@@ -133,27 +133,11 @@ class UCF101Dataset(ClassyVideoDataset):
         """Instantiates a UCF101Dataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. Should contain the following keys,
-                and by default see :method:`__init__` for their meaning
-                - split
-                - batchsize_per_replica
-                - shuffle
-                - transform: The transform configuration. See :method:`build_transform`
-                - num_samples
-                - frames_per_clip
-                - video_width
-                - video_height
-                - audio_samples
-                - step_between_clips
-                – frame_rate
-                - clips_per_video
-                – video_dir
-                - splits_dir
-                - fold
-                - metadata_filepath
-        Returns:
-            A UCF101Dataset instance
+            config: A configuration for a UCF101Dataset.
+                See :func:`__init__` for parameters expected in the config.
 
+        Returns:
+            A UCF101Dataset instance.
         """
         required_args = ["split", "metadata_file", "video_dir", "splits_dir"]
         assert all(

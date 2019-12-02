@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch
 
 from . import ClassyLoss, build_loss, register_loss
@@ -16,17 +18,26 @@ class MultiOutputSumLoss(ClassyLoss):
     up the losses.
     """
 
+    def __init__(self, loss) -> None:
+        super().__init__()
+
+        self._loss = loss
+
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "MultiOutputSumLoss":
+        """Instantiates a MultiOutputSumLoss from a configuration.
+
+        Args:
+            config: A configuration for a MultiOutpuSumLoss.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A MultiOutputSumLoss instance.
+        """
         assert (
             type(config["loss"]) == dict
         ), "loss must be a dict containing a configuration for a registered loss"
         return cls(loss=build_loss(config["loss"]))
-
-    def __init__(self, loss):
-        super().__init__()
-
-        self._loss = loss
 
     def forward(self, output, target):
         if torch.is_tensor(output):

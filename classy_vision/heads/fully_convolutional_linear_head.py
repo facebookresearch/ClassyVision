@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from collections.abc import Sequence
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
@@ -88,7 +88,16 @@ class FullyConvolutionalLinearHead(ClassyHead):
         )
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "FullyConvolutionalLinearHead":
+        """Instantiates a FullyConvolutionalLinearHead from a configuration.
+
+        Args:
+            config: A configuration for a FullyConvolutionalLinearHead.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A FullyConvolutionalLinearHead instance.
+        """
         required_args = ["pool_size", "in_plane", "num_classes"]
         for arg in required_args:
             assert arg in config, "argument %s is required" % arg

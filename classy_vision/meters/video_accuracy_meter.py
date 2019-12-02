@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch
 from classy_vision.generic.util import is_pos_int
 from classy_vision.meters import ClassyMeter
@@ -36,7 +38,16 @@ class VideoAccuracyMeter(ClassyMeter):
         self._accuracy_meter = AccuracyMeter(topk)
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "VideoAccuracyMeter":
+        """Instantiates a VideoAccuracyMeter from a configuration.
+
+        Args:
+            config: A configuration for a VideoAccuracyMeter.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A VideoAccuracyMeter instance.
+        """
         return cls(
             topk=config["topk"],
             clips_per_video_train=config.get("clips_per_video_train", 1),

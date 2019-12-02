@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch
 
 from . import ClassyLoss, register_loss
@@ -14,19 +16,6 @@ class BarronLoss(ClassyLoss):
     """
     This implements the Barron loss: https://arxiv.org/pdf/1701.03077.pdf
     """
-
-    @classmethod
-    def from_config(cls, config):
-        # Infinity is a valid alpha value but is frequently a string
-        config["alpha"] = float(config["alpha"])
-        # assertions:
-        assert type(config["size_average"]) == bool
-        assert type(config["alpha"]) == float
-        assert type(config["c"]) == float and config["c"] > 0.0
-
-        return cls(
-            alpha=config["alpha"], size_average=config["size_average"], c=config["c"]
-        )
 
     def __init__(self, alpha, size_average, c):
         super(BarronLoss, self).__init__()
@@ -57,6 +46,28 @@ class BarronLoss(ClassyLoss):
             self._forward = _forward_inf
         else:
             self._forward = _forward
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "BarronLoss":
+        """Instantiates a BarronLoss from a configuration.
+
+        Args:
+            config: A configuration for a BarronLoss.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A BarronLoss instance.
+        """
+        # Infinity is a valid alpha value but is frequently a string
+        config["alpha"] = float(config["alpha"])
+        # assertions:
+        assert type(config["size_average"]) == bool
+        assert type(config["alpha"]) == float
+        assert type(config["c"]) == float and config["c"] > 0.0
+
+        return cls(
+            alpha=config["alpha"], size_average=config["size_average"], c=config["c"]
+        )
 
     def forward(self, prediction, target):
         diff = torch.add(prediction, -target)

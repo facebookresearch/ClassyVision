@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 
+from typing import Any, Dict
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -13,16 +15,6 @@ from classy_vision.losses import ClassyLoss, register_loss
 
 @register_loss("soft_target_cross_entropy")
 class SoftTargetCrossEntropyLoss(ClassyLoss):
-    @classmethod
-    def from_config(cls, config):
-        if "weight" in config:
-            raise NotImplementedError('"weight" not implemented')
-        return cls(
-            ignore_index=config.get("ignore_index", -100),
-            reduction=config.get("reduction", "mean"),
-            normalize_targets=config.get("normalize_targets", "count_based"),
-        )
-
     def __init__(self, ignore_index, reduction, normalize_targets):
         """Intializer for the soft target cross-entropy loss loss.
         This allows the targets for the cross entropy loss to be multilabel
@@ -42,6 +34,26 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
                 'reduction type "{}" not implemented'.format(self._reduction)
             )
         self._eps = np.finfo(np.float32).eps
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "SoftTargetCrossEntropyLoss":
+        """Instantiates a SoftTargetCrossEntropyLoss from a configuration.
+
+        Args:
+            config: A configuration for a SoftTargetCrossEntropyLoss.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A SoftTargetCrossEntropyLoss instance.
+        """
+
+        if "weight" in config:
+            raise NotImplementedError('"weight" not implemented')
+        return cls(
+            ignore_index=config.get("ignore_index", -100),
+            reduction=config.get("reduction", "mean"),
+            normalize_targets=config.get("normalize_targets", "count_based"),
+        )
 
     def forward(self, output, target):
         """for N examples and C classes
