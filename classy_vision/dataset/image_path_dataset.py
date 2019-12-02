@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os.path
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import torch
 import torchvision.datasets as datasets
@@ -12,6 +13,7 @@ import torchvision.transforms as transforms
 
 from .classy_dataset import ClassyDataset
 from .core import ListDataset
+from .transforms.classy_transform import ClassyTransform
 from .transforms.util import build_field_transform_default_imagenet
 
 
@@ -29,29 +31,44 @@ def _load_dataset(image_paths, targets):
 
 
 class ImagePathDataset(ClassyDataset):
-    """
-    A ClassyDataset class which reads images from image paths.
+    """Dataset which reads images from a local filesystem. Implements ClassyDataset.
 
-    image_paths: Can be
+    The image paths provided can be:
         - A single directory location, in which case the data is expected to be
-            arranged in a format similar to torchvision.datasets.ImageFolder.
+            arranged in a format similar to :class:`torchvision.datasets.ImageFolder`.
             The targets will be inferred from the directory structure.
         - A list of paths, in which case the list will contain the paths to all the
             images. In this situation, the targets can be specified by the targets
             argument.
-    targets (optional): A list containing the target classes for each image
     """
 
     def __init__(
         self,
-        batchsize_per_replica,
-        shuffle,
-        transform,
-        num_samples,
-        image_paths,
-        targets=None,
-        split=None,
+        batchsize_per_replica: int,
+        shuffle: bool,
+        transform: Optional[Union[ClassyTransform, Callable]],
+        num_samples: Optional[int],
+        image_paths: Union[str, List[str]],
+        targets: Optional[List[Any]] = None,
+        split: Optional[str] = None,
     ):
+        """Constructor for ImagePathDataset.
+
+        Args:
+            batchsize_per_replica: Positive integer indicating batch size for each
+                replica
+            shuffle: Whether we should shuffle between epochs
+            transform: Transform to be applied to each sample
+            num_samples: When set, this restricts the number of samples provided by
+                the dataset
+            image_paths: A directory or a list of file paths where images can be found.
+            targets: If a list of file paths is specified, this argument can
+                be used to specify a target for each path (must be same length
+                as list of file paths). If no targets are needed or image_paths is
+                a directory, then targets should be None.
+            split: Split of dataset ("train", "test")
+
+        """
         # TODO(@mannatsingh): we should be able to call build_dataset() to create
         # datasets from this class.
         assert image_paths is not None, "image_paths needs to be provided"
@@ -65,7 +82,29 @@ class ImagePathDataset(ClassyDataset):
         )
 
     @classmethod
-    def from_config(cls, config, image_paths, targets=None, default_transform=None):
+    def from_config(
+        cls,
+        config: Dict[str, Any],
+        image_paths: Union[str, List[str]],
+        targets: Optional[List[Any]] = None,
+        default_transform: Optional[Callable] = None,
+    ):
+        """Instantiates ImagePathDataset from a config.
+
+        Because image_paths / targets can be arbitrarily long, we
+        allow passing in the image paths and targets from python in
+        addition to the configuration parameter.
+
+        Args:
+            config: A configuration for ImagePathDataset.
+                See :func:`__init__` for parameters expected in the config.
+            image_paths: Directory or list of image paths.
+                See :func:`__init__` for more details
+            targets: Optional list of targets for dataset.
+                See :func:`__init__` for more details
+            default_transform: If no transform is provided, use this transform.
+
+        """
         split = config.get("split")
         (
             transform_config,
