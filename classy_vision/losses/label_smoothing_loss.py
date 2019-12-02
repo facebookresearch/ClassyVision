@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import numpy as np
 from classy_vision.generic.util import convert_to_one_hot
 from classy_vision.losses import ClassyLoss, register_loss
@@ -14,18 +16,6 @@ from classy_vision.losses.soft_target_cross_entropy_loss import (
 
 @register_loss("label_smoothing_cross_entropy")
 class LabelSmoothingCrossEntropyLoss(ClassyLoss):
-    @classmethod
-    def from_config(cls, config):
-        assert "weight" not in config, '"weight" not implemented'
-        assert (
-            "smoothing_param" in config
-        ), "Label Smoothing needs a smoothing parameter"
-        return cls(
-            ignore_index=config.get("ignore_index", -100),
-            reduction=config.get("reduction", "mean"),
-            smoothing_param=config.get("smoothing_param"),
-        )
-
     def __init__(self, ignore_index, reduction, smoothing_param):
         """Intializer for the label smoothed cross entropy loss.
         This decreases gap between output scores and encourages generalization.
@@ -44,6 +34,28 @@ class LabelSmoothingCrossEntropyLoss(ClassyLoss):
             self._ignore_index, self._reduction, None
         )
         self._eps = np.finfo(np.float32).eps
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "LabelSmoothingCrossEntropyLoss":
+        """Instantiates a LabelSmoothingCrossEntropyLoss from a configuration.
+
+        Args:
+            config: A configuration for a LabelSmoothingCrossEntropyLoss.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A LabelSmoothingCrossEntropyLoss instance.
+        """
+
+        assert "weight" not in config, '"weight" not implemented'
+        assert (
+            "smoothing_param" in config
+        ), "Label Smoothing needs a smoothing parameter"
+        return cls(
+            ignore_index=config.get("ignore_index", -100),
+            reduction=config.get("reduction", "mean"),
+            smoothing_param=config.get("smoothing_param"),
+        )
 
     def compute_valid_targets(self, target, classes):
 

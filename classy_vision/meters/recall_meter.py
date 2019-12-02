@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
 from classy_vision.generic.util import convert_to_one_hot, is_pos_int
@@ -52,7 +54,16 @@ class RecallAtKMeter(ClassyMeter):
         self.reset()
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "RecallAtKMeter":
+        """Instantiates a RecallAtKMeter from a configuration.
+
+        Args:
+            config: A configuration for a RecallAtKMeter.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A RecallAtKMeter instance.
+        """
         return cls(
             topk=config["topk"],
             target_is_one_hot=config.get("target_is_one_hot", True),

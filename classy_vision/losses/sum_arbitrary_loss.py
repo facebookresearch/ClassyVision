@@ -4,7 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict, List, Optional
+
 import torch
+from torch import Tensor
 
 from . import ClassyLoss, build_loss, register_loss
 
@@ -18,8 +21,25 @@ class SumArbitraryLoss(ClassyLoss):
     taking a list of outputs as input.
     """
 
+    def __init__(self, losses: List[float], weights: Optional[Tensor] = None) -> None:
+        super().__init__()
+        if weights is None:
+            weights = torch.ones((len(losses)))
+
+        self.losses = losses
+        self.weights = weights
+
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "SumArbitraryLoss":
+        """Instantiates a SumArbitraryLoss from a configuration.
+
+        Args:
+            config: A configuration for a SumArbitraryLoss.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A SumArbitraryLoss instance.
+        """
         assert (
             type(config["losses"]) == list and len(config["losses"]) > 0
         ), "losses must be a list of registered losses with length > 0"
@@ -36,14 +56,6 @@ class SumArbitraryLoss(ClassyLoss):
         ), "All losses must be registered, valid ClassyLosses"
 
         return cls(losses=loss_modules, weights=config.get("weights", None))
-
-    def __init__(self, losses, weights=None):
-        super().__init__()
-        if weights is None:
-            weights = torch.ones((len(losses)))
-
-        self.losses = losses
-        self.weights = weights
 
     def forward(self, prediction, target):
         for idx, loss in enumerate(self.losses):

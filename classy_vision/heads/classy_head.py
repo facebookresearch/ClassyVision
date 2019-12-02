@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import torch.nn as nn
 
@@ -38,7 +38,15 @@ class ClassyHead(nn.Module):
         self.num_classes = num_classes
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyHead":
+        """Instantiates a ClassyHead from a configuration.
+
+        Args:
+            config: A configuration for the ClassyHead.
+
+        Returns:
+            A ClassyHead instance.
+        """
         raise NotImplementedError
 
     def forward(self, x):

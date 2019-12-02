@@ -64,7 +64,16 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             start_epoch = milestone
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any]):
+    def from_config(cls, config: Dict[str, Any]) -> "MultiStepParamScheduler":
+        """Instantiates a MultiStepParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a MultiStepParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A MultiStepParamScheduler instance.
+        """
         assert (
             "values" in config
             and isinstance(config["values"], list)

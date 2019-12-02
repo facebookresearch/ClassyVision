@@ -61,11 +61,11 @@ class SyntheticImageDataset(ClassyDataset):
         """Instantiates a SyntheticImageDataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. See :func:`__init__` for parameters
-                expected in the config.
+            config: A configuration for a SyntheticImageDataset.
+                See :func:`__init__` for parameters expected in the config.
 
         Returns:
-            A SyntheticImageDataset instance
+            A SyntheticImageDataset instance.
         """
         assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
         split = config.get("split")

@@ -47,13 +47,14 @@ class RMSProp(ClassyOptimizer):
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "RMSProp":
-        """
-        Initializer for stochastic gradient descent optimizer. The config
-        is expected to contain at least three keys:
+        """Instantiates a RMSProp from a configuration.
 
-        lr: float learning rate
-        momentum: float momentum (should be [0, 1))
-        weight_decay: float weight decay
+        Args:
+            config: A configuration for a RMSProp.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A RMSProp instance.
         """
         # Default params
         config.setdefault("eps", 1e-8)
