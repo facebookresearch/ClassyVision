@@ -6,23 +6,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import pathlib
+import sys
 import unittest
-from typing import Any, Callable, Dict, Optional, Union
 
-import torch.nn as nn
-import torch.nn.functional as F
-from classy_vision.dataset import ClassyDataset, register_dataset
-from classy_vision.dataset.core.random_image_datasets import (
-    RandomImageBinaryClassDataset,
-    SampleType,
-)
-from classy_vision.dataset.transforms import (
-    ClassyTransform,
-    GenericImageTransform,
-    build_transforms,
-)
-from classy_vision.losses import ClassyLoss, register_loss
-from classy_vision.models import ClassyModel, register_model
+import classy_vision
+from classy_vision.dataset.transforms import GenericImageTransform
 from classy_vision.optim import SGD
 from classy_vision.optim.param_scheduler import ConstantParamScheduler
 from classy_vision.tasks import ClassificationTask
@@ -30,92 +19,23 @@ from classy_vision.trainer import LocalTrainer
 from torchvision import transforms
 
 
+# import the classes from the synthetic template
+path = pathlib.Path(classy_vision.__file__).resolve().parent
+synthetic_template_path = path / "templates" / "synthetic"
+sys.path.append(str(synthetic_template_path))
+
+from datasets.my_dataset import MyDataset  # isort:skip
+from losses.my_loss import MyLoss  # isort:skip
+from models.my_model import MyModel  # isort:skip
+
+
 # WARNING: The goal of this test is to use our public API as advertised in our
 # tutorials and make sure everything trains successfully. If you break this
 # test, make sure you also update our tutorials.
 
 
-@register_dataset("my_dataset")
-class MyDataset(ClassyDataset):
-    def __init__(
-        self,
-        batchsize_per_replica: int,
-        shuffle: bool,
-        transform: Optional[Union[ClassyTransform, Callable]],
-        num_samples: int,
-        crop_size: int,
-        class_ratio: float,
-        seed: int,
-        split: Optional[str] = None,
-    ) -> None:
-        dataset = RandomImageBinaryClassDataset(
-            crop_size, class_ratio, num_samples, seed, SampleType.TUPLE
-        )
-        super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
-        )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "MyDataset":
-        assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
-
-        split = config.get("split")
-        crop_size = config["crop_size"]
-        class_ratio = config["class_ratio"]
-        seed = config["seed"]
-        (
-            transform_config,
-            batchsize_per_replica,
-            shuffle,
-            num_samples,
-        ) = cls.parse_config(config)
-        transform = build_transforms(transform_config)
-        return cls(
-            batchsize_per_replica,
-            shuffle,
-            transform,
-            num_samples,
-            crop_size,
-            class_ratio,
-            seed,
-            split=split,
-        )
-
-
-@register_loss("my_loss")
-class MyLoss(ClassyLoss):
-    def forward(self, input, target):
-        labels = F.one_hot(target, num_classes=2).float()
-        return F.binary_cross_entropy(input, labels)
-
-    @classmethod
-    def from_config(cls, config):
-        # We don't need anything from the config
-        return cls()
-
-
-@register_model("my_model")
-class MyModel(ClassyModel):
-    def __init__(self):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.AdaptiveAvgPool2d((20, 20)),
-            nn.Flatten(1),
-            nn.Linear(3 * 20 * 20, 2),
-            nn.Sigmoid(),
-        )
-
-    def forward(self, x):
-        x = self.model(x)
-        return x
-
-    @classmethod
-    def from_config(cls, config):
-        return cls()
-
-
 class APITest(unittest.TestCase):
-    def testOne(self):
+    def test_one(self):
         train_dataset = MyDataset(
             batchsize_per_replica=32,
             shuffle=False,
