@@ -13,8 +13,9 @@ import torchvision.transforms as transforms
 
 from .classy_dataset import ClassyDataset
 from .core import ListDataset
+from .transforms import build_transforms
 from .transforms.classy_transform import ClassyTransform
-from .transforms.util import build_field_transform_default_imagenet
+from .transforms.util import TupleToMapTransform
 
 
 def _load_dataset(image_paths, targets):
@@ -25,9 +26,11 @@ def _load_dataset(image_paths, targets):
             image_paths
         ), "Expect image_paths to be a dir when it is a string"
         dataset = datasets.ImageFolder(image_paths)
+        preproc_transform = TupleToMapTransform(list_of_map_keys=["input", "target"])
     else:
         dataset = ListDataset(image_paths, targets)
-    return dataset
+        preproc_transform = None
+    return dataset, preproc_transform
 
 
 class ImagePathDataset(ClassyDataset):
@@ -76,10 +79,15 @@ class ImagePathDataset(ClassyDataset):
             "targets cannot be specified when image_paths is a directory containing "
             "the targets in the directory structure"
         )
-        dataset = _load_dataset(image_paths, targets)
+        dataset, preproc_transform = _load_dataset(image_paths, targets)
         super().__init__(
             dataset, split, batchsize_per_replica, shuffle, transform, num_samples
         )
+        # Some of the base datasets from _load_dataset have different
+        # sample formats, the preproc_transform should map them all to
+        # the dict {"input": img, "target": label} format
+        if preproc_transform is not None:
+            self.transform = transforms.Compose([preproc_transform, self.transform])
 
     @classmethod
     def from_config(
@@ -87,7 +95,6 @@ class ImagePathDataset(ClassyDataset):
         config: Dict[str, Any],
         image_paths: Union[str, List[str]],
         targets: Optional[List[Any]] = None,
-        default_transform: Optional[Callable] = None,
     ):
         """Instantiates ImagePathDataset from a config.
 
@@ -102,8 +109,6 @@ class ImagePathDataset(ClassyDataset):
                 See :func:`__init__` for more details
             targets: Optional list of targets for dataset.
                 See :func:`__init__` for more details
-            default_transform: If no transform is provided, use this transform.
-
         """
         split = config.get("split")
         (
@@ -113,9 +118,7 @@ class ImagePathDataset(ClassyDataset):
             num_samples,
         ) = cls.parse_config(config)
 
-        transform = build_field_transform_default_imagenet(
-            transform_config, default_transform=default_transform, split=split
-        )
+        transform = build_transforms(transform_config)
         return cls(
             batchsize_per_replica,
             shuffle,
