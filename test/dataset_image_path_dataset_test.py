@@ -46,7 +46,13 @@ class TestImageDataset(unittest.TestCase):
             "batchsize_per_replica": 1,
             "use_shuffle": False,
             "num_samples": None,
-            "transforms": [{"name": "ToTensor"}],
+            "transforms": [
+                {
+                    "name": "apply_transform_to_key",
+                    "transforms": [{"name": "ToTensor"}],
+                    "key": "input",
+                }
+            ],
         }
 
     @unittest.skip(
