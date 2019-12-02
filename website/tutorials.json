@@ -4,6 +4,9 @@
       "id": "getting_started",
       "title": "Getting started"
      },{
+      "id": "ray_aws",
+      "title": "Distributed training on AWS"
+     },{
       "id": "classy_model",
       "title": "Creating a custom model"
      },{

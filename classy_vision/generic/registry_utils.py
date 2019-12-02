@@ -32,9 +32,19 @@ def import_all_packages_from_directory(root):
     This function will import the package foo, but not bar or baz."""
 
     for file in os.listdir(root):
-        file = Path(file)
-        if file.is_dir() and (file / "__init__.py").exists():
+        # Try to import each file in the directory. Our previous implementation
+        # would look for directories here and see if there's a __init__.py
+        # under that directory, but that turns out to be unreliable while
+        # running on AWS: EFS filesystems cache metadata bits so the directory
+        # and existence checks fail even when the import succeeds. We should
+        # find a better workaround eventually, but this will do for now.
+        try:
+            file = Path(file)
             module_name = file.name
-            if module_name not in sys.modules:
+            # Dots have special meaning in Python packages -- it's a relative
+            # import or a subpackage. Skip these.
+            if "." not in module_name and module_name not in sys.modules:
                 logging.debug(f"Automatically importing {module_name}")
                 importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            pass
