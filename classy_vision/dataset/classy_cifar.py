@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from classy_vision.dataset import ClassyDataset, register_dataset
 from classy_vision.dataset.transforms import ClassyTransform, build_transforms
@@ -38,7 +38,16 @@ class CIFARDataset(ClassyDataset):
         )
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "CIFARDataset":
+        """Instantiates a CIFARDataset from a configuration.
+
+        Args:
+            config: A configuration for a CIFARDataset.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A CIFARDataset instance.
+        """
         (
             transform_config,
             batchsize_per_replica,

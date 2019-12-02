@@ -6,7 +6,7 @@
 
 import logging
 import math
-from typing import NamedTuple, Optional  # , Union
+from typing import Any, Dict
 
 from . import ClassyParamScheduler, register_param_scheduler
 
@@ -30,7 +30,16 @@ class CosineParamScheduler(ClassyParamScheduler):
         self._end_lr = end_lr
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "CosineParamScheduler":
+        """Instantiates a CosineParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a CosineParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A CosineParamScheduler instance.
+        """
         assert (
             "start_lr" in config and "end_lr" in config
         ), "Cosine scheduler requires a start_lr and a end_lr"

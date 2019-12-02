@@ -30,7 +30,16 @@ class StepParamScheduler(ClassyParamScheduler):
         self._param_schedule = values
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any]):
+    def from_config(cls, config: Dict[str, Any]) -> "StepParamScheduler":
+        """Instantiates a StepParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a StepParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A StepParamScheduler instance.
+        """
         assert (
             "values" in config
             and isinstance(config["values"], list)

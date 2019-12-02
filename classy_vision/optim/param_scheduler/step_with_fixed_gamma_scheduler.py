@@ -27,7 +27,16 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     """
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any]):
+    def from_config(cls, config: Dict[str, Any]) -> "StepWithFixedGammaParamScheduler":
+        """Instantiates a StepWithFixedGammaParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a StepWithFixedGammaParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A StepWithFixedGammaParamScheduler instance.
+        """
         for key in ["base_lr", "gamma", "num_decays", "num_epochs"]:
             assert key in config, f"Step with fixed decay scheduler requires: {key}"
         for key in ["base_lr", "gamma"]:

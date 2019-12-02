@@ -9,6 +9,7 @@ Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf)
 """
 
 import math
+from typing import Any, Dict
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
@@ -349,7 +350,16 @@ class ResNeXt(ClassyModel):
         return blocks
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
+        """Instantiates a ResNeXt from a configuration.
+
+        Args:
+            config: A configuration for a ResNeXt.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A ResNeXt instance.
+        """
         assert "num_blocks" in config
         config = {
             "num_blocks": config["num_blocks"],

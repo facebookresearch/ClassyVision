@@ -81,6 +81,14 @@ class ClassyOptimizer:
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
+        """Instantiates a ClassyOptimizer from a configuration.
+
+        Args:
+            config: A configuration for the ClassyOptimizer.
+
+        Returns:
+            A ClassyOptimizer instance.
+        """
         raise NotImplementedError
 
     @property

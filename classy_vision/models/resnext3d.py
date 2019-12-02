@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
@@ -402,6 +404,15 @@ class ResNeXt3D(ResNeXt3DBase):
         self._init_parameter(zero_init_residual_transform)
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt3D":
+        """Instantiates a ResNeXt3D from a configuration.
+
+        Args:
+            config: A configuration for a ResNeXt3D.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A ResNeXt3D instance.
+        """
         ret_config = ResNeXt3D._parse_config(config)
         return cls(**ret_config)

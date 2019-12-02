@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch.nn as nn
 
 
@@ -22,7 +24,15 @@ class ClassyLoss(nn.Module):
         super(ClassyLoss, self).__init__()
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ClassyLoss":
+        """Instantiates a ClassyLoss from a configuration.
+
+        Args:
+            config: A configuration for a ClassyLoss.
+
+        Returns:
+            A ClassyLoss instance.
+        """
         raise NotImplementedError()
 
     def forward(self, output, target):

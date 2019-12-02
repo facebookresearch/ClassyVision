@@ -18,14 +18,13 @@ class ClassyMeter:
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyMeter":
-        """
-        Instantiates a ClassyMeter using a configuration.
+        """Instantiates a ClassyMeter using a configuration.
 
         Args:
-            config: A configuration for the meter
+            config: A configuration for a ClassyMeter.
 
         Returns:
-            A ClassyMeter instance
+            A ClassyMeter instance.
         """
         raise NotImplementedError
 

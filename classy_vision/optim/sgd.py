@@ -4,11 +4,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 import torch.optim
 from classy_vision.generic.util import is_pos_float
 from classy_vision.optim.param_scheduler import (
     ClassyParamScheduler,
-    build_param_scheduler
+    build_param_scheduler,
 )
 
 from . import ClassyOptimizer, register_optimizer
@@ -40,14 +42,15 @@ class SGD(ClassyOptimizer):
         )
 
     @classmethod
-    def from_config(cls, config):
-        """
-        Initializer for stochastic gradient descent optimizer. The config
-        is expected to contain at least three keys:
+    def from_config(cls, config: Dict[str, Any]) -> "SGD":
+        """Instantiates a SGD from a configuration.
 
-        lr: float learning rate
-        momentum: float momentum (should be [0, 1))
-        weight_decay: float weight decay
+        Args:
+            config: A configuration for a SGD.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A SGD instance.
         """
         # Default params
         config["nesterov"] = config.get("nesterov", False)

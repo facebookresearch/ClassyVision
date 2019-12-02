@@ -6,7 +6,7 @@
 
 import copy
 import logging
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
@@ -192,7 +192,16 @@ class ClassificationTask(ClassyTask):
         return self
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ClassificationTask":
+        """Instantiates a ClassificationTask from a configuration.
+
+        Args:
+            config: A configuration for a ClassificationTask.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A ClassificationTask instance.
+        """
         optimizer_config = config["optimizer"]
         optimizer_config["num_epochs"] = config["num_epochs"]
 

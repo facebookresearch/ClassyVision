@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 from . import ClassyParamScheduler, register_param_scheduler
 
 
@@ -25,7 +27,16 @@ class LinearParamScheduler(ClassyParamScheduler):
         self._end_lr = end_lr
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "LinearParamScheduler":
+        """Instantiates a LinearParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a LinearParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A LinearParamScheduler instance.
+        """
         assert (
             "start_lr" in config and "end_lr" in config
         ), "Linear scheduler requires a start and a end"

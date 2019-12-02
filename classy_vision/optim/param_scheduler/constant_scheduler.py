@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Any, Dict
+
 from . import ClassyParamScheduler, register_param_scheduler
 
 
@@ -18,7 +20,16 @@ class ConstantParamScheduler(ClassyParamScheduler):
         self._value = value
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "ConstantParamScheduler":
+        """Instantiates a ConstantParamScheduler from a configuration.
+
+        Args:
+            config: A configuration for a ConstantParamScheduler.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A ConstantParamScheduler instance.
+        """
         assert "value" in config
         return cls(value=config["value"])
 

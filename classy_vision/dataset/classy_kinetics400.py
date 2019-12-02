@@ -138,27 +138,11 @@ class Kinetics400Dataset(ClassyVideoDataset):
         """Instantiates a UCF101Dataset from a configuration.
 
         Args:
-            config: A configuration for the dataset. Should contain the following keys,
-                and by default see :method:`__init__` for their meaning
-                - split
-                - batchsize_per_replica
-                - shuffle
-                - transform: The transform configuration. See :method:`build_transform`
-                - num_samples
-                - frames_per_clip
-                – video_width
-                – video_height
-                – audio_samples
-                - audio_channels
-                - step_between_clips
-                – frame_rate
-                – clips_per_video
-                - video_dir
-                – extensions
-                - metadata_filepath
-        Returns:
-            A Kinetics400Dataset instance
+            config: A configuration for a Kinetics400Dataset.
+                See :func:`__init__` for parameters expected in the config.
 
+        Returns:
+            A Kinetics400Dataset instance.
         """
         required_args = ["split", "metadata_file", "video_dir"]
         assert all(

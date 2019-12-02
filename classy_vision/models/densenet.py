@@ -8,6 +8,7 @@
 
 # dependencies:
 import math
+from typing import Any, Dict
 
 import torch
 import torch.nn as nn
@@ -202,7 +203,16 @@ class DenseNet(ClassyModel):
                 m.bias.data.zero_()
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: Dict[str, Any]) -> "DenseNet":
+        """Instantiates a DenseNet from a configuration.
+
+        Args:
+            config: A configuration for a DenseNet.
+                See :func:`__init__` for parameters expected in the config.
+
+        Returns:
+            A DenseNet instance.
+        """
         assert "num_blocks" in config
         config = {
             "num_blocks": config["num_blocks"],
