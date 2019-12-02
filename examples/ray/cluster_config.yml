@@ -1,0 +1,165 @@
+# An unique identifier for the head node and workers of this cluster.
+cluster_name: default 
+# The minimum number of workers nodes to launch in addition to the head
+# node. This number should be >= 0.
+min_workers: 2
+
+# The maximum number of workers nodes to launch in addition to the head
+# node. This takes precedence over min_workers.
+max_workers: 2
+
+# The initial number of worker nodes to launch in addition to the head
+# node. When the cluster is first brought up (or when it is refreshed with a
+# subsequent `ray up`) this number of nodes will be started.
+initial_workers: 2
+
+# Whether or not to autoscale aggressively. If this is enabled, if at any point
+# we would start more workers, we start at least enough to bring us to
+# initial_workers.
+autoscaling_mode: default
+
+# This executes all commands on all nodes in the docker container,
+# and opens all the necessary ports to support the Ray cluster.
+# Empty string means disabled.
+docker:
+    image: "" # e.g., tensorflow/tensorflow:1.5.0-py3
+    container_name: "" # e.g. ray_docker
+    run_options: []  # Extra options to pass into "docker run"
+
+# The autoscaler will scale up the cluster to this target fraction of resource
+# usage. For example, if a cluster of 10 nodes is 100% busy and
+# target_utilization is 0.8, it would resize the cluster to 13. This fraction
+# can be decreased to increase the aggressiveness of upscaling.
+# This value must be less than 1.0 for scaling to happen.
+#
+# For this Classy Vision example, we want to disable autoscaling.
+target_utilization_fraction: 1.0
+
+# If a node is idle for this many minutes, it will be removed.
+idle_timeout_minutes: 5
+
+# Cloud-provider specific configuration.
+provider:
+    type: aws
+    region: us-west-2
+    # Availability zone(s), comma-separated, that nodes may be launched in.
+    # Nodes are currently spread between zones by a round-robin approach,
+    # however this implementation detail should not be relied upon.
+    availability_zone: us-west-2a,us-west-2b
+
+    # This prevents Ray from re-using nodes from a previous cluster that were stopped.
+    # Reusing nodes is desirable cause it speeds up the time to setup a new cluster,
+    # but in our experiments it made each run hard to reproduce. You have to make sure
+    # your setup commands are idempotent. For now disable caching to keep things simple,
+    # but it shouldn't be too hard to get this working with caching.
+    cache_stopped_nodes: False
+
+# How Ray will authenticate with newly launched nodes.
+auth:
+    ssh_user: ubuntu
+# By default Ray creates a new private keypair, but you can also use your own.
+# If you do so, make sure to also set "KeyName" in the head and worker node
+# configurations below.
+#    ssh_private_key: /path/to/your/key.pem
+
+# Provider-specific config for the head node, e.g. instance type. By default
+# Ray will auto-configure unspecified fields such as SubnetId and KeyName.
+# For more documentation on available fields, see:
+# http://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.ServiceResource.create_instances
+#
+# In this Classy Vision example, we will have a CPU-only machine as the head node,
+# and GPU workers to actually run training jobs.
+head_node:
+    InstanceType: m5.large
+    ImageId: ami-05931d11d2bf831c3 # Deep Learning AMI (Ubuntu) Version 24.3
+
+    # You can provision additional disk space with a conf as follows
+    BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+              VolumeSize: 100
+
+    # Additional options in the boto docs.
+
+# Provider-specific config for worker nodes, e.g. instance type. By default
+# Ray will auto-configure unspecified fields such as SubnetId and KeyName.
+# For more documentation on available fields, see:
+# http://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.ServiceResource.create_instances
+worker_nodes:
+    # We will use GPU workers
+    InstanceType: p2.xlarge
+    ImageId: ami-05931d11d2bf831c3 # Deep Learning AMI (Ubuntu) Version 24.3
+
+    # Additional options in the boto docs.
+
+# Files or directories to copy to the head and worker nodes. The format is a
+# dictionary from REMOTE_PATH: LOCAL_PATH, e.g.
+file_mounts: {
+#    "/path1/on/remote/machine": "/path1/on/local/machine",
+}
+
+# List of commands that will be run before `setup_commands`. If docker is
+# enabled, these commands will run outside the container and before docker
+# is setup.
+initialization_commands: []
+
+# List of shell commands to run to set up nodes.
+setup_commands:
+    # These commands are carefully crafted to get EFS mounts working correctly
+    # with this AMI. Be careful editing this: in my experience the EFS setup
+    # process is very fragile
+    #
+    # *********************************************
+    #
+    # ATTENTION: edit the {{FileSystemId}} entry below to match the EFS volume you have created
+    #
+    # *********************************************
+    - sudo kill -9 `sudo lsof /var/lib/dpkg/lock-frontend | awk '{print $2}' | tail -n 1`;
+        sudo pkill -9 apt-get;
+        sudo pkill -9 dpkg;
+        sudo dpkg --configure -a;
+        sudo apt-get -y update;
+        sudo apt-get -y install binutils;
+        cd $HOME;
+        git clone https://github.com/aws/efs-utils;
+        cd $HOME/efs-utils;
+        ./build-deb.sh;
+        sudo kill -9 `sudo lsof /var/lib/dpkg/lock-frontend | awk '{print $2}' | tail -n 1`;
+        sudo pkill -9 apt-get;
+        sudo pkill -9 dpkg;
+        sudo dpkg --configure -a;
+        sudo apt-get -y install ./build/amazon-efs-utils*deb;
+        sudo apt-get -y install ./build/amazon-efs-utils*deb;
+        cd $HOME;
+        mkdir efs;
+        sudo mount -t efs {{FileSystemId}}:/ efs;
+        sudo chmod 777 efs;
+
+# Custom commands that will be run on the head node after common setup.
+head_setup_commands:
+    - conda install pytorch torchvision -c pytorch -y
+    - pip install --upgrade pip
+    - pip install -U https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-0.8.0.dev6-cp36-cp36m-manylinux1_x86_64.whl
+    - pip install boto3==1.4.8  # 1.4.8 adds InstanceMarketOptions
+    - pip install classy-vision
+
+# Custom commands that will be run on worker nodes after common setup.
+worker_setup_commands:
+    # The AMI we use does not have a version of PyTorch compatible with Classy Vision,
+    # so we have to install it manually here. This AMI also comes with the hard drive
+    # almost full, so we have to uninstall a conda environment to make up space.
+    - conda env remove -n caffe2_p27 -y || true
+    - conda install pytorch torchvision -c pytorch -y
+    - pip install --upgrade pip
+    - pip install -U https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-0.8.0.dev6-cp36-cp36m-manylinux1_x86_64.whl
+    - pip install classy-vision
+
+# Command to start ray on the head node. You don't need to change this.
+head_start_ray_commands:
+    - ray stop
+    - ulimit -n 65536; ray start --head --redis-port=6379 --object-manager-port=8076 --autoscaling-config=~/ray_bootstrap_config.yaml
+
+# Command to start ray on worker nodes. You don't need to change this.
+worker_start_ray_commands:
+    - ray stop
+    - ulimit -n 65536; ray start --redis-address=$RAY_HEAD_IP:6379 --object-manager-port=8076
