@@ -1,11 +1,8 @@
 ---
 name: "❓Questions/Help/Support"
-about: Do you need support? We have resources.
-
+about: Do you need support?
 ---
 
 ## ❓ Questions and Help
 
-### Please note that this issue tracker is not a help form and this issue will be closed.
-
-We have a set of [listed resources available on the website]. TODO: Fill this up.
+Before creating an issue, please go over our [Tutorials](https://classyvision.ai/tutorials) and [API Reference](https://classyvision.ai/api). If you cannot find the information you are looking for, please enquire in Classy Vision's `#help` [slack](https://classyvision.slack.com) channel before creating an issue.
