@@ -106,7 +106,7 @@ class ImagenetAugmentTransform(ClassyTransform):
         """The constructor method of ImagenetAugmentTransform class.
 
         Args:
-            crop_size: expected output size of random cropping
+            crop_size: expected output size per dimension after random cropping
             mean: a 3-tuple denoting the pixel RGB mean
             std: a 3-tuple denoting the pixel RGB standard deviation
 
@@ -151,8 +151,8 @@ class ImagenetNoAugmentTransform(ClassyTransform):
         """The constructor method of ImagenetNoAugmentTransform class.
 
         Args:
-            resize: expected image size after resizing
-            crop_size: expected size of central cropping
+            resize: expected image size per dimension after resizing
+            crop_size: expected size for a dimension of central cropping
             mean: a 3-tuple denoting the pixel RGB mean
             std: a 3-tuple denoting the pixel RGB standard deviation
 
@@ -190,8 +190,9 @@ class GenericImageTransform(ClassyTransform):
     The defaults are for the standard imagenet augmentations
 
     This is just a convenience wrapper to cover the common
-    use-case. You can get the same behavior by composing torchvision
-    transforms + ApplyTransformToKey + TupleToMap.
+    use-case. You can get the same behavior by composing `torchvision
+    transforms <https://pytorch.org/docs/stable/torchvision/transforms.html>`_
+    + :class:`ApplyTransformToKey` + :class:`TupleToMapTransform`.
 
     """
 
@@ -199,11 +200,10 @@ class GenericImageTransform(ClassyTransform):
         self, transform: Optional[Callable] = None, split: Optional[str] = None
     ):
         """Constructor for GenericImageTransfrom
-
+        Only one of the two arguments (*transform*, *split*) should be specified.
         Args:
             transform: A callable or ClassyTransform to be applied to the image only
-            split: 'train' or 'test'. Only one of the two arguments
-                should be specified
+            split: 'train' or 'test'
         """
         assert (
             transform is not None or split is not None
@@ -257,11 +257,13 @@ class GenericImageTransform(ClassyTransform):
 class TupleToMapTransform(ClassyTransform):
     """A transform which maps image data from tuple to dict.
 
-    This transform takes a sample of the form (data1, data2, ...) and
+    This transform has a list of keys (key1, key2, ...),
+    takes a sample of the form (data1, data2, ...) and
     returns a sample of the form {key1: data1, key2: data2, ...}
 
-    It is useful for mapping output from datasets like the PyTorch
-    ImageFolder dataset (tuple) to dict with named data fields.
+    It is useful for mapping output from datasets like the `PyTorch
+    ImageFolder <https://github.com/pytorch/vision/blob/master/torchvision/
+    datasets/folder.py#L177>`_ dataset (tuple) to dict with named data fields.
 
     If sample is already a dict with the required keys, pass sample through.
 
@@ -271,8 +273,8 @@ class TupleToMapTransform(ClassyTransform):
         """The constructor method of TupleToMapTransform class.
 
         Args:
-            list_of_map_keys: a list of dict keys that will be mapped to item
-                in the input sample of data type list
+            list_of_map_keys: a list of dict keys that in order will be mapped
+                to items in the input data sample list
 
         """
         self._map_keys = list_of_map_keys

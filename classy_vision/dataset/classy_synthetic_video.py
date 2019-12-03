@@ -23,7 +23,7 @@ class SyntheticVideoDataset(ClassyVideoDataset):
     Useful for testing since the dataset is much faster to initialize and fetch samples
     from, compared to real world datasets.
 
-    Note: Unlike SyntheticImageDataset, this dataset generates targets randomly,
+    Note: Unlike :class:`SyntheticImageDataset`, this dataset generates targets randomly,
         independent of the video clips.
     """
 

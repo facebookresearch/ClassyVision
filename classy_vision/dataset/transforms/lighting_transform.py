@@ -24,12 +24,13 @@ _DEFAULT_COLOR_LIGHTING_STD = 0.1
 class LightingTransform(ClassyTransform):
     """
     Lighting noise(AlexNet - style PCA - based noise).
-    This trick was originally used in AlexNet paper
-    https://papers.nips.cc/paper/4824-imagenet-classification
-    -with-deep-convolutional-neural-networks.pdf
+    This trick was originally used in `AlexNet paper
+    <https://papers.nips.cc/paper/4824-imagenet-classification
+    -with-deep-convolutional-neural-networks.pdf>`_
 
-    The eigen values and eigen vectors, are taken from caffe2 ImageInputOp.h
-    (https://github.com/pytorch/pytorch/blob/master/caffe2/image/image_input_op.h#L265).
+    The eigen values and eigen vectors, are taken from caffe2 `ImageInputOp.h
+    <https://github.com/pytorch/pytorch/blob/master/caffe2/image/
+    image_input_op.h#L265>`_.
     """
 
     def __init__(

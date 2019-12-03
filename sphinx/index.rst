@@ -7,7 +7,7 @@ Classy Vision's API Reference
 =========================================
 
 This is an exhaustive reference for APIs in Classy Vision. Please refer to our
-tutorials <https://classyvision.ai/tutorials/> for high-level information about
+`tutorials <https://classyvision.ai/tutorials/>`_ for high-level information about
 how these abstractions can used together.
 
 .. toctree::

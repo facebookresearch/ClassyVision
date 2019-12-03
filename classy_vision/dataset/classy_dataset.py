@@ -24,7 +24,7 @@ class ClassyDataset:
     This class wraps a :class:`torch.utils.data.Dataset` via the `dataset` attribute
     and configures the dataloaders needed to access the datasets.
     Transforms which need to be applied to the data should be specified in this class.
-    ClassyDataset can be used to instantiate datasets from a configuration file as well.
+    ClassyDataset can be instantiated from a configuration file as well.
     """
 
     def __init__(
@@ -40,11 +40,11 @@ class ClassyDataset:
         Constructor for a ClassyDataset.
 
         Args:
-            split: Split of dataset to use ("train", "test")
+            split: When set, split of dataset to use ("train", "test")
             batchsize_per_replica: Positive integer indicating batch size for each
                 replica
-            shuffle: Whether we should shuffle between epochs
-            transform: Transform to be applied to each sample
+            shuffle: Whether to shuffle between epochs
+            transform: When set, transform to be applied to each sample
             num_samples: When set, this restricts the number of samples provided by
                 the dataset
         """
@@ -85,20 +85,20 @@ class ClassyDataset:
         Args:
             config: A dict with the following string keys -
 
-                | batchsize_per_replica (int): Must be a positive int, batch size
+                | *batchsize_per_replica* (int): Must be a positive int, batch size
                 |    for each replica
-                | use_shuffle (bool): Whether to enable shuffling for the dataset
-                | num_samples (int, optional): When set, restricts the number of samples
+                | *use_shuffle* (bool): Whether to enable shuffling for the dataset
+                | *num_samples* (int, optional): When set, restricts the number of samples
                 |    in a dataset
-                | transforms: list of tranform configurations to be applied in order
+                | *transforms*: list of tranform configurations to be applied in order
 
         Returns:
             A tuple containing the following variables -
-                | transform_config: Config for the dataset transform. Can be passed to
-                |    :func:`build_transform`
-                | batchsize_per_replica: Batch size per replica
-                | shuffle: Whether we should shuffle between epochs
-                | num_samples: When set, restricts the number of samples in a dataset
+                | *transform_config*: Config for the dataset transform. Can be passed to
+                |    :func:`transforms.build_transform`
+                | *batchsize_per_replica*: Batch size per replica
+                | *shuffle*: Whether we should shuffle between epochs
+                | *num_samples*: When set, restricts the number of samples in a dataset
         """
         batchsize_per_replica = config.get("batchsize_per_replica")
         shuffle = config.get("use_shuffle")

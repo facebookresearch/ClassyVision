@@ -22,16 +22,18 @@ MODEL_CLASS_NAMES = set()
 
 
 def register_model(name):
-    """Registers a ClassyModel subclass.
+    """Registers a :class:`ClassyModel` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
-    ClassyModel from a configuration file, even if the class itself is not
-    part of the Classy Vision framework. To use it, apply this decorator to a
-    ClassyModel subclass, like this:
+    :class:`ClassyModel` from a configuration file, even if the class itself is
+    not part of the Classy Vision framework. To use it, apply this decorator to
+    a ClassyModel subclass, like this:
 
-        @register_model('resnet')
-        class ResidualNet(ClassyModel):
-            ...
+    .. code-block:: python
+
+      @register_model('resnet')
+      class ResidualNet(ClassyModel):
+         ...
 
     To instantiate a model from a configuration file, see
     :func:`build_model`."""

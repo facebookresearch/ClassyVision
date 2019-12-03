@@ -17,30 +17,16 @@ from .transforms.util_video import build_video_field_transform_default
 
 @register_dataset("kinetics400")
 class Kinetics400Dataset(ClassyVideoDataset):
-    """Kinetics-400 is an action recognition video dataset, and it has 400 classes.
-
-    Page: <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
-    It is originally published in (https://arxiv.org/pdf/1705.06950.pdf).
-
-    This dataset consider every video as a collection of video clips of fixed size,
-    specified by ``frames_per_clip``, where the step in frames between each clip
-    is given by ``step_between_clips``. It uses clip sampler to sample clips
-    from each video. For training set, a random clip sampler is used to
-    sample a small number of clips (e.g. 1) from each video
-    For testing set, a uniform clip sampler is used to evenly sample a large
-    number of clips (e.g. 10) from the video.
-
-    To give an example, for 2 videos with 10 and 15 frames respectively, if
-    ``frames_per_clip=5`` and ``step_between_clips=5``, the dataset size
-    will be (2 + 3) = 5, where the first two elements will come from video 1,
-    and the next three elements from video 2. Note that we drop clips which do
-    not have exactly ``frames_per_clip`` elements, so not all frames in a video
-    might be present.
+    """`Kinetics-400  <https://deepmind.com/research/open-source/
+    open-source-datasets/kinetics/>`_ is an action recognition video dataset,
+    and it has 400 classes.
+    `Original publication <https://arxiv.org/pdf/1705.06950.pdf>`_
 
     We assume videos are already trimmed to 10-second clip, and are stored in a
     folder.
 
-    It is built on top of Kinetics400 dataset class in TorchVision.
+    It is built on top of `Kinetics400 <https://github.com/pytorch/vision/blob/
+    master/torchvision/datasets/kinetics.py#L7/>`_ dataset class in TorchVision.
 
     """
 
@@ -83,10 +69,10 @@ class Kinetics400Dataset(ClassyVideoDataset):
                 audio sample rate
             audio_channels: desire No. of audio channel. If 0, keep original audio
                 channels
-            step_between_clips: No. of frames between each clip.
+            step_between_clips: Number of frames between each clip.
             frame_rate: desired video frame rate. If None, keep
                 orignal video frame rate.
-            clips_per_video: No. of clips to sample from each video
+            clips_per_video: Number of clips to sample from each video
             video_dir: path to video folder
             extensions: A list of file extensions, such as "avi" and "mp4". Only
                 video matching those file extensions are added to the dataset
@@ -135,7 +121,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "Kinetics400Dataset":
-        """Instantiates a UCF101Dataset from a configuration.
+        """Instantiates a Kinetics400Dataset from a configuration.
 
         Args:
             config: A configuration for a Kinetics400Dataset.

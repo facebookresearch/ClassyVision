@@ -49,7 +49,7 @@ extensions = [
 ]
 
 autodoc_default_flags = ["undoc-members"]
-autodoc_default_options = {"special-members": "__init__", "autodoc_typehints": "none"}
+autodoc_default_options = {"special-members": "__init__,__call__", "autodoc_typehints": "none"}
 
 primary_domain = "py"
 
