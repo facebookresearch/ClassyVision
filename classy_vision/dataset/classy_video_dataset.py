@@ -61,7 +61,7 @@ class MaxLengthClipSampler(Sampler):
 
 class ClassyVideoDataset(ClassyDataset):
     """Interface specifying what a ClassyVision video dataset is expected to provide.
-    
+
     This dataset considers every video as a collection of video clips of fixed size,
     specified by ``frames_per_clip``, where the step in frames between each clip
     is given by ``step_between_clips``. It uses a clip sampler to sample

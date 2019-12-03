@@ -88,8 +88,8 @@ class ClassyDataset:
                 | *batchsize_per_replica* (int): Must be a positive int, batch size
                 |    for each replica
                 | *use_shuffle* (bool): Whether to enable shuffling for the dataset
-                | *num_samples* (int, optional): When set, restricts the number of samples
-                |    in a dataset
+                | *num_samples* (int, optional): When set, restricts the number of
+                     samples in a dataset
                 | *transforms*: list of tranform configurations to be applied in order
 
         Returns:
