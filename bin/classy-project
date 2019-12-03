@@ -18,17 +18,30 @@ if __name__ == "__main__":
     parser.add_argument("--template-name", default="synthetic")
     args = parser.parse_args()
 
-    logging.info("Running classy project!")
-
     root = Path(site.getsitepackages()[0])
+    egg_link = root / "classy-vision.egg-link"
+    dev_install = False
+    # Support development mode (pip install -e)
+    if egg_link.exists():
+        dev_install = True
+        with egg_link.open("r") as f:
+            lines = f.read().split("\n")
+            if lines[1] != ".":
+                raise RuntimeError("Unexpected egg-link format")
+            root = Path(lines[0])
+
     base_path = root / "classy_vision"
     template_path = base_path / "templates" / args.template_name
-    classy_train_path = Path(sys.prefix) / "classy_vision" / "classy_train.py"
     destination_path = Path(os.getcwd()) / args.project_name
 
     if destination_path.exists():
         logging.error(f"Project directory '{destination_path}' already exists!")
         sys.exit(1)
+
+    if dev_install:
+        classy_train_path = root / "classy_train.py"
+    else:
+        classy_train_path = Path(sys.prefix) / "classy_vision" / "classy_train.py"
 
     shutil.copytree(template_path, destination_path)
     shutil.copy(classy_train_path, destination_path)
@@ -38,5 +51,5 @@ if __name__ == "__main__":
     Successfully generated template project at '{destination_path}'.
     To get started, run:
         $ cd {args.project_name}
-        $ ./classy_train.py --config templates/config.json"""
+        $ ./classy_train.py --config configs/template_config.json"""
     )
