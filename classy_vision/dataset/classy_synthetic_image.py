@@ -34,7 +34,6 @@ class SyntheticImageDataset(ClassyDataset):
         crop_size: int,
         class_ratio: float,
         seed: int,
-        split: Optional[str] = None,
     ) -> None:
         """
         Args:
@@ -53,7 +52,7 @@ class SyntheticImageDataset(ClassyDataset):
             crop_size, class_ratio, num_samples, seed
         )
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod
@@ -68,7 +67,6 @@ class SyntheticImageDataset(ClassyDataset):
             A SyntheticImageDataset instance.
         """
         assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
-        split = config.get("split")
         crop_size = config["crop_size"]
         class_ratio = config["class_ratio"]
         seed = config["seed"]
@@ -97,5 +95,4 @@ class SyntheticImageDataset(ClassyDataset):
             crop_size,
             class_ratio,
             seed,
-            split=split,
         )

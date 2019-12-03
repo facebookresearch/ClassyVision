@@ -15,7 +15,6 @@ def get_test_task_config(head_num_classes=1000):
         "dataset": {
             "train": {
                 "name": "synthetic_image",
-                "split": "train",
                 "crop_size": 224,
                 "class_ratio": 0.5,
                 "num_samples": 2000,
@@ -25,7 +24,6 @@ def get_test_task_config(head_num_classes=1000):
             },
             "test": {
                 "name": "synthetic_image",
-                "split": "test",
                 "crop_size": 224,
                 "class_ratio": 0.5,
                 "num_samples": 2000,
@@ -68,7 +66,6 @@ def get_fast_test_task_config(head_num_classes=1000):
         "dataset": {
             "train": {
                 "name": "synthetic_image",
-                "split": "train",
                 "crop_size": 20,
                 "class_ratio": 0.5,
                 "num_samples": 10,
@@ -78,7 +75,6 @@ def get_fast_test_task_config(head_num_classes=1000):
             },
             "test": {
                 "name": "synthetic_image",
-                "split": "test",
                 "crop_size": 20,
                 "class_ratio": 0.5,
                 "num_samples": 10,
@@ -121,7 +117,6 @@ def get_test_mlp_task_config():
         "dataset": {
             "train": {
                 "name": "synthetic_image",
-                "split": "train",
                 "num_classes": 2,
                 "crop_size": 20,
                 "class_ratio": 0.5,
@@ -133,7 +128,6 @@ def get_test_mlp_task_config():
             },
             "test": {
                 "name": "synthetic_image",
-                "split": "test",
                 "num_classes": 2,
                 "crop_size": 20,
                 "class_ratio": 0.5,

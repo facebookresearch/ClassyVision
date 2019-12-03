@@ -34,7 +34,7 @@ class CIFARDataset(ClassyDataset):
             dataset = CIFAR100(root=root, train=(split == "train"), download=download)
 
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod

@@ -53,7 +53,6 @@ class ImagePathDataset(ClassyDataset):
         num_samples: Optional[int],
         image_paths: Union[str, List[str]],
         targets: Optional[List[Any]] = None,
-        split: Optional[str] = None,
     ):
         """Constructor for ImagePathDataset.
 
@@ -69,8 +68,6 @@ class ImagePathDataset(ClassyDataset):
                 be used to specify a target for each path (must be same length
                 as list of file paths). If no targets are needed or image_paths is
                 a directory, then targets should be None.
-            split: Split of dataset ("train", "test")
-
         """
         # TODO(@mannatsingh): we should be able to call build_dataset() to create
         # datasets from this class.
@@ -81,7 +78,7 @@ class ImagePathDataset(ClassyDataset):
         )
         dataset, preproc_transform = _load_dataset(image_paths, targets)
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
         # Some of the base datasets from _load_dataset have different
         # sample formats, the preproc_transform should map them all to
@@ -110,7 +107,6 @@ class ImagePathDataset(ClassyDataset):
             targets: Optional list of targets for dataset.
                 See :func:`__init__` for more details
         """
-        split = config.get("split")
         (
             transform_config,
             batchsize_per_replica,
@@ -126,5 +122,4 @@ class ImagePathDataset(ClassyDataset):
             num_samples,
             image_paths,
             targets=targets,
-            split=split,
         )

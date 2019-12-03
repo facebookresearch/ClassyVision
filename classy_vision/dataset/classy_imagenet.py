@@ -25,7 +25,7 @@ class ImageNetDataset(ClassyDataset):
     ):
         dataset = ImageNet(root=root, split=split, download=download)
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod
