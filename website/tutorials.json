@@ -7,6 +7,9 @@
       "id": "ray_aws",
       "title": "Distributed training on AWS"
      },{
+      "id": "classy_dataset",
+      "title": "Creating a custom dataset"
+     },{
       "id": "classy_model",
       "title": "Creating a custom model"
      },{
