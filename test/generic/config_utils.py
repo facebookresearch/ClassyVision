@@ -22,6 +22,20 @@ def get_test_task_config(head_num_classes=1000):
                 "seed": 0,
                 "batchsize_per_replica": 32,
                 "use_shuffle": True,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
             "test": {
                 "name": "synthetic_image",
@@ -32,6 +46,20 @@ def get_test_task_config(head_num_classes=1000):
                 "seed": 0,
                 "batchsize_per_replica": 32,
                 "use_shuffle": False,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
         },
         "meters": {"accuracy": {"topk": [1, 5]}},
@@ -75,6 +103,20 @@ def get_fast_test_task_config(head_num_classes=1000):
                 "seed": 0,
                 "batchsize_per_replica": 2,
                 "use_shuffle": False,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
             "test": {
                 "name": "synthetic_image",
@@ -85,6 +127,20 @@ def get_fast_test_task_config(head_num_classes=1000):
                 "seed": 0,
                 "batchsize_per_replica": 2,
                 "use_shuffle": False,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
         },
         "model": {
@@ -130,6 +186,20 @@ def get_test_mlp_task_config():
                 "batchsize_per_replica": 3,
                 "use_augmentation": False,
                 "use_shuffle": True,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
             "test": {
                 "name": "synthetic_image",
@@ -142,6 +212,20 @@ def get_test_mlp_task_config():
                 "batchsize_per_replica": 1,
                 "use_augmentation": False,
                 "use_shuffle": False,
+                "transforms": [
+                    {
+                        "name": "apply_transform_to_key",
+                        "transforms": [
+                            {"name": "ToTensor"},
+                            {
+                                "name": "Normalize",
+                                "mean": [0.485, 0.456, 0.406],
+                                "std": [0.229, 0.224, 0.225],
+                            },
+                        ],
+                        "key": "input",
+                    }
+                ],
             },
         },
         "model": {
