@@ -14,28 +14,55 @@
 
 Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
 
-## Getting started
+## Installation
 
-Make sure you have an up-to-date installation of PyTorch (1.3.1), Python (3.6) and torchvision. To install Classy Vision:
+#### Installation Requirements
+Make sure you have an up-to-date installation of PyTorch (1.3.1), Python (3.6) and torchvision (1.4). If you want to use GPUs, then a CUDA installation (10.1) is also required.
+
+#### Installing the latest stable release
+To install Classy Vision:
 ```bash
 pip install classy_vision
 ```
 
-To start a new project:
+#### Manual install of latest commit on master
+
+Alternatively you can do a manual install.
+
+```bash
+git clone https://github.com/facebookresearch/ClassyVision.git
+cd ClassyVision
+pip install .
+```
+
+## Getting started
+
+Classy Vision aims to support a variety of projects to be built and open sourced on top of the core library. We provide utilities for setting up a project in a standard format with some simple generated examples to get started with. To start a new project:
 
 ```bash
 classy-project my-project
-cd my-project; ./classy_train.py --config templates/template_config.json
+cd my-project
 ```
-Voila! A few seconds later your first training run should be done. Check out the results in the checkpoint folder:
+
+We even include a simple, synthetic, training example to show how to use Classy Vision:
 
 ```bash
-TODO TODO TODO TODO TODO TODO TODO TODO
+ ./classy_train.py --config configs/template_config.json
+ ```
+
+Voila! A few seconds later your first training run using our classification task should be done. Check out the results in the output folder:
+```bash
+ls output_<timestamp>/checkpoints/
+checkpoint.torch model_phase-0_end.torch model_phase-1_end.torch model_phase-2_end.torch model_phase-3_end.torch
 ```
+
+checkpoint.torch is the latest model (in this case, same as model_phase-3), a checkpoint is saved at the end of each phase.
+
+For more details / tutorials see the documentation section below.
 
 ## Documentation
 
-Please see X to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](http://TODO).
+Please see our [tutorials](https://classyvision.ai/tutorials/getting_started) to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](http://TODO).
 
 ## Join the Classy Vision community
 * Website: http://classyvision.ai
