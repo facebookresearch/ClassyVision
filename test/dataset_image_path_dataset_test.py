@@ -26,7 +26,13 @@ class TestImageDataset(unittest.TestCase):
             "num_samples": 100,
             "batchsize_per_replica": 1,
             "use_shuffle": False,
-            "transforms": [{"name": "ToTensor"}],
+            "transforms": [
+                {
+                    "name": "apply_transform_to_key",
+                    "transforms": [{"name": "ToTensor"}],
+                    "key": "input",
+                }
+            ],
         }
         dataset = build_dataset(config)
         return dataset

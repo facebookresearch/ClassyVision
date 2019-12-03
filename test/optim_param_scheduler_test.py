@@ -31,8 +31,21 @@ class TestParamSchedulerIntegration(unittest.TestCase):
                     "num_samples": 10,
                     "seed": 0,
                     "batchsize_per_replica": 5,
-                    "use_augmentation": False,
                     "use_shuffle": True,
+                    "transforms": [
+                        {
+                            "name": "apply_transform_to_key",
+                            "transforms": [
+                                {"name": "ToTensor"},
+                                {
+                                    "name": "Normalize",
+                                    "mean": [0.485, 0.456, 0.406],
+                                    "std": [0.229, 0.224, 0.225],
+                                },
+                            ],
+                            "key": "input",
+                        }
+                    ],
                 },
                 "test": {
                     "name": "synthetic_image",
@@ -43,8 +56,21 @@ class TestParamSchedulerIntegration(unittest.TestCase):
                     "num_samples": 10,
                     "seed": 0,
                     "batchsize_per_replica": 5,
-                    "use_augmentation": False,
                     "use_shuffle": False,
+                    "transforms": [
+                        {
+                            "name": "apply_transform_to_key",
+                            "transforms": [
+                                {"name": "ToTensor"},
+                                {
+                                    "name": "Normalize",
+                                    "mean": [0.485, 0.456, 0.406],
+                                    "std": [0.229, 0.224, 0.225],
+                                },
+                            ],
+                            "key": "input",
+                        }
+                    ],
                 },
             },
             "model": {

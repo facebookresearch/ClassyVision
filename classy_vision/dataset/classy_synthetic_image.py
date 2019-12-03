@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-
+import logging
 from typing import Any, Callable, Dict, List, Optional
 
 import torchvision.transforms as transforms
@@ -12,6 +12,7 @@ import torchvision.transforms as transforms
 from . import register_dataset
 from .classy_dataset import ClassyDataset
 from .core import RandomImageBinaryClassDataset
+from .transforms import build_transforms
 from .transforms.util import ImagenetConstants, build_field_transform_default_imagenet
 
 
@@ -78,17 +79,18 @@ class SyntheticImageDataset(ClassyDataset):
             shuffle,
             num_samples,
         ) = cls.parse_config(config)
-        default_transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=ImagenetConstants.MEAN, std=ImagenetConstants.STD
-                ),
-            ]
-        )
-        transform = build_field_transform_default_imagenet(
-            transform_config, default_transform=default_transform
-        )
+
+        try:
+            transform = build_transforms(transform_config)
+        except Exception:
+            logging.error(
+                "We recently changed transform behavior"
+                " do you need to update your config?"
+                " See resnet50_synthetic_image_classy_config.json"
+                " as an example."
+            )
+            raise
+
         return cls(
             batchsize_per_replica,
             shuffle,
