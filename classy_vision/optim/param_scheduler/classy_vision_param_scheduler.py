@@ -58,7 +58,7 @@ class ClassyParamScheduler(object):
         """
         Get the param for a given point at training.
 
-        For Classy Vision we update params (such as LR rate) based on
+        For Classy Vision we update params (such as learning rate) based on
         the percent progress of training completed. This allows a
         scheduler to be agnostic to the exact specifications of a
         particular run (e.g. 120 epochs vs 90 epochs).

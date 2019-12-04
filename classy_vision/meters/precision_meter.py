@@ -17,7 +17,7 @@ from . import register_meter
 @register_meter("precision_at_k")
 class PrecisionAtKMeter(ClassyMeter):
     """
-    Meter to calculate top-k precision for single- or multi-label
+    Meter to calculate top-k precision for single-label or multi-label
     image classification task. Note, ties are resolved randomly.
     """
 

@@ -36,6 +36,8 @@ def register_optimizer(name):
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyOptimizer subclass, like this:
 
+    .. code-block:: python
+
         @register_optimizer('my_optimizer')
         class MyOptimizer(ClassyOptimizer):
             ...

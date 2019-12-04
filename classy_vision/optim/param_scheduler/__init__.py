@@ -21,7 +21,7 @@ PARAM_SCHEDULER_REGISTRY = {}
 
 
 def build_param_scheduler(config):
-    """Builds a ClassyParamScheduler from a config.
+    """Builds a :class:`ClassyParamScheduler` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
     param scheduler class to instantiate. For instance, a config `{"name":
@@ -32,12 +32,14 @@ def build_param_scheduler(config):
 
 
 def register_param_scheduler(name):
-    """Registers a ClassyParamScheduler subclass.
+    """Registers a :class:`ClassyParamScheduler` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
     ClassyParamScheduler from a configuration file, even if the class itself is not
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyParamScheduler subclass, like this:
+
+    .. code-block:: python
 
         @register_param_scheduler('my_scheduler')
         class MyParamScheduler(ClassyParamScheduler):
@@ -87,4 +89,6 @@ __all__ = [
     "PolynomialDecayParamScheduler",
     "StepParamScheduler",
     "StepWithFixedGammaParamScheduler",
+    "build_param_scheduler",
+    "register_param_scheduler"
 ]

@@ -42,12 +42,12 @@ class CheckpointHook(ClassyHook):
         """The constructor method of CheckpointHook.
 
         Args:
-            checkpoint_folder - Folder to store checkpoints in
-            input_args - Any arguments to save about the runtime setup. For example,
+            checkpoint_folder: Folder to store checkpoints in
+            input_args: Any arguments to save about the runtime setup. For example,
                 it is useful to store the config that was used to instantiate the model.
-            phase_types - If phase_types is specified, only checkpoint on those phase
-                types. Each item in phase_types must be either "train" or "test".
-            checkpoint_period - Checkpoint at the end of every x phases (default 1)
+            phase_types: If ``phase_types`` is specified, only checkpoint on those phase
+                types. Each item in ``phase_types`` must be either "train" or "test".
+            checkpoint_period: Checkpoint at the end of every x phases (default 1)
 
         """
         super().__init__()

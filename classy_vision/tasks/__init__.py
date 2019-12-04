@@ -37,6 +37,8 @@ def register_task(name):
     Classy Vision framework. To use it, apply this decorator to a ClassyTask
     subclass, like this:
 
+    .. code-block:: python
+
         @register_task('my_task')
         class MyTask(ClassyTask):
             ...

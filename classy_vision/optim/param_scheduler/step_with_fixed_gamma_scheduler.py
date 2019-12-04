@@ -17,10 +17,13 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     specified total number of decays.
 
     Example:
-      base_lr: 0.1
-      gamma: 0.1
-      num_decays: 3
-      num_epochs: 120
+
+        .. code-block:: python
+
+          base_lr: 0.1
+          gamma: 0.1
+          num_decays: 3
+          num_epochs: 120
 
     Then the param value will be 0.1 for epochs 0-29, 0.01 for
     epochs 30-59, 0.001 for epoch 60-89, 0.0001 for epochs 90-119.

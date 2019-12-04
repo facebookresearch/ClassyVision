@@ -29,7 +29,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         """The constructor method of LossLrMeterLoggingHook.
 
         Args:
-            log_freq: if specified, logs every log_freq batches also.
+            log_freq: if specified, also logs every ``log_freq`` batches.
 
         """
         super().__init__()

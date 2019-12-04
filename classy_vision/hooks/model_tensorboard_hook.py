@@ -23,7 +23,8 @@ except ImportError:
 
 class ModelTensorboardHook(ClassyHook):
     """
-    Shows the model graph in TensorBoard.
+    Shows the model graph in `TensorBoard <https
+    ://www.tensorflow.org/tensorboard`>_.
     """
 
     on_rendezvous = ClassyHook._noop
@@ -40,7 +41,9 @@ class ModelTensorboardHook(ClassyHook):
         """The constructor method of ModelTensorboardHook.
 
         Args:
-            tb_writer: Tensorboard SummaryWriter instance
+            tb_writer: `Tensorboard SummaryWriter <https://tensorboardx.
+            readthedocs.io/en/latest/tensorboard.html#tensorboardX.
+            SummaryWriter>`_ instance
 
         """
         super().__init__()

@@ -21,7 +21,7 @@ class SumArbitraryLoss(ClassyLoss):
     taking a list of outputs as input.
     """
 
-    def __init__(self, losses: List[float], weights: Optional[Tensor] = None) -> None:
+    def __init__(self, losses: List[ClassyLoss], weights: Optional[Tensor] = None) -> None:
         super().__init__()
         if weights is None:
             weights = torch.ones((len(losses)))

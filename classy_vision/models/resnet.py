@@ -20,10 +20,13 @@ INPLACE = True
 @register_model("resnet")
 class ResNet(ResNeXt):
     """
-        ResNet is a special case of ResNeXt.
+        ResNet is a special case of :class:`ResNeXt`.
     """
 
     def __init__(self, **kwargs):
+        """
+        See :func:`ResNeXt.__init__`
+        """
         assert (
             kwargs["base_width_and_cardinality"] is None
         ), "base_width_and_cardinality should be None for ResNet"

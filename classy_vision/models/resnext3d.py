@@ -291,6 +291,15 @@ class ResNeXt3DBase(ClassyModel):
 
 @register_model("resnext3d")
 class ResNeXt3D(ResNeXt3DBase):
+    """
+    Implementation of:
+        1. Conventional `post-activated 3D ResNe(X)t <https://arxiv.org/
+        abs/1812.03982>`_.
+
+        2. `Pre-activated 3D ResNe(X)t <https://arxiv.org/abs/1811.12814>`_.
+        The model consists of one stem, a number of stages, and one or multiple
+        heads that are attached to different blocks in the stage.
+    """
     def __init__(
         self,
         input_key,
@@ -315,21 +324,15 @@ class ResNeXt3D(ResNeXt3DBase):
         zero_init_residual_transform,
     ):
         """
-            Implementation of
-                1) conventional post-activated 3D ResNe(X)t
-                (https://arxiv.org/abs/1812.03982).
-                2) pre-activated 3D ResNe(X)t
-                (https://arxiv.org/abs/1811.12814).
-            The model consists of one stem, a number of stages, and one or multiple
-                heads that are attached to different blocks in the stage.
         Args:
-            input_key (str): a key that can index into model input of dict type.
+            input_key (str): a key that can index into model input that is
+                of dict type.
             input_planes (int): the channel dimension of the input. Normally 3 is used
                 for rgb input.
             clip_crop_size (int): spatial cropping size of video clip at train time.
             skip_transformation_type (str): the type of skip transformation.
             residual_transformation_type (str): the type of residual transformation.
-            frames_per_clip (int): No. of frames in a video clip.
+            frames_per_clip (int): Number of frames in a video clip.
             num_blocks (list): list of the number of blocks in stages.
             stem_name (str): name of model stem.
             stem_planes (int): the output dimension of the convolution in the model
@@ -352,12 +355,12 @@ class ResNeXt3D(ResNeXt3DBase):
             num_groups (int): number of groups for the convolution.
                 num_groups = 1 is for standard ResNet like networks, and
                 num_groups > 1 is for ResNeXt like networks.
-            width_per_group (int): No. of channels per group in 2nd (group) conv in the
-                residual transformation in the first stage
+            width_per_group (int): Number of channels per group in 2nd (group)
+                conv in the residual transformation in the first stage
             zero_init_residual_transform (bool): if true, the weight of last
-                op, which could be either BatchNorm3D in post-activated transformation
-                or Conv3D in pre-activated transformation, in the residual
-                transformation is initialized to zero
+                operation, which could be either BatchNorm3D in post-activated
+                transformation or Conv3D in pre-activated transformation, in the
+                residual transformation is initialized to zero
         """
         super(ResNeXt3D, self).__init__(
             input_key,
