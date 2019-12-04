@@ -49,12 +49,12 @@ html body {
 }
 
 .homeContainer {
- background-image: url(/img/landing-background.jpg);
+ background-image: linear-gradient(to bottom right, #95b6e8, #eee);
  padding: 30px 0px;
 }
 
 .productTitle{
-  color: #ffffff;
+  color: #000;
   font-family: FreightSans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 48px;
   font-weight: 400;
@@ -63,8 +63,8 @@ html body {
 .splashLogo {
   display: block;
   margin: 0 auto;
-  height: 158px;
-  width: 250px;
+  height: 278px;
+  width: 500px;
 }
 
 .primaryLogoImage{
@@ -73,14 +73,14 @@ html body {
 }
 
 .projectTitle {
-  color: #ffffff;
+  color: #000;
   /*font-variant: small-caps;*/
   font-weight: 300;
 }
 
 .promoSection .button {
-  border: 1px solid #fff;
-  color: #ffffff;
+  border: 1px solid #000;
+  color: #000;
 }
 
 .promoSection .button:hover {

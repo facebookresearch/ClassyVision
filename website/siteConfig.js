@@ -45,7 +45,7 @@ const siteConfig = {
   headerIcon: 'img/favicon.png',
   //footerIcon: 'img/favicon.ico',
   favicon: 'img/favicon.png',
-  logo: 'img/cv-icon.png',
+  logo: 'img/cv-logo.png',
 
   // colors for website
   colors: {
