@@ -64,7 +64,6 @@ class HomeSplash extends React.Component {
     return (
       <SplashContainer>
         <Logo img_src={siteConfig.logo} />
-        <div className="productTitle">Classy Vision</div>
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
@@ -148,11 +147,10 @@ cd my-project
       <Block layout="threeColumn">
         {[
           {
-            content:
-              'Launch large distributed training jobs with minimal effort.',
-            image: `${baseUrl}img/multi-modal.png`,
+            content: 'Launch large distributed training jobs with minimal effort. No need for proprietary infrastructure.',
+            image: `${baseUrl}img/expanding_arrows.svg`,
             imageAlign: 'top',
-            title: 'Distributed',
+            title: 'Elastic',
           },
           {
             content:
@@ -163,10 +161,10 @@ cd my-project
           },
           {
             content:
-              'Open source, generic API for computer vision research. Easily implement and launch training jobs. ',
-            image: `${baseUrl}img/expanding_arrows.svg`,
+              'Open source, modular API for computer vision research. Everyone is welcome to contribute.',
+            image: `${baseUrl}img/modular.svg`,
             imageAlign: 'top',
-            title: 'Extensible',
+            title: 'Open',
           },
         ]}
       </Block>
