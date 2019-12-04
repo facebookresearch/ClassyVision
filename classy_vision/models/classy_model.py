@@ -26,9 +26,9 @@ class ClassyModel(nn.Module):
     A model refers either to a specific architecture (e.g. ResNet50) or a
     family of architectures (e.g. ResNet). Models can take arguments in the
     constructor in order to configure different behavior (e.g.
-    hyperparameters).  Classy Models must implement :method:`from_config` in
+    hyperparameters).  Classy Models must implement :func:`from_config` in
     order to allow instantiation from a configuration file. Like regular
-    PyTorch models, Classy Models must also implement :method:`forward`, where
+    PyTorch models, Classy Models must also implement :func:`forward`, where
     the bulk of the inference logic lives.
 
     Classy Models also have some advanced functionality for production
@@ -120,7 +120,7 @@ class ClassyModel(nn.Module):
 
         Args:
             state_dict: The state dictionary. Must be the output of a call to
-                :method:`get_classy_state`.
+                :func:`get_classy_state`.
 
         This is used to load the state of the model from a checkpoint.
         """
@@ -141,7 +141,7 @@ class ClassyModel(nn.Module):
         Extract features from the model.
 
         Derived classes can implement this method to extract the features before
-        applying the final fc layer.
+        applying the final fully connected layer.
         """
         return self.forward(x)
 
@@ -171,7 +171,7 @@ class ClassyModel(nn.Module):
         """Attach all the heads to corresponding blocks.
 
         A head is expected to be a ClassyHead object. For more
-        details, see :class:`ClassyHead`.
+        details, see :class:`classy_vision.heads.ClassyHead`.
 
         Args:
             heads (Dict): a mapping between attachable block name
@@ -179,9 +179,12 @@ class ClassyModel(nn.Module):
                 example, if you have two different teams that want to
                 attach two different heads for downstream classifiers to
                 the 15th block, then they would use:
-                heads = {"block15":
-                    {"team1": classifier_head1, "team2": classifier_head2}
-                }
+
+                .. code-block:: python
+
+                  heads = {"block15":
+                      {"team1": classifier_head1, "team2": classifier_head2}
+                  }
         """
         self._clear_heads()
 
@@ -202,7 +205,8 @@ class ClassyModel(nn.Module):
         """Returns the heads on the model
 
         Function returns the heads a dictionary of block names to
-        nn.modules attached to that block.
+        `nn.Modules <https://pytorch.org/docs/stable/nn.html#torch.nn.Module>`_
+        attached to that block.
 
         """
         return {block_name: dict(heads) for block_name, heads in self._heads.items()}
@@ -235,14 +239,16 @@ class ClassyModel(nn.Module):
 
         Function to return dict of params with "keys" from
         {"regularized_params", "unregularized_params"}
-        to "values" a list of torch Params.
+        to "values" a list of `pytorch Params <https://pytorch.org/docs/
+        stable/nn.html#torch.nn.Parameter>`_.
 
         "weight_decay" provided as part of optimizer is only used
         for "regularized_params". For "unregularized_params", weight_decay is set
         to 0.0
 
-        This implementation sets BatchNorm's all trainable params to be
-        unregularized_params if bn_weight_decay is False.
+        This implementation sets `BatchNorm's <https://pytorch.org/docs/
+        stable/nn.html#normalization-layers>`_ all trainable params to be
+        unregularized_params if ``bn_weight_decay`` is False.
 
         Override this function for any custom behavior.
 
@@ -296,9 +302,7 @@ class ClassyModel(nn.Module):
     @property
     def evaluation_mode(self):
         """Used by video models for averaging over contiguous clips.
-
-        TODO: Remove this once we have a video task, this logic should
-        live in a video specific task
-
         """
+        # TODO: Remove this once we have a video task, this logic should
+        # live in a video specific task
         return ClassyModelEvaluationMode.DEFAULT

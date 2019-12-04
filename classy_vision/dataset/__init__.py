@@ -18,7 +18,7 @@ DATASET_CLASS_NAMES = set()
 
 
 def build_dataset(config, *args, **kwargs):
-    """Builds a ClassyDataset from a config.
+    """Builds a :class:`ClassyDataset` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
     dataset class to instantiate. For instance, a config `{"name": "my_dataset",
@@ -28,16 +28,18 @@ def build_dataset(config, *args, **kwargs):
 
 
 def register_dataset(name):
-    """Registers a ClassyDataset subclass.
+    """Registers a :class:`ClassyDataset` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
     ClassyDataset from a configuration file, even if the class itself is not
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyDataset subclass like this:
 
-    |    @register_dataset("my_dataset")
-    |    class MyDataset(ClassyDataset):
-    |        ...
+    .. code-block:: python
+
+      @register_dataset("my_dataset")
+      class MyDataset(ClassyDataset):
+          ...
 
     To instantiate a dataset from a configuration file, see
     :func:`build_dataset`."""

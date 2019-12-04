@@ -20,7 +20,7 @@ from .transforms.util import ImagenetConstants, build_field_transform_default_im
 class SyntheticImageDataset(ClassyDataset):
     """Classy Dataset which produces random synthetic images with binary targets.
 
-    The underlying dataset sets targets based on the image channel, so users can
+    The underlying dataset sets targets based on the channels in the image, so users can
     validate their setup by checking if they can get 100% accuracy on this dataset.
     Useful for testing since the dataset is much faster to initialize and fetch samples
     from, compared to real world datasets.
@@ -42,13 +42,13 @@ class SyntheticImageDataset(ClassyDataset):
             batchsize_per_replica: Positive integer indicating batch size for each
                 replica
             shuffle: Whether we should shuffle between epochs
-            transform: Transform to be applied to each sample
+            transform: When specified, transform to be applied to each sample
             num_samples: Number of samples to return
             crop_size: Image size, used for both height and width
             class_ratio: Ratio of the distribution of target classes
             seed: Seed used for image generation. Use the same seed to generate the same
                 set of samples.
-            split: Split of dataset to use
+            split: When specified, split of dataset to use
         """
         dataset = RandomImageBinaryClassDataset(
             crop_size, class_ratio, num_samples, seed
