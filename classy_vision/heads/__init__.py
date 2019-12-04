@@ -27,9 +27,11 @@ def register_head(name):
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyHead subclass, like this:
 
-    |    @register_head("my_head")
-    |    class MyHead(ClassyHead):
-    |        ...
+    .. code-block:: python
+
+      @register_head("my_head")
+      class MyHead(ClassyHead):
+          ...
 
     To instantiate a head from a configuration file, see
     :func:`build_head`."""

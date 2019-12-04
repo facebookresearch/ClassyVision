@@ -17,8 +17,11 @@ class StepParamScheduler(ClassyParamScheduler):
     are divided evenly among the param schedule.
 
     Example:
-      values: [0.1, 0.01, 0.001, 0.0001]
-      num_epochs = 120
+
+        .. code-block:: python
+
+          values: [0.1, 0.01, 0.001, 0.0001]
+          num_epochs = 120
 
     Then the param value will be 0.1 for epochs 0-29, 0.01 for
     epochs 30-59, 0.001 for epoch 60-89, 0.0001 for epochs 90-119.

@@ -24,12 +24,10 @@ except ImportError:
 
 
 class VisdomHook(ClassyHook):
-    """Plots metrics on to Visdom.
+    """Plots metrics on to `Visdom <https://github.com/facebookresearch/visdom>`_.
 
     Visdom is a flexible tool for creating, organizing, and sharing visualizations
         of live, rich data. It supports Python.
-
-    See more details at https://github.com/facebookresearch/visdom.
 
     """
 
