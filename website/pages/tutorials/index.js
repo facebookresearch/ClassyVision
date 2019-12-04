@@ -34,7 +34,7 @@ class TutorialHome extends React.Component {
               <p>
                 If you are new to Classy Vision, the easiest way to get started is
                 with the{' '}
-                <a href="Titanic_Basic_Interpret">
+                <a href="getting_started">
                   Getting started with Classy Vision
                 </a>{' '}
                 tutorial.
