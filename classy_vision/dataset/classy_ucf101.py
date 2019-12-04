@@ -17,26 +17,11 @@ from .transforms.util_video import build_video_field_transform_default
 
 @register_dataset("ucf101")
 class UCF101Dataset(ClassyVideoDataset):
-    """UCF101 is an action recognition video dataset, and it has 101 classes.
+    """`UCF101 <https://www.crcv.ucf.edu/data/UCF101.php/>`_ is an action
+    recognition video dataset, and it has 101 classes.
 
-    Page: <https://www.crcv.ucf.edu/data/UCF101.php>
-
-    This dataset consider every video as a collection of video clips of fixed size,
-    specified by ``frames_per_clip``, where the step in frames between each clip
-    is given by ``step_between_clips``. It uses clip sampler to sample clips
-    from each video. For training set, a random clip sampler is used to
-    sample a small number of clips (e.g. 1) from each video
-    For testing set, a uniform clip sampler is used to evenly sample a large
-    number of clips (e.g. 10) from the video.
-
-    To give an example, for 2 videos with 10 and 15 frames respectively,
-    if ``frames_per_clip=5`` and ``step_between_clips=5``,
-    the dataset size will be (2 + 3) = 5, where the first two elements will come
-    from video 1, and the next three elements from video 2. Note that we drop
-    clips which do not have exactly ``frames_per_clip`` elements, so not all
-    frames in a video might be present.
-
-    It is built on top of UCF101 dataset class in TorchVision.
+    It is built on top of `UCF101 <https://github.com/pytorch/vision/blob/master
+    /torchvision/datasets/ucf101.py#L10>`_ dataset class in TorchVision.
 
     """
 
@@ -72,15 +57,15 @@ class UCF101Dataset(ClassyVideoDataset):
             video_width: rescaled video width. If 0, keep original width
             video_height: rescaled video height. If 0, keep original height
             video_min_dimension: rescale video so that min(height, width) =
-                video_min_dimension. If 0, keep original video resolution. Note
-                only one of (video_width, video_height) and (video_min_dimension)
-                can be set
+                ``video_min_dimension``. If 0, keep original video resolution.
+                Note only one of (``video_width``, ``video_height``)
+                and (``video_min_dimension``) can be set
             audio_samples: desired audio sample rate. If 0, keep original
                 audio sample rate.
-            step_between_clips: No. of frames between each clip.
+            step_between_clips: Number of frames between each clip.
             frame_rate: desired video frame rate. If None, keep original video
                 frame rate.
-            clips_per_video: No. of clips to sample from each video
+            clips_per_video: Number of clips to sample from each video
             video_dir: path to video folder
             splits_dir: path to dataset splitting file folder
             fold: UCF101 dataset has 3 folds. Valid values are 1, 2 and 3.

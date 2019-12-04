@@ -13,7 +13,8 @@ from .classy_model import ClassyModel
 
 class ClassyModelWrapper(ClassyModel):
     """
-    Class which wraps an nn.Module within a ClassyModel.
+    Class which wraps an `nn.Module <https://pytorch.org/docs/stable/
+    nn.html#torch.nn.Module>`_ within a ClassyModel.
 
     The only required argument is the model, the additional args are needed
     to get some additional capabilities from Classy Vision to work.

@@ -61,6 +61,22 @@ class MaxLengthClipSampler(Sampler):
 
 class ClassyVideoDataset(ClassyDataset):
     """Interface specifying what a ClassyVision video dataset is expected to provide.
+
+    This dataset considers every video as a collection of video clips of fixed size,
+    specified by ``frames_per_clip``, where the step in frames between each clip
+    is given by ``step_between_clips``. It uses a clip sampler to sample
+    a specified number of clips (``clips_per_video``) from each video.
+    For training set, a random clip sampler is used to
+    sample a small number of clips (e.g. 1) from each video
+    For testing set, a uniform clip sampler is used to evenly sample a large
+    number of clips (e.g. 10) from the video.
+
+    To give an example, for 2 videos with 10 and 15 frames respectively,
+    if ``frames_per_clip=5`` and ``step_between_clips=5``, the dataset size
+    will be (2 + 3) = 5, where the first two elements will come from video 1,
+    and the next three elements from video 2. Note that we drop clips which do
+    not have exactly ``frames_per_clip`` elements, so not all frames in a video
+    may be present.
     """
 
     def __init__(
@@ -77,8 +93,10 @@ class ClassyVideoDataset(ClassyDataset):
 
         Args:
             dataset: the underlying video dataset from either TorchVision or other
-                source. It should have an attribute `video_clips` of type
-                torchvision.datasets.video_utils.VideoClips
+                source. It should have an attribute *video_clips* of type
+                `torchvision.datasets.video_utils.VideoClips <https://github.com/
+                pytorch/vision/blob/master/torchvision/datasets/
+                video_utils.py#L46/>`_
             split: dataset split. Must be either "train" or "test"
             batchsize_per_replica: batch size per model replica
             shuffle: If true, shuffle video clips.
@@ -151,12 +169,10 @@ class ClassyVideoDataset(ClassyDataset):
 
         Video dataset meta data computation takes minutes on small dataset and hours
         on large dataset, and thus is time-consuming. However, it only needs to be
-        computed once, and can be saved into file. Later we can load the meta data
-        to reuse it.
+        computed once, and can be saved into a file via :func:`save_metadata`.
 
-        The format of meta data is defined in TorchVision as shown below.
-        https://github.com/pytorch/vision/blob/master/torchvision/datasets/
-        video_utils.py#L131
+        The format of meta data is defined in `TorchVision <https://github.com/
+        pytorch/vision/blob/master/torchvision/datasets/video_utils.py#L131/>`_.
 
         For each video, meta data contains the video file path, presentation
         timestamps of all video frames, and video fps.
@@ -166,8 +182,8 @@ class ClassyVideoDataset(ClassyDataset):
             video_dir: If provided, the folder where video files are stored.
             update_file_path: If true, replace the directory part of video file path
                 in meta data with the actual video directory provided in `video_dir`.
-                This is needed for successsfully reusing pre-computed meta data
-                when video directory has been moved and it is no longer consitent
+                This is necessary for successsfully reusing pre-computed meta data
+                when video directory has been moved and is no longer consitent
                 with the full video file path saved in the meta data.
         """
         metadata = torch.load(filepath)
@@ -191,11 +207,9 @@ class ClassyVideoDataset(ClassyDataset):
         Args:
             metadata: dataset meta data, which contains video meta infomration, such
                 as video file path, video fps, video frame timestamp in each video.
-                For the format of dataset meta data, check the TorchVision
-                documentations below.
-                https://github.com/pytorch/vision/blob/master/torchvision/datasets
-                /video_utils.py#L132-L137
-
+                For the format of dataset meta data, check the `TorchVision
+                documentation <https://github.com/pytorch/vision/blob/master/
+                torchvision/datasets/video_utils.py#L132-L137/>`_.
             filepath: file path where the meta data will be saved
 
         """
@@ -216,8 +230,9 @@ class ClassyVideoDataset(ClassyDataset):
     def video_clips(self):
         """Attribute video_clips.
 
-        It is used in `_get_sampler` method. Its data type should be
-            torchvision.datasets.video_utils.VideoClips.
+        It is used in ``_get_sampler`` method. Its data type should be
+            `torchvision.datasets.video_utils.VideoClips <https://github.com/
+            pytorch/vision/blob/master/torchvision/datasets/video_utils.py#L46/>`_.
         """
         return self.dataset.video_clips
 
@@ -246,14 +261,11 @@ class ClassyVideoDataset(ClassyDataset):
 
     def iterator(self, *args, **kwargs):
         """Overrides the implementation in parent class `ClassyDataset`.
+        See parent class method :func:`ClassyDataset.iterator` for all the
+        usable positional and keyword arguments.
 
-        You can check all the usable positional and keyword arguments in parent
-        class `ClassyDataset.iterator(...)`.
-        For video dataset, it may use VideoClips class from TorchVision,
-        which may use a cpp python extension for video decoding when video backend
-        is set to `video_reader`. In such case, it is difficult to use "spawning"
-        as multiprocessing start method. Thus we choose "fork" as multiprocessing
-        start method.
+        Sets "fork" as start method for python multiprocessing module for
+        comaptibility with video decoding using cpp python extensions.
         """
         if "num_workers" in kwargs and kwargs["num_workers"] > 0:
             mp = multiprocessing.get_context("fork")

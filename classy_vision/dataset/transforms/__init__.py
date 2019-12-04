@@ -23,7 +23,7 @@ TRANSFORM_REGISTRY = {}
 
 
 def build_transform(transform_config: Dict[str, Any]) -> Callable:
-    """Builds a ClassyTransform from a config.
+    """Builds a :class:`ClassyTransform` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
     transform class to instantiate. For instance, a config `{"name":
@@ -33,11 +33,14 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
 
     In addition to transforms registered with :func:`register_transform`, we
     also support instantiating transforms available in the
-    `torchvision.transforms` module. Any keys in the config will get expanded
+    `torchvision.transforms <https://pytorch.org/docs/stable/torchvision/
+    transforms.html>`_ module. Any keys in the config will get expanded
     to parameters of the transform constructor. For instance, the following
     call will instantiate a :class:`torchvision.transforms.CenterCrop`:
 
-        build_transform({"name": "CenterCrop", "size": 224})
+    .. code-block:: python
+
+      build_transform({"name": "CenterCrop", "size": 224})
     """
     assert (
         "name" in transform_config
@@ -67,16 +70,18 @@ def build_transforms(transforms_config: List[Dict[str, Any]]) -> Callable:
 
 
 def register_transform(name: str):
-    """Registers a ClassyTransform subclass.
+    """Registers a :class:`ClassyTransform` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
-    ClassyTransform from a configuration file, even if the class itself is not
+    :class:`ClassyTransform` from a configuration file, even if the class itself is not
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyTransform subclass like this:
 
-        @register_transform("my_transform")
-        class MyTransform(ClassyTransform):
-            ...
+    .. code-block:: python
+
+      @register_transform("my_transform")
+      class MyTransform(ClassyTransform):
+          ...
 
     To instantiate a transform from a configuration file, see
     :func:`build_transform`."""
