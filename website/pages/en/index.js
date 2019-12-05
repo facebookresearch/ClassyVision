@@ -150,7 +150,7 @@ cd my-project
             content: 'Launch large distributed training jobs with minimal effort. No need for proprietary infrastructure.',
             image: `${baseUrl}img/expanding_arrows.svg`,
             imageAlign: 'top',
-            title: 'Elastic',
+            title: 'Scalable',
           },
           {
             content:
@@ -164,7 +164,7 @@ cd my-project
               'Open source, modular API for computer vision research. Everyone is welcome to contribute.',
             image: `${baseUrl}img/modular.svg`,
             imageAlign: 'top',
-            title: 'Open',
+            title: 'Plug and play',
           },
         ]}
       </Block>
