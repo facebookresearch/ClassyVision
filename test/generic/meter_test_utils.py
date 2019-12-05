@@ -106,23 +106,45 @@ class ClassificationMeterTest(unittest.TestCase):
             self.assertTrue(
                 key in meter_value, msg="{0} not in meter value!".format(key)
             )
-            self.assertAlmostEqual(
-                meter_value[key],
-                val,
-                places=4,
-                msg="{0} meter value mismatch!".format(key),
-            )
+            if torch.is_tensor(meter_value[key]):
+                self.assertTrue(
+                    torch.all(torch.eq(meter_value[key], val)),
+                    msg="{0} meter value mismatch!".format(key),
+                )
+            else:
+                self.assertAlmostEqual(
+                    meter_value[key],
+                    val,
+                    places=4,
+                    msg="{0} meter value mismatch!".format(key),
+                )
 
     def _values_match_expected_value(self, value0, value1, expected_value):
         for key, val in expected_value.items():
             self.assertTrue(key in value0, msg="{0} not in meter value!".format(key))
-            self.assertAlmostEqual(
-                value0[key], val, places=4, msg="{0} meter value mismatch!".format(key)
-            )
             self.assertTrue(key in value1, msg="{0} not in meter value!".format(key))
-            self.assertAlmostEqual(
-                value1[key], val, places=4, msg="{0} meter value mismatch!".format(key)
-            )
+            if torch.is_tensor(val):
+                self.assertTrue(
+                    torch.all(torch.eq(value0[key], val)),
+                    "{0} meter value mismatch!".format(key),
+                )
+                self.assertTrue(
+                    torch.all(torch.eq(value1[key], val)),
+                    "{0} meter value mismatch!".format(key),
+                )
+            else:
+                self.assertAlmostEqual(
+                    value0[key],
+                    val,
+                    places=4,
+                    msg="{0} meter value mismatch!".format(key),
+                )
+                self.assertAlmostEqual(
+                    value1[key],
+                    val,
+                    places=4,
+                    msg="{0} meter value mismatch!".format(key),
+                )
 
     def meter_update_and_reset_test(
         self, meter, model_outputs, targets, expected_value, **kwargs
@@ -192,25 +214,43 @@ class ClassificationMeterTest(unittest.TestCase):
         meter1.sync_state()
         value1 = meter1.value
         for key, val in value0.items():
-            self.assertNotEqual(
-                value1[key], val, msg="{0} meter values should not be same!".format(key)
-            )
+            if torch.is_tensor(value1[key]):
+                self.assertFalse(
+                    torch.all(torch.eq(value1[key], val)),
+                    msg="{0} meter values should not be same!".format(key),
+                )
+            else:
+                self.assertNotEqual(
+                    value1[key],
+                    val,
+                    msg="{0} meter values should not be same!".format(key),
+                )
 
         meter0.set_classy_state(meter1.get_classy_state())
         value0 = meter0.value
         for key, val in value0.items():
-            self.assertAlmostEqual(
-                value1[key],
-                val,
-                places=4,
-                msg="{0} meter value mismatch after state transfer!".format(key),
-            )
-            self.assertAlmostEqual(
-                value1[key],
-                expected_value[key],
-                places=4,
-                msg="{0} meter value mismatch from ground truth!".format(key),
-            )
+            if torch.is_tensor(value1[key]):
+                self.assertTrue(
+                    torch.all(torch.eq(value1[key], val)),
+                    msg="{0} meter value mismatch after state transfer!".format(key),
+                )
+                self.assertTrue(
+                    torch.all(torch.eq(value1[key], expected_value[key])),
+                    msg="{0} meter value mismatch from ground truth!".format(key),
+                )
+            else:
+                self.assertAlmostEqual(
+                    value1[key],
+                    val,
+                    places=4,
+                    msg="{0} meter value mismatch after state transfer!".format(key),
+                )
+                self.assertAlmostEqual(
+                    value1[key],
+                    expected_value[key],
+                    places=4,
+                    msg="{0} meter value mismatch from ground truth!".format(key),
+                )
 
     def _spawn_all_meter_workers(self, world_size, meters, is_train):
         filename = tempfile.NamedTemporaryFile(delete=True).name
