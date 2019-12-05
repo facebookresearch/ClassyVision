@@ -35,39 +35,42 @@ class ClassificationTask(ClassyTask):
     """Basic classification training task.
 
     This task encapsultates all of the components and steps needed to
-    train a classifier using a :obj:`ClassyTrainer`.
+    train a classifier using a :class:`classy_vision.trainer.ClassyTrainer`.
 
     Assumes a train / test phase per each epoch and that the datasets
     have the same API as the map-style Dataset class in
-    torch.utils.data.dataset (in particular, this task makes use of
-    the len).  If you are using an IterableDataset then a custom task
+    `torch.utils.data.dataset <https://pytorch.org/docs/stable/data.html
+    #torch.utils.data.Dataset>`_ (in particular, this task makes use of
+    the len).  If you are using an `IterableDataset <https://pytorch.org/docs/
+    stable/data.html#torch.utils.data.IterableDataset>`_ then a custom task
     may be appropriate.
 
-    Attributes:
-        loss: Loss (see :obj:`ClassyLoss`) function used for computing the loss in
-            each forward pass
-        datasets: Mapping from a phase_type in ["train", "test']
-            to dataset used for training (or testing)
-        meters: List of meters (see :obj:`ClassyMeter`) to calculate during training
-        num_epochs: Number of epochs (passes over dataset) to train
-        test_only: Used to only run the test phase
-        base_model: Model to be trained, unwrapped in DDP or DP wrappers
-        optimizer: Optimizer used in train step
-        checkpoint: Serializable dict which represents state in training
-        phases: List of phase specific information, e.g. if phase is
-            train / test.
-        hooks: List of hooks to apply during training
-        train: Phase type, if true it means we are training,
-            false means testing
-        distributed_model: Base model, but wrapped in DDP (DistributedDataParallel)
-        phase_idx: Current phase id, first phase is 0, if task has not started
-            training then returns -1
-        train_phase_idx: Only counts train phases
-        num_updates: Number of total parameter updates applied to model
-            by the optimizer
-        data_iterator: Iterator which can be used to obtain batches
-        num_samples_this_phase: Number of samples ran this phase
-        losses: Loss curve
+
+    :var loss: Loss (see :class:`classy_vision.losses.ClassyLoss`) function used
+        for computing the loss in each forward pass
+    :var datasets: Mapping from a ``phase_type`` in ["train", "test']
+        to dataset used for training (or testing)
+    :var meters: List of meters (see :class:`classy_vision.meters.ClassyMeter`)
+        to calculate during training
+    :var num_epochs: Number of epochs (passes over dataset) to train
+    :var test_only: Used to only run the test phase
+    :var base_model: Model to be trained, unwrapped in DDP or DP wrappers
+    :var optimizer: Optimizer used in train step
+    :var checkpoint: Serializable dict which represents state in training
+    :var phases: List of phase specific information, e.g. if phase is
+        train / test.
+    :var hooks: List of hooks to apply during training
+    :var train: Phase type, if true it means we are training,
+        false means testing
+    :var distributed_model: Base model, but wrapped in DDP (DistributedDataParallel)
+    :var phase_idx: Current phase id, first phase is 0, if task has not started
+        training then returns -1
+    :var train_phase_idx: Only counts train phases
+    :var num_updates: Number of total parameter updates applied to model
+        by the optimizer
+    :var data_iterator: Iterator which can be used to obtain batches
+    :var num_samples_this_phase: Number of samples ran this phase
+    :var losses: Loss curve
 
     """
 
@@ -310,11 +313,13 @@ class ClassificationTask(ClassyTask):
         Args:
             phase_type: "train" or "test" iterable
             num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See PyTorch dataloader
-                documentation for more details on num_workers and the usage
+                dataloading is done on main process. See `PyTorch dataloader
+                documentation <https://pytorch.org/docs/stable/
+                data.html#torch.utils.data.DataLoader>`_ for more details on
+                ``num_workers`` and the usage
                 of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
-                documentation for details on pin_memory.
+                documentation for details on ``pin_memory``.
             multiprocessing_context: Determines how processes are spawned.
                 Value must be one of None, "spawn", "fork", "forkserver".
                 If None, then context is inherited from parent process
@@ -336,8 +341,10 @@ class ClassificationTask(ClassyTask):
 
         Args:
             num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See PyTorch dataloader
-                documentation for more details on num_workers and the usage
+                dataloading is done on main process. See `PyTorch dataloader
+                documentation <https://pytorch.org/docs/stable/
+                data.html#torch.utils.data.DataLoader>`_
+                for more details on num_workers and the usage
                 of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
                 documentation for details on pin_memory.

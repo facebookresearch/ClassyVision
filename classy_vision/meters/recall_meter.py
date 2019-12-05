@@ -16,7 +16,7 @@ from . import register_meter
 
 @register_meter("recall_at_k")
 class RecallAtKMeter(ClassyMeter):
-    """Meter to calculate top-k recall for single- or multi-label
+    """Meter to calculate top-k recall for single-label or multi-label
        image classification task.
     """
 
@@ -148,8 +148,10 @@ class RecallAtKMeter(ClassyMeter):
                           either logit or class probability.
             target:       tensor of shape (B, C), one-hot encoded
                           or integer encoded.
-            Note: For binary classification, C=2.
-                  For integer encoded target, C=1.
+
+        Note:
+
+            For binary classification, C=2. For integer encoded target, C=1.
         """
 
         if self._target_is_one_hot is False:

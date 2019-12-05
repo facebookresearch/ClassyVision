@@ -22,7 +22,8 @@ class ExponentialMovingAverageModelHook(ClassyHook):
     Saving the state in cpu will save gpu memory, but will make training slower since
     the model parameters will need to be moved to cpu before the averaging.
 
-    Note: This hooks stores two additional copies of the model's parameters, which will
+    Note:
+        This hooks stores two additional copies of the model's parameters, which will
         increase memory usage significantly.
     """
 

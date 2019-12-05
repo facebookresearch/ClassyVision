@@ -16,8 +16,11 @@ class PolynomialDecayParamScheduler(ClassyParamScheduler):
     polynomial function with a fixed power.
 
     Example:
-      base_lr: 0.1
-      power: 0.9
+
+        .. code-block:: python
+
+          base_lr: 0.1
+          power: 0.9
 
     Then the param value will be 0.1 for epoch 0, 0.099 for epoch 1, and
     so on.
