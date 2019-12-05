@@ -108,6 +108,12 @@ def add_generic_args(parser):
         help="Logging frequency for LossLrMeterLoggingHook (default 5)",
     )
     parser.add_argument(
+        "--image_backend",
+        default="PIL",
+        type=str,
+        help="torchvision image decoder backend (PIL or accimage). Default PIL",
+    )
+    parser.add_argument(
         "--video_backend",
         default="pyav",
         type=str,
@@ -161,9 +167,6 @@ def check_generic_args(args):
             args.visdom_server = args.visdom_server[8:]
         if not args.visdom_server.startswith("http://"):
             args.visdom_server = "http://%s" % args.visdom_server
-
-    # set the right backend for torchvision:
-    torchvision.set_image_backend("accimage")
 
     # return input arguments:
     return args
