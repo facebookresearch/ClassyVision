@@ -1,0 +1,177 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+
+# -------------------------------------------------------------------------------------
+# Environments to run the jobs in
+# -------------------------------------------------------------------------------------
+cpu: &cpu
+  docker:
+  machine:
+    image: default
+  resource_class: medium
+
+gpu: &gpu
+  environment:
+    CUDA_VERSION: "10.1"
+  machine:
+    image: default
+  resource_class: gpu.medium  # Tesla M60
+
+# -------------------------------------------------------------------------------------
+# Re-usable commands
+# -------------------------------------------------------------------------------------
+setup_venv: &setup_venv
+  - run:
+      name: Activate Venv
+      command: |
+        python -m venv ~/venv
+        echo ". ~/venv/bin/activate" >> $BASH_ENV
+        . ~/venv/bin/activate
+        python --version
+        which python
+        which pip
+
+install_python: &install_python
+  - run:
+      name: Install Python
+      working_directory: ~/
+      command: |
+        pyenv install 3.6.1
+        pyenv global 3.6.1
+
+install_dep: &install_dep
+  - run:
+      name: Install Dependencies
+      command: |
+        which python
+        which pip
+        pip install --upgrade pip
+        pip install --progress-bar off -r requirements.txt
+        pip list
+
+install_dev_dep: &install_dev_dep
+  - run:
+      name: Install Dev Dependencies
+      command: |
+        pip install .[dev]
+
+run_tests: &run_tests
+  - run:
+      name: Run Tests
+      command: |
+        python setup.py test -s test.suites.unittests -v
+
+# -------------------------------------------------------------------------------------
+# Jobs to run
+# -------------------------------------------------------------------------------------
+jobs:
+  cpu_tests:
+    <<: *cpu
+
+    working_directory: ~/ClassyVision
+
+    steps:
+      - checkout
+
+      - <<: *install_python
+
+      - <<: *setup_venv
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v2-cpu-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v2-cpu-dependencies-
+
+      - <<: *install_dep
+
+      - save_cache:
+          paths:
+            - ~/venv
+          key: v2-cpu-dependencies-{{ checksum "requirements.txt" }}
+
+      - <<: *install_dev_dep
+
+      - run:
+          name: black
+          working_directory: ~/ClassyVision
+          command: |
+            bash ./scripts/check_formatting.sh -b
+
+      - run:
+          name: isort
+          working_directory: ~/ClassyVision
+          command: |
+            bash ./scripts/check_formatting.sh -s
+
+      - <<: *run_tests
+
+      - run:
+          name: Run classy-project tests
+          command: |
+            pip install .
+            classy-project my-project
+            pushd my-project
+            ./classy_train.py --device cpu --config configs/template_config.json
+            popd
+            rm -rf my-project
+
+
+  gpu_tests:
+    <<: *gpu
+
+    working_directory: ~/ClassyVision
+
+    steps:
+      - checkout
+
+      - run:
+          name: Setup CUDA
+          working_directory: ~/
+          command: |
+            # download and install nvidia drivers, cuda, etc
+            wget -q 'https://s3.amazonaws.com/ossci-linux/nvidia_driver/NVIDIA-Linux-x86_64-430.40.run'
+            sudo /bin/bash ./NVIDIA-Linux-x86_64-430.40.run -s --no-drm
+            wget -q https://developer.download.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-ubuntu1404-10-1-local-10.1.243-418.87.00_1.0-1_amd64.deb
+            sudo dpkg -i cuda-repo-ubuntu1404-10-1-local-10.1.243-418.87.00_1.0-1_amd64.deb
+            sudo apt-key add /var/cuda-repo-10-1-local-10.1.243-418.87.00/7fa2af80.pub
+            nvidia-smi
+
+      - <<: *install_python
+
+      - <<: *setup_venv
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-gpu-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-gpu-dependencies-
+
+      - <<: *install_dep
+
+      - run:
+          name: Check CUDA Available
+          command: python -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'"
+
+      - save_cache:
+          paths:
+            - ~/venv
+          key: v1-gpu-dependencies-{{ checksum "requirements.txt" }}
+
+      - <<: *run_tests
+
+
+# -------------------------------------------------------------------------------------
+# Workflows
+# -------------------------------------------------------------------------------------
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - cpu_tests
+      - gpu_tests

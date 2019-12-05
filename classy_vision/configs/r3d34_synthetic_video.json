@@ -1,0 +1,80 @@
+{
+    "name": "classification_task",
+    "num_epochs": 2,
+    "loss": {
+        "name": "CrossEntropyLoss"
+    },
+    "dataset": {
+        "train": {
+            "name": "synthetic_video",
+            "split": "train",
+            "batchsize_per_replica": 16,
+            "use_shuffle": true,
+            "num_samples": 128,
+            "frames_per_clip": 32,
+            "video_height": 128,
+            "video_width": 160,
+            "num_classes": 50,
+            "clips_per_video": 1
+        },
+        "test": {
+            "name": "synthetic_video",
+            "split": "test",
+            "batchsize_per_replica": 10,
+            "use_shuffle": false,
+            "num_samples": 40,
+            "frames_per_clip": 32,
+            "video_height": 128,
+            "video_width": 160,
+            "num_classes": 50,
+            "clips_per_video": 10
+        }
+    },
+    "meters": {
+        "accuracy": {
+            "topk": [1, 5]
+        }
+    },
+    "model": {
+        "name": "resnext3d",
+        "input_planes": 3,
+        "clip_crop_size": 112,
+        "frames_per_clip": 32,
+        "skip_transformation_type": "postactivated_shortcut",
+        "residual_transformation_type": "basic_transformation",
+        "num_blocks": [2, 2, 2, 2],
+        "input_key": "video",
+        "stem_name": "resnext3d_stem",
+        "stem_planes": 64,
+        "stem_temporal_kernel": 3,
+        "stem_maxpool": false,
+        "stage_planes": 64,
+        "stage_temporal_kernel_basis": [[3], [3], [3], [3]],
+        "temporal_conv_1x1": [false, false, false, false],
+        "stage_temporal_stride": [1, 2, 2, 2],
+        "stage_spatial_stride": [1, 2, 2, 2],
+        "num_groups": 1,
+        "width_per_group": 64,
+        "num_classes": 50,
+        "heads": [
+          {
+            "name": "fully_convolutional_linear",
+            "unique_id": "default_head",
+            "pool_size": [4, 7, 7],
+            "activation_func": "softmax",
+            "num_classes": 50,
+            "fork_block": "pathway0-stage4-block1",
+            "in_plane": 512
+          }
+        ]
+    },
+    "optimizer": {
+        "name": "sgd",
+        "lr": {
+            "name": "step",
+            "values": [0.04, 0.004]
+        },
+        "weight_decay": 5e-3,
+        "momentum": 0.9
+    }
+}
