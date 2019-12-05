@@ -94,7 +94,7 @@ class NodeLaunchActor:
             return s.getsockname()[1]
 
 
-def wait_for_gpus(world_size, timeout_secs=360):
+def wait_for_gpus(world_size, timeout_secs=3600):
     n_gpus = int(ray.cluster_resources().get("GPU", 0))
     elapsed_time = 0
     while n_gpus < world_size:
