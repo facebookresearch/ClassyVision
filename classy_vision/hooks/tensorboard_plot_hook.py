@@ -26,7 +26,8 @@ log = logging.getLogger()
 
 class TensorboardPlotHook(ClassyHook):
     """
-    Hook for writing the losses, learning rates and meters to tensorboard.
+    Hook for writing the losses, learning rates and meters to `tensorboard <https
+    ://www.tensorflow.org/tensorboard`>_.
 
     Global steps are counted in terms of the number of samples processed.
     """
@@ -43,7 +44,9 @@ class TensorboardPlotHook(ClassyHook):
         """The constructor method of TensorboardPlotHook.
 
         Args:
-            tb_writer: Tensorboard SummaryWriter instance
+            tb_writer: `Tensorboard SummaryWriter <https://tensorboardx.
+            readthedocs.io/en/latest/tensorboard.html#tensorboardX.
+            SummaryWriter>`_ instance
         """
         super().__init__()
         if not tbx_available:

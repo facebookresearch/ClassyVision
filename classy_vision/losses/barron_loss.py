@@ -14,7 +14,7 @@ from . import ClassyLoss, register_loss
 @register_loss("barron")
 class BarronLoss(ClassyLoss):
     """
-    This implements the Barron loss: https://arxiv.org/pdf/1701.03077.pdf
+    This implements the `Barron loss <https://arxiv.org/pdf/1701.03077.pdf>`_.
     """
 
     def __init__(self, alpha, size_average, c):

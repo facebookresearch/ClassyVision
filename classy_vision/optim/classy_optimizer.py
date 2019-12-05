@@ -20,10 +20,12 @@ class ClassyOptimizer:
     Base class for classy optimizers.
 
     This wraps a :class:`torch.optim.Optimizer` instance, handles learning
-    rate scheduling by using a :class:`ClassyParamScheduler` and supports specifying
-    regularized and unregularized param groups. Specifying unregularized params is
-    especially useful to avoid applying weight decay on batch norm. See
-    :method:ClassyModel.get_optimizer_params for more information.
+    rate scheduling by using a :class:`param_scheduler.ClassyParamScheduler`
+    and supports specifying regularized and unregularized param groups.
+    Specifying unregularized params is especially useful to avoid applying
+    weight decay on batch norm. See
+    :func:`classy_vision.models.ClassyModel.get_optimizer_params` for more
+    information.
 
     Deriving classes can extend functionality be overriding the appropriate functions.
     """
@@ -45,7 +47,7 @@ class ClassyOptimizer:
         Validate and return the optimizer params.
 
         The optimizer params are fetched from
-        :method:`ClassyVision.get_optimizer_params`.
+        :fun:`models.ClassyModel.get_optimizer_params`.
 
         Args:
             model: The model to get the params from.
@@ -112,7 +114,8 @@ class ClassyOptimizer:
         Note:
             Deriving classes should initialize the underlying Pytorch optimizer
             in this call. The simplest way to do this after a call to
-            super().init_pytorch_optimizer().
+
+            ``super().init_pytorch_optimizer()``
 
         Warning:
             This should called only after the model has been moved to the correct
@@ -152,7 +155,7 @@ class ClassyOptimizer:
 
         Args:
             state_dict: The state dictionary. Must be the output of a call to
-                :method:`get_classy_state`.
+                :func:`get_classy_state`.
 
         This is used to load the state of the optimizer from a checkpoint.
         """
@@ -164,8 +167,10 @@ class ClassyOptimizer:
         """
         Computer gradients with respect to the loss.
 
-        Calls :method:`zero_grad` and then computes the gradient using
-        :func:`torch.Tensor.backward`. See :mod:`torch.autograd` for more information.
+        Calls :func:`zero_grad` and then computes the gradient using
+        `torch.Tensor.backward <https://pytorch.org/docs/stable/
+        tensors.html#torch.Tensor.backward>`_. See :mod:`torch.autograd` for
+        more information.
         """
         # TODO (aadcock): Add gradient accumulation logic
         self.zero_grad()
@@ -176,12 +181,12 @@ class ClassyOptimizer:
         Update the param schedule at the end of an epoch.
 
         This should be called by the task at the end of every epoch to update the
-        schedule of epoch based param schedulers (See :class:`ClassyParamScheduler` for
-        more information).
+        schedule of epoch based param schedulers (See
+        :class:`param_scheduler.ClassyParamScheduler` for more information).
 
         Args:
             where: where we are in terms of training progress (output of
-                :method:`ClassyTask.where`)
+                :func:`tasks.ClassyTask.where`)
         """
         assert self.lr_scheduler.update_interval in [
             UpdateInterval.EPOCH,
@@ -196,8 +201,9 @@ class ClassyOptimizer:
         Update the param schedule at the end of a train step.
 
         This should be called by the task at the end of every train step (
-        :method:`ClassyTask.train_step`) to update the schedule of step based param
-        schedulers (See :class:`ClassyParamScheduler` for more information).
+        :func:`tasks.ClassyTask.train_step`) to update the schedule of step
+        based param schedulers (See :class:`param_scheduler.ClassyParamScheduler`
+        for more information).
 
         Args:
             where: where we are in terms of training progress (output of
@@ -215,7 +221,7 @@ class ClassyOptimizer:
         """
         Args:
             where: where we are in terms of training progress (output of
-                :method:`ClassyTask.where`)
+                :func:`tasks.ClassyTask.where`)
         """
         self.lr = self.lr_scheduler(where)
         for group in self.optimizer.param_groups:
@@ -233,7 +239,8 @@ class ClassyOptimizer:
         """
         Performs a single optimization step.
 
-        See :method:`torch.optim.Optimizer.step` for more information.
+        See `torch.optim.Optimizer.step <https://pytorch.org/docs/stable/
+        optim.html#torch.optim.Optimizer.step>`_for more information.
 
         Args:
             closure: A closure that re-evaluates the model and returns the loss
@@ -244,6 +251,7 @@ class ClassyOptimizer:
         """
         Clears the gradients of all optimized parameters.
 
-        See :method:`torch.optim.Optimizer.zero_grad` for more information.
+        See `torch.optim.Optimizer.zero_grad <https://pytorch.org/docs/stable/
+        optim.html#torch.optim.Optimizer.zero_grad>`_ for more information.
         """
         self.optimizer.zero_grad()

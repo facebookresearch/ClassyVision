@@ -45,21 +45,24 @@ class ClassyHook(ABC):
     """Base class for hooks.
 
     Hooks allow to inject behavior at different places of the training loop, which
-        are listed below in the chronological order.
+    are listed below in the chronological order.
 
-    on_start -> on_phase_start -> on_sample -> on_forward -> on_loss_and_meter ->
-        on_backward -> on_update -> on_phase_end -> on_end
+        on_start -> on_phase_start -> on_sample -> on_forward -> on_loss_and_meter ->
+            on_backward -> on_update -> on_phase_end -> on_end
 
-    Deriving classes should call super().__init__() and store any state in
-    self.state. Any state added to this property should be serializable.
+    Deriving classes should call ``super().__init__()`` and store any state in
+    ``self.state``. Any state added to this property should be serializable.
     E.g. -
-    class MyHook(ClassyHook):
-        def __init__(self, a, b):
-            super().__init__()
-            self.state.a = [1,2,3]
-            self.state.b = "my_hook"
-            # the following line is not allowed
-            # self.state.my_lambda = lambda x: x^2
+
+    .. code-block:: python
+
+        class MyHook(ClassyHook):
+            def __init__(self, a, b):
+                super().__init__()
+                self.state.a = [1,2,3]
+                self.state.b = "my_hook"
+                # the following line is not allowed
+                # self.state.my_lambda = lambda x: x^2
 
     """
 
@@ -163,7 +166,7 @@ class ClassyHook(ABC):
 
         Args:
             state_dict: The state dictionary. Must be the output of a call to
-                :method:`get_classy_state`.
+                :func:`get_classy_state`.
 
         This is used to load the state of the hook from a checkpoint.
 

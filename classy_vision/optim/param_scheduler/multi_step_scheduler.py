@@ -20,9 +20,12 @@ class MultiStepParamScheduler(ClassyParamScheduler):
     which stand for the upper boundary (excluded) of each range.
 
     Example:
-      values: [0.1, 0.01, 0.001, 0.0001]
-      milestones = [30, 60, 80]
-      num_epochs = 120
+
+        .. code-block:: python
+
+          values: [0.1, 0.01, 0.001, 0.0001]
+          milestones = [30, 60, 80]
+          num_epochs = 120
 
     Then the param value will be 0.1 for epochs 0-29, 0.01 for
     epochs 30-59, 0.001 for epochs 60-79, 0.0001 for epochs after epoch 80.

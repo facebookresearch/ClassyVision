@@ -30,12 +30,16 @@ def build_loss(config):
     (see :func:`register_loss`) and call .from_config on it.
 
     In addition to losses registered with :func:`register_loss`, we also
-    support instantiating losses available in the `torch.nn.modules.loss`
+    support instantiating losses available in the `torch.nn.modules.loss <https:
+    //pytorch.org/docs/stable/nn.html#loss-functions>`_
     module. Any keys in the config will get expanded to parameters of the loss
     constructor. For instance, the following call will instantiate a
-    :class:`torch.nn.modules.CrossEntropyLoss`:
+    `torch.nn.modules.CrossEntropyLoss <https://pytorch.org/docs/stable/
+    nn.html#torch.nn.CrossEntropyLoss>`_:
 
-        build_loss({"name": "CrossEntropyLoss", "reduction": "sum"})
+    .. code-block:: python
+
+     build_loss({"name": "CrossEntropyLoss", "reduction": "sum"})
     """
 
     assert "name" in config, f"name not provided for loss: {config}"
@@ -65,9 +69,11 @@ def register_loss(name):
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyLoss subclass, like this:
 
-        @register_loss("my_loss")
-        class MyLoss(ClassyLoss):
-            ...
+    .. code-block:: python
+
+     @register_loss("my_loss")
+     class MyLoss(ClassyLoss):
+          ...
 
     To instantiate a loss from a configuration file, see
     :func:`build_loss`."""

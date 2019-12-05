@@ -12,12 +12,15 @@ from . import ClassyParamScheduler, register_param_scheduler
 @register_param_scheduler("linear")
 class LinearParamScheduler(ClassyParamScheduler):
     """
-    Linearly interpolates parameter between start_lr and end_lr.
+    Linearly interpolates parameter between ``start_lr`` and ``end_lr``.
     Can be used for either warmup or decay based on start and end values.
 
     Example:
-      start_lr: 0.0001
-      end_lr: 0.01
+
+        .. code-block:: python
+
+            start_lr: 0.0001
+            end_lr: 0.01
     Corresponds to a linear increasing schedule with values in [0.0001, 0.01)
     """
 

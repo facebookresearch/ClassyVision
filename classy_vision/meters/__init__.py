@@ -18,7 +18,7 @@ METER_REGISTRY = {}
 
 
 def build_meter(config):
-    """Builds a ClassyMeter from a config.
+    """Builds a :class:`ClassyMeter` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
     meter class to instantiate. For instance, a config `{"name": "my_meter",
@@ -33,12 +33,14 @@ def build_meters(config):
 
 
 def register_meter(name):
-    """Registers a ClassyMeter subclass.
+    """Registers a :class:`ClassyMeter` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
     ClassyMeter from a configuration file, even if the class itself is not
     part of the Classy Vision framework. To use it, apply this decorator to a
     ClassyMeter subclass, like this:
+
+    .. code-block:: python
 
         @register_meter('accuracy')
         class AccuracyMeter(ClassyMeter):

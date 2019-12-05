@@ -40,7 +40,7 @@ class ClassyMeter:
 
         Note:
             If there are multiple training processes then this
-            represents the local state of the meter. If :method:`sync_meter` is
+            represents the local state of the meter. If :func:`sync_state` is
             implemented, then value will return the global state since the
             last sync PLUS any local unsynced updates that have occurred
             in the local process.
@@ -89,8 +89,8 @@ class ClassyMeter:
         """
         Validate the meter.
 
-        Checks if the meter can be calculated on the given model_output_shape
-        and target_shape.
+        Checks if the meter can be calculated on the given ``model_output_shape``
+        and ``target_shape``.
         """
         raise NotImplementedError
 
@@ -109,7 +109,7 @@ class ClassyMeter:
 
         Args:
             state_dict: The state dictionary. Must be the output of a call to
-                :method:`get_classy_state`.
+                :func:`get_classy_state`.
 
         This is used to load the state of the meter from a checkpoint.
         """

@@ -237,12 +237,12 @@ class ResNeXt(ClassyModel):
         final_bn_relu,
     ):
         """
-            Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf).
+            Implementation of `ResNeXt <https://arxiv.org/pdf/1611.05431.pdf>`_.
 
-            Set `small_input` to `True` for 32x32 sized image inputs.
+            Set ``small_input`` to `True` for 32x32 sized image inputs.
 
-            Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
-            layersSet. These settings are useful when training Siamese networks.
+            Set ``final_bn_relu`` to `False` to exclude the final batchnorm and
+            ReLU layers. These settings are useful when training Siamese networks.
         """
         super().__init__()
 

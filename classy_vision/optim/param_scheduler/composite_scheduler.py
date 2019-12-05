@@ -30,13 +30,16 @@ class CompositeParamScheduler(ClassyParamScheduler):
     would if it were the only scheduler. Default is 'fixed' for all schedulers.
 
     Example:
-      update_interval = "step"
-      schedulers = [
-        {"name": "constant", "value": 0.42},
-        {"name": "cosine_decay", "start_lr": 0.42, "end_lr": 0.0001}
-      ]
-      interval_scaling = ['rescaled', 'rescaled'],
-      lengths =  [0.3, 0.7]
+
+        .. code-block:: python
+
+              update_interval = "step"
+              schedulers = [
+                {"name": "constant", "value": 0.42},
+                {"name": "cosine_decay", "start_lr": 0.42, "end_lr": 0.0001}
+              ]
+              interval_scaling = ['rescaled', 'rescaled'],
+              lengths =  [0.3, 0.7]
 
     The parameter value will be 0.42 for the first [0%, 30%) of steps,
     and then will cosine decay from 0.42 to 0.0001 for [30%, 100%) of

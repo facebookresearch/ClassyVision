@@ -14,14 +14,17 @@ from . import ClassyParamScheduler, register_param_scheduler
 @register_param_scheduler("cosine")
 class CosineParamScheduler(ClassyParamScheduler):
     """
-    Changes the param value after every epoch based on a cosine schedule.
+    Changes the param value after every epoch based on a `cosine schedule <https:
+    //arxiv.org/pdf/1608.03983.pdf>`_.
     Can be used for either cosine decay or cosine warmup schedules based on
     start and end values.
-    See https://arxiv.org/pdf/1608.03983.pdf for details.
 
     Example:
-      start_lr: 0.1
-      end_lr: 0.0001
+
+        .. code-block:: python
+
+          start_lr: 0.1
+          end_lr: 0.0001
     """
 
     def __init__(self, start_lr: float, end_lr: float):
