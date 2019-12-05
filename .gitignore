@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+.DS_Store
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+node_modules
+
+lib/core/metadata.js
+lib/core/MetadataBlog.js
+
+# Sphinx documentation
+sphinx/build/
+
+# Docusaurus
+website/translated_docs
+website/build/
+website/yarn.lock
+website/node_modules
+website/i18n/*
+
+## Generated for tutorials
+website/_tutorials/
+website/static/files/
+website/pages/tutorials/*
+!website/pages/tutorials/index.js
+
+## Generated for Sphinx
+website/pages/api/
+website/static/js/*
+!website/static/js/code_block_buttons.js
+website/static/_sphinx-sources/

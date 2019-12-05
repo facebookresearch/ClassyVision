@@ -1,0 +1,32 @@
+{
+  "Using Classy Vision": [
+     {
+      "id": "getting_started",
+      "title": "Getting started"
+     },{
+      "id": "ray_aws",
+      "title": "Distributed training on AWS"
+     },{
+      "id": "classy_dataset",
+      "title": "Creating a custom dataset"
+     },{
+      "id": "classy_model",
+      "title": "Creating a custom model"
+     },{
+      "id": "classy_loss",
+      "title": "Creating a custom loss"
+     },{
+      "id": "video_classification",
+      "title": "How to do video classification"
+     },{
+      "id": "fine_tuning",
+      "title": "Fine Tuning a model"
+     },{
+      "id": "pet_aws",
+      "title": "Elastic training on AWS"
+     },{
+      "id": "torchscript",
+      "title": "Productionizing models"
+     }
+  ]
+}

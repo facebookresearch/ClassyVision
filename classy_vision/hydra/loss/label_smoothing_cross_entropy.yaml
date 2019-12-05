@@ -1,0 +1,4 @@
+config:
+  loss:
+    name: label_smoothing_cross_entropy
+    smoothing_param: 0.1

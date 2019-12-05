@@ -1,0 +1,12 @@
+config:
+  model:
+    name: resnet
+    num_blocks: [3, 4, 6, 3]
+    small_input: false
+    zero_init_bn_residuals: true
+    heads:
+      - name: fully_connected
+        unique_id: default_head
+        num_classes: 1000
+        fork_block: block3-2
+        in_plane: 2048

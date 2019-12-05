@@ -1,0 +1,21 @@
+debug: False
+device: gpu
+checkpoint_folder: ""
+checkpoint_period: 1
+log_freq: 5
+num_workers: 4
+pretrained_checkpoint_folder: ""
+profiler: False
+skip_tensorboard: False
+show_progress: False
+test_only: False
+visdom_port: 8097
+visdom_server: ""
+video_backend: pyav
+defaults:
+  - task: classification_task
+  - loss: cross_entropy
+  - dataset: synthetic_image
+  - model: resnet_50
+  - optimizer: sgd
+  - param_scheduler: step

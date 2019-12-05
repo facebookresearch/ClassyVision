@@ -1,0 +1,63 @@
+config:
+  name: classification_task
+  num_epochs: 2
+  loss:
+    name: CrossEntropyLoss
+  dataset:
+    train:
+      name: synthetic_image
+      split: train
+      crop_size: 224
+      class_ratio: 0.5
+      num_samples: 2000
+      seed: 0
+      batchsize_per_replica: 32
+      use_shuffle: true
+      transforms:
+        - name: apply_transform_to_key
+          transforms:
+            - name: ToTensor
+            - name: Normalize
+              mean: [0.485, 0.456, 0.406]
+              std: [0.229, 0.224, 0.225]
+          key: input
+
+    test:
+      name: synthetic_image
+      split: val
+      crop_size: 224
+      class_ratio: 0.5
+      num_samples: 2000
+      seed: 1
+      batchsize_per_replica: 32
+      use_shuffle: false
+      transforms:
+        - name: apply_transform_to_key
+          transforms:
+            - name: ToTensor
+            - name: Normalize
+              mean: [0.485, 0.456, 0.406]
+              std: [0.229, 0.224, 0.225]
+          key: input
+
+  meters:
+    accuracy:
+      topk: [1, 5]
+  model:
+    name: resnet
+    num_blocks: [3, 4, 6, 3]
+    small_input: false
+    zero_init_bn_residuals: true
+    heads:
+      - name: fully_connected
+        unique_id: default_head
+        num_classes: 1000
+        fork_block: block3-2
+        in_plane: 2048
+  optimizer:
+    name: sgd
+    lr:
+      name: step
+      values: [0.1, 0.01]
+    weight_decay: 1e-4
+    momentum: 0.9
