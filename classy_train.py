@@ -57,12 +57,13 @@ from classy_vision.hooks import (
 )
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import DistributedTrainer, LocalTrainer
-from torchvision import set_video_backend
+from torchvision import set_image_backend, set_video_backend
 
 
 def main(args, config):
     # Global flags
     torch.manual_seed(0)
+    set_image_backend(args.image_backend)
     set_video_backend(args.video_backend)
 
     task = build_task(config)
