@@ -64,7 +64,7 @@ class Adam(ClassyOptimizer):
         ), "Config must contain a learning rate 'lr' section for Adam optimizer"
         assert (
             "betas" in config
-            and type(config["betas"]) == type
+            and type(config["betas"]) == tuple
             and len(config["betas"]) == 2
             and type(config["betas"][0]) == float
             and type(config["betas"][1]) == float
