@@ -82,7 +82,7 @@ def all_reduce_sum(tensor):
     return tensor
 
 
-def gather_from_all(tensor):
+def gather_tensors_from_all(tensor):
     """
     Wrapper over torch.distributed.all_gather for performing
     'gather' of 'tensor' over all processes in both distributed /
@@ -91,11 +91,26 @@ def gather_from_all(tensor):
     if tensor.ndim == 0:
         # 0 dim tensors cannot be gathered. so unsqueeze
         tensor = tensor.unsqueeze(0)
-    gathered_tensor = [
-        torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
-    ]
-    torch.distributed.all_gather(gathered_tensor, tensor)
-    gathered_tensor = torch.cat(gathered_tensor, 0)
+
+    if is_distributed_training_run():
+        tensor, orig_device = convert_to_distributed_tensor(tensor)
+        gathered_tensors = [
+            torch.zeros_like(tensor) for _ in range(torch.distributed.get_world_size())
+        ]
+        torch.distributed.all_gather(gathered_tensors, tensor)
+        gathered_tensors = [
+            convert_to_normal_tensor(_tensor, orig_device)
+            for _tensor in gathered_tensors
+        ]
+    else:
+        gathered_tensors = [tensor]
+
+    return gathered_tensors
+
+
+def gather_from_all(tensor):
+    gathered_tensors = gather_tensors_from_all(tensor)
+    gathered_tensor = torch.cat(gathered_tensors, 0)
     return gathered_tensor
 
 
