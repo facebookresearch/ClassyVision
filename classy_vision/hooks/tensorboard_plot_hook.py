@@ -132,7 +132,15 @@ class TensorboardPlotHook(ClassyHook):
                 log.warn(f"Skipping meter {meter.name} with value: {meter.value}")
                 continue
             for name, value in meter.value.items():
-                meter_key = f"{phase_type}_{meter.name}_{name}"
-                self.tb_writer.add_scalar(meter_key, value, global_step=phase_type_idx)
+                if isinstance(value, float):
+                    meter_key = f"{phase_type}_{meter.name}_{name}"
+                    self.tb_writer.add_scalar(
+                        meter_key, value, global_step=phase_type_idx
+                    )
+                else:
+                    log.warn(
+                        f"Skipping meter name {meter.name}_{name} with value: {value}"
+                    )
+                    continue
 
         logging.info(f"Done plotting to Tensorboard")
