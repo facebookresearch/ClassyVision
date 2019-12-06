@@ -4,13 +4,13 @@
 
 --------------------------------------------------------------------------------
 
-[Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutia of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
+[Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutiae of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
 
 * Ease of use. The library features a modular, flexible design that allows anyone to train machine learning models on top of PyTorch using very simple abstractions. The system also has out-of-the-box integration with Amazon Web Services (AWS), facilitating research at scale and making it simple to move between research and production.
 * High performance. Researchers can use the framework to train Resnet50 on ImageNet in as little as 15 minutes, for example.
 * Demonstrated success in training at scale. We’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
 * Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
-* Elastic training. We have also added experimental integration with PyTorch Elastic, which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
+* Elastic training. We have also added experimental integration with [PyTorch Elastic](https://github.com/pytorch/elastic), which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
 
 Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
 
@@ -56,16 +56,16 @@ ls output_<timestamp>/checkpoints/
 checkpoint.torch model_phase-0_end.torch model_phase-1_end.torch model_phase-2_end.torch model_phase-3_end.torch
 ```
 
-checkpoint.torch is the latest model (in this case, same as model_phase-3), a checkpoint is saved at the end of each phase.
+`checkpoint.torch` is the latest model (in this case, same as `model_phase-3_end.torch`), a checkpoint is saved at the end of each phase.
 
 For more details / tutorials see the documentation section below.
 
 ## Documentation
 
-Please see our [tutorials](https://classyvision.ai/tutorials/getting_started) to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](http://TODO).
+Please see our [tutorials](https://classyvision.ai/tutorials/) to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](https://classyvision.ai/api/).
 
 ## Join the Classy Vision community
-* Website: http://classyvision.ai
+* Website: https://classyvision.ai
 * Slack: [invite link](https://join.slack.com/t/classyvision/shared_invite/enQtODMwODA5Mjg3MTI3LWM5NzNlOTZjNWY3ZTE5YTViYmU2NWM1MDBjMWIwZTIwNmIyY2JjOTkyMTVmMTYzMmIwZWRmZjZmYjhhZTBkZGE)
 
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
