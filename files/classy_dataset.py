@@ -413,8 +413,3 @@ class ExampleImageNetDataset(ClassyDataset):
 # In this tutorial we have seen how to create a custom dataset using ClassyDataset, how to integrate this dataset with the configuration system, how to iterate over samples / use multiple workers, how to use transforms in the configuration system and finally we showed an example of how to use a torchvision dataset in Classy Vision. 
 # 
 # For more details on how to use the dataset for training, please see [Getting started](https://classyvision.ai/tutorials/getting_started).
-
-# In[ ]:
-
-
-

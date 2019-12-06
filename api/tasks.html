@@ -387,6 +387,11 @@ See <a class="reference internal" href="#classy_vision.tasks.ClassificationTask.
 <dd><p>Returns the total number of samples processed in current phase</p>
 </dd></dl>
 <dl class="method">
+<dt id="classy_vision.tasks.ClassificationTask.get_total_test_phases">
+<code class="sig-name descname">get_total_test_phases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.get_total_test_phases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of “test” phases in the task</p>
+</dd></dl>
+<dl class="method">
 <dt id="classy_vision.tasks.ClassificationTask.get_total_training_phases">
 <code class="sig-name descname">get_total_training_phases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.get_total_training_phases" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the total number of “train” phases in the task</p>
@@ -549,7 +554,8 @@ in train_step for access by hooks</p></li>
 <dl class="method">
 <dt id="classy_vision.tasks.ClassificationTask.where">
 <em class="property">property </em><code class="sig-name descname">where</code><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.where" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the proportion of training that has completed.</p>
+<dd><p>Returns the proportion of training that has completed. If in test
+only mode, returns proportion of testing completed</p>
 <p>Returned value is a float in the range [0, 1)</p>
 </dd></dl>
 </dd></dl>
