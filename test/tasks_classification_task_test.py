@@ -90,6 +90,51 @@ class TestClassificationTask(unittest.TestCase):
             task_2.train_step(use_gpu, local_variables)
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
+    def test_test_only_checkpointing(self):
+        """
+        Tests checkpointing by running train_steps to make sure the
+        train_steps run the same way after loading from a training
+        task checkpoint on a test_only task.
+        """
+        train_config = get_fast_test_task_config()
+        train_config["num_epochs"] = 10
+        test_config = get_fast_test_task_config()
+        test_config["test_only"] = True
+        train_task = build_task(train_config).set_hooks([LossLrMeterLoggingHook()])
+        test_only_task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
+
+        use_gpu = torch.cuda.is_available()
+
+        # prepare the tasks for the right device
+        train_task.prepare(use_gpu=use_gpu)
+
+        # test in both train and test mode
+        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer.train(train_task)
+
+        # set task's state as task_2's checkpoint
+        test_only_task.set_checkpoint(
+            get_checkpoint_dict(train_task, {}, deep_copy=True)
+        )
+        test_only_task.prepare(use_gpu=use_gpu)
+        test_state = test_only_task.get_classy_state()
+
+        # We expect the phase idx to be different for a test only task
+        self.assertEqual(test_state["phase_idx"], -1)
+
+        # We expect that test only state is test, no matter what train state is
+        self.assertFalse(test_state["train"])
+
+        # Num updates should be 0
+        self.assertEqual(test_state["num_updates"], 0)
+
+        # train_phase_idx should -1
+        self.assertEqual(test_state["train_phase_idx"], -1)
+
+        # Verify task will run
+        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer.train(test_only_task)
+
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
     def test_checkpointing_different_device(self):
         config = get_fast_test_task_config()
