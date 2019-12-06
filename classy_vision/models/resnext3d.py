@@ -72,7 +72,8 @@ class ResNeXt3DBase(ClassyModel):
             assert arg in config, "resnext3d model requires argument %s" % arg
             ret_config[arg] = config[arg]
 
-        # Default setting for model stem
+        # Default setting for model stem, which is considered as stage 0. Stage
+        # index starts from 0 as implemented in ResStageBase._block_name() method.
         #   stem_planes: No. of output channles of conv op in stem
         #   stem_temporal_kernel: temporal size of conv op in stem
         #   stem_spatial_kernel: spatial size of conv op in stem
@@ -87,8 +88,8 @@ class ResNeXt3DBase(ClassyModel):
                 "stem_maxpool": config.get("stem_maxpool", False),
             }
         )
-        # Default setting for model stages 2, 3, 4 and 5
-        #   stage_planes: No. of output channel of 1st conv op in stage 2
+        # Default setting for model stages 1, 2, 3 and 4
+        #   stage_planes: No. of output channel of 1st conv op in stage 1
         #   stage_temporal_kernel_basis: Basis of temporal kernel sizes for each of
         #       the stage.
         #   temporal_conv_1x1: if True, do temporal convolution in the fist
