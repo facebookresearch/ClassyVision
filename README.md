@@ -8,7 +8,7 @@
 
 * Ease of use. The library features a modular, flexible design that allows anyone to train machine learning models on top of PyTorch using very simple abstractions. The system also has out-of-the-box integration with Amazon Web Services (AWS), facilitating research at scale and making it simple to move between research and production.
 * High performance. Researchers can use the framework to train Resnet50 on ImageNet in as little as 15 minutes, for example.
-* Demonstrated success in production at scale. The framework is currently in use at Facebook, where we’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
+* Demonstrated success in training at scale. We’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
 * Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
 * Elastic training. We have also added experimental integration with PyTorch Elastic, which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
 
