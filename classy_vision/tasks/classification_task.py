@@ -276,6 +276,16 @@ class ClassificationTask(ClassyTask):
                 num_training_phases += 1
         return num_training_phases
 
+    def get_total_test_phases(self):
+        """
+        Returns the total number of "test" phases in the task
+        """
+        num_test_phases = 0
+        for phase in self.phases:
+            if phase["train"] is False:
+                num_test_phases += 1
+        return num_test_phases
+
     def _build_phases(self):
         """Returns list of phases from config.
 
@@ -426,12 +436,18 @@ class ClassificationTask(ClassyTask):
 
     @property
     def where(self):
-        """Returns the proportion of training that has completed.
+        """Returns the proportion of training that has completed. If in test
+        only mode, returns proportion of testing completed
 
         Returned value is a float in the range [0, 1)
         """
         current_step = self.num_updates / self.get_global_batchsize()
-        num_steps = self.get_total_training_phases() * self.num_batches_per_phase
+        num_phases = (
+            self.get_total_test_phases()
+            if self.test_only
+            else self.get_total_training_phases()
+        )
+        num_steps = num_phases * self.num_batches_per_phase
         where = current_step / num_steps
 
         assert where >= 0 and where < 1, f"Invalid where: {where}"
@@ -466,16 +482,19 @@ class ClassificationTask(ClassyTask):
         Args:
             state: Dict containing state of a task
         """
-        self.train = state["train"]
+        # some settings are different in test only
+        self.train = False if self.test_only else state["train"]
+        if not self.test_only:
+            self.phase_idx = state["phase_idx"]
+            self.num_updates = state["num_updates"]
+            self.train_phase_idx = state["train_phase_idx"]
+            self.losses = state["losses"]
+            for meter, meter_state in zip(self.meters, state["meters"]):
+                meter.set_classy_state(meter_state)
+
         self.base_model.set_classy_state(state["base_model"])
-        for meter, meter_state in zip(self.meters, state["meters"]):
-            meter.set_classy_state(meter_state)
         self.optimizer.set_classy_state(state["optimizer"])
-        self.phase_idx = state["phase_idx"]
-        self.train_phase_idx = state["train_phase_idx"]
-        self.num_updates = state["num_updates"]
         self.num_samples_this_phase = state["num_samples_this_phase"]
-        self.losses = state["losses"]
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
             # hooks are removed
