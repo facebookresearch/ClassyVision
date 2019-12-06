@@ -1,20 +1,16 @@
 #!/bin/bash                                                                                                                                                                                                      
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 usage() {
   echo "Usage: $0 [-b]"
   echo ""
-  echo "Build and push updated ClassyVision site. Will either update latest or bump stable version."
+  echo "Build and push updated ClassyVision site."
   echo ""
   exit 1
 }
-
-# Command to strip out Algolia (search functionality) form siteConfig.js                                                                                                                                         
-# Algolia only indexes stable build, so we'll remove from older versions                                                                                                                                         
-REMOVE_ALGOLIA_CMD="import os, re; "
-REMOVE_ALGOLIA_CMD+="c = open('siteConfig.js', 'r').read(); "
-REMOVE_ALGOLIA_CMD+="out = re.sub('algolia: \{.+\},', '', c, flags=re.DOTALL); "
-REMOVE_ALGOLIA_CMD+="f = open('siteConfig.js', 'w'); "
-REMOVE_ALGOLIA_CMD+="f.write(out); "
-REMOVE_ALGOLIA_CMD+="f.close(); "
 
 # Current directory (needed for cleanup later)                                                                                                                                                                   
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -32,9 +28,6 @@ cd ClassyVision-master/website || exit
 # Build site, tagged with "latest" version; baseUrl set to /versions/latest/                                                                                                                                   
 yarn
 yarn run build
-
-# disable search for non-stable version (can't use sed b/c of newline)                                                                                                                                         
-python3 -c "$REMOVE_ALGOLIA_CMD"
 
 cd .. || exit
 ./scripts/build_docs.sh -b
