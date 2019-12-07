@@ -59,7 +59,7 @@ class Adam(ClassyOptimizer):
         config.setdefault("eps", 1e-8)
         config.setdefault("amsgrad", False)
 
-        # Check if betas is a list and convert it to a tuple 
+        # Check if betas is a list and convert it to a tuple
         # since a JSON config can only have lists
         if "betas" in config and type(config["betas"]) == list:
             config["betas"] = tuple(config["betas"])
