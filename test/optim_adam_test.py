@@ -11,6 +11,9 @@ from classy_vision.optim.adam import Adam
 
 
 class TestAdamOptimizer(TestOptimizer, unittest.TestCase):
+    def _check_momentum_buffer(self):
+        return False
+
     def _get_config(self):
         return {
             "name": "adam",

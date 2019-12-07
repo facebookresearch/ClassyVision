@@ -21,10 +21,10 @@ class Adam(ClassyOptimizer):
     def __init__(
         self,
         lr_scheduler: ClassyParamScheduler,
-        betas: Tuple[float, float],
-        eps: float,
-        weight_decay: float,
-        amsgrad: bool,
+        betas: Tuple[float, float] = (0.9, 0.999),
+        eps: float = 1e-8,
+        weight_decay: float = 0.0,
+        amsgrad: bool = False,
     ) -> None:
         super().__init__(lr_scheduler=lr_scheduler)
 
@@ -57,7 +57,12 @@ class Adam(ClassyOptimizer):
         """
         # Default params
         config.setdefault("eps", 1e-8)
-        config["amsgrad"] = config.get("amsgrad", False)
+        config.setdefault("amsgrad", False)
+
+        # Check if betas is a list and convert it to a tuple 
+        # since a JSON config can only have lists
+        if "betas" in config and type(config["betas"]) == list:
+            config["betas"] = tuple(config["betas"])
 
         assert (
             "lr" in config
