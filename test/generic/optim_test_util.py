@@ -21,6 +21,9 @@ class TestOptimizer(ABC):
     def _instance_to_test(self):
         pass
 
+    def _check_momentum_buffer(self):
+        return False
+
     def _get_optimizer_params(self):
         return {
             "regularized_params": [
@@ -73,16 +76,16 @@ class TestOptimizer(ABC):
                 len(optim1["param_groups"][i]["params"]),
                 len(optim2["param_groups"][i]["params"]),
             )
-
-            for j in range(len(optim1["param_groups"][i]["params"])):
-                id1 = optim1["param_groups"][i]["params"][j]
-                id2 = optim2["param_groups"][i]["params"][j]
-                self.assertTrue(
-                    torch.allclose(
-                        optim1["state"][id1]["momentum_buffer"],
-                        optim2["state"][id2]["momentum_buffer"],
+            if self._check_momentum_buffer():
+                for j in range(len(optim1["param_groups"][i]["params"])):
+                    id1 = optim1["param_groups"][i]["params"][j]
+                    id2 = optim2["param_groups"][i]["params"][j]
+                    self.assertTrue(
+                        torch.allclose(
+                            optim1["state"][id1]["momentum_buffer"],
+                            optim2["state"][id2]["momentum_buffer"],
+                        )
                     )
-                )
 
     def _get_set_state(self, grad_values):
         config = self._get_config()
