@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import enum
 import logging
 from typing import Any, Dict, List, Union
 
@@ -25,9 +26,22 @@ from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
+from torch.distributed import _broadcast_coalesced
 
 from . import register_task
 from .classy_task import ClassyTask
+
+
+class BroadcastBuffersMode(enum.Enum):
+    DISABLED = enum.auto()
+    # Enable DistributedDataParallel's broadcast_buffers option, synchronizing
+    # model buffers every forward pass.
+    FORWARD_PASS = enum.auto()
+    # Similar to FORWARD_PASS, but only synchronizes model buffers once
+    # per epoch, between train and test phases. If your motivation for
+    # synchronizing buffers is for buffers to be consistent during eval, use
+    # this instead of FORWARD_PASS to reduce training overhead.
+    BEFORE_EVAL = enum.auto()
 
 
 @register_task("classification_task")
@@ -97,6 +111,9 @@ class ClassificationTask(ClassyTask):
         self.data_iterator = None
         self.num_samples_this_phase = 0
         self.losses = []
+        self.broadcast_buffers_mode: BroadcastBuffersMode = (
+            BroadcastBuffersMode.DISABLED
+        )
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -157,6 +174,16 @@ class ClassificationTask(ClassyTask):
             meters: list of meters to compute during training
         """
         self.meters = meters
+        return self
+
+    def set_distributed_options(self, broadcast_buffers_mode: BroadcastBuffersMode):
+        """Set distributed options.
+
+        Args:
+            broadcast_buffers_mode: Broadcast buffers mode. See
+                :class:`BroadcastBuffersMode` for options.
+        """
+        self.broadcast_buffers_mode = broadcast_buffers_mode
         return self
 
     def set_hooks(self, hooks: List["ClassyHook"]):
@@ -229,6 +256,9 @@ class ClassificationTask(ClassyTask):
             .set_model(model)
             .set_optimizer(optimizer)
             .set_meters(meters)
+            .set_distributed_options(
+                BroadcastBuffersMode[config.get("broadcast_buffers", "DISABLED")]
+            )
         )
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
@@ -432,7 +462,12 @@ class ClassificationTask(ClassyTask):
             self.distributed_model is None
         ), "init_ddp_non_elastic must only be called once"
 
-        self.distributed_model = init_distributed_data_parallel_model(self.base_model)
+        broadcast_buffers = (
+            self.broadcast_buffers_mode == BroadcastBuffersMode.FORWARD_PASS
+        )
+        self.distributed_model = init_distributed_data_parallel_model(
+            self.base_model, broadcast_buffers=broadcast_buffers
+        )
 
     @property
     def where(self):
@@ -707,8 +742,25 @@ class ClassificationTask(ClassyTask):
         phase = self.phases[self.phase_idx]
         self.base_model.train(phase["train"])
 
+        if (
+            self.broadcast_buffers_mode == BroadcastBuffersMode.BEFORE_EVAL
+            and not self.train
+        ):
+            self._broadcast_buffers()
+
         if self.train and self.train_phase_idx >= 0:
             self.optimizer.update_schedule_on_epoch(self.where)
+
+    def _broadcast_buffers(self):
+        """Explicitly synchronize buffers across all devices."""
+        if self.distributed_model is None:
+            return
+        buffers = list(self.base_model.buffers())
+        if len(buffers) > 0:
+            logging.info("Synchronizing buffers before evaluation.")
+            _broadcast_coalesced(
+                self.distributed_model.process_group, buffers, 256 * 1024 * 1024
+            )
 
     # TODO: Functions below should be better abstracted into the dataloader
     # abstraction

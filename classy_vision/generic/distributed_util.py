@@ -163,17 +163,19 @@ def get_cuda_device_index() -> int:
     return _cuda_device_index
 
 
-def init_distributed_data_parallel_model(model):
+def init_distributed_data_parallel_model(model, broadcast_buffers=False):
     global _cuda_device_index
 
     if _cuda_device_index == _CPU_DEVICE_INDEX:
         # CPU-only model, don't specify device
-        return torch.nn.parallel.DistributedDataParallel(model, broadcast_buffers=False)
+        return torch.nn.parallel.DistributedDataParallel(
+            model, broadcast_buffers=broadcast_buffers
+        )
     else:
         # GPU model
         return torch.nn.parallel.DistributedDataParallel(
             model,
             device_ids=[_cuda_device_index],
             output_device=_cuda_device_index,
-            broadcast_buffers=False,
+            broadcast_buffers=broadcast_buffers,
         )
