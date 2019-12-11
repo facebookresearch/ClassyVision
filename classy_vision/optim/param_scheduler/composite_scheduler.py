@@ -15,6 +15,11 @@ from . import (
 )
 
 
+class IntervalScaling(Enum):
+    RESCALED = auto()
+    FIXED = auto()
+
+
 @register_param_scheduler("composite")
 class CompositeParamScheduler(ClassyParamScheduler):
     """
@@ -45,10 +50,6 @@ class CompositeParamScheduler(ClassyParamScheduler):
     and then will cosine decay from 0.42 to 0.0001 for [30%, 100%) of
     training.
     """
-
-    class IntervalScaling(Enum):
-        RESCALED = auto()
-        FIXED = auto()
 
     def __init__(
         self,
@@ -105,9 +106,9 @@ class CompositeParamScheduler(ClassyParamScheduler):
                     "fixed",
                     "rescaled",
                 }, "Choices for interval scaline are 'fixed' or 'rescaled'"
-                interval_scaling.append(cls.IntervalScaling[interval_scale.upper()])
+                interval_scaling.append(IntervalScaling[interval_scale.upper()])
         else:
-            interval_scaling = [cls.IntervalScaling.RESCALED] * len(
+            interval_scaling = [IntervalScaling.RESCALED] * len(
                 config["schedulers"]
             )
         if "num_epochs" in config:  # Propogate value to intermediate schedulers
@@ -136,7 +137,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
         scheduler = self._schedulers[i]
         scheduler_where = where
         interval_scale = self._interval_scaling[i]
-        if interval_scale == self.IntervalScaling.RESCALED:
+        if interval_scale == IntervalScaling.RESCALED:
             # Calculate corresponding where % for scheduler
             scheduler_start = running_total - self._lengths[i]
             scheduler_where = (where - scheduler_start) / self._lengths[i]

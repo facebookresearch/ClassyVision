@@ -10,7 +10,8 @@ import unittest
 from classy_vision.optim.param_scheduler import build_param_scheduler
 from classy_vision.optim.param_scheduler.composite_scheduler import (
     CompositeParamScheduler,
-    UpdateInterval,
+    IntervalScaling,
+    UpdateInterval
 )
 
 
@@ -164,6 +165,13 @@ class TestCompositeScheduler(unittest.TestCase):
         config = self._get_valid_mixed_config()
         scheduler = build_param_scheduler(config)
         self.assertTrue(isinstance(scheduler, CompositeParamScheduler))
+
+        schedulers = [build_param_scheduler(scheduler_config) for scheduler_config in config["schedulers"]]
+        composite = CompositeParamScheduler(schedulers=schedulers,
+                                            lengths=config["lengths"],
+                                            update_interval=UpdateInterval.EPOCH,
+                                            interval_scaling=[IntervalScaling.RESCALED, IntervalScaling.FIXED])
+        self.assertTrue(isinstance(composite, CompositeParamScheduler))
 
     def test_scheduler_with_mixed_types(self):
         config = self._get_valid_mixed_config()
