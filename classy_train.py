@@ -59,6 +59,7 @@ from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import DistributedTrainer, LocalTrainer
 from torchvision import set_image_backend, set_video_backend
 
+imprt a
 
 def main(args, config):
     # Global flags

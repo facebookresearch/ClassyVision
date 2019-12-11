@@ -7,7 +7,7 @@
 set -e
 
 CMD="black"
-CHANGED_FILES="$(git diff --name-only master... | grep '\.py$' | tr '\n' ' ')"
+CHANGED_FILES="$(git diff --name-only  | grep '\.py$' | tr '\n' ' ')"
 
 while getopts bs opt; do
   case $opt in
