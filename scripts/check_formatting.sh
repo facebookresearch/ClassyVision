@@ -29,18 +29,18 @@ if [ "$CHANGED_FILES" != "" ]
 then
     if [ "$CMD" = "black" ]
     then
-	if [ ! "$(black --version)" ]
-	then
+        if [ ! "$(black --version)" ]
+        then
             echo "Please install black."
-	    exit 1
-	fi
-	cmd="black --check $CHANGED_FILES"
+            exit 1
+        fi
+        cmd="black --check $CHANGED_FILES"
     else
-	if [ ! "$(isort --version)" ]
-	then
+        if [ ! "$(isort --version)" ]
+        then
             echo "Please install isort."
-	    exit 1
-	fi
+            exit 1
+        fi
         cmd="isort $CHANGED_FILES -c"
     fi
     echo "Running command \"$cmd\""
