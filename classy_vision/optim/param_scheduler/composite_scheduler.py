@@ -29,7 +29,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
     are run in order. All values in lengths should sum to 1.0.
 
     Each scheduler also has a corresponding interval scale. If interval
-    scale is 'fixed', the intermidiate scheduler will be run without any rescaling
+    scale is 'fixed', the intermediate scheduler will be run without any rescaling
     of the time. If interval scale is 'rescaled', intermediate scheduler is
     run such that each scheduler will start and end at the same values as it
     would if it were the only scheduler. Default is 'fixed' for all schedulers.
@@ -105,13 +105,13 @@ class CompositeParamScheduler(ClassyParamScheduler):
                 assert interval_scale in {
                     "fixed",
                     "rescaled",
-                }, "Choices for interval scaline are 'fixed' or 'rescaled'"
+                }, "Choices for interval scaling are 'fixed' or 'rescaled'"
                 interval_scaling.append(IntervalScaling[interval_scale.upper()])
         else:
             interval_scaling = [IntervalScaling.RESCALED] * len(
                 config["schedulers"]
             )
-        if "num_epochs" in config:  # Propogate value to intermediate schedulers
+        if "num_epochs" in config:  # Propagate value to intermediate schedulers
             config["schedulers"] = [
                 dict(schedule, **{"num_epochs": config["num_epochs"]})
                 for schedule in config["schedulers"]
