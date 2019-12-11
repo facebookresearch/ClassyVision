@@ -43,7 +43,9 @@ then
 	fi
         cmd="isort $CHANGED_FILES -c"
     fi
+    echo "Running command \"$cmd\""
+    ($cmd)
+else
+    echo "No changes made to any Python files. Nothing to do."
 fi
 
-echo "Running command \"$cmd\""
-($cmd)
