@@ -26,7 +26,7 @@ from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
-from torch.distributed import _broadcast_coalesced
+from torch.distributed import broadcast
 
 from . import register_task
 from .classy_task import ClassyTask
@@ -758,9 +758,8 @@ class ClassificationTask(ClassyTask):
         buffers = list(self.base_model.buffers())
         if len(buffers) > 0:
             logging.info("Synchronizing buffers before evaluation.")
-            _broadcast_coalesced(
-                self.distributed_model.process_group, buffers, 256 * 1024 * 1024
-            )
+            for buffer in buffers:
+                broadcast(buffer, 0, group=self.distributed_model.process_group)
 
     # TODO: Functions below should be better abstracted into the dataloader
     # abstraction
