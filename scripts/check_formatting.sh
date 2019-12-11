@@ -4,11 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-if [ ! "cd $(dirname $0)/.." ]
-then
-    echo "Cannot cd to root dir"
-    exit 1
-fi
+cd $(dirname $0)/.. || exit 1
 
 CMD="black"
 CHANGED_FILES="$(git diff --name-only master | grep '\.py$' | tr '\n' ' ')"
