@@ -83,8 +83,8 @@ class TestPrecisionAtKMeter(ClassificationMeterTest):
                 [0.33, 0.33, 0.34],  # top-1: 2, top-2: 2/0/1
             ]
         )
-        # Target shape does not match model shape
-        target = torch.tensor([0, 1, 2])
+        # Target shape is of length 3
+        target = torch.tensor([[[0, 1, 2]]])
 
         self.meter_invalid_meter_input_test(meter, model_output, target)
 
@@ -181,6 +181,32 @@ class TestPrecisionAtKMeter(ClassificationMeterTest):
         targets = [
             torch.tensor([[1], [1], [1]]),  # [[0, 1, 0], [0, 1, 0], [0, 1, 0]]
             torch.tensor([[0], [1], [2]]),  # [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        ]
+
+        # Note for ties, we select randomly, so we should not use ambiguous ties
+        # First batch has top-1 precision of 2/3.0, top-2 precision of 2/6.0
+        # Second batch has top-1 precision of 1/3.0, top-2 precision of 1/6.0
+        expected_value = {"top_1": 3 / 6.0, "top_2": 3 / 12.0}
+
+        self.meter_update_and_reset_test(meter, model_outputs, targets, expected_value)
+
+    def test_non_onehot_target_one_dim_target(self):
+        """
+        This test verifies that the meter works as expected on a single
+        update + reset + same single update with one dimensional targets.
+        """
+        meter = PrecisionAtKMeter(topk=[1, 2], target_is_one_hot=False, num_classes=3)
+
+        # Batchsize = 2, num classes = 3, score is probability of class
+        model_outputs = [
+            torch.tensor([[0.05, 0.4, 0.05], [0.15, 0.65, 0.2], [0.4, 0.2, 0.4]]),
+            torch.tensor([[0.2, 0.4, 0.4], [0.2, 0.65, 0.15], [0.1, 0.8, 0.1]]),
+        ]
+
+        # One-hot encoding, 1 = positive for class
+        targets = [
+            torch.tensor([1, 1, 1]),  # [[0, 1, 0], [0, 1, 0], [0, 1, 0]]
+            torch.tensor([0, 1, 2]),  # [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         ]
 
         # Note for ties, we select randomly, so we should not use ambiguous ties
