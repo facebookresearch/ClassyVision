@@ -37,6 +37,10 @@ Example:
         $ ./classy_train.py --help
 """
 
+import c
+
+a =
+
 import logging
 import os
 from datetime import datetime
