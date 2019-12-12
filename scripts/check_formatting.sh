@@ -4,10 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-set -e
+cd "$(dirname "$0")/.." || exit 1
 
 CMD="black"
-CHANGED_FILES="$(git diff --name-only master... | grep '\.py$' | tr '\n' ' ')"
+CHANGED_FILES="$(git diff --name-only master | grep '\.py$' | tr '\n' ' ')"
 
 while getopts bs opt; do
   case $opt in
@@ -29,15 +29,23 @@ if [ "$CHANGED_FILES" != "" ]
 then
     if [ "$CMD" = "black" ]
     then
-        command -v black >/dev/null || \
-            ( echo "Please install black." && false )
-        # only output if something needs to change
-        black --check "$CHANGED_FILES"
+        if [ ! "$(black --version)" ]
+        then
+            echo "Please install black."
+            exit 1
+        fi
+        cmd="black --check $CHANGED_FILES"
     else
-        isort -v | grep 'VERSION' >/dev/null || \
-            ( echo "Please install isort." && false )
-
-        # output number of files with incorrectly sorted imports
-        isort "$CHANGED_FILES" -c | grep -c 'ERROR'
+        if [ ! "$(isort --version)" ]
+        then
+            echo "Please install isort."
+            exit 1
+        fi
+        cmd="isort $CHANGED_FILES -c"
     fi
+    echo "Running command \"$cmd\""
+    ($cmd)
+else
+    echo "No changes made to any Python files. Nothing to do."
 fi
+
