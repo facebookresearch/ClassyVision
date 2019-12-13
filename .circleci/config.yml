@@ -8,7 +8,8 @@ version: 2
 # Environments to run the jobs in
 # -------------------------------------------------------------------------------------
 cpu: &cpu
-  docker:
+  environment:
+    TERM: xterm
   machine:
     image: default
   resource_class: medium
@@ -16,6 +17,7 @@ cpu: &cpu
 gpu: &gpu
   environment:
     CUDA_VERSION: "10.1"
+    TERM: xterm
   machine:
     image: default
   resource_class: gpu.medium  # Tesla M60
