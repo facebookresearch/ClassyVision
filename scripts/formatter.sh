@@ -4,6 +4,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+# NOTE: isort should be run in a Python enironment where all the packages
+# required by the package are installed and the project isn't in the
+# directory where isort is being called from. We fix the latter in the following
+# lines
+
 # cd to the scripts directory
 # this is needed for isort to work as expected
 cd "$(dirname "$0")/" || exit 1
