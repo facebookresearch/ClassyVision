@@ -4,7 +4,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-cd "$(dirname "$0")/.." || exit 1
+# cd to scripts/
+# this is needed for isort to work as expected
+cd "$(dirname "$0")/" || exit 1
 
 GIT_URL_1="https://github.com/facebookresearch/ClassyVision.git"
 GIT_URL_2="git@github.com:facebookresearch/ClassyVision.git"
@@ -54,3 +56,11 @@ else
     echo "No changes made to any Python files. Nothing to do."
 fi
 
+FORMATTED_FILES="$(git diff | grep '\.py$' | tr '\n' ' ')"
+
+if [ "$FORMATTED_FILES" != "" ]
+then
+    echo "Formatted the following files: \n$FORMATTED_FILES"
+    exit 1
+fi
+echo "Files already correctly formatted. Nothing to do."
