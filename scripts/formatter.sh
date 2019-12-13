@@ -28,42 +28,26 @@ git fetch upstream
 
 CHANGED_FILES="$(git diff --name-only upstream/master | grep '\.py$' | tr '\n' ' ')"
 
-CMD="black"
-
-while getopts bs opt; do
-  case $opt in
-    s)
-      CMD="isort"
-      ;;
-
-    b)
-      CMD="black"
-      ;;
-
-    *)
-      CMD="black"
-  esac
-
-  done
-
 if [ "$CHANGED_FILES" != "" ]
 then
-    if [ "$CMD" = "black" ]
+    if [ ! "$(black --version)" ]
     then
-        if [ ! "$(black --version)" ]
-        then
-            echo "Please install black."
-            exit 1
-        fi
-        cmd="black --check $CHANGED_FILES"
-    else
-        if [ ! "$(isort --version)" ]
-        then
-            echo "Please install isort."
-            exit 1
-        fi
-        cmd="isort $CHANGED_FILES -c"
+        echo "Please install black."
+        exit 1
     fi
+    if [ ! "$(isort --version)" ]
+    then
+        echo "Please install isort."
+        exit 1
+    fi
+
+    # run isort
+    cmd="isort $CHANGED_FILES"
+    echo "Running command \"$cmd\""
+    ($cmd)
+
+    # run black
+    cmd="black $CHANGED_FILES"
     echo "Running command \"$cmd\""
     ($cmd)
 else
