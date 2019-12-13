@@ -157,6 +157,7 @@ class ElasticTrainer(ClassyTrainer):
             self.input_args = input_args if input_args else {}
             self.advance_to_next_phase = True
             self.skip_current_phase = False
+            self.snapshot = None
 
         def broadcast_state(self, rank, src_rank):
             data = None
@@ -221,13 +222,39 @@ class ElasticTrainer(ClassyTrainer):
             # consider the cost it is not very necessary to do checkpoint for test phase
             return self.task.train and self.advance_to_next_phase
 
+        def capture_snapshot(self):
+            # Save snapshot at phase boundary. This will make sure no data-loss
+            # when a failure happens. We will support fine-grade recovery once
+            # fault tolerate data loader is ready
+            if self.task.train and self.advance_to_next_phase:
+                stream = io.BytesIO()
+                self.save(stream)
+                # save snapshot and return it every train step this make sure
+                # we always has a good state to recover.
+                self.snapshot = stream.getbuffer()
+                logging.info(
+                    "Take snapshot at updates {}".format(self.task.num_updates)
+                )
+            return self.snapshot
+
+        def apply_snapshot(self, capture_snapshot) -> None:
+            with io.BytesIO(capture_snapshot) as stream:
+                self.load(stream)
+                logging.info(
+                    "Snapshot applied, now we are at updates {}".format(
+                        self.task.num_updates
+                    )
+                )
+
         def save(self, stream):
             checkpoint_state = get_checkpoint_dict(self.task, self.input_args)
             checkpoint_state["advance_to_next_phase"] = self.advance_to_next_phase
             torch.save(checkpoint_state, stream)
 
         def load(self, stream):
-            checkpoint_state = torch.load(stream)
+            checkpoint_state = torch.load(
+                stream, map_location=lambda storage, loc: storage
+            )
             state = checkpoint_state["classy_state_dict"]
             self.task.set_classy_state(state)
             if "advance_to_next_phase" in checkpoint_state:
