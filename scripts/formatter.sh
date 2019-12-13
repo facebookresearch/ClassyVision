@@ -4,9 +4,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# cd to scripts/
+# cd to the scripts directory
 # this is needed for isort to work as expected
 cd "$(dirname "$0")/" || exit 1
+
+LOCAL_CHANGES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
+
+if [ "$LOCAL_CHANGES" != "" ]
+then
+    echo "Please commit your local changes before running this script."
+    exit 1
+fi
 
 GIT_URL_1="https://github.com/facebookresearch/ClassyVision.git"
 GIT_URL_2="git@github.com:facebookresearch/ClassyVision.git"
@@ -28,7 +36,7 @@ fi
 # fetch upstream
 git fetch upstream
 
-CHANGED_FILES="$(git diff --name-only upstream/master | grep '\.py$' | tr '\n' ' ')"
+CHANGED_FILES="$(git diff --relative --name-only upstream/master | grep '\.py$' | tr '\n' ' ')"
 
 if [ "$CHANGED_FILES" != "" ]
 then
@@ -54,9 +62,10 @@ then
     ($cmd)
 else
     echo "No changes made to any Python files. Nothing to do."
+    exit 0
 fi
 
-FORMATTED_FILES="$(git diff | grep '\.py$' | tr '\n' ' ')"
+FORMATTED_FILES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
 
 if [ "$FORMATTED_FILES" != "" ]
 then
