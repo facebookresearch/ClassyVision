@@ -148,14 +148,18 @@ class PrecisionAtKMeter(ClassyMeter):
             model_output: tensor of shape (B, C) where each value is
                           either logit or class probability.
             target:       tensor of shape (B, C), one-hot encoded
-                          or integer encoded.
+                          or integer encoded or tensor of shape (B),
+                          integer encoded.
             Note: For binary classification, C=2.
                   For integer encoded target, C=1.
         """
+        target_shape_list = list(target.size())
 
         if self._target_is_one_hot is False:
-            assert target.shape[1] == 1, "Integer encoded target must be single labeled"
-            target = convert_to_one_hot(target, self._num_classes)
+            assert len(target_shape_list) == 1 or (
+                len(target_shape_list) == 2 and target_shape_list[1] == 1
+            ), "Integer encoded target must be single labeled"
+            target = convert_to_one_hot(target.view(-1, 1), self._num_classes)
 
         assert (
             torch.min(target.eq(0) + target.eq(1)) == 1
@@ -196,8 +200,8 @@ class PrecisionAtKMeter(ClassyMeter):
             model_output_shape
         )
         assert (
-            len(target_shape) == 2
-        ), "target_shape must be (B, C) \
+            len(target_shape) > 0 and len(target_shape) < 3
+        ), "target_shape must be (B) or (B, C) \
             Found shape {}".format(
             target_shape
         )

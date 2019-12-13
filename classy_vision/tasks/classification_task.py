@@ -599,9 +599,9 @@ class ClassificationTask(ClassyTask):
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
 
-            model_output = local_variables["output"]
-            target = local_variables["sample"]["target"]
-            local_variables["local_loss"] = self.loss(model_output, target)
+            local_variables["local_loss"] = self.compute_loss(
+                local_variables["output"], local_variables["sample"]
+            )
 
             # NOTE: This performs an all_reduce_mean() on the losses across the
             # replicas.  The reduce should ideally be weighted by the length of
@@ -617,14 +617,9 @@ class ClassificationTask(ClassyTask):
                 * local_variables["target"].size(0)
             )
 
-            model_output_cpu = model_output.cpu() if use_gpu else model_output
-
-            # Update meters
             with PerfTimer("meters_update", perf_stats):
-                for meter in self.meters:
-                    meter.update(
-                        model_output_cpu, target.detach().cpu(), is_train=self.train
-                    )
+                self.update_meters(local_variables["output"], local_variables["sample"])
+
             # After both loss and meters are updated, we run hooks. Among hooks,
             # `LossLrMeterLoggingHook` will log both loss and meter status
             self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
@@ -649,6 +644,17 @@ class ClassificationTask(ClassyTask):
 
         timer_train_step.stop()
         timer_train_step.record()
+
+    def compute_loss(self, model_output, sample):
+        return self.loss(model_output, sample["target"])
+
+    def update_meters(self, model_output, sample):
+        target = sample["target"].detach().cpu()
+        model_output = model_output.detach().cpu()
+
+        # Update meters
+        for meter in self.meters:
+            meter.update(model_output, target, is_train=self.train)
 
     def advance_phase(self):
         """Performs bookkeeping / task updates between phases
