@@ -12,7 +12,7 @@ LOCAL_CHANGES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
 
 if [ "$LOCAL_CHANGES" != "" ]
 then
-    echo "Please commit your local changes before running this script."
+    echo "Please commit/stage your local changes before running this script."
     exit 1
 fi
 
@@ -36,7 +36,9 @@ fi
 # fetch upstream
 git fetch upstream
 
-CHANGED_FILES="$(git diff --relative --name-only upstream/master | grep '\.py$' | tr '\n' ' ')"
+CHANGED_FILES="$(git diff --name-only upstream/master | grep '\.py$')"
+# add ../ to all the files and remove newlines
+CHANGED_FILES="$(echo "$CHANGED_FILES" | sed 's/^/..\//' | tr '\n' ' ')"
 
 if [ "$CHANGED_FILES" != "" ]
 then
