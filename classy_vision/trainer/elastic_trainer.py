@@ -7,11 +7,9 @@
 import io
 import logging
 import os
-import sys
 from typing import Any, Optional
 
 import numpy
-import scipy
 import torch
 import torchelastic
 import torchelastic.distributed as dist
@@ -40,7 +38,6 @@ class ElasticTrainer(ClassyTrainer):
         local_rank,
         dataloader_mp_context=None,
     ):
-        scipy.do_something()
         super().__init__(
             use_gpu=use_gpu,
             num_dataloader_workers=num_dataloader_workers,
