@@ -49,7 +49,7 @@ if __name__ == "__main__":
         extras_require={
             "dev": [
                 "GitPython",
-                "black",
+                "black==19.3b0",
                 "sphinx",
                 "isort",
                 "bs4",
