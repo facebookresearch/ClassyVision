@@ -6,8 +6,29 @@
 
 cd "$(dirname "$0")/.." || exit 1
 
+GIT_URL_1="https://github.com/facebookresearch/ClassyVision.git"
+GIT_URL_2="git@github.com:facebookresearch/ClassyVision.git"
+
+UPSTREAM_URL="$(git config remote.upstream.url)"
+
+if [ -z "$UPSTREAM_URL" ]
+then
+    echo "Setting upstream remote to $GIT_URL_1"
+    git remote add upstream "$GIT_URL_1"
+elif [ "$UPSTREAM_URL" != "$GIT_URL_1" ] && \
+     [ "$UPSTREAM_URL" != "$GIT_URL_2" ]
+then
+    echo "upstream remote set to $UPSTREAM_URL."
+    echo "Please delete the upstream remote or set it to $GIT_URL_1 to use this script."
+    exit 1
+fi
+
+# fetch upstream
+git fetch upstream
+
+CHANGED_FILES="$(git diff --name-only upstream/master | grep '\.py$' | tr '\n' ' ')"
+
 CMD="black"
-CHANGED_FILES="$(git diff --name-only master | grep '\.py$' | tr '\n' ' ')"
 
 while getopts bs opt; do
   case $opt in
