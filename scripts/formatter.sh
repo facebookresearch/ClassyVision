@@ -8,14 +8,6 @@
 # this is needed for isort to work as expected
 cd "$(dirname "$0")/" || exit 1
 
-LOCAL_CHANGES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
-
-if [ "$LOCAL_CHANGES" != "" ]
-then
-    echo "Please commit/stage your local changes before running this script."
-    exit 1
-fi
-
 GIT_URL_1="https://github.com/facebookresearch/ClassyVision.git"
 GIT_URL_2="git@github.com:facebookresearch/ClassyVision.git"
 
@@ -67,11 +59,10 @@ else
     exit 0
 fi
 
-FORMATTED_FILES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
+CHANGED_FILES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
 
-if [ "$FORMATTED_FILES" != "" ]
+if [ "$CHANGED_FILES" != "" ]
 then
-    echo "Formatted the following files: \n$FORMATTED_FILES"
+    # need this so that CircleCI fails
     exit 1
 fi
-echo "Files already correctly formatted. Nothing to do."
