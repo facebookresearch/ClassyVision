@@ -66,7 +66,8 @@ Please see our [tutorials](https://classyvision.ai/tutorials/) to learn how to g
 
 ## Join the Classy Vision community
 * Website: https://classyvision.ai
-* Slack: [invite link](https://join.slack.com/t/classyvision/shared_invite/enQtODMwODA5Mjg3MTI3LWM5NzNlOTZjNWY3ZTE5YTViYmU2NWM1MDBjMWIwZTIwNmIyY2JjOTkyMTVmMTYzMmIwZWRmZjZmYjhhZTBkZGE)
+* [Stack overflow](https://stackoverflow.com/questions/tagged/classy-vision)
+* Slack: [invite link](https://join.slack.com/t/classyvision/shared_invite/enQtODczNTEyOTUyNTY0LTc4YTc3NThhMzhiNGNjZTkzY2RkYjZiNDc1ZDcyZGYxY2Q0M2M5YjAyYjA4OGQ2M2FlNDk4YzBlNWRjOTg3ZTE)
 
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
 
