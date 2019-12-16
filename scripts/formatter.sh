@@ -61,7 +61,7 @@ CHANGED_FILES="$(git diff --name-only | grep '\.py$' | tr '\n' ' ')"
 if [ "$CHANGED_FILES" != "" ]
 then
     echo "Running git diff:"
-    echo "$(git diff)"
+    git diff
     # need this so that CircleCI fails
     exit 1
 fi
