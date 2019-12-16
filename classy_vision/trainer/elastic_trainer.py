@@ -79,9 +79,14 @@ class ElasticTrainer(ClassyTrainer):
         state.advance_to_next_phase = True
 
         def elastic_train_step(orig_state):
-            return self._run_step(orig_state, local_variables, self.use_gpu)
+            if state.run_start_hooks:
+                # need this to ensure we don't run the on_start hooks every time
+                # a trainer starts
+                state.task.run_hooks(local_variables, ClassyHookFunctions.on_start.name)
+                state.run_start_hooks = False
+                return state, self._ClassyWorkerStats(None)
 
-        task.run_hooks(local_variables, ClassyHookFunctions.on_start.name)
+            return self._run_step(orig_state, local_variables, self.use_gpu)
 
         torchelastic.train(self.elastic_coordinator, elastic_train_step, state)
 
@@ -153,11 +158,16 @@ class ElasticTrainer(ClassyTrainer):
         """
 
         def __init__(self, task: ClassyTask, input_args: Any):
+            # WARNING: Make sure to add any members here to self.save() and self.load()
             self.task = task
             self.input_args = input_args if input_args else {}
             self.advance_to_next_phase = True
             self.skip_current_phase = False
             self.snapshot = None
+            # run_start_hooks is used to determine if the on_start hooks should be run,
+            # which should happen at the beginning of training. After that, this is set
+            # to False.
+            self.run_start_hooks = True
 
         def broadcast_state(self, rank, src_rank):
             data = None
@@ -249,6 +259,8 @@ class ElasticTrainer(ClassyTrainer):
         def save(self, stream):
             checkpoint_state = get_checkpoint_dict(self.task, self.input_args)
             checkpoint_state["advance_to_next_phase"] = self.advance_to_next_phase
+            checkpoint_state["skip_current_phase"] = self.skip_current_phase
+            checkpoint_state["run_start_hooks"] = self.run_start_hooks
             torch.save(checkpoint_state, stream)
 
         def load(self, stream):
@@ -259,6 +271,10 @@ class ElasticTrainer(ClassyTrainer):
             self.task.set_classy_state(state)
             if "advance_to_next_phase" in checkpoint_state:
                 self.advance_to_next_phase = checkpoint_state["advance_to_next_phase"]
+            if "skip_current_phase" in checkpoint_state:
+                self.skip_current_phase = checkpoint_state["skip_current_phase"]
+            if "run_start_hooks" in checkpoint_state:
+                self.run_start_hooks = checkpoint_state["run_start_hooks"]
 
         def _recreate_ddp_model(self):
             # Delete & re-create the DDP module wrapper. This is required because
