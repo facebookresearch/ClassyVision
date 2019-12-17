@@ -7,11 +7,6 @@
 from typing import Any, Dict
 
 import torch.optim
-from classy_vision.generic.util import is_pos_float
-from classy_vision.optim.param_scheduler import (
-    ClassyParamScheduler,
-    build_param_scheduler,
-)
 
 from . import ClassyOptimizer, register_optimizer
 
@@ -20,25 +15,26 @@ from . import ClassyOptimizer, register_optimizer
 class SGD(ClassyOptimizer):
     def __init__(
         self,
-        lr_scheduler: ClassyParamScheduler,
-        momentum: float = 0,
-        weight_decay: float = 0,
-        nesterov=False,
+        lr: float = 0.1,
+        momentum: float = 0.0,
+        weight_decay: float = 0.0,
+        nesterov: bool = False,
     ):
-        super().__init__(lr_scheduler=lr_scheduler)
+        super().__init__()
 
-        self.momentum = momentum
-        self.weight_decay = weight_decay
-        self.nesterov = nesterov
+        self.parameters.lr = lr
+        self.parameters.momentum = momentum
+        self.parameters.weight_decay = weight_decay
+        self.parameters.nesterov = nesterov
 
     def init_pytorch_optimizer(self, model):
         super().init_pytorch_optimizer(model)
         self.optimizer = torch.optim.SGD(
             self.param_groups_override,
-            lr=self.lr,
-            nesterov=self.nesterov,
-            momentum=self.momentum,
-            weight_decay=self.weight_decay,
+            lr=self.parameters.lr,
+            nesterov=self.parameters.nesterov,
+            momentum=self.parameters.momentum,
+            weight_decay=self.parameters.weight_decay,
         )
 
     @classmethod
@@ -53,43 +49,23 @@ class SGD(ClassyOptimizer):
             A SGD instance.
         """
         # Default params
-        config["nesterov"] = config.get("nesterov", False)
+        config.setdefault("lr", 0.1)
+        config.setdefault("momentum", 0.0)
+        config.setdefault("weight_decay", 0.0)
+        config.setdefault("nesterov", False)
 
         assert (
-            "lr" in config
-        ), "Config must contain a learning rate 'lr' section for SGD optimizer"
-        assert (
-            "momentum" in config
-            and config["momentum"] >= 0.0
+            config["momentum"] >= 0.0
             and config["momentum"] < 1.0
             and type(config["momentum"]) == float
         ), "Config must contain a 'momentum' in [0, 1) for SGD optimizer"
-        assert "nesterov" in config and isinstance(
+        assert isinstance(
             config["nesterov"], bool
         ), "Config must contain a boolean 'nesterov' param for SGD optimizer"
-        assert "weight_decay" in config and is_pos_float(
-            config["weight_decay"]
-        ), "Config must contain a positive 'weight_decay' for SGD optimizer"
-
-        lr_config = config["lr"]
-        if not isinstance(lr_config, dict):
-            lr_config = {"name": "constant", "value": lr_config}
-
-        lr_config["num_epochs"] = config["num_epochs"]
-        lr_scheduler = build_param_scheduler(lr_config)
 
         return cls(
-            lr_scheduler=lr_scheduler,
+            lr=config["lr"],
             momentum=config["momentum"],
             weight_decay=config["weight_decay"],
             nesterov=config["nesterov"],
         )
-
-    @property
-    def parameters(self):
-        return {
-            "lr": self.lr,
-            "momentum": self.momentum,
-            "weight_decay": self.weight_decay,
-            "nesterov": self.nesterov,
-        }

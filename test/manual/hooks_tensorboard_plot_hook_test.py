@@ -146,7 +146,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
         writer = DummySummaryWriter()
         hook = TensorboardPlotHook(writer)
         task.set_hooks([hook])
-        task.optimizer.lr_scheduler = mock_lr_scheduler
+        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
 
         trainer = LocalTrainer()
         trainer.train(task)

@@ -81,7 +81,7 @@ def get_test_task_config(head_num_classes=1000):
         "optimizer": {
             "name": "sgd",
             "num_epochs": 12,
-            "lr": {"name": "step", "values": [0.1, 0.01]},
+            "param_schedulers": {"lr": {"name": "step", "values": [0.1, 0.01]}},
             "weight_decay": 1e-4,
             "momentum": 0.9,
         },
@@ -351,11 +351,13 @@ def get_test_video_task_config():
         },
         "optimizer": {
             "name": "sgd",
-            "lr": {
-                "name": "multistep",
-                "num_epochs": 10,
-                "values": [0.1, 0.01, 0.001, 0.0001],
-                "milestones": [3, 7, 9],
+            "param_schedulers": {
+                "lr": {
+                    "name": "multistep",
+                    "num_epochs": 10,
+                    "values": [0.1, 0.01, 0.001, 0.0001],
+                    "milestones": [3, 7, 9],
+                }
             },
             "weight_decay": 0.0001,
             "momentum": 0.9,

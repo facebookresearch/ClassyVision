@@ -99,10 +99,12 @@
   },
   "optimizer": {
     "name": "sgd",
-    "lr": {
-      "name": "cosine",
-      "start_lr": 0.1,
-      "end_lr": 0.0001
+    "param_schedulers": {
+      "lr": {
+        "name": "cosine",
+        "start_lr": 0.1,
+        "end_lr": 0.0001
+      }
     },
     "weight_decay": 0.0001,
     "momentum": 0.9,
