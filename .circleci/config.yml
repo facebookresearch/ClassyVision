@@ -98,18 +98,6 @@ jobs:
 
       - <<: *install_dev_dep
 
-      - run:
-          name: black
-          working_directory: ~/ClassyVision
-          command: |
-            bash ./scripts/check_formatting.sh -b
-
-      - run:
-          name: isort
-          working_directory: ~/ClassyVision
-          command: |
-            bash ./scripts/check_formatting.sh -s
-
       - <<: *run_tests
 
       - run:
@@ -122,6 +110,12 @@ jobs:
             popd
             rm -rf my-project
 
+      - run:
+          name: Check formatting
+          working_directory: ~/ClassyVision/
+          command: |
+            bash ./scripts/formatter.sh
+            
 
   gpu_tests:
     <<: *gpu
