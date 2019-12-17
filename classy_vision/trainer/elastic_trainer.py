@@ -264,9 +264,7 @@ class ElasticTrainer(ClassyTrainer):
             torch.save(checkpoint_state, stream)
 
         def load(self, stream):
-            checkpoint_state = torch.load(
-                stream, map_location=lambda storage, loc: storage
-            )
+            checkpoint_state = torch.load(stream, map_location=torch.device("cpu"))
             state = checkpoint_state["classy_state_dict"]
             self.task.set_classy_state(state)
             if "advance_to_next_phase" in checkpoint_state:
