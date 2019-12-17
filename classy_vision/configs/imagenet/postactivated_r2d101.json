@@ -86,11 +86,13 @@
   },
   "optimizer": {
     "name": "sgd",
-    "lr": {
-      "name": "multistep",
-      "num_epochs": 95,
-      "values": [0.1, 0.01, 0.001, 0.0001],
-      "milestones": [30, 60, 90]
+    "param_schedulers": {
+      "lr": {
+        "name": "multistep",
+        "num_epochs": 95,
+        "values": [0.1, 0.01, 0.001, 0.0001],
+        "milestones": [30, 60, 90]
+      }
     },
     "weight_decay": 0.0001,
     "momentum": 0.9,

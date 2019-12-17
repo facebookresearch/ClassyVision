@@ -12,13 +12,52 @@ from classy_vision.hooks import ClassyHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
-from classy_vision.optim.param_scheduler import UpdateInterval
+from classy_vision.optim.param_scheduler import (
+    ClassyParamScheduler,
+    UpdateInterval,
+    register_param_scheduler,
+)
 from classy_vision.tasks import ClassificationTask, ClassyTask
 from classy_vision.trainer import LocalTrainer
 
 
+@register_param_scheduler("test_scheduler_where")
+class TestParamSchedulerWhere(ClassyParamScheduler):
+    def __init__(self):
+        self.update_interval = UpdateInterval.STEP
+
+    def __call__(self, where):
+        return where
+
+    @classmethod
+    def from_config(cls, cfg):
+        return cls()
+
+
+@register_param_scheduler("test_scheduler_where_double")
+class TestParamSchedulerWhereDouble(ClassyParamScheduler):
+    def __init__(self):
+        self.update_interval = UpdateInterval.EPOCH
+
+    def __call__(self, where):
+        return where * 2
+
+    @classmethod
+    def from_config(cls, cfg):
+        return cls()
+
+
 class TestParamSchedulerIntegration(unittest.TestCase):
-    def _get_config(self):
+    def _get_optimizer_config(self, skip_param_schedulers=False):
+        optimizer_config = {"name": "sgd", "num_epochs": 10, "momentum": 0.9}
+        if not skip_param_schedulers:
+            optimizer_config["param_schedulers"] = {
+                "lr": {"name": "test_scheduler_where"},
+                "weight_decay": {"name": "test_scheduler_where_double"},
+            }
+        return optimizer_config
+
+    def _get_config(self, skip_param_schedulers=False):
         return {
             "loss": {"name": "CrossEntropyLoss"},
             "dataset": {
@@ -81,17 +120,11 @@ class TestParamSchedulerIntegration(unittest.TestCase):
                 "hidden_dims": [10],
             },
             "meters": {"accuracy": {"topk": [1]}},
-            "optimizer": {
-                "name": "sgd",
-                "num_epochs": 10,
-                "lr": 0.1,
-                "weight_decay": 1e-4,
-                "momentum": 0.9,
-            },
+            "optimizer": self._get_optimizer_config(skip_param_schedulers),
         }
 
-    def _build_task(self, num_epochs):
-        config = self._get_config()
+    def _build_task(self, num_epochs, skip_param_schedulers=False):
+        config = self._get_config(skip_param_schedulers)
         config["optimizer"]["num_epochs"] = num_epochs
         task = (
             ClassificationTask()
@@ -118,7 +151,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.EPOCH
-        task.optimizer.lr_scheduler = mock
+        task.optimizer.param_schedulers["lr"] = mock
 
         trainer = LocalTrainer()
         trainer.train(task)
@@ -136,7 +169,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.STEP
-        task.optimizer.lr_scheduler = mock
+        task.optimizer.param_schedulers["lr"] = mock
 
         trainer = LocalTrainer()
         trainer.train(task)
@@ -144,10 +177,24 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.
         self.assertEqual(where_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
 
+    def test_no_param_schedulers(self):
+        task = self._build_task(num_epochs=3, skip_param_schedulers=True)
+
+        # there should be no param schedulers
+        self.assertEqual(task.optimizer.param_schedulers, {})
+
+        # we should still be able to train the task
+        trainer = LocalTrainer()
+        trainer.train(task)
+
     def test_hook(self):
         task = self._build_task(num_epochs=3)
 
         lr_list = []
+        weight_decay_list = []
+        momentum_list = []
+
+        test_instance = self
 
         class TestHook(ClassyHook):
             on_rendezvous = ClassyHook._noop
@@ -161,7 +208,25 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             on_end = ClassyHook._noop
 
             def on_update(self, task: ClassyTask, local_variables) -> None:
-                lr_list.append(task.optimizer.lr)
+                # make sure we have non-zero param groups
+                test_instance.assertGreater(
+                    len(task.optimizer.optimizer.param_groups), 0
+                )
+                # test that our overrides work on the underlying PyTorch optimizer
+                for param_group in task.optimizer.optimizer.param_groups:
+                    test_instance.assertEqual(
+                        param_group["lr"], task.optimizer.parameters.lr
+                    )
+                    test_instance.assertEqual(
+                        param_group["weight_decay"],
+                        task.optimizer.parameters.weight_decay,
+                    )
+                    test_instance.assertEqual(
+                        param_group["momentum"], task.optimizer.parameters.momentum
+                    )
+                lr_list.append(param_group["lr"])
+                weight_decay_list.append(param_group["weight_decay"])
+                momentum_list.append(param_group["momentum"])
 
         task.set_hooks([TestHook()])
 
@@ -170,10 +235,15 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         mock = Mock(side_effect=scheduler_mock)
         mock.update_interval = UpdateInterval.STEP
-        task.optimizer.lr_scheduler = mock
+        task.optimizer.param_schedulers["lr"] = mock
 
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # We have 10 samples, batch size is 5. Each epoch is done in two steps.
-        self.assertEqual(lr_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
+        # We have 10 samples, batch size is 5. Each epoch takes two steps. So,
+        # there will be a total of 6 steps.
+        # the lr scheduler uses a step update interval
+        self.assertEqual(lr_list, [0 / 6, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
+        # the weight decay scheduler uses an epoch update interval
+        self.assertEqual(weight_decay_list, [0 / 6, 0 / 6, 4 / 6, 4 / 6, 8 / 6, 8 / 6])
+        self.assertEqual(momentum_list, [0.9, 0.9, 0.9, 0.9, 0.9, 0.9])

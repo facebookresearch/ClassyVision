@@ -109,7 +109,9 @@ class TestVisdomHook(unittest.TestCase):
                     and len(visdom_hook.metrics[lr_key]) == counts[phase_type]
                 )
                 self.assertAlmostEqual(
-                    visdom_hook.metrics[lr_key][-1], task.optimizer.lr, places=4
+                    visdom_hook.metrics[lr_key][-1],
+                    task.optimizer.parameters.lr,
+                    places=4,
                 )
 
                 if master and not train and visdom_conn:

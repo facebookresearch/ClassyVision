@@ -92,7 +92,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
         config["dataset"]["train"]["batchsize_per_replica"] = 5
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
-        task.optimizer.lr_scheduler = mock_lr_scheduler
+        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
         trainer = LocalTrainer()
 
         # 2 LR updates per epoch
@@ -101,7 +101,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
         lr_list = []
 
         def mock_log_lr(task: ClassyTask, local_variables) -> None:
-            lr_list.append(task.optimizer.lr)
+            lr_list.append(task.optimizer.parameters.lr)
 
         with mock.patch.object(
             LossLrMeterLoggingHook, "_log_lr", side_effect=mock_log_lr

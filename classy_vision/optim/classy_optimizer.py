@@ -9,10 +9,15 @@ from typing import Any, Callable, Dict, Optional
 import torch
 from classy_vision.models import ClassyModel
 
-from .param_scheduler.classy_vision_param_scheduler import (
-    ClassyParamScheduler,
-    UpdateInterval,
-)
+from .param_scheduler import ClassyParamScheduler, UpdateInterval
+
+
+class AttrDict(dict):
+    """Dictionary class which also support attribute access."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__dict__ = self
 
 
 class ClassyOptimizer:
@@ -30,17 +35,31 @@ class ClassyOptimizer:
     Deriving classes can extend functionality be overriding the appropriate functions.
     """
 
-    def __init__(self, lr_scheduler: ClassyParamScheduler):
-        """
-        Constructor for ClassyOptimizer.
-
-        Args:
-            lr_scheduler: The learning rate scheduler to use.
-        """
-        self.lr_scheduler = lr_scheduler
-        self.lr = self.lr_scheduler(0)
+    def __init__(self) -> None:
+        """Constructor for ClassyOptimizer."""
+        self.param_schedulers = {}
+        self.parameters = AttrDict()
         self.optimizer = None
         self.optimizer_params = None
+
+    def set_param_schedulers(
+        self, param_schedulers: Dict[str, ClassyParamScheduler]
+    ) -> "ClassyOptimizer":
+        """Set the param schedulers for the Classy Optimizer
+
+        Args:
+            param_schedulers: A dictionary of :class:`ClassyParamScheduler`s containing
+                the parameter scheduler to use for every parameter.
+
+        Returns:
+            self
+        """
+        self.param_schedulers = param_schedulers
+        # initialize the parameters with a where of 0
+        self.parameters.update(
+            {param: scheduler(0) for param, scheduler in param_schedulers.items()}
+        )
+        return self
 
     def _validate_and_get_optimizer_params(self, model: ClassyModel) -> Dict[str, Any]:
         """
@@ -93,17 +112,6 @@ class ClassyOptimizer:
         """
         raise NotImplementedError
 
-    @property
-    def parameters(self) -> Dict[str, Any]:
-        """
-        Get the parameters of the optimizer which need to be overridden. All optimizer
-        param groups will use these parameters.
-
-        Returns:
-            A kwarg dictionary that will be used to override optimizer args.
-        """
-        return {"lr": self.lr}
-
     def init_pytorch_optimizer(self, model: ClassyModel) -> None:
         """
         Initialize the underlying :class:`torch.optim.Optimizer` instance.
@@ -148,7 +156,10 @@ class ClassyOptimizer:
         Returns:
             A state dictionary containing the state of the optimizer.
         """
-        return {"optim": self.optimizer.state_dict(), "parameters": self.parameters}
+        return {
+            "optim": self.optimizer.state_dict(),
+            "parameters": dict(self.parameters),
+        }
 
     def set_classy_state(self, state: Dict[str, Any]) -> None:
         """Set the state of the ClassyOptimizer.
@@ -160,8 +171,7 @@ class ClassyOptimizer:
         This is used to load the state of the optimizer from a checkpoint.
         """
         self.optimizer.load_state_dict(state["optim"])
-        for param_name, param_value in state["parameters"].items():
-            setattr(self, param_name, param_value)
+        self.parameters.update(state["parameters"])
 
     def backward(self, loss: torch.Tensor) -> None:
         """
@@ -188,13 +198,16 @@ class ClassyOptimizer:
             where: where we are in terms of training progress (output of
                 :func:`tasks.ClassyTask.where`)
         """
-        assert self.lr_scheduler.update_interval in [
-            UpdateInterval.EPOCH,
-            UpdateInterval.STEP,
-        ]
+        for param, scheduler in self.param_schedulers.items():
+            assert scheduler.update_interval in [
+                UpdateInterval.EPOCH,
+                UpdateInterval.STEP,
+            ]
 
-        if self.lr_scheduler.update_interval == UpdateInterval.EPOCH:
-            self._update_schedule(where)
+            if scheduler.update_interval == UpdateInterval.EPOCH:
+                self.parameters[param] = scheduler(where)
+
+        self._update_schedule()
 
     def update_schedule_on_step(self, where: float) -> None:
         """
@@ -209,21 +222,19 @@ class ClassyOptimizer:
             where: where we are in terms of training progress (output of
                 :method:`ClassyTask.where`)
         """
-        assert self.lr_scheduler.update_interval in [
-            UpdateInterval.EPOCH,
-            UpdateInterval.STEP,
-        ]
+        for param, scheduler in self.param_schedulers.items():
+            assert scheduler.update_interval in [
+                UpdateInterval.EPOCH,
+                UpdateInterval.STEP,
+            ]
 
-        if self.lr_scheduler.update_interval == UpdateInterval.STEP:
-            self._update_schedule(where)
+            if scheduler.update_interval == UpdateInterval.STEP:
+                self.parameters[param] = scheduler(where)
 
-    def _update_schedule(self, where: float) -> None:
-        """
-        Args:
-            where: where we are in terms of training progress (output of
-                :func:`tasks.ClassyTask.where`)
-        """
-        self.lr = self.lr_scheduler(where)
+        self._update_schedule()
+
+    def _update_schedule(self) -> None:
+        """Update the optimizer's parameters based on self.parameters."""
         for group in self.optimizer.param_groups:
             group.update(self.parameters)
 

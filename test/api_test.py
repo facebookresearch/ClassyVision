@@ -13,7 +13,7 @@ import unittest
 import classy_vision
 from classy_vision.dataset.transforms import GenericImageTransform
 from classy_vision.optim import SGD
-from classy_vision.optim.param_scheduler import ConstantParamScheduler
+from classy_vision.optim.param_scheduler import LinearParamScheduler
 from classy_vision.tasks import ClassificationTask
 from classy_vision.trainer import LocalTrainer
 from torchvision import transforms
@@ -81,7 +81,10 @@ class APITest(unittest.TestCase):
         model = MyModel()
         loss = MyLoss()
 
-        optimizer = SGD(lr_scheduler=ConstantParamScheduler(0.01))
+        optimizer = SGD(momentum=0.9, weight_decay=1e-4, nesterov=True)
+        optimizer.set_param_schedulers(
+            {"lr": LinearParamScheduler(start_lr=0.01, end_lr=0.009)}
+        )
 
         task = (
             ClassificationTask()

@@ -83,7 +83,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         """
         Compute and log the optimizer LR.
         """
-        optimizer_lr = task.optimizer.lr
+        optimizer_lr = task.optimizer.parameters.lr
         logging.info("Learning Rate: {}\n".format(optimizer_lr))
 
     def _log_loss_meters(
