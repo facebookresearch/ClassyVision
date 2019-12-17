@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from pathlib import Path
+from typing import Any, Dict
 
 from classy_vision.generic.registry_utils import import_all_modules
 
@@ -20,7 +21,7 @@ FILE_ROOT = Path(__file__).parent
 PARAM_SCHEDULER_REGISTRY = {}
 
 
-def build_param_scheduler(config):
+def build_param_scheduler(config: Dict[str, Any]) -> ClassyParamScheduler:
     """Builds a :class:`ClassyParamScheduler` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
@@ -88,7 +89,8 @@ __all__ = [
     "MultiStepParamScheduler",
     "PolynomialDecayParamScheduler",
     "StepParamScheduler",
+    "UpdateInterval",
     "StepWithFixedGammaParamScheduler",
     "build_param_scheduler",
-    "register_param_scheduler"
+    "register_param_scheduler",
 ]

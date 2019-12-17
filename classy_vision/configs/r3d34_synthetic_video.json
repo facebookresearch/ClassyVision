@@ -70,9 +70,11 @@
     },
     "optimizer": {
         "name": "sgd",
-        "lr": {
-            "name": "step",
-            "values": [0.04, 0.004]
+        "param_schedulers": {
+            "lr": {
+                "name": "step",
+                "values": [0.04, 0.004]
+            }
         },
         "weight_decay": 5e-3,
         "momentum": 0.9

@@ -84,7 +84,7 @@ class VisdomHook(ClassyHook):
         metrics[loss_key].append(loss)
 
         # Optimizer LR for the phase
-        optimizer_lr = task.optimizer.lr
+        optimizer_lr = task.optimizer.parameters.lr
         lr_key = phase_type + "_learning_rate"
         if lr_key not in metrics:
             metrics[lr_key] = []

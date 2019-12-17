@@ -100,11 +100,13 @@
   },
   "optimizer": {
     "name": "sgd",
-    "lr": {
-      "name": "multistep",
-      "num_epochs": 80,
-      "values": [0.04, 0.004, 0.0004],
-      "milestones": [40, 70]
+    "param_schedulers": {
+      "lr": {
+        "name": "multistep",
+        "num_epochs": 80,
+        "values": [0.04, 0.004, 0.0004],
+        "milestones": [40, 70]
+      }
     },
     "weight_decay": 0.0001,
     "momentum": 0.9,

@@ -96,23 +96,25 @@
   },
   "optimizer": {
     "name": "sgd",
-    "lr": {
-      "name": "composite",
-      "schedulers": [
-        {
-          "name": "linear",
-          "start_lr": 0.005,
-          "end_lr": 0.04
-        },
-        {
-          "name": "cosine",
-          "start_lr": 0.04,
-          "end_lr": 0.00004
-        }
-      ],
-      "update_interval": "epoch",
-      "interval_scaling": ["rescaled", "rescaled"],
-      "lengths": [0.13, 0.87]
+    "param_schedulers": {
+      "lr": {
+        "name": "composite",
+        "schedulers": [
+            {
+            "name": "linear",
+            "start_lr": 0.005,
+            "end_lr": 0.04
+            },
+            {
+            "name": "cosine",
+            "start_lr": 0.04,
+            "end_lr": 0.00004
+            }
+        ],
+        "update_interval": "epoch",
+        "interval_scaling": ["rescaled", "rescaled"],
+        "lengths": [0.13, 0.87]
+      }
     },
     "weight_decay": 0.005,
     "momentum": 0.9,

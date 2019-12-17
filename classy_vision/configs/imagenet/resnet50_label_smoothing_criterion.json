@@ -67,9 +67,11 @@
     },
     "optimizer": {
         "name": "sgd",
-        "lr": {
-            "name": "step",
-            "values": [0.1, 0.01, 0.001]
+        "param_schedulers": {
+            "lr": {
+                "name": "step",
+                "values": [0.1, 0.01, 0.001]
+            }
         },
         "weight_decay": 1e-4,
         "momentum": 0.9

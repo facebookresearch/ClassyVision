@@ -79,7 +79,7 @@ class TensorboardPlotHook(ClassyHook):
             # Only need to log the average loss during the test phase
             return
 
-        learning_rate_val = task.optimizer.lr
+        learning_rate_val = task.optimizer.parameters.lr
 
         self.learning_rates.append(learning_rate_val)
         self.wall_times.append(time.time())
