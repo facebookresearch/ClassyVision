@@ -4,9 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from classy_vision.generic.util import update_classy_model
+from classy_vision.generic.util import (
+    check_str_prefix_match_from_list,
+    update_classy_model,
+)
 from classy_vision.tasks import ClassificationTask, register_task
 
 
@@ -17,6 +20,7 @@ class FineTuningTask(ClassificationTask):
         self.pretrained_checkpoint = None
         self.reset_heads = False
         self.freeze_trunk = False
+        self.freeze_trunk_blocks_prefix_list = []
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "FineTuningTask":
@@ -32,6 +36,9 @@ class FineTuningTask(ClassificationTask):
         task = super().from_config(config)
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
+        task.set_freeze_trunk_blocks_prefix_list(
+            config.get("freeze_trunk_blocks_prefix_list", [])
+        )
         return task
 
     def set_pretrained_checkpoint(self, checkpoint: Dict[str, Any]) -> "FineTuningTask":
@@ -49,6 +56,12 @@ class FineTuningTask(ClassificationTask):
         self.freeze_trunk = freeze_trunk
         return self
 
+    def set_freeze_trunk_blocks_prefix_list(
+        self, freeze_trunk_blocks_prefix_list: List[str]
+    ) -> "FineTuningTask":
+        self.freeze_trunk_blocks_prefix_list = freeze_trunk_blocks_prefix_list
+        return self
+
     def _set_model_train_mode(self):
         phase = self.phases[self.phase_idx]
         if self.freeze_trunk:
@@ -62,6 +75,15 @@ class FineTuningTask(ClassificationTask):
 
         if self.train and self.train_phase_idx >= 0:
             self.optimizer.update_schedule_on_epoch(self.where)
+
+    def _freeze_selected_blocks_in_trunk(self):
+        if self.freeze_trunk:
+            return
+        # freeze selected trunk blocks with prefix matches
+        for name, param in self.base_model.named_parameters():
+            param.requires_grad = not check_str_prefix_match_from_list(
+                name, self.freeze_trunk_blocks_prefix_list
+            )
 
     def prepare(
         self,
@@ -97,3 +119,6 @@ class FineTuningTask(ClassificationTask):
                 for h in heads.values():
                     for param in h.parameters():
                         param.requires_grad = True
+
+        if len(self.freeze_trunk_blocks_prefix_list) > 0:
+            self._freeze_selected_blocks_in_trunk()

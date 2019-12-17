@@ -9,7 +9,11 @@ import typing
 import unittest
 import unittest.mock as mock
 from pathlib import Path
-from test.generic.config_utils import get_fast_test_task_config, get_test_model_configs
+from test.generic.config_utils import (
+    get_fast_test_task_config,
+    get_test_model_configs,
+    get_test_task_config,
+)
 from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
@@ -414,3 +418,45 @@ class TestUpdateStateFunctions(unittest.TestCase):
                         task_2.model.get_classy_state(),
                         check_heads=True,
                     )
+
+    def test_partial_update_classy_model(self):
+        """
+        Tests that the update_classy_model successfully updates from a
+        checkpoint when some of, not all, the block names match.
+        Implemented trunk partial update only. Must reset heads.
+        """
+        config = get_fast_test_task_config()
+        task = build_task(config)
+        use_gpu = torch.cuda.is_available()
+        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer.train(task)
+
+        for reset_heads in [False, True]:
+            config_2 = get_test_task_config()
+            task_2 = build_task(config_2)
+            # prepare task_2 for the right device
+            task_2.prepare(use_gpu=use_gpu)
+            success = update_classy_model(
+                task_2.model, task.model.get_classy_state(deep_copy=True), reset_heads
+            )
+            # only reset heads not implemented for partial update
+            if not reset_heads:
+                self.assertFalse(success)
+                break
+            self.assertTrue(success)
+            # compare model states
+            states_1 = task.model.get_classy_state()
+            states_2 = task_2.model.get_classy_state()
+            states_1_trunk = states_1["model"]["trunk"]
+            states_2_trunk = states_2["model"]["trunk"]
+            states_1_heads = states_1["model"]["heads"]
+            states_2_heads = states_2["model"]["heads"]
+            for block_name, states in states_2_trunk.items():
+                if block_name in states_1_trunk:
+                    torch.testing.assert_allclose(states, states_1_trunk[block_name])
+            for block_name, states in states_2_heads.items():
+                if block_name in states_1_heads:
+                    with self.assertRaises(Exception):
+                        torch.testing.assert_allclose(
+                            states, states_1_heads[block_name]
+                        )
