@@ -26,7 +26,7 @@ class ImageNetDataset(ClassyDataset):
         img_dir = os.path.join(root, split)
         dataset = ImageFolder(img_dir)
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod

@@ -107,10 +107,11 @@ class ClassyVideoDataset(ClassyDataset):
 
         """
         super(ClassyVideoDataset, self).__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
         # Assignments:
         self.clips_per_video = clips_per_video
+        self.split = split
 
     @classmethod
     def parse_config(cls, config: Dict[str, Any]):

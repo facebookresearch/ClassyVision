@@ -63,7 +63,6 @@ class TestDataset(classy_dataset.ClassyDataset):
         dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
         super().__init__(
             dataset=dataset,
-            split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=shuffle,
             transform=transform,
@@ -88,7 +87,6 @@ class OtherTestDataset(classy_dataset.ClassyDataset):
         dataset = ListDataset(input_tensors, target_tensors, loader=lambda x: x)
         super().__init__(
             dataset=dataset,
-            split=None,
             batchsize_per_replica=batchsize_per_replica,
             shuffle=False,
             transform=None,

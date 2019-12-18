@@ -26,20 +26,18 @@ class MyDataset(ClassyDataset):
         crop_size: int,
         class_ratio: float,
         seed: int,
-        split: Optional[str] = None,
     ) -> None:
         dataset = RandomImageBinaryClassDataset(
             crop_size, class_ratio, num_samples, seed, SampleType.TUPLE
         )
         super().__init__(
-            dataset, split, batchsize_per_replica, shuffle, transform, num_samples
+            dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "MyDataset":
         assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
 
-        split = config.get("split")
         crop_size = config["crop_size"]
         class_ratio = config["class_ratio"]
         seed = config["seed"]
@@ -58,5 +56,4 @@ class MyDataset(ClassyDataset):
             crop_size,
             class_ratio,
             seed,
-            split=split,
         )

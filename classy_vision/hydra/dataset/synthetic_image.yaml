@@ -2,7 +2,6 @@ config:
   dataset:
     train:
       name: synthetic_image
-      split: train
       crop_size: 224
       class_ratio: 0.5
       num_samples: 2000
@@ -19,7 +18,6 @@ config:
           key: input
     test:
       name: synthetic_image
-      split: val
       crop_size: 224
       class_ratio: 0.5
       num_samples: 2000
