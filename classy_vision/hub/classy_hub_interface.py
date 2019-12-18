@@ -130,7 +130,6 @@ class ClassyHubInterface:
             num_samples,
             image_paths,
             targets=targets,
-            split=phase_type,
         )
 
     @staticmethod

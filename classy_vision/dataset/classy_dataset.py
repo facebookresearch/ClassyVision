@@ -30,7 +30,6 @@ class ClassyDataset:
     def __init__(
         self,
         dataset: Sequence,
-        split: Optional[str],
         batchsize_per_replica: int,
         shuffle: bool,
         transform: Optional[Union[ClassyTransform, Callable]],
@@ -40,7 +39,6 @@ class ClassyDataset:
         Constructor for a ClassyDataset.
 
         Args:
-            split: When set, split of dataset to use ("train", "test")
             batchsize_per_replica: Positive integer indicating batch size for each
                 replica
             shuffle: Whether to shuffle between epochs
@@ -58,7 +56,6 @@ class ClassyDataset:
         ), "num_samples must be a positive int or None"
 
         # Assignments:
-        self.split = split
         self.batchsize_per_replica = batchsize_per_replica
         self.shuffle = shuffle
         self.transform = transform
