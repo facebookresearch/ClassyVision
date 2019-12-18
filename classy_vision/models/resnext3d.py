@@ -301,6 +301,7 @@ class ResNeXt3D(ResNeXt3DBase):
         The model consists of one stem, a number of stages, and one or multiple
         heads that are attached to different blocks in the stage.
     """
+
     def __init__(
         self,
         input_key,

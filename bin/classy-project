@@ -7,9 +7,10 @@ import argparse
 import logging
 import os
 import shutil
+import site
 import sys
 from pathlib import Path
-import site
+
 
 logging.basicConfig(level=logging.INFO)
 if __name__ == "__main__":
