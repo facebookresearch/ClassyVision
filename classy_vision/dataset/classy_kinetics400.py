@@ -98,13 +98,14 @@ class Kinetics400Dataset(ClassyVideoDataset):
             frame_rate=frame_rate,
             _precomputed_metadata=metadata,
             extensions=extensions,
-            num_workers=torch.get_num_threads(),
+            num_workers=torch.get_num_threads() // 2,  # heuristically use half threads
             _video_width=video_width,
             _video_height=video_height,
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
             _audio_channels=audio_channels,
         )
+
         metadata = dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
             Kinetics400Dataset.save_metadata(metadata, metadata_filepath)

@@ -5,13 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-import multiprocessing
 import os
 from typing import Any, Callable, Dict, Optional
 
 import torch
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from torch.utils.data import Sampler
+from torchvision import get_video_backend
 from torchvision.datasets.samplers.clip_sampler import (
     DistributedSampler,
     RandomClipSampler,
@@ -112,6 +112,7 @@ class ClassyVideoDataset(ClassyDataset):
         # Assignments:
         self.clips_per_video = clips_per_video
         self.split = split
+        self.video_backend = get_video_backend()
 
     @classmethod
     def parse_config(cls, config: Dict[str, Any]):
@@ -260,15 +261,17 @@ class ClassyVideoDataset(ClassyDataset):
         sampler.set_epoch(epoch)
         return sampler
 
-    def iterator(self, *args, **kwargs):
-        """Overrides the implementation in parent class `ClassyDataset`.
-        See parent class method :func:`ClassyDataset.iterator` for all the
-        usable positional and keyword arguments.
+    def _worker_init_fn(self, worker_id):
+        # we need to set video backend in the worker process explicitly
+        # because the global variable `_video_backend` in TorchVision will
+        # always start with the default value `pyav` when multiprocessing
+        # context other than `fork` is used, and it won't inherit the value of
+        # `_video_backend` in the main process
 
-        Sets "fork" as start method for python multiprocessing module for
-        comaptibility with video decoding using cpp python extensions.
-        """
-        if "num_workers" in kwargs and kwargs["num_workers"] > 0:
-            mp = multiprocessing.get_context("fork")
-            kwargs["multiprocessing_context"] = mp
+        from torchvision import set_video_backend
+
+        set_video_backend(self.video_backend)
+
+    def iterator(self, *args, **kwargs):
+        kwargs["worker_init_fn"] = self._worker_init_fn
         return super(ClassyVideoDataset, self).iterator(*args, **kwargs)
