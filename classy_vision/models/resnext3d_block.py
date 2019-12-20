@@ -6,6 +6,8 @@
 
 import torch.nn as nn
 
+from .r2plus1_util import r2plus1_unit
+
 
 class BasicTransformation(nn.Module):
     """
@@ -38,7 +40,28 @@ class BasicTransformation(nn.Module):
                 PyTorch = 1 - BN momentum in Caffe2.
         """
         super(BasicTransformation, self).__init__()
+        self._construct_model(
+            dim_in,
+            dim_out,
+            temporal_stride,
+            spatial_stride,
+            groups,
+            inplace_relu,
+            bn_eps,
+            bn_mmt,
+        )
 
+    def _construct_model(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        groups,
+        inplace_relu,
+        bn_eps,
+        bn_mmt,
+    ):
         # 3x3x3 group conv, BN, ReLU.
         branch2a = nn.Conv3d(
             dim_in,
@@ -64,12 +87,98 @@ class BasicTransformation(nn.Module):
         branch2b_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
         branch2b_bn.final_transform_op = True
 
-        self.basic_transform = nn.Sequential(
+        self.transform = nn.Sequential(
             branch2a, branch2a_bn, branch2a_relu, branch2b, branch2b_bn
         )
 
     def forward(self, x):
-        return self.basic_transform(x)
+        return self.transform(x)
+
+
+class BasicR2Plus1DTransformation(BasicTransformation):
+    """
+    Basic transformation: 3x3x3 group conv, 3x3x3 group conv
+    """
+
+    def __init__(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        groups,
+        inplace_relu=True,
+        bn_eps=1e-5,
+        bn_mmt=0.1,
+        **kwargs
+    ):
+        """
+        Args:
+            dim_in (int): the channel dimensions of the input.
+            dim_out (int): the channel dimension of the output.
+            temporal_stride (int): the temporal stride of the bottleneck.
+            spatial_stride (int): the spatial_stride of the bottleneck.
+            groups (int): number of groups for the convolution.
+            inplace_relu (bool): calculate the relu on the original input
+                without allocating new memory.
+            bn_eps (float): epsilon for batch norm.
+            bn_mmt (float): momentum for batch norm. Noted that BN momentum in
+                PyTorch = 1 - BN momentum in Caffe2.
+        """
+        super(BasicR2Plus1DTransformation, self).__init__(
+            dim_in,
+            dim_out,
+            temporal_stride,
+            spatial_stride,
+            groups,
+            inplace_relu=inplace_relu,
+            bn_eps=bn_eps,
+            bn_mmt=bn_mmt,
+        )
+
+    def _construct_model(
+        self,
+        dim_in,
+        dim_out,
+        temporal_stride,
+        spatial_stride,
+        groups,
+        inplace_relu,
+        bn_eps,
+        bn_mmt,
+    ):
+        # Implementation of R(2+1)D operation <https://arxiv.org/abs/1711.11248>.
+        # decompose the original 3D conv into one 2D spatial conv and one
+        # 1D temporal conv
+        branch2a = r2plus1_unit(
+            dim_in,
+            dim_out,
+            temporal_stride,
+            spatial_stride,
+            groups,
+            inplace_relu,
+            bn_eps,
+            bn_mmt,
+        )
+        branch2a_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
+        branch2a_relu = nn.ReLU(inplace=inplace_relu)
+
+        branch2b = r2plus1_unit(
+            dim_out,
+            dim_out,
+            1,  # temporal_stride
+            1,  # spatial_stride
+            groups,
+            inplace_relu,
+            bn_eps,
+            bn_mmt,
+        )
+        branch2b_bn = nn.BatchNorm3d(dim_out, eps=bn_eps, momentum=bn_mmt)
+        branch2b_bn.final_transform_op = True
+
+        self.transform = nn.Sequential(
+            branch2a, branch2a_bn, branch2a_relu, branch2b, branch2b_bn
+        )
 
 
 class PostactivatedBottleneckTransformation(nn.Module):
@@ -291,6 +400,7 @@ class PreactivatedBottleneckTransformation(nn.Module):
 
 
 residual_transformations = {
+    "basic_r2plus1d_transformation": BasicR2Plus1DTransformation,
     "basic_transformation": BasicTransformation,
     "postactivated_bottleneck_transformation": PostactivatedBottleneckTransformation,
     "preactivated_bottleneck_transformation": PreactivatedBottleneckTransformation,
