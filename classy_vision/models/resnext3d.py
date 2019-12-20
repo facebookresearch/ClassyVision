@@ -13,10 +13,11 @@ from classy_vision.generic.util import is_pos_int, is_pos_int_list
 from . import register_model
 from .classy_model import ClassyModel, ClassyModelEvaluationMode
 from .resnext3d_stage import ResStage
-from .resnext3d_stem import ResNeXt3DStem
+from .resnext3d_stem import R2Plus1DStem, ResNeXt3DStem
 
 
 model_stems = {
+    "r2plus1d_stem": R2Plus1DStem,
     "resnext3d_stem": ResNeXt3DStem,
     # For more types of model stem, add them below
 }
