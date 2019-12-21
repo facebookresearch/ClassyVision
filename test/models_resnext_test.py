@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import pickle
 import unittest
 from test.generic.utils import compare_model_state
 
@@ -65,10 +66,18 @@ class TestResnext(unittest.TestCase):
         """
         model = build_model(model_config)
 
+        model.eval()  # eval mode to make sure batchnorm stats don't change
+
         # Verify forward pass works
         input = torch.ones([1, 3, 32, 32])
+        ser_before = pickle.dumps(model)
         output = model.forward(input)
+        ser_after = pickle.dumps(model)
+
         self.assertEqual(output.size(), (1, 1000))
+        # Ensure that execution of the forward pass is stateless - i.e. we don't
+        # set any attributes
+        self.assertEqual(ser_before, ser_after)
 
         # Verify get_set_state
         new_model = build_model(model_config)

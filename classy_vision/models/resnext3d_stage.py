@@ -5,9 +5,12 @@
 # LICENSE file in the root directory of this source tree.
 
 from collections import OrderedDict
+from typing import Dict
 
+import torch
 import torch.nn as nn
 
+from .classy_block import BlockSequential
 from .resnext3d_block import ResBlock
 
 
@@ -59,13 +62,14 @@ class ResStageBase(nn.Module):
     def _pathway_name(self, pathway_idx):
         return "pathway{}".format(pathway_idx)
 
-    def forward(self, inputs):
+    def forward(self, inputs, block_outs: Dict[str, torch.Tensor]):
         output = []
         for p in range(self.num_pathways):
             x = inputs[p]
             pathway_module = getattr(self, self._pathway_name(p))
-            output.append(pathway_module(x))
-        return output
+            out, block_outs = pathway_module(x, block_outs)
+            output.append(out)
+        return output, block_outs
 
 
 class ResStage(ResStageBase):
@@ -173,6 +177,8 @@ class ResStage(ResStageBase):
                 block_name = self._block_name(p, stage_idx, i)
                 if block_callback:
                     res_block = block_callback(block_name, res_block)
+                else:
+                    raise NotImplementedError("not yet supported after refactoring")
                 blocks.append((block_name, res_block))
 
             if final_stage and (
@@ -190,4 +196,4 @@ class ResStage(ResStageBase):
                 blocks.append((activate_bn_name, activate_bn))
                 blocks.append((activate_relu_name, activate_relu))
 
-            self.add_module(self._pathway_name(p), nn.Sequential(OrderedDict(blocks)))
+            self.add_module(self._pathway_name(p), BlockSequential(OrderedDict(blocks)))
