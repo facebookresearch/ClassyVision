@@ -80,7 +80,7 @@ If you use Classy Vision in your work, please use the following BibTeX entry:
 ```
 @article{adcock2019classy,
   title={Classy Vision},
-  author={{Adcock}, A. and {Reis}, V. and {Singh}, M. and {Yan}, Z. and {van der Maaten} L., and {Zhang}, K. and {Motwani}, S. and {Guerin}, J. and {Goyal}, N. and {Misra}, I. and {Gustafson}, L. and {Changhan}, C. and {Goyal}, P.},
+  author={{Adcock}, A. and {Reis}, V. and {Singh}, M. and {Yan}, Z. and {van der Maaten} L., and {Zhang}, K. and {Motwani}, S. and {Guerin}, J. and {Goyal}, N. and {Misra}, I. and {Gustafson}, L. and {Wang}, C. and {Goyal}, P.},
   howpublished = {\url{https://github.com/facebookresearch/ClassyVision}},
   year={2019}
 }
