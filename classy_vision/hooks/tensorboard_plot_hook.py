@@ -143,4 +143,6 @@ class TensorboardPlotHook(ClassyHook):
                     )
                     continue
 
+        # flush the data to disk
+        self.tb_writer.flush()
         logging.info(f"Done plotting to Tensorboard")
