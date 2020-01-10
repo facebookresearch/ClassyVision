@@ -60,11 +60,11 @@ class ModelTensorboardHook(ClassyHook):
         """
         Plot the model on Tensorboard.
         """
-        # Show model in tensorboard:
-        logging.info("Showing model graph in TensorBoard...")
-
         if is_master():
             try:
+                # Show model in tensorboard:
+                logging.info("Showing model graph in TensorBoard...")
+
                 plot_model(
                     task.base_model,
                     size=task.base_model.input_shape,

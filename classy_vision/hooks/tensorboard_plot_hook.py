@@ -143,4 +143,6 @@ class TensorboardPlotHook(ClassyHook):
                     )
                     continue
 
+        # flush so that the plots aren't lost if training crashes soon after
+        self.tb_writer.flush()
         logging.info(f"Done plotting to Tensorboard")
