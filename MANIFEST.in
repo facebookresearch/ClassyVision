@@ -1,4 +1,5 @@
 graft classy_vision/templates
 graft classy_vision/configs
 include classy_train.py
+include requirements.txt
 recursive-include classy_vision/hydra *.yaml
