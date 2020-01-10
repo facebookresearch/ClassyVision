@@ -137,6 +137,9 @@ class TestTensorboardPlotHook(unittest.TestCase):
             def add_scalar(self, key, value, global_step=None, walltime=None) -> None:
                 self.scalar_logs[key] = self.scalar_logs.get(key, []) + [value]
 
+            def flush(self):
+                return
+
         config = get_test_mlp_task_config()
         config["num_epochs"] = 3
         config["dataset"]["train"]["batchsize_per_replica"] = 5

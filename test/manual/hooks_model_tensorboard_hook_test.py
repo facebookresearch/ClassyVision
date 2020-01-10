@@ -37,8 +37,7 @@ class TestModelTensorboardHook(unittest.TestCase):
                 # create a model tensorboard hook
                 model_tensorboard_hook = ModelTensorboardHook(mock_summary_writer)
 
-                with self.assertLogs():
-                    model_tensorboard_hook.on_start(task, local_variables)
+                model_tensorboard_hook.on_start(task, local_variables)
 
                 if master:
                     # SummaryWriter should have been init-ed with the correct
