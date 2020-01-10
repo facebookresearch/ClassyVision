@@ -8,7 +8,6 @@ import argparse
 import os
 
 import torch
-import torchvision
 from classy_vision.generic.util import is_pos_int
 
 
