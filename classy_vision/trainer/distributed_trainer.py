@@ -28,7 +28,7 @@ def _init_env_vars():
         os.environ["LOCAL_RANK"] = "0"
 
     if "MASTER_ADDR" not in os.environ or "MASTER_PORT" not in os.environ:
-        os.environ["MASTER_ADDR"] = "127.0.0.1"
+        os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "29500"
 
 

@@ -50,7 +50,7 @@ class TestDistributedTrainer(unittest.TestCase):
             cmd = f"""{sys.executable} -m torch.distributed.launch \
             --nnodes=1 \
             --nproc_per_node={num_processes} \
-            --master_addr=127.0.0.1 \
+            --master_addr=localhost \
             --master_port=29500 \
             --use_env \
             {self.path}/../classy_train.py \

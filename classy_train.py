@@ -23,7 +23,7 @@ Example:
         $ python -m torch.distributed.launch \
                  --nnodes=1 \
                  --nproc_per_node=1 \
-                 --master_addr=127.0.0.1 \
+                 --master_addr=localhost \
                  --master_port=29500 \
                  --use_env \
                  classy_train.py \
@@ -88,6 +88,7 @@ def main(args, config):
     use_gpu = None
     if args.device is not None:
         use_gpu = args.device == "gpu"
+        assert torch.cuda.is_available(), "CUDA is unavailable"
 
     # LocalTrainer is used for a single node. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.
