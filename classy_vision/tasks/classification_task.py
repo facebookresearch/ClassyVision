@@ -7,7 +7,7 @@
 import copy
 import enum
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
@@ -30,6 +30,14 @@ from torch.distributed import broadcast
 
 from . import register_task
 from .classy_task import ClassyTask
+
+
+try:
+    import apex
+
+    apex_available = True
+except ImportError:
+    apex_available = False
 
 
 class BroadcastBuffersMode(enum.Enum):
@@ -114,6 +122,7 @@ class ClassificationTask(ClassyTask):
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
             BroadcastBuffersMode.DISABLED
         )
+        self.amp_opt_level = None
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -221,6 +230,38 @@ class ClassificationTask(ClassyTask):
         self.test_only = test_only
         return self
 
+    def set_amp_opt_level(self, opt_level: Optional[str]):
+        """Disable / enable apex.amp and set the automatic mixed precision level.
+
+        apex.amp can be utilized for mixed / half precision training.
+
+        Args:
+            opt_level: Opt level used to initialize apex.amp. Set to None to disable
+                amp. Supported modes are -
+                    O0: FP32 training
+                    O1: Mixed Precision
+                    O2: "Almost FP16" Mixed Precision
+                    O3: FP16 training
+                See https://nvidia.github.io/apex/amp.html#opt-levels for more info.
+        Raises:
+            RuntimeError: If opt_level is not None and apex is not installed.
+
+        Warning: apex needs to be installed to utilize this feature.
+        """
+        if not apex_available:
+            raise RuntimeError("apex is not installed, cannot enable amp")
+
+        if opt_level not in [None, "O0", "O1", "O2", "O3"]:
+            raise ValueError(f"Unsupported opt_level: {opt_level}")
+
+        self.amp_opt_level = opt_level
+
+        if opt_level is None:
+            logging.info(f"AMP disabled")
+        else:
+            logging.info(f"AMP enabled with opt_level {opt_level}")
+        return self
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassificationTask":
         """Instantiates a ClassificationTask from a configuration.
@@ -241,6 +282,7 @@ class ClassificationTask(ClassyTask):
             datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         test_only = config.get("test_only", False)
+        amp_opt_level = config.get("amp_opt_level")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
         # put model in eval mode in case any hooks modify model states, it'll
@@ -256,6 +298,7 @@ class ClassificationTask(ClassyTask):
             .set_model(model)
             .set_optimizer(optimizer)
             .set_meters(meters)
+            .set_amp_opt_level(amp_opt_level)
             .set_distributed_options(
                 BroadcastBuffersMode[config.get("broadcast_buffers", "DISABLED")]
             )
@@ -455,6 +498,13 @@ class ClassificationTask(ClassyTask):
                 state_load_success
             ), "Update classy state from checkpoint was unsuccessful."
 
+        if self.amp_opt_level is not None:
+            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
+            # which is wrapped by the ClassyOptimizer in self.optimizer)
+            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                self.base_model, self.optimizer.optimizer, opt_level=self.amp_opt_level
+            )
+
     def init_distributed_data_parallel_model(self):
         """Sets up distributed dataparallel and wraps model in DDP
         """
@@ -630,7 +680,14 @@ class ClassificationTask(ClassyTask):
         # For training phases, run backwards pass / update optimizer
         if self.train:
             with PerfTimer("backward", perf_stats):
-                self.optimizer.backward(local_variables["local_loss"])
+                if self.amp_opt_level is not None:
+                    self.optimizer.zero_grad()
+                    with apex.amp.scale_loss(
+                        local_variables["local_loss"], self.optimizer.optimizer
+                    ) as scaled_loss:
+                        scaled_loss.backward()
+                else:
+                    self.optimizer.backward(local_variables["local_loss"])
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_backward.name)
 
