@@ -88,7 +88,7 @@ def main(args, config):
     use_gpu = None
     if args.device is not None:
         use_gpu = args.device == "gpu"
-        assert torch.cuda.is_available(), "CUDA is unavailable"
+        assert torch.cuda.is_available() or not use_gpu, "CUDA is unavailable"
 
     # LocalTrainer is used for a single node. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.
