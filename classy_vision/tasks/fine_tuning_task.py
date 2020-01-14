@@ -8,6 +8,7 @@ from typing import Any, Dict
 
 from classy_vision.generic.util import update_classy_model
 from classy_vision.tasks import ClassificationTask, register_task
+from classy_vision.generic.util import load_checkpoint
 
 
 @register_task("fine_tuning")
@@ -30,6 +31,15 @@ class FineTuningTask(ClassificationTask):
             A FineTuningTask instance.
         """
         task = super().from_config(config)
+
+        required_keys = ['pretrained_checkpoint']
+        for key in required_keys:
+            if key not in config:
+                raise ValueError(f'missing required key in config: {key}')
+
+        pretrained_checkpoint = load_checkpoint(config['pretrained_checkpoint'])
+        task.set_pretrained_checkpoint(pretrained_checkpoint)
+
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
         return task

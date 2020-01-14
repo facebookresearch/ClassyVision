@@ -6,22 +6,27 @@
 
 import copy
 import unittest
-from test.generic.config_utils import get_fast_test_task_config
-from test.generic.utils import compare_model_state
+from unittest import mock
 
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_fast_test_task_config
+from test.generic.utils import compare_model_state
 
 
 class TestFineTuningTask(unittest.TestCase):
     def _compare_model_state(self, state_1, state_2, check_heads=True):
         return compare_model_state(self, state_1, state_2, check_heads=check_heads)
 
-    def _get_fine_tuning_config(self, head_num_classes=1000):
+    def _get_fine_tuning_config(self, head_num_classes=1000, pretrained_checkpoint=False):
         config = get_fast_test_task_config(head_num_classes=head_num_classes)
         config["name"] = "fine_tuning"
         config["num_epochs"] = 10
+
+        if pretrained_checkpoint:
+            config['pretrained_checkpoint'] = ''
+
         return config
 
     def _get_pre_train_config(self, head_num_classes=1000):
@@ -31,7 +36,15 @@ class TestFineTuningTask(unittest.TestCase):
 
     def test_build_task(self):
         config = self._get_fine_tuning_config()
-        task = build_task(config)
+
+        with self.assertRaises(ValueError):
+            build_task(config)
+
+        config = self._get_fine_tuning_config(pretrained_checkpoint=True)
+
+        with mock.patch('classy_vision.tasks.FineTuningTask.set_pretrained_checkpoint'):
+            task = build_task(config)
+
         self.assertIsInstance(task, FineTuningTask)
 
     def test_prepare(self):
@@ -40,21 +53,19 @@ class TestFineTuningTask(unittest.TestCase):
         pre_train_task.prepare()
         checkpoint = get_checkpoint_dict(pre_train_task, {})
 
-        fine_tuning_config = self._get_fine_tuning_config()
-        fine_tuning_task = build_task(fine_tuning_config)
-        # cannot prepare a fine tuning task without a pre training checkpoint
-        with self.assertRaises(Exception):
-            fine_tuning_task.prepare()
+        fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
 
-        fine_tuning_task.set_pretrained_checkpoint(checkpoint)
+        with mock.patch('classy_vision.tasks.fine_tuning_task.load_checkpoint', return_value=checkpoint):
+            fine_tuning_task = build_task(fine_tuning_config)
+
         fine_tuning_task.prepare()
 
         # test a fine tuning task with incompatible heads
-        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10)
-        fine_tuning_task = build_task(fine_tuning_config)
-        fine_tuning_task.set_pretrained_checkpoint(checkpoint)
-        # cannot prepare a fine tuning task with a pre training checkpoint which
-        # has incompatible heads
+        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10, pretrained_checkpoint=True)
+
+        with mock.patch('classy_vision.tasks.fine_tuning_task.load_checkpoint', return_value=checkpoint):
+            fine_tuning_task = build_task(fine_tuning_config)
+
         with self.assertRaises(Exception):
             fine_tuning_task.prepare()
 
