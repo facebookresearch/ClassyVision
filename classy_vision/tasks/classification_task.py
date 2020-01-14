@@ -248,9 +248,6 @@ class ClassificationTask(ClassyTask):
 
         Warning: apex needs to be installed to utilize this feature.
         """
-        if not apex_available:
-            raise RuntimeError("apex is not installed, cannot enable amp")
-
         if opt_level not in [None, "O0", "O1", "O2", "O3"]:
             raise ValueError(f"Unsupported opt_level: {opt_level}")
 
@@ -259,6 +256,9 @@ class ClassificationTask(ClassyTask):
         if opt_level is None:
             logging.info(f"AMP disabled")
         else:
+            if not apex_available:
+                raise RuntimeError("apex is not installed, cannot enable amp")
+
             logging.info(f"AMP enabled with opt_level {opt_level}")
         return self
 
