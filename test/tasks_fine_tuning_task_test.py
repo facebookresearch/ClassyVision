@@ -35,11 +35,6 @@ class TestFineTuningTask(unittest.TestCase):
         return config
 
     def test_build_task(self):
-        config = self._get_fine_tuning_config()
-
-        with self.assertRaises(ValueError):
-            build_task(config)
-
         config = self._get_fine_tuning_config(pretrained_checkpoint=True)
 
         with mock.patch('classy_vision.tasks.FineTuningTask.set_pretrained_checkpoint'):
@@ -54,11 +49,10 @@ class TestFineTuningTask(unittest.TestCase):
         checkpoint = get_checkpoint_dict(pre_train_task, {})
 
         fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
+        fine_tuning_task = build_task(fine_tuning_config)
 
-        with mock.patch('classy_vision.tasks.fine_tuning_task.load_checkpoint', return_value=checkpoint):
-            fine_tuning_task = build_task(fine_tuning_config)
-
-        fine_tuning_task.prepare()
+        with self.assertRaises(Exception):
+            fine_tuning_task.prepare()
 
         # test a fine tuning task with incompatible heads
         fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10, pretrained_checkpoint=True)

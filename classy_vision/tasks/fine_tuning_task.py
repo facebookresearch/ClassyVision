@@ -32,13 +32,10 @@ class FineTuningTask(ClassificationTask):
         """
         task = super().from_config(config)
 
-        required_keys = ['pretrained_checkpoint']
-        for key in required_keys:
-            if key not in config:
-                raise ValueError(f'missing required key in config: {key}')
+        pretrained_checkpoint = load_checkpoint(config.get('pretrained_checkpoint'))
 
-        pretrained_checkpoint = load_checkpoint(config['pretrained_checkpoint'])
-        task.set_pretrained_checkpoint(pretrained_checkpoint)
+        if pretrained_checkpoint is not None:
+            task.set_pretrained_checkpoint(pretrained_checkpoint)
 
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
