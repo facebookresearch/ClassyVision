@@ -69,7 +69,7 @@ def register_param_scheduler(name):
 # automatically import any Python files in the optim/param_scheduler/ directory
 import_all_modules(FILE_ROOT, "classy_vision.optim.param_scheduler")
 
-from .composite_scheduler import CompositeParamScheduler  # isort:skip
+from .composite_scheduler import CompositeParamScheduler, IntervalScaling  # isort:skip
 from .constant_scheduler import ConstantParamScheduler  # isort:skip
 from .cosine_scheduler import CosineParamScheduler  # isort:skip
 from .linear_scheduler import LinearParamScheduler  # isort:skip
@@ -90,6 +90,7 @@ __all__ = [
     "PolynomialDecayParamScheduler",
     "StepParamScheduler",
     "UpdateInterval",
+    "IntervalScaling",
     "StepWithFixedGammaParamScheduler",
     "build_param_scheduler",
     "register_param_scheduler",

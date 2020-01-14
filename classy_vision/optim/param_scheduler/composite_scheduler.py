@@ -15,6 +15,11 @@ from . import (
 )
 
 
+class IntervalScaling(Enum):
+    RESCALED = auto()
+    FIXED = auto()
+
+
 @register_param_scheduler("composite")
 class CompositeParamScheduler(ClassyParamScheduler):
     """
@@ -24,7 +29,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
     are run in order. All values in lengths should sum to 1.0.
 
     Each scheduler also has a corresponding interval scale. If interval
-    scale is 'fixed', the intermidiate scheduler will be run without any rescaling
+    scale is 'fixed', the intermediate scheduler will be run without any rescaling
     of the time. If interval scale is 'rescaled', intermediate scheduler is
     run such that each scheduler will start and end at the same values as it
     would if it were the only scheduler. Default is 'rescaled' for all schedulers.
@@ -45,10 +50,6 @@ class CompositeParamScheduler(ClassyParamScheduler):
     and then will cosine decay from 0.42 to 0.0001 for [30%, 100%) of
     training.
     """
-
-    class IntervalScaling(Enum):
-        RESCALED = auto()
-        FIXED = auto()
 
     def __init__(
         self,
@@ -104,13 +105,11 @@ class CompositeParamScheduler(ClassyParamScheduler):
                 assert interval_scale in {
                     "fixed",
                     "rescaled",
-                }, "Choices for interval scaline are 'fixed' or 'rescaled'"
-                interval_scaling.append(cls.IntervalScaling[interval_scale.upper()])
+                }, "Choices for interval scaling are 'fixed' or 'rescaled'"
+                interval_scaling.append(IntervalScaling[interval_scale.upper()])
         else:
-            interval_scaling = [cls.IntervalScaling.RESCALED] * len(
-                config["schedulers"]
-            )
-        if "num_epochs" in config:  # Propogate value to intermediate schedulers
+            interval_scaling = [IntervalScaling.RESCALED] * len(config["schedulers"])
+        if "num_epochs" in config:  # Propagate value to intermediate schedulers
             config["schedulers"] = [
                 dict(schedule, **{"num_epochs": config["num_epochs"]})
                 for schedule in config["schedulers"]
@@ -136,7 +135,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
         scheduler = self._schedulers[i]
         scheduler_where = where
         interval_scale = self._interval_scaling[i]
-        if interval_scale == self.IntervalScaling.RESCALED:
+        if interval_scale == IntervalScaling.RESCALED:
             # Calculate corresponding where % for scheduler
             scheduler_start = running_total - self._lengths[i]
             scheduler_where = (where - scheduler_start) / self._lengths[i]
