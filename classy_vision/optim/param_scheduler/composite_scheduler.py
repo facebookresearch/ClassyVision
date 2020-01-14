@@ -27,7 +27,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
     scale is 'fixed', the intermidiate scheduler will be run without any rescaling
     of the time. If interval scale is 'rescaled', intermediate scheduler is
     run such that each scheduler will start and end at the same values as it
-    would if it were the only scheduler. Default is 'fixed' for all schedulers.
+    would if it were the only scheduler. Default is 'rescaled' for all schedulers.
 
     Example:
 
