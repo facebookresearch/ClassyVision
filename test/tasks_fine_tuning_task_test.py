@@ -6,9 +6,10 @@
 
 import copy
 import unittest
-from test.generic.config_utils import get_fast_test_task_config
+from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from test.generic.utils import compare_model_state
 
+import torch
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import LocalTrainer
@@ -61,6 +62,18 @@ class TestFineTuningTask(unittest.TestCase):
         fine_tuning_task.set_pretrained_checkpoint(checkpoint).set_reset_heads(True)
         fine_tuning_task.prepare()
 
+        # test fine tuning task: partially initialialized with pre-trained trunk
+        # heads initialization: only reset is implemented
+        fine_tuning_config_2 = get_test_task_config()
+        fine_tuning_config_2["name"] = "fine_tuning"
+        fine_tuning_task_2 = build_task(fine_tuning_config_2)
+        fine_tuning_task_2.set_pretrained_checkpoint(checkpoint).set_reset_heads(False)
+        with self.assertRaises(Exception):
+            fine_tuning_task_2.prepare()
+
+        fine_tuning_task_2.set_pretrained_checkpoint(checkpoint).set_reset_heads(True)
+        fine_tuning_task_2.prepare()
+
     def test_train(self):
         pre_train_config = self._get_pre_train_config(head_num_classes=1000)
         pre_train_task = build_task(pre_train_config)
@@ -110,3 +123,48 @@ class TestFineTuningTask(unittest.TestCase):
 
                 accuracy = fine_tuning_task.meters[0].value["top_1"]
                 self.assertAlmostEqual(accuracy, 1.0)
+
+        # test freeze selected trunk blocks, disabled when freeze trunk is true
+        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=200)
+        fine_tuning_task = build_task(fine_tuning_config)
+        fine_tuning_task = (
+            fine_tuning_task.set_pretrained_checkpoint(copy.deepcopy(checkpoint))
+            .set_reset_heads(True)
+            .set_freeze_trunk(True)
+            .set_freeze_trunk_blocks_prefix_list(
+                ["blocks.0.0._module.convolutional_block"]
+            )
+        )
+        trainer.train(fine_tuning_task)
+        self._compare_model_state(
+            pre_train_task.model.get_classy_state(),
+            fine_tuning_task.model.get_classy_state(),
+            check_heads=False,
+        )
+
+        # test freeze selected trunk blocks given block name prefix
+        # note that only blocks with grad will be freezed
+        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=200)
+        fine_tuning_task = build_task(fine_tuning_config)
+        fine_tuning_task = (
+            fine_tuning_task.set_pretrained_checkpoint(copy.deepcopy(checkpoint))
+            .set_reset_heads(True)
+            .set_freeze_trunk(False)
+            .set_freeze_trunk_blocks_prefix_list(
+                ["blocks.0.0._module.convolutional_block"]
+            )
+        )
+        trainer.train(fine_tuning_task)
+        for name, param in fine_tuning_task.model.named_parameters():
+            if name.startswith("blocks.0.0._module.convolutional_block"):
+                self.assertFalse(param.requires_grad)
+                torch.testing.assert_allclose(
+                    fine_tuning_task.model.get_classy_state()["model"]["trunk"][name],
+                    pre_train_task.model.get_classy_state()["model"]["trunk"][name],
+                )
+        with self.assertRaises(Exception):
+            self._compare_model_state(
+                pre_train_task.model.get_classy_state(),
+                fine_tuning_task.model.get_classy_state(),
+                check_heads=False,
+            )

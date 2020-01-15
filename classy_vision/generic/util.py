@@ -748,3 +748,10 @@ def get_model_dummy_input(
         if input_key:
             input = {input_key: input}
     return input
+
+
+def check_str_prefix_match_from_list(target_str, prefix_list):
+    for prefix in prefix_list:
+        if target_str.startswith(prefix):
+            return True
+    return False
