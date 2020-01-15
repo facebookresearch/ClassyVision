@@ -19,7 +19,9 @@ class TestFineTuningTask(unittest.TestCase):
     def _compare_model_state(self, state_1, state_2, check_heads=True):
         return compare_model_state(self, state_1, state_2, check_heads=check_heads)
 
-    def _get_fine_tuning_config(self, head_num_classes=1000, pretrained_checkpoint=False):
+    def _get_fine_tuning_config(
+        self, head_num_classes=1000, pretrained_checkpoint=False
+    ):
         config = get_fast_test_task_config(head_num_classes=head_num_classes)
         config["name"] = "fine_tuning"
         config["num_epochs"] = 10
@@ -59,7 +61,10 @@ class TestFineTuningTask(unittest.TestCase):
         fine_tuning_task.prepare()
 
         fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
-        with mock.patch("classy_vision.tasks.fine_tuning_task.load_checkpoint", return_value=checkpoint):
+        with mock.patch(
+            "classy_vision.tasks.fine_tuning_task.load_checkpoint",
+            return_value=checkpoint,
+        ):
             fine_tuning_task = build_task(fine_tuning_config)
 
         fine_tuning_task.prepare()
