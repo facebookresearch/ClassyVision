@@ -6,9 +6,8 @@
 
 from typing import Any, Dict
 
-from classy_vision.generic.util import update_classy_model
+from classy_vision.generic.util import load_checkpoint, update_classy_model
 from classy_vision.tasks import ClassificationTask, register_task
-from classy_vision.generic.util import load_checkpoint
 
 
 @register_task("fine_tuning")
@@ -32,7 +31,7 @@ class FineTuningTask(ClassificationTask):
         """
         task = super().from_config(config)
 
-        pretrained_checkpoint = load_checkpoint(config.get('pretrained_checkpoint'))
+        pretrained_checkpoint = load_checkpoint(config.get("pretrained_checkpoint"))
 
         if pretrained_checkpoint is not None:
             task.set_pretrained_checkpoint(pretrained_checkpoint)
