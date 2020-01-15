@@ -25,7 +25,7 @@ class TestFineTuningTask(unittest.TestCase):
         config["num_epochs"] = 10
 
         if pretrained_checkpoint:
-            config['pretrained_checkpoint'] = ''
+            config["pretrained_checkpoint"] = ""
 
         return config
 
@@ -37,7 +37,7 @@ class TestFineTuningTask(unittest.TestCase):
     def test_build_task(self):
         config = self._get_fine_tuning_config(pretrained_checkpoint=True)
 
-        with mock.patch('classy_vision.tasks.FineTuningTask.set_pretrained_checkpoint'):
+        with mock.patch("classy_vision.tasks.FineTuningTask.set_pretrained_checkpoint"):
             task = build_task(config)
 
         self.assertIsInstance(task, FineTuningTask)
@@ -48,17 +48,25 @@ class TestFineTuningTask(unittest.TestCase):
         pre_train_task.prepare()
         checkpoint = get_checkpoint_dict(pre_train_task, {})
 
-        fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
+        fine_tuning_config = self._get_fine_tuning_config()
         fine_tuning_task = build_task(fine_tuning_config)
 
+        # cannot prepare a fine tuning task without a pre training checkpoint
         with self.assertRaises(Exception):
             fine_tuning_task.prepare()
 
-        # test a fine tuning task with incompatible heads
-        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10, pretrained_checkpoint=True)
+        fine_tuning_task.set_pretrained_checkpoint(checkpoint)
+        fine_tuning_task.prepare()
 
-        with mock.patch('classy_vision.tasks.fine_tuning_task.load_checkpoint', return_value=checkpoint):
+        fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
+        with mock.patch("classy_vision.tasks.fine_tuning_task.load_checkpoint", return_value=checkpoint):
             fine_tuning_task = build_task(fine_tuning_config)
+
+        fine_tuning_task.prepare()
+
+        # test a fine tuning task with incompatible heads
+        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10)
+        fine_tuning_task = build_task(fine_tuning_config)
 
         with self.assertRaises(Exception):
             fine_tuning_task.prepare()
