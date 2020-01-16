@@ -82,12 +82,17 @@ class TestFineTuningTask(unittest.TestCase):
 
         # test: a fine tuning task with incompatible heads with a manually set pre-trained checkpoint
         # should succeed to prepare if the heads are reset
-        fine_tuning_task.set_pretrained_checkpoint(copy.deepcopy(checkpoint)).set_reset_heads(True)
+        fine_tuning_task.set_pretrained_checkpoint(
+            copy.deepcopy(checkpoint)
+        ).set_reset_heads(True)
+
         fine_tuning_task.prepare()
 
         # test: a fine tuning task with incompatible heads with the pre-trained checkpoint provided in the config
         # should fail to prepare
-        fine_tuning_config = self._get_fine_tuning_config(head_num_classes=10, pretrained_checkpoint=True)
+        fine_tuning_config = self._get_fine_tuning_config(
+            head_num_classes=10, pretrained_checkpoint=True
+        )
 
         with mock.patch(
             "classy_vision.tasks.fine_tuning_task.load_checkpoint",
