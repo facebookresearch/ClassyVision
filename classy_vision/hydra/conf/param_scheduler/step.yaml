@@ -1,5 +1,6 @@
 config:
   optimizer:
-    lr:
-      name: step
-      values: [0.1, 0.01]
+    param_schedulers:
+      lr:
+        name: step
+        values: [0.1, 0.01]
