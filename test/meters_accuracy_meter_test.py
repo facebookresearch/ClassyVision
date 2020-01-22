@@ -56,6 +56,65 @@ class TestAccuracyMeter(ClassificationMeterTest):
 
         self.meter_update_and_reset_test(meter, model_outputs, targets, expected_value)
 
+    def test_single_meter_update_and_reset_onehot(self):
+        """
+        This test verifies that the meter works as expected on a single
+        update + reset + same single update with onehot target.
+        """
+        meter = AccuracyMeter(topk=[1, 2])
+
+        # Batchsize = 3, num classes = 3, score is a value in {1, 2,
+        # 3}...3 is the highest score
+        model_output = torch.tensor([[3, 2, 1], [3, 1, 2], [1, 3, 2]])
+
+        # Class 0 is the correct class for sample 1, class 2 for sample 2, etc
+        target = torch.tensor([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+        # Only the first sample has top class correct, first and third
+        # sample have correct class in top 2
+        expected_value = {"top_1": 1 / 3.0, "top_2": 2 / 3.0}
+
+        self.meter_update_and_reset_test(meter, model_output, target, expected_value)
+
+    def test_single_meter_update_and_reset_multilabel(self):
+        """
+        This test verifies that the meter works as expected on a single
+        update + reset + same single update with multilabel target.
+        """
+        meter = AccuracyMeter(topk=[1, 2])
+
+        # Batchsize = 7, num classes = 3, score is a value in {1, 2,
+        # 3}...3 is the highest score
+        model_output = torch.tensor(
+            [
+                [3, 2, 1],
+                [3, 1, 2],
+                [1, 3, 2],
+                [1, 2, 3],
+                [2, 1, 3],
+                [2, 3, 1],
+                [1, 3, 2],
+            ]
+        )
+
+        target = torch.tensor(
+            [
+                [1, 1, 0],
+                [0, 0, 1],
+                [1, 0, 0],
+                [0, 0, 1],
+                [0, 1, 1],
+                [1, 1, 1],
+                [1, 0, 1],
+            ]
+        )
+
+        # 1st, 4th, 5th, 6th sample has top class correct, 2nd and 7th have at least
+        # one correct class in top 2.
+        expected_value = {"top_1": 4 / 7.0, "top_2": 6 / 7.0}
+
+        self.meter_update_and_reset_test(meter, model_output, target, expected_value)
+
     def test_meter_invalid_model_output(self):
         meter = AccuracyMeter(topk=[1, 2])
         # This model output has 3 dimensions instead of expected 2
@@ -69,8 +128,8 @@ class TestAccuracyMeter(ClassificationMeterTest):
     def test_meter_invalid_target(self):
         meter = AccuracyMeter(topk=[1, 2])
         model_output = torch.tensor([[3, 2, 1], [3, 1, 2], [1, 3, 2]])
-        # Target has 2 dimensions instead of expected 1
-        target = torch.tensor([[0, 1, 2], [0, 1, 2]])
+        # Target has 3 dimensions instead of expected 1 or 2
+        target = torch.tensor([[[0, 1, 2], [0, 1, 2]]])
 
         self.meter_invalid_meter_input_test(meter, model_output, target)
 

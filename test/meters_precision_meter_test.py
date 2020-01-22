@@ -169,7 +169,7 @@ class TestPrecisionAtKMeter(ClassificationMeterTest):
         This test verifies that the meter works as expected on a single
         update + reset + same single update.
         """
-        meter = PrecisionAtKMeter(topk=[1, 2], target_is_one_hot=False, num_classes=3)
+        meter = PrecisionAtKMeter(topk=[1, 2])
 
         # Batchsize = 2, num classes = 3, score is probability of class
         model_outputs = [
@@ -195,7 +195,7 @@ class TestPrecisionAtKMeter(ClassificationMeterTest):
         This test verifies that the meter works as expected on a single
         update + reset + same single update with one dimensional targets.
         """
-        meter = PrecisionAtKMeter(topk=[1, 2], target_is_one_hot=False, num_classes=3)
+        meter = PrecisionAtKMeter(topk=[1, 2])
 
         # Batchsize = 2, num classes = 3, score is probability of class
         model_outputs = [
