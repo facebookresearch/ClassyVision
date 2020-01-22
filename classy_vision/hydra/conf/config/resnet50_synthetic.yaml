@@ -21,7 +21,6 @@ config:
               mean: [0.485, 0.456, 0.406]
               std: [0.229, 0.224, 0.225]
           key: input
-
     test:
       name: synthetic_image
       split: val
@@ -39,7 +38,6 @@ config:
               mean: [0.485, 0.456, 0.406]
               std: [0.229, 0.224, 0.225]
           key: input
-
   meters:
     accuracy:
       topk: [1, 5]
@@ -56,8 +54,9 @@ config:
         in_plane: 2048
   optimizer:
     name: sgd
-    lr:
-      name: step
-      values: [0.1, 0.01]
+    param_schedulers:
+      lr:
+        name: step
+        values: [0.1, 0.01]
     weight_decay: 1e-4
     momentum: 0.9
