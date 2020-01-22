@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
-from classy_vision.generic.util import convert_to_one_hot, is_pos_int
+from classy_vision.generic.util import is_pos_int, maybe_convert_to_one_hot
 from classy_vision.meters import ClassyMeter
 
 from . import register_meter
@@ -24,20 +24,12 @@ class RecallAtKMeter(ClassyMeter):
         """
         args:
             topk: list of int `k` values.
-            target_is_one_hot: boolean, if class labels are one-hot encoded.
-            num_classes: int, number of classes.
         """
         assert isinstance(topk, list), "topk must be a list"
         assert len(topk) > 0, "topk list should have at least one element"
         assert [is_pos_int(x) for x in topk], "each value in topk must be >= 1"
-        if not target_is_one_hot:
-            assert (
-                type(num_classes) == int and num_classes > 0
-            ), "num_classes must be positive integer"
 
         self._topk = topk
-        self._target_is_one_hot = target_is_one_hot
-        self._num_classes = num_classes
 
         # _total_* variables store running, in-sync totals for the
         # metrics. These should not be communicated / summed.
@@ -64,11 +56,7 @@ class RecallAtKMeter(ClassyMeter):
         Returns:
             A RecallAtKMeter instance.
         """
-        return cls(
-            topk=config["topk"],
-            target_is_one_hot=config.get("target_is_one_hot", True),
-            num_classes=config.get("num_classes", None),
-        )
+        return cls(topk=config["topk"])
 
     @property
     def name(self):
@@ -146,31 +134,19 @@ class RecallAtKMeter(ClassyMeter):
         args:
             model_output: tensor of shape (B, C) where each value is
                           either logit or class probability.
-            target:       tensor of shape (B, C), one-hot encoded
-                          or integer encoded or tensor of shape (B),
-                          integer encoded.
-
-        Note:
-
-            For binary classification, C=2. For integer encoded target, C=1.
+            target:       tensor of shape (B, C), which is one-hot /
+                          multi-label encoded, or tensor of shape (B) /
+                          (B, 1), integer encoded
         """
-
-        target_shape_list = list(target.size())
-
-        if self._target_is_one_hot is False:
-            assert len(target_shape_list) == 1 or (
-                len(target_shape_list) == 2 and target_shape_list[1] == 1
-            ), "Integer encoded target must be single labeled"
-            target = convert_to_one_hot(target.view(-1, 1), self._num_classes)
-
-        assert (
-            torch.min(target.eq(0) + target.eq(1)) == 1
-        ), "Target must be one-hot encoded vector"
         # Due to dummy samples, in some corner cases, the whole batch could
         # be dummy samples, in that case we want to not update meters on that
         # process
         if model_output.shape[0] == 0:
             return
+
+        # Convert target to 0/1 encoding if isn't
+        target = maybe_convert_to_one_hot(target, model_output)
+
         _, pred_classes = model_output.topk(
             max(self._topk), dim=1, largest=True, sorted=True
         )
