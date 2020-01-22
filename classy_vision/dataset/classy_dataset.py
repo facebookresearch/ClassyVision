@@ -106,7 +106,7 @@ class ClassyDataset:
     def __getitem__(self, idx: int):
         assert idx >= 0 and idx < len(
             self.dataset
-        ), "Provided idx is outside of dataset range"
+        ), "Provided idx ({}) is outside of dataset range".format(idx)
         sample = self.dataset[idx]
         if self.transform is None:
             return sample
@@ -163,6 +163,7 @@ class ClassyDataset:
             batch_size=self.batchsize_per_replica,
             num_workers=kwargs.get("num_workers", 0),
             pin_memory=kwargs.get("pin_memory", False),
+            worker_init_fn=kwargs.get("worker_init_fn", None),
             multiprocessing_context=kwargs.get("multiprocessing_context", None),
             sampler=self._get_sampler(epoch=offset_epoch),
         )
