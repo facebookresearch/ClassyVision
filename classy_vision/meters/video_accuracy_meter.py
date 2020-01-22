@@ -15,7 +15,7 @@ from .video_meter import VideoMeter
 
 @register_meter("video_accuracy")
 class VideoAccuracyMeter(VideoMeter):
-    """Meter to calculate top-k video-level accuracy for single label
+    """Meter to calculate top-k video-level accuracy for single/multi label
        video classification task.
 
     Video-level accuarcy is computed by averaging clip-level predictions and

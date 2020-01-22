@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
-from classy_vision.generic.util import is_pos_int
+from classy_vision.generic.util import is_pos_int, maybe_convert_to_one_hot
 from classy_vision.meters import ClassyMeter
 
 from . import register_meter
@@ -16,7 +16,7 @@ from . import register_meter
 
 @register_meter("accuracy")
 class AccuracyMeter(ClassyMeter):
-    """Meter to calculate top-k accuracy for single label
+    """Meter to calculate top-k accuracy for single label/ multi label
        image classification task.
     """
 
@@ -134,20 +134,27 @@ class AccuracyMeter(ClassyMeter):
         args:
             model_output: tensor of shape (B, C) where each value is
                           either logit or class probability.
-            target:       tensor of shape (B).
-            Note: For binary classification, C=2.
+            target:       tensor of shape (B, C), which is one-hot /
+                          multi-label encoded, or tensor of shape (B) /
+                          (B, 1), integer encoded
         """
         # Due to dummy samples, in some corner cases, the whole batch could
         # be dummy samples, in that case we want to not update meters on that
         # process
         if model_output.shape[0] == 0:
             return
-        _, pred = model_output.topk(max(self._topk), dim=1, largest=True, sorted=True)
 
-        correct_predictions = pred.eq(target.unsqueeze(1).expand_as(pred))
+        # Convert target to 0/1 encoding if isn't
+        target = maybe_convert_to_one_hot(target, model_output)
+
+        _, pred = model_output.topk(max(self._topk), dim=1, largest=True, sorted=True)
         for i, k in enumerate(self._topk):
             self._curr_correct_predictions_k[i] += (
-                correct_predictions[:, :k].float().sum().item()
+                torch.gather(target, dim=1, index=pred[:, :k])
+                .long()
+                .max(dim=1)
+                .values.sum()
+                .item()
             )
         self._curr_sample_count += model_output.shape[0]
 
@@ -165,8 +172,8 @@ class AccuracyMeter(ClassyMeter):
             model_output_shape
         )
         assert (
-            len(target_shape) == 1
-        ), "target_shape must be (B) \
+            len(target_shape) > 0 and len(target_shape) < 3
+        ), "target_shape must be (B) or (B, C) \
             Found shape {}".format(
             target_shape
         )

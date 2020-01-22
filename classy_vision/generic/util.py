@@ -720,6 +720,28 @@ def convert_to_one_hot(targets, classes):
     return one_hot_targets
 
 
+def maybe_convert_to_one_hot(target, model_output):
+    """
+    This function infers whether target is integer or 0/1 encoded
+    and converts it to 0/1 encoding if necessary.
+    """
+    target_shape_list = list(target.size())
+
+    if len(target_shape_list) == 1 or (
+        len(target_shape_list) == 2 and target_shape_list[1] == 1
+    ):
+        target = convert_to_one_hot(target.view(-1, 1), model_output.shape[1])
+
+    assert (target.shape == model_output.shape) and (
+        torch.min(target.eq(0) + target.eq(1)) == 1
+    ), (
+        "Target must be one-hot/multi-label encoded and of the "
+        "same shape as model_output."
+    )
+
+    return target
+
+
 def bind_method_to_class(method, cls):
     """
     Binds an already bound method to the provided class.

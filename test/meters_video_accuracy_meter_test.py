@@ -99,8 +99,8 @@ class TestVideoAccuracyMeter(ClassificationMeterTest):
             [[3, 2, 1], [3, 1, 2], [1, 2, 2], [1, 2, 3], [2, 2, 2], [1, 3, 2]],
             dtype=torch.float,
         )
-        # Target has 2 dimensions instead of expected 1
-        target = torch.tensor([[0, 1, 2], [0, 1, 2]])
+        # Target has 3 dimensions instead of expected 1 or 2
+        target = torch.tensor([[[0, 1, 2], [0, 1, 2]]])
 
         self.meter_invalid_meter_input_test(meter, model_output, target)
         # Target of clips from the same video is not consistent

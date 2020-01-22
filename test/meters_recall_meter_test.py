@@ -170,7 +170,7 @@ class TestRecallAtKMeter(ClassificationMeterTest):
         This test verifies that the meter works as expected on a single
         update + reset + same single update.
         """
-        meter = RecallAtKMeter(topk=[1, 2], target_is_one_hot=False, num_classes=3)
+        meter = RecallAtKMeter(topk=[1, 2])
 
         # Batchsize = 2, num classes = 3, score is probability of class
         model_outputs = [
@@ -191,7 +191,7 @@ class TestRecallAtKMeter(ClassificationMeterTest):
 
         self.meter_update_and_reset_test(meter, model_outputs, targets, expected_value)
 
-    def test_non_onehot_target(self):
+    def test_non_onehot_target_one_dim_target(self):
         """
         This test verifies that the meter works as expected on a single
         update + reset + same single update with one dimensional targets.
