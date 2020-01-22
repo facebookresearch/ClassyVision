@@ -44,12 +44,13 @@ class DatasetTransformsUtilTest(unittest.TestCase):
         torch.manual_seed(0)
         numpy.random.seed(0)
         random.seed(0)
-        output_image = transform(sample)[transformed_key]
+        output_image = transform(sample)[transformed_key] if transform is not None else sample[transformed_key]
 
         torch.manual_seed(0)
         numpy.random.seed(0)
         random.seed(0)
-        self.assertTrue(torch.allclose(output_image, expected_transform(input_image)))
+        expected_image = expected_transform(input_image) if expected_transform is not None else input_image
+        self.assertTrue(torch.allclose(output_image, expected_image))
 
     def test_build_dict_field_transform_default_imagenet(self):
         dataset = self.get_test_image_dataset(SampleType.DICT)
@@ -124,7 +125,17 @@ class DatasetTransformsUtilTest(unittest.TestCase):
     def test_generic_image_transform(self):
         dataset = self.get_test_image_dataset(SampleType.TUPLE)
 
+        # Check constructor asserts
+        with self.assertRaises(AssertionError):
+            transform = GenericImageTransform(split="train", transform=transforms.ToTensor())
+            transform = GenericImageTransform(split="valid", transform=None)
+
         # Check class constructor
+        transform = GenericImageTransform(transform=None)
+        PIL_sample = dataset[0]
+        tensor_sample = (transforms.ToTensor()(PIL_sample[0]), PIL_sample[1])
+        self.transform_checks(tensor_sample, transform, None, 0, "input")
+
         transform = GenericImageTransform(transform=transforms.ToTensor())
         sample = dataset[0]
         self.transform_checks(sample, transform, transforms.ToTensor(), 0, "input")
