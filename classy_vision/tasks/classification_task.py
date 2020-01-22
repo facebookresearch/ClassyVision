@@ -16,7 +16,6 @@ from classy_vision.generic.distributed_util import (
     init_distributed_data_parallel_model,
     is_distributed_training_run,
 )
-from classy_vision.generic.perf_stats import PerfTimer
 from classy_vision.generic.util import (
     copy_model_to_gpu,
     recursive_copy_to_gpu,
@@ -608,25 +607,18 @@ class ClassificationTask(ClassyTask):
         if local_variables is None:
             local_variables = {}
 
-        # We'll time train_step and some of its sections, and accumulate values
-        # into perf_stats if it were defined in local_variables:
-        perf_stats = local_variables.get("perf_stats", None)
-        timer_train_step = PerfTimer("train_step_total", perf_stats)
-        timer_train_step.start()
-
         # Process next sample
-        with PerfTimer("read_sample", perf_stats):
-            sample = next(self.get_data_iterator())
-            local_variables["sample"] = sample
+        sample = next(self.get_data_iterator())
+        local_variables["sample"] = sample
 
-            assert (
-                isinstance(local_variables["sample"], dict)
-                and "input" in local_variables["sample"]
-                and "target" in local_variables["sample"]
-            ), (
-                f"Returned sample [{sample}] is not a map with 'input' and"
-                + "'target' keys"
-            )
+        assert (
+            isinstance(local_variables["sample"], dict)
+            and "input" in local_variables["sample"]
+            and "target" in local_variables["sample"]
+        ), (
+            f"Returned sample [{sample}] is not a map with 'input' and"
+            + "'target' keys"
+        )
 
         self.run_hooks(local_variables, ClassyHookFunctions.on_sample.name)
 
@@ -642,10 +634,7 @@ class ClassificationTask(ClassyTask):
         context = torch.enable_grad() if self.train else torch.no_grad()
         with context:
             # Forward pass
-            with PerfTimer("forward", perf_stats):
-                local_variables["output"] = self.model(
-                    local_variables["sample"]["input"]
-                )
+            local_variables["output"] = self.model(local_variables["sample"]["input"])
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
 
@@ -658,17 +647,15 @@ class ClassificationTask(ClassyTask):
             # the targets on each replica. This will only be an issue when
             # there are dummy samples present (once an epoch) and will only
             # impact the loss reporting (slightly).
-            with PerfTimer("loss_allreduce", perf_stats):
-                local_variables["loss"] = local_variables["local_loss"].detach().clone()
-                local_variables["loss"] = all_reduce_mean(local_variables["loss"])
+            local_variables["loss"] = local_variables["local_loss"].detach().clone()
+            local_variables["loss"] = all_reduce_mean(local_variables["loss"])
 
             self.losses.append(
                 local_variables["loss"].data.cpu().item()
                 * local_variables["target"].size(0)
             )
 
-            with PerfTimer("meters_update", perf_stats):
-                self.update_meters(local_variables["output"], local_variables["sample"])
+            self.update_meters(local_variables["output"], local_variables["sample"])
 
             # After both loss and meters are updated, we run hooks. Among hooks,
             # `LossLrMeterLoggingHook` will log both loss and meter status
@@ -679,28 +666,23 @@ class ClassificationTask(ClassyTask):
 
         # For training phases, run backwards pass / update optimizer
         if self.train:
-            with PerfTimer("backward", perf_stats):
-                if self.amp_opt_level is not None:
-                    self.optimizer.zero_grad()
-                    with apex.amp.scale_loss(
-                        local_variables["local_loss"], self.optimizer.optimizer
-                    ) as scaled_loss:
-                        scaled_loss.backward()
-                else:
-                    self.optimizer.backward(local_variables["local_loss"])
+            if self.amp_opt_level is not None:
+                self.optimizer.zero_grad()
+                with apex.amp.scale_loss(
+                    local_variables["local_loss"], self.optimizer.optimizer
+                ) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                self.optimizer.backward(local_variables["local_loss"])
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_backward.name)
 
             self.optimizer.update_schedule_on_step(self.where)
-            with PerfTimer("optimizer_step", perf_stats):
-                self.optimizer.step()
+            self.optimizer.step()
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
 
             self.num_updates += num_samples_in_step
-
-        timer_train_step.stop()
-        timer_train_step.record()
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])

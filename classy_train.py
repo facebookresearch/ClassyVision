@@ -52,7 +52,6 @@ from classy_vision.hooks import (
     ProfilerHook,
     ProgressBarHook,
     TensorboardPlotHook,
-    TimeMetricsHook,
     VisdomHook,
 )
 from classy_vision.tasks import FineTuningTask, build_task
@@ -107,7 +106,7 @@ def main(args, config):
 
 
 def configure_hooks(args, config):
-    hooks = [LossLrMeterLoggingHook(args.log_freq), TimeMetricsHook()]
+    hooks = [LossLrMeterLoggingHook(args.log_freq)]
 
     # Make a folder to store checkpoints and tensorboard logging outputs
     suffix = datetime.now().isoformat()
