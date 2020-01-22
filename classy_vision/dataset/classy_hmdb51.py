@@ -94,7 +94,7 @@ class HMDB51Dataset(ClassyVideoDataset):
             _precomputed_metadata=metadata,
             fold=fold,
             train=(split == "train"),
-            num_workers=torch.get_num_threads(),
+            num_workers=torch.get_num_threads() // 2,  # heuristically use half threads
             _video_width=video_width,
             _video_height=video_height,
             _video_min_dimension=video_min_dimension,
