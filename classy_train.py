@@ -43,9 +43,9 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
-from classy_vision.generic.args import parse_args
+from classy_vision.generic.opts import check_generic_args, parse_train_arguments
 from classy_vision.generic.registry_utils import import_all_packages_from_directory
-from classy_vision.generic.util import load_checkpoint
+from classy_vision.generic.util import load_checkpoint, load_json
 from classy_vision.hooks import (
     CheckpointHook,
     LossLrMeterLoggingHook,
@@ -58,6 +58,14 @@ from classy_vision.hooks import (
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import DistributedTrainer, LocalTrainer
 from torchvision import set_image_backend, set_video_backend
+
+
+try:
+    import hydra
+
+    hydra_available = True
+except ImportError:
+    hydra_available = False
 
 
 def main(args, config):
@@ -111,12 +119,12 @@ def configure_hooks(args, config):
 
     # Make a folder to store checkpoints and tensorboard logging outputs
     suffix = datetime.now().isoformat()
-    base_folder = Path(__file__).parent / f"output_{suffix}"
+    base_folder = f"{Path(__file__).parent}/output_{suffix}"
     if args.checkpoint_folder == "":
-        args.checkpoint_folder = base_folder / "checkpoints"
+        args.checkpoint_folder = base_folder + "/checkpoints"
         os.makedirs(args.checkpoint_folder, exist_ok=True)
 
-    logging.info(f"Logging outputs to {base_folder.resolve()}")
+    logging.info(f"Logging outputs to {base_folder}")
     logging.info(f"Logging checkpoints to {args.checkpoint_folder}")
 
     if not args.skip_tensorboard:
@@ -146,6 +154,16 @@ def configure_hooks(args, config):
     return hooks
 
 
+if hydra_available:
+
+    @hydra.main(config_path="hydra_configs/args.yaml")
+    def hydra_main(cfg):
+        args = cfg
+        check_generic_args(cfg)
+        config = cfg.config.to_container()
+        main(args, config)
+
+
 # run all the things:
 if __name__ == "__main__":
     logger = logging.getLogger()
@@ -162,5 +180,9 @@ if __name__ == "__main__":
     file_root = Path(__file__).parent
     import_all_packages_from_directory(file_root)
 
-    args, config = parse_args()
-    main(args, config)
+    if hydra_available:
+        hydra_main()
+    else:
+        args = parse_train_arguments()
+        config = load_json(args.config_file)
+        main(args, config)
