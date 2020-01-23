@@ -620,8 +620,6 @@ class ClassificationTask(ClassyTask):
             + "'target' keys"
         )
 
-        self.run_hooks(local_variables, ClassyHookFunctions.on_sample.name)
-
         # Copy sample to GPU
         local_variables["target"] = local_variables["sample"]["target"]
         if use_gpu:
@@ -674,8 +672,6 @@ class ClassificationTask(ClassyTask):
                     scaled_loss.backward()
             else:
                 self.optimizer.backward(local_variables["local_loss"])
-
-            self.run_hooks(local_variables, ClassyHookFunctions.on_backward.name)
 
             self.optimizer.update_schedule_on_step(self.where)
             self.optimizer.step()

@@ -32,11 +32,8 @@ class TensorboardPlotHook(ClassyHook):
     Global steps are counted in terms of the number of samples processed.
     """
 
-    on_rendezvous = ClassyHook._noop
     on_start = ClassyHook._noop
-    on_sample = ClassyHook._noop
     on_forward = ClassyHook._noop
-    on_backward = ClassyHook._noop
     on_loss_and_meter = ClassyHook._noop
     on_end = ClassyHook._noop
 

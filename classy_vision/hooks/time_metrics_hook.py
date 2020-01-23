@@ -19,11 +19,8 @@ class TimeMetricsHook(ClassyHook):
     Computes and prints performance metrics. Logs at the end of a phase.
     """
 
-    on_rendezvous = ClassyHook._noop
     on_start = ClassyHook._noop
-    on_sample = ClassyHook._noop
     on_forward = ClassyHook._noop
-    on_backward = ClassyHook._noop
     on_update = ClassyHook._noop
     on_end = ClassyHook._noop
 
