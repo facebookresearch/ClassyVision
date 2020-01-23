@@ -16,13 +16,10 @@ class ClassyHookFunctions(Enum):
     Enumeration of all the hook functions in the ClassyHook class.
     """
 
-    on_rendezvous = auto()
     on_start = auto()
     on_phase_start = auto()
-    on_sample = auto()
     on_forward = auto()
     on_loss_and_meter = auto()
-    on_backward = auto()
     on_update = auto()
     on_phase_end = auto()
     on_end = auto()
@@ -47,8 +44,8 @@ class ClassyHook(ABC):
     Hooks allow to inject behavior at different places of the training loop, which
     are listed below in the chronological order.
 
-        on_start -> on_phase_start -> on_sample -> on_forward -> on_loss_and_meter ->
-            on_backward -> on_update -> on_phase_end -> on_end
+        on_start -> on_phase_start -> on_forward -> on_loss_and_meter ->
+            on_update -> on_phase_end -> on_end
 
     Deriving classes should call ``super().__init__()`` and store any state in
     ``self.state``. Any state added to this property should be serializable.
@@ -83,13 +80,6 @@ class ClassyHook(ABC):
         return cls.__name__
 
     @abstractmethod
-    def on_rendezvous(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
-        """Called when the trainers rendezvous."""
-        pass
-
-    @abstractmethod
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
@@ -104,13 +94,6 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_sample(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
-        """Called each time trainer obtained a sample from the dataset."""
-        pass
-
-    @abstractmethod
     def on_forward(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
@@ -122,13 +105,6 @@ class ClassyHook(ABC):
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """Called each time after a loss has been computed and meters are updated."""
-        pass
-
-    @abstractmethod
-    def on_backward(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
-        """Called each time a backward step is performed on the loss."""
         pass
 
     @abstractmethod

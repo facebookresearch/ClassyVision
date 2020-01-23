@@ -17,12 +17,9 @@ class LossLrMeterLoggingHook(ClassyHook):
     Logs the loss, optimizer LR, and meters. Logs at the end of a phase.
     """
 
-    on_rendezvous = ClassyHook._noop
     on_start = ClassyHook._noop
     on_phase_start = ClassyHook._noop
-    on_sample = ClassyHook._noop
     on_forward = ClassyHook._noop
-    on_backward = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
