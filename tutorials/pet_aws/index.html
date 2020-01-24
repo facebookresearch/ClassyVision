@@ -1,0 +1,300 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Classy Vision · An end-to-end framework for image and video classification</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="An end-to-end framework for image and video classification"/><meta property="og:title" content="Classy Vision · An end-to-end framework for image and video classification"/><meta property="og:type" content="website"/><meta property="og:url" content="https://classyvision.ai/"/><meta property="og:description" content="An end-to-end framework for image and video classification"/><meta property="og:image" content="https://classyvision.ai/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://classyvision.ai/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/code_block_buttons.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/code_block_buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/favicon.png" alt="Classy Vision"/><h2 class="headerTitleWithLogo">Classy Vision</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/tutorials/" target="_self">Tutorials</a></li><li class=""><a href="/api/" target="_self">API Reference</a></li><li class=""><a href="https://github.com/facebookresearch/ClassyVision" target="_self">GitHub</a></li><li class=""><a target="_self"></a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span></span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Tutorials</h3><ul class=""><li class="navListItem"><a class="navItem" href="/tutorials/">Overview</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Using Classy Vision</h3><ul class=""><li class="navListItem"><a class="navItem" href="/tutorials/getting_started">Getting started</a></li><li class="navListItem"><a class="navItem" href="/tutorials/ray_aws">Distributed training on AWS</a></li><li class="navListItem"><a class="navItem" href="/tutorials/classy_dataset">Creating a custom dataset</a></li><li class="navListItem"><a class="navItem" href="/tutorials/classy_model">Creating a custom model</a></li><li class="navListItem"><a class="navItem" href="/tutorials/classy_loss">Creating a custom loss</a></li><li class="navListItem"><a class="navItem" href="/tutorials/video_classification">How to do video classification</a></li><li class="navListItem"><a class="navItem" href="/tutorials/fine_tuning">Fine Tuning a model</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/tutorials/pet_aws">Elastic training on AWS</a></li><li class="navListItem"><a class="navItem" href="/tutorials/torchscript">Productionizing models</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="tutorialBody">
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js">
+</script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js">
+</script>
+<div class="notebook">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Elastic-training-with-Classy-Vision">Elastic training with Classy Vision<a class="anchor-link" href="#Elastic-training-with-Classy-Vision">¶</a></h1><p>This tutorial will demonstrate how to launch an training job on Amazon Web Services (<a href="https://aws.amazon.com/">AWS</a>) using <a href="https://github.com/pytorch/elastic">PyTorch Elastic</a> and Classy Vision.</p>
+<h2 id="Prerequisites">Prerequisites<a class="anchor-link" href="#Prerequisites">¶</a></h2><ol>
+<li>Familiarity with basic AWS (EC2, Auto Scaling Groups, S3, EFS).</li>
+<li>(suggested) install and setup <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html"><code>awscli</code></a>.</li>
+<li>Basic knowledge of containers (we use Docker in our examples).</li>
+</ol>
+<h2 id="1.-Setup">1. Setup<a class="anchor-link" href="#1.-Setup">¶</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Download the PyTorch Elastic repository and install it. Run in your terminal:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">pytorch</span><span class="o">/</span><span class="n">elastic</span><span class="o">.</span><span class="n">git</span>
+<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">torchelastic</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Install the required dependencies for AWS:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span> <span class="n">cd</span> <span class="n">elastic</span><span class="o">/</span><span class="n">aws</span>
+<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Make sure you are familiar with the following AWS resources:</p>
+<ol>
+<li>EC2 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html">instance profile</a></li>
+<li>EC2 <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html">key pair</a></li>
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html#create-default-subnet">Subnet(s)</a></li>
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html#DefaultSecurityGroup">Security group</a></li>
+<li>EFS volume</li>
+<li>S3 bucket</li>
+</ol>
+<p><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html">Install</a>
+ the AWS Session Manager plugin.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="2.-Create-the-cluster">2. Create the cluster<a class="anchor-link" href="#2.-Create-the-cluster">¶</a></h2><p><code>petctl</code> is a commandline tool that helps run distributed jobs written with torchelastic on EC2 instances. It's available in the <code>aws</code> directory of the <code>torchelastic</code> repo. To get started, run this on your terminal:</p>
+<div class="highlight"><pre><span></span>python3 petctl.py setup
+</pre></div>
+<p>This will bootstrap all the AWS resources required to run a torchelastic
+job. For details take a look at the CloudFormation <a href="cfn/setup.yml">template</a> .</p>
+<p>Use <code>--s3_bucket</code> and <code>--efs_id</code> to use an existing S3 bucket and EFS 
+file system. Otherwise an S3 bucket and EFS volume will be created.</p>
+<blockquote><p><strong>IMPORTANT</strong> when specifying <code>--efs_id</code> you MUST ensure that NO mount targets
+exist on the EFS file system. torchelastic's cfn stack will attempt to create
+mount targets for the subnets it creates and WILL FAIL if the file system already
+has mount targets on a different VPC. For more information refer to 
+the <a href="https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html">EFS docs</a>.</p>
+</blockquote>
+<p><strong>TIP:</strong> If the stack creation fails, log into the CloudFormation console, inspect
+the failure reason, address the failure, then manually delete the stack and re-run
+<code>petctl configure</code>.</p>
+<p>If you are familiar with AWS or already have the resources specified in the 
+<strong>Requirements</strong> section above, then you can follow the <a href="https://github.com/pytorch/elastic/blob/master/aws/README.md">Manual Setup</a> instructions
+in the <code>torchelastic</code> repository. Simply copy the sample specs file and fill
+in the template, then run <code>python petctl.py configure</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="3.-Create-your-Classy-Vision-project">3. Create your Classy Vision project<a class="anchor-link" href="#3.-Create-your-Classy-Vision-project">¶</a></h2><p>If you already have a Classy Vision project to use with <code>torchelastic</code>, great! You only need to modify <code>classy_train.py</code> to use an <code>ElasticTrainer</code> instead of a <code>DistributedTrainer</code>. See our <a href="https://classyvision.ai/tutorials/getting_started">getting started</a> tutorial for more details about <code>classy_train.py</code>.</p>
+<p>To make things easier, we provided an example of how to use <code>ElasticTrainer</code>: it's under <code>./examples/classy_vision/main.py</code> in the <code>torchelastic</code> repo. You can start by copying that file and use it to replace <code>classy_train.py</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.-Start-training">4. Start training<a class="anchor-link" href="#4.-Start-training">¶</a></h2><p>Normally you would run the training script directly to start training. For elastic training, we'll use <code>petctl</code> to launch it. Here's how you launch our example script in your terminal:</p>
+<div class="highlight"><pre><span></span>python3 aws/petctl.py run_job --size <span class="m">2</span> --min_size <span class="m">2</span> --max_size <span class="m">2</span> --name <span class="si">${</span><span class="nv">USER</span><span class="si">}</span>-job examples/classy_vision/main.py -- --config_file classy-vision://configs/resnet50_synthetic_image_classy_config.json --num_workers <span class="m">0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the example above, the named arguments, such as, <code>--size</code> , <code>--min_size</code>, and
+<code>--max_size</code> are parameters to the <code>run_job</code> sub-command of <code>petctl</code>. In the example
+above, we created an <strong>elastic</strong> job where the initial worker <code>--size=2</code>, we are
+allowed to scale down to <code>--min_size</code> and up to <code>--max_size</code>. This is used by
+torchelastic's rendezvous algorithm to determine how many nodes to admit on each
+re-rendezvous before considering the group <em>final</em> and start the <code>train_step</code>.</p>
+<p>Because all the size parameters are the same in this case, that means we are disabling elasticity. You might want to do that for reproducibility reasons, for instance. Training this way still provides benefits, since <code>torchelastic</code>  increases robustness: when a node fails, we can start a new node and resume training from the last minibatch, without reverting back to the previous checkpoint.</p>
+<p>The other positional arguments have the form:</p>
+<pre><code>[local script] -- [script args ...]
+  -- or -- 
+[local directory] -- [script] [script args...]</code></pre>
+<p>If the first positional argument is a path to a script file, then the script
+is uploaded to S3 and the script arguments specified after the <code>--</code> delimiter
+are passed through to the script.</p>
+<p>If the first positional argument is a directory, then a tarball of the directory
+is created and uploaded to S3 and is extracted on the worker-side. In this case
+the first argument after the <code>--</code> delimiter is the path to the script <strong>relative</strong> to the
+specified directory and the rest of the arguments after the delimiter is passed 
+to the script.</p>
+<p>In our example we specified</p>
+<pre><code>petctl.py run_job [...] classy_vision/main.py --config_file [...]</code></pre>
+<p>We could have decided to specify the directory instead</p>
+<pre><code>petctl.py run_job [...] classy_vision -- main.py --config_file [...]</code></pre>
+<p><strong>TIP 1:</strong> Besides a local script or directory you can run with scripts or <code>tar</code> files
+that have already been uploaded to S3 or directly point it to a file or directory
+on the container.</p>
+<div class="highlight"><pre><span></span>python3 petctl.py run_job <span class="o">[</span>...<span class="o">]</span> s3://my-bucket/my_script.py
+python3 petctl.py run_job <span class="o">[</span>...<span class="o">]</span> s3://my-bucket/my_dir.tar.gz -- my_script.py
+
+<span class="c1"># or</span>
+python3 petctl.py run_job <span class="o">[</span>...<span class="o">]</span> docker:///abs/path/in/container/dir -- my_script.py
+python3 petctl.py run_job <span class="o">[</span>...<span class="o">]</span> docker://rel/path/in/container/dir/my_script.py
+</pre></div>
+<p><strong>TIP 2:</strong> To iterate quickly, simply make changes to your local script and
+upload the script to S3 using</p>
+<div class="highlight"><pre><span></span>python3 petctl.py upload examples/imagenet/main.py s3://&lt;bucket&gt;/&lt;prefix&gt;/&lt;job_name&gt;
+</pre></div>
+<p><strong>TIP 3:</strong> Use the EFS volume attached on <code>/mnt/efs/fs1</code> on all the workers to 
+save input data, checkpoints and job output.</p>
+<p>Once the <code>run_job</code> command returns log into the EC2 console, you will see two
+Auto Scaling Groups</p>
+<ol>
+<li>etcd server </li>
+<li>workers</li>
+</ol>
+<h2 id="5.-Inspect-the-logs">5. Inspect the logs<a class="anchor-link" href="#5.-Inspect-the-logs">¶</a></h2><p>Log into the AWS CloudWatch Logs console. You should see a log group called
+<code>torchelastic/$USER</code>. Under it there will be a log stream per instance with the 
+name <code>$job_name/$instance_id</code> (e.g. <code>my_job/i0b938EXAMPLE</code>).</p>
+<h4 id="Troubleshooting">Troubleshooting<a class="anchor-link" href="#Troubleshooting">¶</a></h4><p>To SSH onto the worker nodes to debug/inspect the worker process use AWS 
+Session Manager instead of the ec2 key pair. <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html">Install</a>
+ the Session Manager plugin and run</p>
+<div class="highlight"><pre><span></span><span class="c1"># get the instance ids of the workers</span>
+python3 petctl.py list_hosts &lt;job_name&gt;
+
+<span class="c1"># ssh onto one of the workers</span>
+awscli ssm start-session --target &lt;instance_id&gt;
+ -- example --
+awscli ssm start-session --target i-00b00EXAMPLE
+</pre></div>
+<p>Once SSH'ed, the workers run in a docker container managed by <code>systemd</code>.
+You can take a look at their console outputs by running</p>
+<div class="highlight"><pre><span></span><span class="c1"># see the status of the worker</span>
+sudo systemctl status torchelastic_worker
+<span class="c1"># get the container id</span>
+sudo docker ps
+<span class="c1"># tail the container logs</span>
+sudo docker logs -f &lt;container id&gt;
+</pre></div>
+<p>You can also manually stop and start the workers by running</p>
+<div class="highlight"><pre><span></span>sudo systemctl stop torchelastic_worker
+sudo systemctl start torchelastic_worker
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>EXERCISE:</strong> Open up two terminals and SSH onto each worker. Tail the docker logs
+on each worker. Now stop worker 1 and observe the worker 2 re-rendezvous and
+since <code>--min_size=1</code> it continues training by itself. Now restart worker 1 and
+observe that worker 2 notices that worker 1 is waiting to join and re-rendezvous,
+the <code>state</code> object in worker 2 is <code>sync()</code>'ed to worker 1 and both resume training
+without loss of progress.</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p><strong>Note</strong>: by design, <code>petctl</code> tries to use the least number of AWS services. This
+was done intentionally to allow non-AWS users to easily transfer the functionality
+to their environment. Hence it currently does not have the functionality to query
+status of the job or to terminate the ASG when the job is done (there is nothing
+that is monitoring the job!). In practice consider using EKS, Batch, or SageMaker.</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="6.-Stop-training">6. Stop training<a class="anchor-link" href="#6.-Stop-training">¶</a></h2><p>To stop the job and tear down the resources, use the <code>kill_job</code> command:</p>
+<div class="highlight"><pre><span></span>python3 petctl.py kill_job <span class="si">${</span><span class="nv">USER</span><span class="si">}</span>-job
+</pre></div>
+<p>You'll notice that the two ASGs created with the <code>run_job</code> command are deleted.</p>
+</div>
+</div>
+</div>
+</div></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/pet_aws.ipynb" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Jupyter Notebook</a></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/pet_aws.py" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Source Code</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footerSection"><h5>Documentation</h5><a href="/tutorials/">Tutorials</a><a href="/api/">API Reference</a></div><div class="footerSection"><h5>Social</h5><div class="social"><a class="github-button" href="https://github.com/facebookresearch/ClassyVision" data-count-href="https://github.com/facebookresearch/ClassyVision/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star Classy Vision on GitHub">ClassyVision</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright"><span>Copyright © 2020 Facebook Inc.</span> </section><script>
+            (function() {
+              var BAD_BASE = '/classyvision/';
+              if (window.location.origin !== 'https://classyvision.ai') {
+                var pathname = window.location.pathname;
+                var newPathname = pathname.slice(pathname.indexOf(BAD_BASE) === 0 ? BAD_BASE.length : 1);
+                var newLocation = 'https://classyvision.ai/' + newPathname;
+                console.log('redirecting to ' + newLocation);
+                window.location.href = newLocation;
+              }
+            })();
+          </script></footer></div></body></html>
