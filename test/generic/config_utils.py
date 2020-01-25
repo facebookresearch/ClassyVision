@@ -242,7 +242,7 @@ def get_test_mlp_task_config():
 
 def get_test_model_configs():
     return [
-        # resnet 101
+        # resnet 50
         {
             "name": "resnet",
             "num_blocks": [3, 4, 6, 3],
@@ -257,10 +257,25 @@ def get_test_model_configs():
                 }
             ],
         },
-        # resnext 101 32-4d
+        # resnet 101
+        {
+            "name": "resnet",
+            "num_blocks": [3, 4, 23, 3],
+            "small_input": False,
+            "heads": [
+                {
+                    "name": "fully_connected",
+                    "unique_id": "default_head",
+                    "num_classes": 1000,
+                    "fork_block": "block3-2",
+                    "in_plane": 2048,
+                }
+            ],
+        },
+        # resnext 101 32x4d
         {
             "name": "resnext",
-            "num_blocks": [3, 4, 6, 3],
+            "num_blocks": [3, 4, 23, 3],
             "base_width_and_cardinality": [4, 32],
             "small_input": False,
             "heads": [

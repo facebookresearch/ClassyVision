@@ -55,7 +55,7 @@ def profile(
                 return profiler
 
 
-def _layer_flops(layer, x):
+def _layer_flops(layer, x, _):
     """
     Computes the number of FLOPs required for a single layer.
     """
@@ -243,6 +243,15 @@ def _layer_flops(layer, x):
     raise NotImplementedError("FLOPs not implemented for %s layer" % layer_type)
 
 
+def _layer_activations(layer, x, out):
+    """
+    Computes the number of activations produced by a single layer.
+
+    Activations are counted only for convolutional layers.
+    """
+    return out.numel() if isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)) else 0
+
+
 def summarize_profiler_info(prof):
     """
     Summarizes the statistics in the specified profiler.
@@ -264,37 +273,40 @@ def summarize_profiler_info(prof):
     return str
 
 
-def _flops_module(module, flops_list):
+def _patched_computation_module(module, compute_list, compute_fn):
     """
-    Convert module into FLOP-counting module.
+    Patch the module to compute a module's parameters, like FLOPs.
+
+    Calls compute_fn and appends the results to compute_list.
     """
     ty = type(module)
     typestring = module.__repr__()
 
-    class FLOPsModule(ty):
+    class ComputeModule(ty):
         orig_type = ty
 
         def _original_forward(self, *args, **kwargs):
             return ty.forward(self, *args, **kwargs)
 
         def forward(self, *args, **kwargs):
-            flops_list.append(_layer_flops(self, args[0]))
-            return self._original_forward(*args, **kwargs)
+            out = self._original_forward(*args, **kwargs)
+            compute_list.append(compute_fn(self, args[0], out))
+            return out
 
         def __repr__(self):
             return typestring
 
-    return FLOPsModule
+    return ComputeModule
 
 
-def modify_forward(model, flops_list):
+def modify_forward(model, compute_list, compute_fn):
     """
-    Modify forward pass to measure FLOPs:
+    Modify forward pass to measure a module's parameters, like FLOPs.
     """
     if is_leaf(model):
-        model.__class__ = _flops_module(model, flops_list)
+        model.__class__ = _patched_computation_module(model, compute_list, compute_fn)
     for child in model.children():
-        modify_forward(child, flops_list)
+        modify_forward(child, compute_list, compute_fn)
 
     return model
 
@@ -311,9 +323,9 @@ def restore_forward(model):
     return model
 
 
-def compute_flops(model, input_shape=(3, 244, 244), input_key=None):
+def compute_complexity(model, compute_fn, input_shape, input_key=None):
     """
-    Compute the number of FLOPs needed for a forward pass.
+    Compute the complexity of a forward pass.
     """
 
     # assertions, input, and upvalue in which we will perform the count:
@@ -321,17 +333,31 @@ def compute_flops(model, input_shape=(3, 244, 244), input_key=None):
     if not isinstance(input_shape, abc.Sequence):
         return None
     input = get_model_dummy_input(model, input_shape, input_key)
-    flops_list = []
+    compute_list = []
 
     # measure FLOPs:
-    modify_forward(model, flops_list)
+    modify_forward(model, compute_list, compute_fn)
     try:
         model.forward(input)
     except NotImplementedError as err:
         raise err
     finally:
         restore_forward(model)
-    return sum(flops_list)
+    return sum(compute_list)
+
+
+def compute_flops(model, input_shape=(3, 224, 224), input_key=None):
+    """
+    Compute the number of FLOPs needed for a forward pass.
+    """
+    return compute_complexity(model, _layer_flops, input_shape, input_key)
+
+
+def compute_activations(model, input_shape=(3, 224, 224), input_key=None):
+    """
+    Compute the number of activations created in a forward pass.
+    """
+    return compute_complexity(model, _layer_activations, input_shape, input_key)
 
 
 def count_params(model):

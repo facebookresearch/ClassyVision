@@ -8,13 +8,17 @@ import logging
 from typing import Any, Dict
 
 from classy_vision import tasks
-from classy_vision.generic.profiler import compute_flops, count_params
+from classy_vision.generic.profiler import (
+    compute_activations,
+    compute_flops,
+    count_params,
+)
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
 class ModelComplexityHook(ClassyHook):
     """
-    Logs the number of paramaters and forward pass FLOPs of the model.
+    Logs the number of paramaters and forward pass FLOPs and activations of the model.
     """
 
     on_phase_start = ClassyHook._noop
@@ -27,7 +31,7 @@ class ModelComplexityHook(ClassyHook):
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        """Measure number of parameters and number of FLOPs."""
+        """Measure number of parameters, FLOPs and activations."""
         try:
             num_flops = compute_flops(
                 task.base_model,
@@ -48,6 +52,14 @@ class ModelComplexityHook(ClassyHook):
             Could not compute FLOPs for model forward pass. Exception:""",
                 exc_info=True,
             )
+        num_activations = compute_activations(
+            task.base_model,
+            input_shape=task.base_model.input_shape,
+            input_key=task.base_model.input_key
+            if hasattr(task.base_model, "input_key")
+            else None,
+        )
+        logging.info(f"Number of activations in model: {num_activations}")
         logging.info(
             "Number of parameters in model: %d" % count_params(task.base_model)
         )
