@@ -684,6 +684,8 @@ class ClassificationTask(ClassyTask):
         return self.loss(model_output, sample["target"])
 
     def update_meters(self, model_output, sample):
+        if isinstance(model_output, dict):
+            model_output = model_output["data"]
         target = sample["target"].detach().cpu()
         model_output = model_output.detach().cpu()
 

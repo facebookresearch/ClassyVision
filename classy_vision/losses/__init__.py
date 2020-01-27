@@ -98,6 +98,7 @@ import_all_modules(FILE_ROOT, "classy_vision.losses")
 
 from .barron_loss import BarronLoss  # isort:skip
 from .label_smoothing_loss import LabelSmoothingCrossEntropyLoss  # isort:skip
+from .multi_output_first_value_loss import MultiOutputFirstValueLoss  # isort:skip
 from .multi_output_sum_loss import MultiOutputSumLoss  # isort:skip
 from .soft_target_cross_entropy_loss import SoftTargetCrossEntropyLoss  # isort:skip
 from .sum_arbitrary_loss import SumArbitraryLoss  # isort:skip
@@ -107,6 +108,7 @@ __all__ = [
     "BarronLoss",
     "ClassyLoss",
     "LabelSmoothingCrossEntropyLoss",
+    "MultiOutputFirstValueLoss",
     "MultiOutputSumLoss",
     "SoftTargetCrossEntropyLoss",
     "SumArbitraryLoss",
