@@ -206,19 +206,14 @@ class GenericImageTransform(ClassyTransform):
             split: 'train' or 'test'
         """
         assert (
-            transform is not None or split is not None
-        ), "One of transform / split must be specified"
-        assert (
-            transform is None or split is None
-        ), "Only one of transform / split should be specified"
+            split is None or transform is None
+        ), "If split is not None then transform must be None"
         assert split in [None, "train", "test"], (
             "If specified, split should be either 'train' or 'test', "
             "instead got {}".format(split)
         )
 
-        if transform is not None:
-            self._transform = transform
-
+        self._transform = transform
         if split is not None:
             self._transform = (
                 ImagenetAugmentTransform()
@@ -243,7 +238,9 @@ class GenericImageTransform(ClassyTransform):
                 target data.
         """
         image = sample[0]
-        transformed_image = self._transform(image)
+        transformed_image = (
+            self._transform(image) if self._transform is not None else image
+        )
         new_sample = {"input": transformed_image, "target": sample[1]}
         # Any additional metadata is just appended under index of tuple
         if len(sample) > 2:
