@@ -52,14 +52,19 @@ class ModelComplexityHook(ClassyHook):
             Could not compute FLOPs for model forward pass. Exception:""",
                 exc_info=True,
             )
-        num_activations = compute_activations(
-            task.base_model,
-            input_shape=task.base_model.input_shape,
-            input_key=task.base_model.input_key
-            if hasattr(task.base_model, "input_key")
-            else None,
-        )
-        logging.info(f"Number of activations in model: {num_activations}")
+        try:
+            num_activations = compute_activations(
+                task.base_model,
+                input_shape=task.base_model.input_shape,
+                input_key=task.base_model.input_key
+                if hasattr(task.base_model, "input_key")
+                else None,
+            )
+            logging.info(f"Number of activations in model: {num_activations}")
+        except NotImplementedError:
+            logging.info(
+                "Model does not implement input_shape. Skipping activation calculation."
+            )
         logging.info(
             "Number of parameters in model: %d" % count_params(task.base_model)
         )
