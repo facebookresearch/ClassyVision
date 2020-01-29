@@ -531,6 +531,10 @@ class ClassificationTask(ClassyTask):
             if self.test_only
             else self.get_total_training_phases()
         )
+
+        if self.num_batches_per_phase <= 0:
+            raise RuntimeError("No batches to read. Is the dataset empty?")
+
         num_steps = num_phases * self.num_batches_per_phase
         where = current_step / num_steps
 
