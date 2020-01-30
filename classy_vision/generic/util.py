@@ -12,12 +12,12 @@ import logging
 import math
 import os
 import sys
-import tempfile
 import traceback
 
 import numpy as np
 import torch
 import torch.nn as nn
+from fvcore.common.file_io import PathManager
 from torch._six import container_abcs
 
 
@@ -455,20 +455,21 @@ def load_checkpoint(
     if device.type == "cuda":
         assert torch.cuda.is_available()
 
-    if not os.path.exists(checkpoint_folder):
+    if not PathManager.exists(checkpoint_folder):
         logging.warning("Checkpoint folder '%s' not found" % checkpoint_folder)
         return None
     logging.info("Attempting to load checkpoint from '%s'" % checkpoint_folder)
 
     # read what the latest model file is:
-    filename = os.path.join(checkpoint_folder, checkpoint_file)
-    if not os.path.exists(filename):
+    filename = f"{checkpoint_folder}/{checkpoint_file}"
+    if not PathManager.exists(filename):
         logging.warning("Checkpoint file %s not found." % filename)
         return None
 
     # load model on specified device and not on saved device for model and return
     # the checkpoint
-    checkpoint = torch.load(filename, map_location=device)
+    with PathManager.open(filename, "rb") as f:
+        checkpoint = torch.load(f, map_location=device)
     logging.info(f"Loaded checkpoint from {filename}")
     return checkpoint
 
@@ -526,26 +527,21 @@ def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
     """
 
     # make sure that we have a checkpoint folder:
-    if not os.path.isdir(checkpoint_folder):
+    if not PathManager.isdir(checkpoint_folder):
         try:
-            os.makedirs(checkpoint_folder)
+            PathManager.mkdirs(checkpoint_folder)
         except BaseException:
             logging.warning(
                 "Could not create folder %s." % checkpoint_folder, exc_info=True
             )
-    if not os.path.isdir(checkpoint_folder):
+    if not PathManager.isdir(checkpoint_folder):
         return False
 
     # write checkpoint atomically:
     try:
-        with tempfile.NamedTemporaryFile(
-            "w+b", dir=checkpoint_folder, delete=False
-        ) as fwrite:
-            tmp_fname = fwrite.name
-            torch.save(state, fwrite.name)
-        full_filename = os.path.join(checkpoint_folder, checkpoint_file)
-        os.rename(tmp_fname, full_filename)
-        os.chmod(full_filename, 0o666)
+        full_filename = f"{checkpoint_folder}/{checkpoint_file}"
+        with PathManager.open(full_filename, "wb") as f:
+            torch.save(state, f)
         return full_filename
     except BaseException:
         logging.warning(
