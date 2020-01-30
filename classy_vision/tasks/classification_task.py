@@ -90,7 +90,6 @@ class ClassificationTask(ClassyTask):
     :var num_updates: Number of total parameter updates applied to model
         by the optimizer
     :var data_iterator: Iterator which can be used to obtain batches
-    :var num_samples_this_phase: Number of samples ran this phase
     :var losses: Loss curve
 
     """
@@ -116,7 +115,6 @@ class ClassificationTask(ClassyTask):
         self.train_phase_idx = -1
         self.num_updates = 0
         self.data_iterator = None
-        self.num_samples_this_phase = 0
         self.losses = []
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
             BroadcastBuffersMode.DISABLED
@@ -556,7 +554,6 @@ class ClassificationTask(ClassyTask):
             "phase_idx": self.phase_idx,
             "train_phase_idx": self.train_phase_idx,
             "num_updates": self.num_updates,
-            "num_samples_this_phase": self.num_samples_this_phase,
             "losses": self.losses,
             "hooks": {hook.name(): hook.get_classy_state() for hook in self.hooks},
         }
@@ -582,7 +579,6 @@ class ClassificationTask(ClassyTask):
 
         self.base_model.set_classy_state(state["base_model"])
         self.optimizer.set_classy_state(state["optimizer"])
-        self.num_samples_this_phase = state["num_samples_this_phase"]
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
             # hooks are removed
@@ -663,8 +659,6 @@ class ClassificationTask(ClassyTask):
             # `LossLrMeterLoggingHook` will log both loss and meter status
             self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
 
-        num_samples_in_step = self.get_global_batchsize()
-        self.num_samples_this_phase += num_samples_in_step
 
         # For training phases, run backwards pass / update optimizer
         if self.train:
@@ -682,7 +676,7 @@ class ClassificationTask(ClassyTask):
 
             self.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
 
-            self.num_updates += num_samples_in_step
+            self.num_updates += self.get_global_batchsize()
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
@@ -711,7 +705,6 @@ class ClassificationTask(ClassyTask):
         self.losses = []
 
         # Setup new phase
-        self.num_samples_this_phase = 0
         self.phase_idx += 1
         phase = self.phases[self.phase_idx]
         self.train = True if phase["train"] else False
@@ -818,12 +811,3 @@ class ClassificationTask(ClassyTask):
         """Return global batchsize across all trainers
         """
         return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
-
-    def get_total_samples_trained_this_phase(self):
-        """Returns the total number of samples processed in current phase
-        """
-        # TODO(T47573564) - cleaner abstraction
-        # TODO(T47387605) - instead of get_world_size, we need the max world
-        # size for elasticity to match parity with Uru and other systems,
-        # although DPP will solve this by dynamically re-sharding.
-        return self.num_samples_this_phase
