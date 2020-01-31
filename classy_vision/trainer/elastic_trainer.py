@@ -13,11 +13,7 @@ import numpy
 import torch
 import torchelastic
 import torchelastic.distributed as dist
-from classy_vision.generic.distributed_util import (
-    barrier,
-    set_cpu_device,
-    set_cuda_device_index,
-)
+from classy_vision.generic.distributed_util import set_cpu_device, set_cuda_device_index
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.tasks import ClassyTask
@@ -98,7 +94,10 @@ class ElasticTrainer(ClassyTrainer):
             raise StopIteration
 
         if state.advance_to_next_phase:
+            logging.info("Begin advance_phase")
             state.task.advance_phase()
+            self.elastic_coordinator.barrier()
+            logging.info("Done advance_phase")
 
             # Start phase hooks
             state.task.run_hooks(
@@ -120,8 +119,8 @@ class ElasticTrainer(ClassyTrainer):
             logging.info("Syncing meters on phase end...")
             for meter in state.task.meters:
                 meter.sync_state()
+            self.elastic_coordinator.barrier()
             logging.info("...meters synced")
-            barrier()
             # Phase complete
             # NOTE: this is a good time to checkpoint, as it guarantees
             # that loading from checkpoint will properly advance the phase.
