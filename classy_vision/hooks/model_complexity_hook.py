@@ -32,19 +32,20 @@ class ModelComplexityHook(ClassyHook):
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """Measure number of parameters, FLOPs and activations."""
+        self.num_flops = None
         try:
-            num_flops = compute_flops(
+            self.num_flops = compute_flops(
                 task.base_model,
                 input_shape=task.base_model.input_shape,
                 input_key=task.base_model.input_key
                 if hasattr(task.base_model, "input_key")
                 else None,
             )
-            if num_flops is None:
+            if self.num_flops is None:
                 logging.info("FLOPs for forward pass: skipped.")
             else:
                 logging.info(
-                    "FLOPs for forward pass: %d MFLOPs" % (float(num_flops) / 1e6)
+                    "FLOPs for forward pass: %d MFLOPs" % (float(self.num_flops) / 1e6)
                 )
         except NotImplementedError:
             logging.warning(
@@ -52,19 +53,30 @@ class ModelComplexityHook(ClassyHook):
             Could not compute FLOPs for model forward pass. Exception:""",
                 exc_info=True,
             )
+        self.num_activations = None
         try:
-            num_activations = compute_activations(
+            self.num_activations = compute_activations(
                 task.base_model,
                 input_shape=task.base_model.input_shape,
                 input_key=task.base_model.input_key
                 if hasattr(task.base_model, "input_key")
                 else None,
             )
-            logging.info(f"Number of activations in model: {num_activations}")
+            logging.info(f"Number of activations in model: {self.num_activations}")
         except NotImplementedError:
             logging.info(
                 "Model does not implement input_shape. Skipping activation calculation."
             )
-        logging.info(
-            "Number of parameters in model: %d" % count_params(task.base_model)
-        )
+        self.num_parameters = count_params(task.base_model)
+        logging.info("Number of parameters in model: %d" % self.num_parameters)
+
+    def get_model_complexity(self):
+        return {
+            "FLOPS(M)": float(self.num_flops) / 1e6
+            if self.num_flops is not None
+            else 0,
+            "num_activations(M)": float(self.num_activations) / 1e6
+            if self.num_activations is not None
+            else 0,
+            "num_parameters(M)": float(self.num_parameters) / 1e6,
+        }
