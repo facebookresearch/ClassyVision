@@ -25,7 +25,7 @@ To install Classy Vision via pip:
 pip install classy_vision
 ```
 
-To install Classy Vision via conda:
+To install Classy Vision via conda (only works on linux):
 ```bash
 conda install -c conda-forge classy_vision
 ```
