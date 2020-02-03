@@ -5,15 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-import os
-import tempfile
-from shutil import copy2, move
 from typing import Any, Collection, Dict, Optional
 
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
 from classy_vision.hooks.classy_hook import ClassyHook
+from fvcore.common.file_io import PathManager
 
 
 class CheckpointHook(ClassyHook):
@@ -66,7 +64,7 @@ class CheckpointHook(ClassyHook):
     def _save_checkpoint(self, task, filename):
         if getattr(task, "test_only", False):
             return
-        assert os.path.exists(
+        assert PathManager.exists(
             self.checkpoint_folder
         ), "Checkpoint folder '{}' deleted unexpectedly".format(self.checkpoint_folder)
 
@@ -78,17 +76,14 @@ class CheckpointHook(ClassyHook):
 
         # make copy of checkpoint that won't be overwritten:
         if checkpoint_file:
-            tmp_dir = tempfile.mkdtemp()
-            tmp_file = os.path.join(tmp_dir, filename)
-            copy2(checkpoint_file, tmp_file)
-            move(tmp_file, os.path.join(self.checkpoint_folder, filename))
+            PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         if getattr(task, "test_only", False):
             return
-        if not os.path.exists(self.checkpoint_folder):
+        if not PathManager.exists(self.checkpoint_folder):
             err_msg = "Checkpoint folder '{}' does not exist.".format(
                 self.checkpoint_folder
             )
