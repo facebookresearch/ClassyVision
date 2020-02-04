@@ -166,7 +166,7 @@ def _layer_flops(layer, x, _):
     # linear layer:
     elif layer_type in ["Linear"]:
         weight_ops = layer.weight.numel()
-        bias_ops = layer.bias.numel()
+        bias_ops = layer.bias.numel() if layer.bias is not None else 0
         return x.size()[0] * (weight_ops + bias_ops)
 
     # 2D/3D batch normalization:
