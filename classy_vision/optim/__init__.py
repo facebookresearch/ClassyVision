@@ -107,12 +107,14 @@ import_all_modules(FILE_ROOT, "classy_vision.optim")
 
 from .adam import Adam  # isort:skip
 from .rmsprop import RMSProp  # isort:skip
+from .rmsprop_tf import RMSPropTF  # isort:skip
 from .sgd import SGD  # isort:skip
 
 __all__ = [
     "Adam",
     "ClassyOptimizer",
     "RMSProp",
+    "RMSPropTF",
     "SGD",
     "build_optimizer",
     "register_optimizer",
