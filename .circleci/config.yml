@@ -85,18 +85,18 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-cpu-dependencies-{{ checksum "requirements.txt" }}
+            - v3-cpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v2-cpu-dependencies-
+            - v3-cpu-dependencies-
 
       - <<: *install_dep
+
+      - <<: *install_dev_dep
 
       - save_cache:
           paths:
             - ~/venv
-          key: v2-cpu-dependencies-{{ checksum "requirements.txt" }}
-
-      - <<: *install_dev_dep
+          key: v3-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
