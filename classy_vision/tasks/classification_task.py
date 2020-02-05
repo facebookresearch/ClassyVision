@@ -13,6 +13,7 @@ import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
+    barrier,
     init_distributed_data_parallel_model,
     is_distributed_training_run,
 )
@@ -21,6 +22,7 @@ from classy_vision.generic.util import (
     recursive_copy_to_gpu,
     update_classy_state,
 )
+from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
@@ -502,8 +504,16 @@ class ClassificationTask(ClassyTask):
                 self.base_model, self.optimizer.optimizer, opt_level=self.amp_opt_level
             )
 
+        if is_distributed_training_run():
+            self.init_distributed_data_parallel_model()
+
     def init_distributed_data_parallel_model(self):
-        """Sets up distributed dataparallel and wraps model in DDP
+        """
+        Initialize
+        `torch.nn.parallel.distributed.DistributedDataParallel <https://pytorch.org/
+        docs/stable/nn.html#distributeddataparallel>`_.
+
+        Needed for distributed training. This is where a model should be wrapped by DDP.
         """
         assert (
             self.distributed_model is None
@@ -602,7 +612,6 @@ class ClassificationTask(ClassyTask):
             local_variables: Dict containing intermediate values
                 in train_step for access by hooks
         """
-        from classy_vision.hooks import ClassyHookFunctions
 
         if local_variables is None:
             local_variables = {}
@@ -810,3 +819,22 @@ class ClassificationTask(ClassyTask):
         """Return global batchsize across all trainers
         """
         return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
+
+    def on_start(self, local_variables):
+        self.run_hooks(local_variables, ClassyHookFunctions.on_start.name)
+
+    def on_phase_start(self, local_variables):
+        self.advance_phase()
+
+        self.run_hooks(local_variables, ClassyHookFunctions.on_phase_start.name)
+
+    def on_phase_end(self, local_variables):
+        logging.info("Syncing meters on phase end...")
+        for meter in self.meters:
+            meter.sync_state()
+        logging.info("...meters synced")
+        barrier()
+        self.run_hooks(local_variables, ClassyHookFunctions.on_phase_end.name)
+
+    def on_end(self, local_variables):
+        self.run_hooks(local_variables, ClassyHookFunctions.on_end.name)

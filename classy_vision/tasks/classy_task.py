@@ -36,17 +36,6 @@ class ClassyTask(ABC):
         """
         raise NotImplementedError()
 
-    @abstractmethod
-    def init_distributed_data_parallel_model(self) -> None:
-        """
-        Initialize
-        `torch.nn.parallel.distributed.DistributedDataParallel <https://pytorch.org/
-        docs/stable/nn.html#distributeddataparallel>`_.
-
-        Needed for distributed training. This is where a model should be wrapped by DDP.
-        """
-        pass
-
     @property
     @abstractmethod
     def where(self) -> float:
@@ -55,16 +44,6 @@ class ClassyTask(ABC):
 
         Returns:
             A float in [0, 1) which tells the training progress.
-        """
-        pass
-
-    @abstractmethod
-    def advance_phase(self) -> None:
-        """
-        Advance the task a phase.
-
-        Called when one phase of reading from
-        :class:`classy_vision.dataset.ClassyDataset` is over.
         """
         pass
 
@@ -117,7 +96,7 @@ class ClassyTask(ABC):
         Prepares the task for training.
 
         Will be called by the :class:`classy_vision.trainer.ClassyTrainer` to
-        prepare the task.
+        prepare the task, before on_start is called.
 
         Args:
             num_dataloader_workers: Number of workers to create for the dataloaders
@@ -138,6 +117,42 @@ class ClassyTask(ABC):
             use_gpu: True if training on GPUs, False otherwise
             local_variables: Local variables created in the function. Can be passed to
                 custom :class:`classy_vision.hooks.ClassyHook`.
+        """
+        pass
+
+    @abstractmethod
+    def on_start(self, local_variables):
+        """
+        Start training.
+
+        Called by :class:`classy_vision.trainer.ClassyTrainer` before training starts.
+        """
+        pass
+
+    @abstractmethod
+    def on_phase_start(self, local_variables):
+        """
+        Epoch start.
+
+        Called by :class:`classy_vision.trainer.ClassyTrainer` before each epoch starts.
+        """
+        pass
+
+    @abstractmethod
+    def on_phase_end(self, local_variables):
+        """
+        Epoch end.
+
+        Called by :class:`classy_vision.trainer.ClassyTrainer` after each epoch ends.
+        """
+        pass
+
+    @abstractmethod
+    def on_end(self, local_variables):
+        """
+        Training end.
+
+        Called by :class:`classy_vision.trainer.ClassyTrainer` after training ends.
         """
         pass
 
