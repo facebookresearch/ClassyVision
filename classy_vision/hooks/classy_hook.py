@@ -5,24 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 from abc import ABC, abstractmethod
-from enum import Enum, auto
 from typing import Any, Dict
 
 from classy_vision import tasks
-
-
-class ClassyHookFunctions(Enum):
-    """
-    Enumeration of all the hook functions in the ClassyHook class.
-    """
-
-    on_start = auto()
-    on_phase_start = auto()
-    on_forward = auto()
-    on_loss_and_meter = auto()
-    on_update = auto()
-    on_phase_end = auto()
-    on_end = auto()
 
 
 class ClassyHookState:
