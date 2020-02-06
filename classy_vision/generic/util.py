@@ -13,6 +13,7 @@ import math
 import os
 import sys
 import traceback
+from typing import Dict, Optional
 
 import numpy as np
 import torch
@@ -440,14 +441,21 @@ def get_checkpoint_dict(task, input_args, deep_copy=False):
     }
 
 
-# function that tries to load a checkpoint:
 def load_checkpoint(
-    checkpoint_folder, device=CPU_DEVICE, checkpoint_file=CHECKPOINT_FILE
-):
+    checkpoint_path: str, device: torch.device = CPU_DEVICE
+) -> Optional[Dict]:
+    """Loads a checkpoint from the specified checkpoint path.
+
+    Args:
+        checkpoint_path: The path to load the checkpoint from. Can be a file or a
+            directory. If it is a directory, the checkpoint is loaded from
+            :py:data:`CHECKPOINT_FILE` inside the directory.
+        device: device to load the checkpoint to
+
+    Returns:
+        The checkpoint, if it exists, or None.
     """
-    Loads a state variable from the specified checkpoint folder.
-    """
-    if not checkpoint_folder:
+    if not checkpoint_path:
         return None
 
     assert device is not None, "Please specify what device to load checkpoint on"
@@ -455,22 +463,22 @@ def load_checkpoint(
     if device.type == "cuda":
         assert torch.cuda.is_available()
 
-    if not PathManager.exists(checkpoint_folder):
-        logging.warning("Checkpoint folder '%s' not found" % checkpoint_folder)
+    if not PathManager.exists(checkpoint_path):
+        logging.warning(f"Checkpoint path {checkpoint_path} not found")
         return None
-    logging.info("Attempting to load checkpoint from '%s'" % checkpoint_folder)
+    if PathManager.isdir(checkpoint_path):
+        checkpoint_path = f"{checkpoint_path.rstrip('/')}/{CHECKPOINT_FILE}"
 
-    # read what the latest model file is:
-    filename = f"{checkpoint_folder}/{checkpoint_file}"
-    if not PathManager.exists(filename):
-        logging.warning("Checkpoint file %s not found." % filename)
+    if not PathManager.exists(checkpoint_path):
+        logging.warning(f"Checkpoint file {checkpoint_path} not found.")
         return None
 
+    logging.info(f"Attempting to load checkpoint from {checkpoint_path}")
     # load model on specified device and not on saved device for model and return
     # the checkpoint
-    with PathManager.open(filename, "rb") as f:
+    with PathManager.open(checkpoint_path, "rb") as f:
         checkpoint = torch.load(f, map_location=device)
-    logging.info(f"Loaded checkpoint from {filename}")
+    logging.info(f"Loaded checkpoint from {checkpoint_path}")
     return checkpoint
 
 
