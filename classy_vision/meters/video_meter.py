@@ -91,12 +91,6 @@ class VideoMeter(ClassyMeter):
             Note: For binary classification, C=2.
         """
         num_clips = len(model_output)
-        if num_clips == 0:
-            # It is possible that a minibatch entirely contains dummy samples
-            # when dataset is sharded. In such case, the effective target and output
-            # can be empty, and we immediately return
-            return
-
         clips_per_video = (
             self._clips_per_video_train if is_train else self._clips_per_video_test
         )

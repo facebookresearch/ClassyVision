@@ -648,11 +648,6 @@ class ClassificationTask(ClassyTask):
                 local_variables["output"], local_variables["sample"]
             )
 
-            # NOTE: This performs an all_reduce_mean() on the losses across the
-            # replicas.  The reduce should ideally be weighted by the length of
-            # the targets on each replica. This will only be an issue when
-            # there are dummy samples present (once an epoch) and will only
-            # impact the loss reporting (slightly).
             local_variables["loss"] = local_variables["local_loss"].detach().clone()
             local_variables["loss"] = all_reduce_mean(local_variables["loss"])
 
