@@ -599,7 +599,6 @@ class ClassificationTask(ClassyTask):
         # TODO (mannatsingh): Figure out how to set the state of the dataloaders
         # Re-build dataloader & re-create iterator.
         self._recreate_data_loader_from_dataset()
-        self._reshuffle_data()
         self.create_data_iterator()
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
@@ -721,7 +720,6 @@ class ClassificationTask(ClassyTask):
 
         # Re-build dataloader & re-create iterator anytime membership changes.
         self._recreate_data_loader_from_dataset()
-        self._reshuffle_data()
         self.create_data_iterator()
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
@@ -764,15 +762,6 @@ class ClassificationTask(ClassyTask):
             multiprocessing_context=multiprocessing_context,
             current_phase_id=current_phase_id,
         )
-
-    def _reshuffle_data(self):
-        """Shuffles the dataset if needed.
-        """
-        if hasattr(self.dataloaders[self.phase_type].dataset, "do_shuffle"):
-            self.dataloaders[self.phase_type].dataset.do_shuffle(
-                epoch_num=self.phase_idx
-            )
-            logging.info("Data shuffled.")
 
     def create_data_iterator(self):
         """Creates data iterator for phase.
