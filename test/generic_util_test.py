@@ -4,8 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import argparse
-import typing
+import shutil
+import tempfile
 import unittest
 import unittest.mock as mock
 from pathlib import Path
@@ -14,7 +14,13 @@ from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
-from classy_vision.generic.util import update_classy_model, update_classy_state
+from classy_vision.generic.util import (
+    CHECKPOINT_FILE,
+    load_checkpoint,
+    save_checkpoint,
+    update_classy_model,
+    update_classy_state,
+)
 from classy_vision.models import build_model
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
@@ -414,3 +420,40 @@ class TestUpdateStateFunctions(unittest.TestCase):
                         task_2.model.get_classy_state(),
                         check_heads=True,
                     )
+
+
+class TestCheckpointFunctions(unittest.TestCase):
+    def setUp(self):
+        # create a base directory to write checkpoints to
+        self.base_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        # delete all the temporary data created
+        shutil.rmtree(self.base_dir)
+
+    def test_save_and_load_checkpoint(self):
+        checkpoint_dict = {str(i): i * 2 for i in range(1000)}
+
+        # save to the default checkpoint file
+        save_checkpoint(self.base_dir, checkpoint_dict)
+
+        # load the checkpoint by using the default file
+        loaded_checkpoint = load_checkpoint(self.base_dir)
+        self.assertDictEqual(checkpoint_dict, loaded_checkpoint)
+
+        # load the checkpoint by passing the full path
+        checkpoint_path = f"{self.base_dir}/{CHECKPOINT_FILE}"
+        loaded_checkpoint = load_checkpoint(checkpoint_path)
+        self.assertDictEqual(checkpoint_dict, loaded_checkpoint)
+
+        # create a new checkpoint dict
+        filename = "my_checkpoint.torch"
+        checkpoint_dict = {str(i): i * 3 for i in range(1000)}
+
+        # save the checkpoint to a different file
+        save_checkpoint(self.base_dir, checkpoint_dict, checkpoint_file=filename)
+
+        # load the checkpoint by passing the full path
+        checkpoint_path = f"{self.base_dir}/{filename}"
+        loaded_checkpoint = load_checkpoint(checkpoint_path)
+        self.assertDictEqual(checkpoint_dict, loaded_checkpoint)
