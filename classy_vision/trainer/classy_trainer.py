@@ -4,10 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 from typing import Optional
 
 import torch
+from classy_vision.generic.distributed_util import barrier
 from classy_vision.tasks import ClassyTask
 
 
@@ -65,6 +65,10 @@ class ClassyTrainer:
             dataloader_mp_context=self.dataloader_mp_context,
         )
         assert isinstance(task, ClassyTask)
+
+        # make sure all the workers start training at the same time
+        # this helps catch hangs which would have happened elsewhere
+        barrier()
 
         local_variables = {}
 
