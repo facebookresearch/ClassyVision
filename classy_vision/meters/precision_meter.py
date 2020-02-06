@@ -139,12 +139,6 @@ class PrecisionAtKMeter(ClassyMeter):
                           multi-label encoded, or tensor of shape (B) /
                           (B, 1), integer encoded
         """
-        # Due to dummy samples, in some corner cases, the whole batch could
-        # be dummy samples, in that case we want to not update meters on that
-        # process
-        if model_output.shape[0] == 0:
-            return
-
         # Convert target to 0/1 encoding if isn't
         target = maybe_convert_to_one_hot(target, model_output)
 
