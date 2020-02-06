@@ -79,7 +79,13 @@ class ModelComplexityHook(ClassyHook):
 
     def get_summary(self):
         return {
-            "FLOPS(M)": float(self.num_flops) / 1e6,
-            "num_activations(M)": float(self.num_activations) / 1e6,
-            "num_parameters(M)": float(self.num_parameters) / 1e6,
+            "FLOPS(M)": float(self.num_flops) / 1e6
+            if self.num_flops is not None
+            else 0,
+            "num_activations(M)": float(self.num_activations) / 1e6
+            if self.num_activations is not None
+            else 0,
+            "num_parameters(M)": float(self.num_parameters) / 1e6
+            if self.num_parameters is not None
+            else 0,
         }
