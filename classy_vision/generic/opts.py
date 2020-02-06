@@ -34,19 +34,27 @@ def add_generic_args(parser):
         "--checkpoint_folder",
         default="",
         type=str,
-        help="""folder to use for checkpoints:
+        help="""folder to use for saving checkpoints:
                         epochal checkpoints are stored as model_<epoch>.torch,
                         latest epoch checkpoint is at checkpoint.torch""",
     )
     parser.add_argument(
-        "--pretrained_checkpoint_folder",
+        "--checkpoint_load_path",
         default="",
         type=str,
-        help="""folder to use for pre-trained checkpoints:
-                        epochal checkpoints are stored as model_<epoch>.torch,
-                        latest epoch checkpoint is at checkpoint.torch,
-                        checkpoint is used for fine-tuning task, and it will
-                        not resume training from the checkpoint""",
+        help="""path to load a checkpoint from, which can be a file or a directory:
+                        If the path is a directory, the checkpoint file is assumed to be
+                        checkpoint.torch""",
+    )
+    parser.add_argument(
+        "--pretrained_checkpoint_path",
+        default="",
+        type=str,
+        help="""path to load a pre-trained checkpoints from, which can be a file or a
+                        directory:
+                        If the path is a directory, the checkpoint file is assumed to be
+                        checkpoint.torch. This checkpoint is only used for fine-tuning
+                        tasks, and training will not resume from this checkpoint.""",
     )
     parser.add_argument(
         "--checkpoint_period",
