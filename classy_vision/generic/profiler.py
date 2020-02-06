@@ -128,7 +128,7 @@ def _layer_flops(layer, x, _):
         return count1 + count2
 
     # non-linearities:
-    elif layer_type in ["ReLU", "Tanh", "Sigmoid", "Softmax"]:
+    elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax"]:
         return x.numel()
 
     # 2D pooling layers:
@@ -229,6 +229,26 @@ def _layer_flops(layer, x, _):
             (in_w + 2 * layer.padding[2] - layer.kernel_size[2]) / layer.stride[2]
         )
         return batchsize_per_replica * x.size()[1] * out_t * out_h * out_w * kernel_ops
+
+    # adaptive avg pool3d
+    # This is approximate and works only for downsampling without padding
+    # based on aten/src/ATen/native/AdaptiveAveragePooling3d.cpp
+    elif layer_type in ["AdaptiveAvgPool3d"]:
+        in_t = x.size()[2]
+        in_h = x.size()[3]
+        in_w = x.size()[4]
+        out_t = layer.output_size[0]
+        out_h = layer.output_size[1]
+        out_w = layer.output_size[2]
+        if out_t > in_t or out_h > in_h or out_w > in_w:
+            raise NotImplementedError()
+        batchsize_per_replica = x.size()[0]
+        num_channels = x.size()[1]
+        kt = in_t - out_t + 1
+        kh = in_h - out_h + 1
+        kw = in_w - out_w + 1
+        kernel_ops = kt * kh * kw
+        return batchsize_per_replica * num_channels * out_t * out_w * out_h * kernel_ops
 
     # dropout layer
     elif layer_type in ["Dropout"]:
