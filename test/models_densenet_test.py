@@ -15,12 +15,21 @@ MODELS = {
     "small_densenet": {
         "name": "densenet",
         "num_blocks": [1, 1, 1, 1],
-        "num_classes": 1000,
         "init_planes": 4,
         "growth_rate": 32,
         "expansion": 4,
         "final_bn_relu": True,
         "small_input": True,
+        "heads": [
+            {
+                "name": "fully_connected",
+                "unique_id": "default_head",
+                "num_classes": 1000,
+                "fork_block": "trunk_output",
+                "in_plane": 60,
+                "zero_init_bias": True,
+            }
+        ],
     }
 }
 
@@ -49,5 +58,5 @@ class TestDensenet(unittest.TestCase):
 
         compare_model_state(self, state, new_state, check_heads=True)
 
-    def test_small_resnet(self):
+    def test_small_densenet(self):
         self._test_model(MODELS["small_densenet"])

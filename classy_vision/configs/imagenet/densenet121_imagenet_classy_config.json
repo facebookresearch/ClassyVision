@@ -50,8 +50,17 @@
     "model": {
         "name": "densenet",
         "num_blocks": [6, 12, 24, 16],
-        "num_classes": 1000,
-        "small_input": false
+        "small_input": false,
+        "heads": [
+            {
+                "name": "fully_connected",
+                "unique_id": "default_head",
+                "num_classes": 1000,
+                "fork_block": "trunk_output",
+                "in_plane": 1024,
+                "zero_init_bias": true
+            }
+        ]
     },
     "optimizer": {
         "name": "sgd",

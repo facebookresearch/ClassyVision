@@ -18,7 +18,13 @@ class FullyConnectedHead(ClassyHead):
     layer (:class:`torch.nn.Linear`).
     """
 
-    def __init__(self, unique_id: str, num_classes: int, in_plane: int):
+    def __init__(
+        self,
+        unique_id: str,
+        num_classes: int,
+        in_plane: int,
+        zero_init_bias: bool = False,
+    ):
         """Constructor for FullyConnectedHead
 
         Args:
@@ -37,6 +43,9 @@ class FullyConnectedHead(ClassyHead):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = None if num_classes is None else nn.Linear(in_plane, num_classes)
 
+        if zero_init_bias:
+            self.fc.bias.data.zero_()
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "FullyConnectedHead":
         """Instantiates a FullyConnectedHead from a configuration.
@@ -50,7 +59,12 @@ class FullyConnectedHead(ClassyHead):
         """
         num_classes = config.get("num_classes", None)
         in_plane = config["in_plane"]
-        return cls(config["unique_id"], num_classes, in_plane)
+        return cls(
+            config["unique_id"],
+            num_classes,
+            in_plane,
+            zero_init_bias=config.get("zero_init_bias", False),
+        )
 
     def forward(self, x):
         # perform average pooling:
