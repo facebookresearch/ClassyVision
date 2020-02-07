@@ -95,9 +95,11 @@ class ElasticTrainer(ClassyTrainer):
 
         if state.advance_to_next_phase:
             logging.info("Begin advance_phase")
+            self.elastic_coordinator._log_event("before advance_phase")
             state.task.advance_phase()
             self.elastic_coordinator.barrier()
             logging.info("Done advance_phase")
+            self.elastic_coordinator._log_event("after advance_phase")
 
             # Start phase hooks
             state.task.run_hooks(
