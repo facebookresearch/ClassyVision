@@ -4,7 +4,8 @@ checkpoint_folder: ""
 checkpoint_period: 1
 log_freq: 5
 num_workers: 4
-pretrained_checkpoint_folder: ""
+checkpoint_load_path: ""
+pretrained_checkpoint_path: ""
 profiler: False
 skip_tensorboard: False
 show_progress: False
