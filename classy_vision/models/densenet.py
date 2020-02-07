@@ -62,29 +62,6 @@ class _DenseLayer(nn.Sequential):
         return torch.cat([x, new_features], 1)
 
 
-class _DenseBlock(nn.Sequential):
-    """
-        Block of densely connected layers at same resolution.
-    """
-
-    def __init__(self, num_layers, in_planes, growth_rate=32, expansion=4):
-
-        # assertions:
-        assert is_pos_int(in_planes)
-        assert is_pos_int(growth_rate)
-        assert is_pos_int(expansion)
-
-        # create block of dense layers at same resolution:
-        super(_DenseBlock, self).__init__()
-        for idx in range(num_layers):
-            layer = _DenseLayer(
-                in_planes + idx * growth_rate,
-                growth_rate=growth_rate,
-                expansion=expansion,
-            )
-            self.add_module("denselayer-%d" % (idx + 1), layer)
-
-
 class _Transition(nn.Sequential):
     """
         Transition layer to reduce spatial resolution.
@@ -130,6 +107,13 @@ class DenseNet(ClassyModel):
             Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
             layers. These settings are useful when
             training Siamese networks.
+
+            Contains the following attachable blocks:
+                block{block_idx}-{idx}: This is the output of each dense block,
+                    indexed by the block index and the index of the dense layer
+                transition-{idx}: This is the output of the transition layers
+                trunk_output: The final output of the `DenseNet`. This is
+                    where a `fully_connected` head is normally attached.
         """
         super().__init__()
 
@@ -165,31 +149,28 @@ class DenseNet(ClassyModel):
             )
         # loop over spatial resolutions:
         num_planes = init_planes
-        self.features = nn.Sequential()
+        blocks = []
         for idx, num_layers in enumerate(num_blocks):
-
-            # add dense block:
-            block = _DenseBlock(
-                num_layers, num_planes, growth_rate=growth_rate, expansion=expansion
+            # add dense block
+            block = self._make_dense_block(
+                num_layers,
+                num_planes,
+                idx,
+                growth_rate=growth_rate,
+                expansion=expansion,
             )
-            self.features.add_module("denseblock-%d" % (idx + 1), block)
+            blocks.append(block)
             num_planes = num_planes + num_layers * growth_rate
 
             # add transition layer:
             if idx != len(num_blocks) - 1:
                 trans = _Transition(num_planes, num_planes // 2)
-                self.features.add_module("transition-%d" % (idx + 1), trans)
+                blocks.append(self.build_attachable_block(f"transition-{idx}", trans))
                 num_planes = num_planes // 2
 
-        # final batch normalization:
-        if final_bn_relu:
-            self.features.add_module("norm-final", nn.BatchNorm2d(num_planes))
-            self.features.add_module("relu-final", nn.ReLU(inplace=INPLACE))
+        blocks.append(self._make_trunk_output_block(num_planes, final_bn_relu))
 
-        # final classifier:
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = None if num_classes is None else nn.Linear(num_planes, num_classes)
-        self.num_planes = num_planes
+        self.features = nn.Sequential(*blocks)
 
         # initialize weights of convolutional and batchnorm layers:
         for m in self.modules():
@@ -201,6 +182,36 @@ class DenseNet(ClassyModel):
                 m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
                 m.bias.data.zero_()
+
+    def _make_trunk_output_block(self, num_planes, final_bn_relu):
+        layers = nn.Sequential()
+        if final_bn_relu:
+            # final batch normalization:
+            layers.add_module("norm-final", nn.BatchNorm2d(num_planes))
+            layers.add_module("relu-final", nn.ReLU(inplace=INPLACE))
+        return self.build_attachable_block("trunk_output", layers)
+
+    def _make_dense_block(
+        self, num_layers, in_planes, block_idx, growth_rate=32, expansion=4
+    ):
+        assert is_pos_int(in_planes)
+        assert is_pos_int(growth_rate)
+        assert is_pos_int(expansion)
+
+        # create a block of dense layers at same resolution:
+        layers = []
+        for idx in range(num_layers):
+            layers.append(
+                self.build_attachable_block(
+                    f"block{block_idx}-{idx}",
+                    _DenseLayer(
+                        in_planes + idx * growth_rate,
+                        growth_rate=growth_rate,
+                        expansion=expansion,
+                    ),
+                )
+            )
+        return nn.Sequential(*layers)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "DenseNet":
@@ -234,14 +245,16 @@ class DenseNet(ClassyModel):
         # evaluate all dense blocks:
         out = self.features(out)
 
-        # perform average pooling:
-        out = self.avgpool(out)
-
-        # final classifier:
-        out = out.view(out.size(0), -1)
-        if self.fc is not None:
-            out = self.fc(out)
-        return out
+        # By default the classification layer is implemented as one head on top
+        # of the last block. The head is automatically computed right after the
+        # last block.
+        head_outputs = self.execute_heads()
+        if len(head_outputs) == 0:
+            raise Exception("Expecting at least one head that generates output")
+        elif len(head_outputs) == 1:
+            return list(head_outputs.values())[0]
+        else:
+            return head_outputs
 
     def get_optimizer_params(self):
         # use weight decay on BatchNorm for DenseNets
