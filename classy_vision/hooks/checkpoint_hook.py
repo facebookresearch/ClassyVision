@@ -40,16 +40,16 @@ class CheckpointHook(ClassyHook):
             checkpoint_folder: Folder to store checkpoints in
             input_args: Any arguments to save about the runtime setup. For example,
                 it is useful to store the config that was used to instantiate the model.
-            phase_types: If ``phase_types`` is specified, only checkpoint on those phase
-                types. Each item in ``phase_types`` must be either "train" or "test".
+            phase_types: If `phase_types` is specified, only checkpoint on those phase
+                types. Each item in `phase_types` must be either "train" or "test". If
+                not specified, it is set to checkpoint after "train" phases.
             checkpoint_period: Checkpoint at the end of every x phases (default 1)
-
         """
         super().__init__()
         self.checkpoint_folder: str = checkpoint_folder
         self.input_args: Any = input_args
         if phase_types is None:
-            phase_types = ["train", "test"]
+            phase_types = ["train"]
         assert len(phase_types) > 0 and all(
             phase_type in ["train", "test"] for phase_type in phase_types
         ), "phase_types should contain one or more of ['train', 'test']"
@@ -81,7 +81,7 @@ class CheckpointHook(ClassyHook):
     def on_start(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
-        if getattr(task, "test_only", False):
+        if not is_master() or getattr(task, "test_only", False):
             return
         if not PathManager.exists(self.checkpoint_folder):
             err_msg = "Checkpoint folder '{}' does not exist.".format(
