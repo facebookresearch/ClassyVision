@@ -217,7 +217,6 @@ class ElasticTrainer(ClassyTrainer):
             # currently.
             for phase_type in self.task.datasets.keys():
                 self.task._recreate_data_loader_from_dataset(phase_type)
-            self.task._reshuffle_data()
             self.task.create_data_iterator()
             # Set up pytorch module in train vs eval mode, update optimizer.
             self.task._set_model_train_mode()
