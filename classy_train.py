@@ -129,7 +129,7 @@ def configure_hooks(args, config):
         try:
             from tensorboardX import SummaryWriter
 
-            tb_writer = SummaryWriter(log_dir=base_folder / "tensorboard")
+            tb_writer = SummaryWriter(log_dir=Path(base_folder) / "tensorboard")
             hooks.append(TensorboardPlotHook(tb_writer))
         except ImportError:
             logging.warning("tensorboardX not installed, skipping tensorboard hooks")
