@@ -719,6 +719,10 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
+        # Update the optimizer schedule
+        if self.train and self.train_phase_idx >= 0:
+            self.optimizer.update_schedule_on_epoch(self.where)
+
     def done_training(self):
         """Stop condition for training
         """
@@ -777,9 +781,6 @@ class ClassificationTask(ClassyTask):
             and not self.train
         ):
             self._broadcast_buffers()
-
-        if self.train and self.train_phase_idx >= 0:
-            self.optimizer.update_schedule_on_epoch(self.where)
 
     def _broadcast_buffers(self):
         """Explicitly synchronize buffers across all devices."""
