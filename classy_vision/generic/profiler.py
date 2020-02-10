@@ -58,6 +58,16 @@ def profile(
 def _layer_flops(layer, x, _):
     """
     Computes the number of FLOPs required for a single layer.
+
+    For common layers, such as Conv1d, the flop compute is implemented in this
+    centralized place.
+    For other layers, if it defines a method to compute flops with the signature
+    below, we will use it to compute flops.
+
+    Class MyModule(nn.Module):
+        def flops(self, x):
+            ...
+
     """
 
     # get layer type:
@@ -258,6 +268,13 @@ def _layer_flops(layer, x, _):
         for dim_size in x.size():
             flops *= dim_size
         return flops
+    elif hasattr(layer, "flops"):
+        # If the module already defines a method to compute flops with the signature
+        # below, we use it to compute flops
+        #
+        #   def flops(self, x):
+        #       ...
+        return layer.flops(x)
 
     # not implemented:
     raise NotImplementedError("FLOPs not implemented for %s layer" % layer_type)
