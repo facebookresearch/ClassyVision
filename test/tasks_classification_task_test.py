@@ -4,14 +4,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import shutil
+import tempfile
 import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from test.generic.utils import compare_model_state, compare_samples, compare_states
 
 import torch
 from classy_vision.dataset import build_dataset
-from classy_vision.generic.util import get_checkpoint_dict
-from classy_vision.hooks import LossLrMeterLoggingHook
+from classy_vision.generic.util import get_checkpoint_dict, load_checkpoint
+from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
@@ -28,6 +30,14 @@ class TestClassificationTask(unittest.TestCase):
 
     def _compare_states(self, state_1, state_2, check_heads=True):
         compare_states(self, state_1, state_2)
+
+    def setUp(self):
+        # create a base directory to write checkpoints to
+        self.base_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        # delete all the temporary data created
+        shutil.rmtree(self.base_dir)
 
     def test_build_task(self):
         config = get_test_task_config()
@@ -89,6 +99,35 @@ class TestClassificationTask(unittest.TestCase):
             task.train_step(use_gpu, local_variables)
             task_2.train_step(use_gpu, local_variables)
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
+
+    def test_final_train_checkpoint(self):
+        """Test that a train phase checkpoint with a where of 1.0 can be loaded"""
+
+        config = get_fast_test_task_config()
+        task = build_task(config).set_hooks(
+            [CheckpointHook(self.base_dir, {}, phase_types=["train"])]
+        )
+        task_2 = build_task(config)
+
+        use_gpu = torch.cuda.is_available()
+
+        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer.train(task)
+
+        # load the final train checkpoint
+        checkpoint = load_checkpoint(self.base_dir)
+
+        # make sure fetching the where raises an exception, which means that
+        # where is >= 1.0
+        with self.assertRaises(Exception):
+            task.where
+
+        # set task_2's state as task's final train checkpoint
+        task_2.set_checkpoint(checkpoint)
+        task_2.prepare(use_gpu=use_gpu)
+
+        # we should be able to train the task
+        trainer.train(task_2)
 
     def test_test_only_checkpointing(self):
         """
