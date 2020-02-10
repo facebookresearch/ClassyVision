@@ -66,9 +66,6 @@ class FineTuningTask(ClassificationTask):
         else:
             self.base_model.train(phase["train"])
 
-        if self.train and self.train_phase_idx >= 0:
-            self.optimizer.update_schedule_on_epoch(self.where)
-
     def prepare(
         self,
         num_dataloader_workers: int = 0,
