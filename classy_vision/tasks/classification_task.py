@@ -606,6 +606,52 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
+    def eval_step(self, use_gpu, local_variables=None):
+        if local_variables is None:
+            local_variables = {}
+
+        # Process next sample
+        sample = next(self.get_data_iterator())
+        local_variables["sample"] = sample
+
+        assert (
+            isinstance(local_variables["sample"], dict)
+            and "input" in local_variables["sample"]
+            and "target" in local_variables["sample"]
+        ), (
+            f"Returned sample [{sample}] is not a map with 'input' and"
+            + "'target' keys"
+        )
+
+        # Copy sample to GPU
+        local_variables["target"] = local_variables["sample"]["target"]
+        if use_gpu:
+            for key, value in local_variables["sample"].items():
+                local_variables["sample"][key] = recursive_copy_to_gpu(
+                    value, non_blocking=True
+                )
+
+        with torch.no_grad():
+            local_variables["output"] = self.model(local_variables["sample"]["input"])
+
+            self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
+
+            local_variables["local_loss"] = self.compute_loss(
+                local_variables["output"], local_variables["sample"]
+            )
+
+            local_variables["loss"] = local_variables["local_loss"].detach().clone()
+            local_variables["loss"] = all_reduce_mean(local_variables["loss"])
+
+            self.losses.append(
+                local_variables["loss"].data.cpu().item()
+                * local_variables["target"].size(0)
+            )
+
+            self.update_meters(local_variables["output"], local_variables["sample"])
+
+            self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
+
     def train_step(self, use_gpu, local_variables=None):
         """Train step to be executed in train loop
 
@@ -639,9 +685,7 @@ class ClassificationTask(ClassyTask):
                     value, non_blocking=True
                 )
 
-        # Only need gradients during training
-        context = torch.enable_grad() if self.train else torch.no_grad()
-        with context:
+        with torch.enable_grad():
             # Forward pass
             local_variables["output"] = self.model(local_variables["sample"]["input"])
 
@@ -665,23 +709,22 @@ class ClassificationTask(ClassyTask):
             # `LossLrMeterLoggingHook` will log both loss and meter status
             self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
 
-        # For training phases, run backwards pass / update optimizer
-        if self.train:
-            if self.amp_opt_level is not None:
-                self.optimizer.zero_grad()
-                with apex.amp.scale_loss(
-                    local_variables["local_loss"], self.optimizer.optimizer
-                ) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                self.optimizer.backward(local_variables["local_loss"])
+        # Run backwards pass / update optimizer
+        if self.amp_opt_level is not None:
+            self.optimizer.zero_grad()
+            with apex.amp.scale_loss(
+                local_variables["local_loss"], self.optimizer.optimizer
+            ) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            self.optimizer.backward(local_variables["local_loss"])
 
-            self.optimizer.update_schedule_on_step(self.where)
-            self.optimizer.step()
+        self.optimizer.update_schedule_on_step(self.where)
+        self.optimizer.step()
 
-            self.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
+        self.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
 
-            self.num_updates += self.get_global_batchsize()
+        self.num_updates += self.get_global_batchsize()
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
