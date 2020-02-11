@@ -156,6 +156,26 @@ class ClassyTask(ABC):
         """
         pass
 
+    @abstractmethod
+    def eval_step(self, use_gpu, local_variables: Optional[Dict] = None) -> None:
+        """
+        Run an evaluation step.
+
+        This corresponds to evaluating the model over one batch of data.
+
+        Args:
+            use_gpu: True if training on GPUs, False otherwise
+            local_variables: Local variables created in the function. Can be passed to
+                custom :class:`classy_vision.hooks.ClassyHook`.
+        """
+        pass
+
+    def step(self, use_gpu, local_variables: Optional[Dict] = None) -> None:
+        if self.train:
+            self.train_step(use_gpu, local_variables)
+        else:
+            self.eval_step(use_gpu, local_variables)
+
     def run_hooks(self, local_variables: Dict[str, Any], hook_function: str) -> None:
         """
         Helper function that runs a hook function for all the

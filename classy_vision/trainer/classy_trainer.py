@@ -77,7 +77,7 @@ class ClassyTrainer:
             task.on_phase_start(local_variables)
             while True:
                 try:
-                    task.train_step(self.use_gpu, local_variables)
+                    task.step(self.use_gpu, local_variables)
                 except StopIteration:
                     break
             task.on_phase_end(local_variables)

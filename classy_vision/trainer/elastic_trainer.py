@@ -114,7 +114,7 @@ class ElasticTrainer(ClassyTrainer):
                 state.advance_to_next_phase = True
                 state.skip_current_phase = False  # Reset flag
             else:
-                state.task.train_step(use_gpu, local_variables)
+                state.task.step(use_gpu, local_variables)
         except StopIteration:
             state.advance_to_next_phase = True
         if state.advance_to_next_phase:
