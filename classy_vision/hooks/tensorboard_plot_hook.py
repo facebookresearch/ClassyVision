@@ -140,6 +140,20 @@ class TensorboardPlotHook(ClassyHook):
                     )
                     continue
 
+        if hasattr(task, "perf_log"):
+            for perf in task.perf_log:
+                phase_idx = perf["phase_idx"]
+                tag = perf["tag"]
+                for metric_name, metric_value in perf.items():
+                    if metric_name in ["phase_idx", "tag"]:
+                        continue
+
+                    self.tb_writer.add_scalar(
+                        f"Speed/{tag}/{metric_name}",
+                        metric_value,
+                        global_step=phase_idx,
+                    )
+
         # flush so that the plots aren't lost if training crashes soon after
         self.tb_writer.flush()
         logging.info(f"Done plotting to Tensorboard")
