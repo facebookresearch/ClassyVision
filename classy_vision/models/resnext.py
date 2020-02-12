@@ -262,6 +262,10 @@ class ResNeXt(ClassyModel):
             and is_pos_int(base_width_and_cardinality[1])
         )
 
+        # we apply weight decay to batch norm if the model is a ResNeXt and we don't if
+        # it is a ResNet
+        self.bn_weight_decay = base_width_and_cardinality is not None
+
         # initial convolutional block:
         self.num_blocks = num_blocks
         self.small_input = small_input
@@ -392,6 +396,9 @@ class ResNeXt(ClassyModel):
             return list(head_outputs.values())[0]
         else:
             return head_outputs
+
+    def get_optimizer_params(self):
+        return super().get_optimizer_params(bn_weight_decay=self.bn_weight_decay)
 
     @property
     def input_shape(self):
