@@ -42,3 +42,43 @@ class ClassyLoss(nn.Module):
         Refer to :class:`torch.nn.Module` for more details.
         """
         raise NotImplementedError
+
+    def get_optimizer_params(self, bn_weight_decay=False):
+        """Gets optimizer params.
+
+        The default implementation is very simple. Most losses have no learned
+        parameters, so this is rarely needed.
+        """
+        params = [
+            param for param in self.parameters(recurse=True) if param.requires_grad
+        ]
+        return {"regularized_params": params, "unregularized_params": []}
+
+    def get_classy_state(self) -> Dict[str, Any]:
+        """Get the state of the ClassyLoss.
+
+        The returned state is used for checkpointing. Note that most losses are
+        stateless and do not need to save any state.
+
+        Returns:
+            A state dictionary containing the state of the loss.
+        """
+        return self.state_dict()
+
+    def set_classy_state(self, state: Dict[str, Any]) -> None:
+        """Set the state of the ClassyLoss.
+
+        Args:
+            state_dict: The state dictionary. Must be the output of a call to
+                :func:`get_classy_state`.
+
+        This is used to load the state of the loss from a checkpoint. Note
+        that most losses are stateless and do not need to load any state.
+        """
+        return self.load_state_dict(state)
+
+    def has_learned_parameters(self) -> bool:
+        """Does this loss have learned parameters?"""
+        return any(
+            len(params) > 0 for (_, params) in self.get_optimizer_params().items()
+        )
