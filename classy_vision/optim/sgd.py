@@ -27,8 +27,8 @@ class SGD(ClassyOptimizer):
         self.parameters.weight_decay = weight_decay
         self.parameters.nesterov = nesterov
 
-    def init_pytorch_optimizer(self, model):
-        super().init_pytorch_optimizer(model)
+    def init_pytorch_optimizer(self, model, **kwargs):
+        super().init_pytorch_optimizer(model, **kwargs)
         self.optimizer = torch.optim.SGD(
             self.param_groups_override,
             lr=self.parameters.lr,

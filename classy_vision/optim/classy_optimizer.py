@@ -4,9 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 import torch
+from classy_vision.losses import ClassyLoss
 from classy_vision.models import ClassyModel
 
 from .param_scheduler import ClassyParamScheduler, UpdateInterval
@@ -61,24 +62,9 @@ class ClassyOptimizer:
         )
         return self
 
-    def _validate_and_get_optimizer_params(self, model: ClassyModel) -> Dict[str, Any]:
-        """
-        Validate and return the optimizer params.
-
-        The optimizer params are fetched from
-        :fun:`models.ClassyModel.get_optimizer_params`.
-
-        Args:
-            model: The model to get the params from.
-
-        Returns:
-            A dict containing "regularized_params" and "unregularized_params".
-            Weight decay will only be applied to "regularized_params".
-        """
-        if isinstance(model, torch.nn.parallel.DistributedDataParallel):
-            optimizer_params = model.module.get_optimizer_params()
-        else:
-            optimizer_params = model.get_optimizer_params()
+    @staticmethod
+    def _validate_optimizer_params(model: Union[ClassyLoss, ClassyModel]):
+        optimizer_params = model.get_optimizer_params()
 
         assert isinstance(optimizer_params, dict) and set(optimizer_params.keys()) == {
             "regularized_params",
@@ -100,6 +86,39 @@ class ClassyOptimizer:
 
         return optimizer_params
 
+    def _validate_and_get_optimizer_params(
+        self, model: ClassyModel, loss: Optional[Union[ClassyLoss, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Validate and return the optimizer params.
+
+        The optimizer params are fetched from
+        :fun:`models.ClassyModel.get_optimizer_params`.
+
+        Args:
+            model: The model to get the params from.
+            loss: The loss. If present, and a ClassyLoss, then the loss may
+                also contirbute parameters.
+
+        Returns:
+            A dict containing "regularized_params" and "unregularized_params".
+            Weight decay will only be applied to "regularized_params".
+        """
+        if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+            model = model.module
+
+        optimizer_params = self._validate_optimizer_params(model)
+
+        if loss is not None and isinstance(loss, ClassyLoss):
+            loss_params = self._validate_optimizer_params(loss)
+            # Merge loss and model params.
+            optimizer_params = {
+                key: value + loss_params[key]
+                for (key, value) in optimizer_params.items()
+            }
+
+        return optimizer_params
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
         """Instantiates a ClassyOptimizer from a configuration.
@@ -112,7 +131,9 @@ class ClassyOptimizer:
         """
         raise NotImplementedError
 
-    def init_pytorch_optimizer(self, model: ClassyModel) -> None:
+    def init_pytorch_optimizer(
+        self, model: ClassyModel, loss: Optional[Union[ClassyLoss, Any]] = None
+    ) -> None:
         """
         Initialize the underlying :class:`torch.optim.Optimizer` instance.
 
@@ -129,7 +150,7 @@ class ClassyOptimizer:
             This should called only after the model has been moved to the correct
             device.
         """
-        self.optimizer_params = self._validate_and_get_optimizer_params(model)
+        self.optimizer_params = self._validate_and_get_optimizer_params(model, loss)
 
         param_groups_override = []
         self.contains_unregularized_params = False

@@ -32,8 +32,8 @@ class RMSProp(ClassyOptimizer):
         self.parameters.eps = eps
         self.parameters.centered = centered
 
-    def init_pytorch_optimizer(self, model):
-        super().init_pytorch_optimizer(model)
+    def init_pytorch_optimizer(self, model, **kwargs):
+        super().init_pytorch_optimizer(model, **kwargs)
         self.optimizer = torch.optim.RMSprop(
             self.param_groups_override,
             lr=self.parameters.lr,

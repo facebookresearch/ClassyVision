@@ -478,15 +478,14 @@ class ClassificationTask(ClassyTask):
 
         # move the model and loss to the right device
         if use_gpu:
-            self.loss.cuda()
-            self.base_model = copy_model_to_gpu(self.base_model)
+            self.base_model, self.loss = copy_model_to_gpu(self.base_model, self.loss)
         else:
             self.loss.cpu()
             self.base_model.cpu()
 
         # initialize the pytorch optimizer now since the model has been moved to
         # the appropriate device
-        self.optimizer.init_pytorch_optimizer(self.base_model)
+        self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
 
         classy_state_dict = (
             None
@@ -528,6 +527,11 @@ class ClassificationTask(ClassyTask):
         self.distributed_model = init_distributed_data_parallel_model(
             self.base_model, broadcast_buffers=broadcast_buffers
         )
+        if isinstance(self.loss, ClassyLoss) and self.loss.has_learned_parameters():
+            logging.info("Initializing distributed loss")
+            self.loss = init_distributed_data_parallel_model(
+                self.loss, broadcast_buffers=broadcast_buffers
+            )
 
     @property
     def where(self):
@@ -569,7 +573,10 @@ class ClassificationTask(ClassyTask):
             "num_updates": self.num_updates,
             "losses": self.losses,
             "hooks": {hook.name(): hook.get_classy_state() for hook in self.hooks},
+            "loss": {},
         }
+        if isinstance(self.loss, ClassyLoss):
+            classy_state_dict["loss"] = self.loss.get_classy_state()
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
         return classy_state_dict
@@ -592,6 +599,9 @@ class ClassificationTask(ClassyTask):
 
         self.base_model.set_classy_state(state["base_model"])
         self.optimizer.set_classy_state(state["optimizer"])
+        if state.get("loss") and isinstance(self.loss, ClassyLoss):
+            self.loss.set_classy_state(state["loss"])
+
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
             # hooks are removed
@@ -821,6 +831,7 @@ class ClassificationTask(ClassyTask):
         """
         phase = self.phases[self.phase_idx]
         self.base_model.train(phase["train"])
+        self.loss.train(phase["train"])
 
         if (
             self.broadcast_buffers_mode == BroadcastBuffersMode.BEFORE_EVAL
