@@ -107,6 +107,7 @@ class ClassificationTask(ClassyTask):
         self.datasets = {}
         self.meters = []
         self.num_epochs = 1
+        self.test_phase_period = 1
         self.test_only = False
         self.base_model = None
         self.optimizer = None
@@ -144,6 +145,15 @@ class ClassificationTask(ClassyTask):
            num_epochs: Number of epochs to run task
         """
         self.num_epochs = num_epochs
+        return self
+
+    def set_test_phase_period(self, test_phase_period: int):
+        """Set the period of test phase.
+
+        Args:
+            test_phase_period: The period of test phase
+        """
+        self.test_phase_period = test_phase_period
         return self
 
     def set_dataset(self, dataset: ClassyDataset, phase_type: str):
@@ -295,6 +305,7 @@ class ClassificationTask(ClassyTask):
         task = (
             cls()
             .set_num_epochs(config["num_epochs"])
+            .set_test_phase_period(config.get("test_phase_period", 1))
             .set_loss(loss)
             .set_test_only(test_only)
             .set_model(model)
@@ -378,8 +389,11 @@ class ClassificationTask(ClassyTask):
             phases = [{"train": True} for _ in range(self.num_epochs)]
 
             final_phases = []
-            for phase in phases:
+            for i, phase in enumerate(phases):
                 final_phases.append(phase)
+                if (i + 1) % self.test_phase_period == 0:
+                    final_phases.append({"train": False})
+            if final_phases[-1]["train"]:
                 final_phases.append({"train": False})
             return final_phases
 
