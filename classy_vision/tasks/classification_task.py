@@ -519,9 +519,7 @@ class ClassificationTask(ClassyTask):
             self.base_model, self.optimizer.optimizer = apex.amp.initialize(
                 self.base_model, self.optimizer.optimizer, opt_level=self.amp_opt_level
             )
-
-        if is_distributed_training_run():
-            self.init_distributed_data_parallel_model()
+        self.init_distributed_data_parallel_model()
 
     def init_distributed_data_parallel_model(self):
         """
@@ -531,6 +529,8 @@ class ClassificationTask(ClassyTask):
 
         Needed for distributed training. This is where a model should be wrapped by DDP.
         """
+        if not is_distributed_training_run():
+            return
         assert (
             self.distributed_model is None
         ), "init_ddp_non_elastic must only be called once"
