@@ -100,3 +100,6 @@ class FineTuningTask(ClassificationTask):
                 for h in heads.values():
                     for param in h.parameters():
                         param.requires_grad = True
+            # re-create ddp model
+            self.distributed_model = None
+            super().init_distributed_data_parallel_model()
