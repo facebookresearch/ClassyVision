@@ -46,16 +46,16 @@ class TestProgressBarHook(unittest.TestCase):
         mock_progress_bar.start.reset_mock()
         mock_progressbar_pkg.ProgressBar.reset_mock()
 
-        # on_update should update the progress bar correctly
+        # on_step should update the progress bar correctly
         for i in range(num_batches):
-            progress_bar_hook.on_update(task, local_variables)
+            progress_bar_hook.on_step(task, local_variables)
             mock_progress_bar.update.assert_called_once_with(i + 1)
             mock_progress_bar.update.reset_mock()
 
-        # check that even if on_update is called again, the progress bar is
+        # check that even if on_step is called again, the progress bar is
         # only updated with num_batches
         for _ in range(num_batches):
-            progress_bar_hook.on_update(task, local_variables)
+            progress_bar_hook.on_step(task, local_variables)
             mock_progress_bar.update.assert_called_once_with(num_batches)
             mock_progress_bar.update.reset_mock()
 
@@ -68,7 +68,7 @@ class TestProgressBarHook(unittest.TestCase):
         # crash
         progress_bar_hook = ProgressBarHook()
         try:
-            progress_bar_hook.on_update(task, local_variables)
+            progress_bar_hook.on_step(task, local_variables)
             progress_bar_hook.on_phase_end(task, local_variables)
         except Exception as e:
             self.fail(
@@ -81,7 +81,7 @@ class TestProgressBarHook(unittest.TestCase):
         progress_bar_hook = ProgressBarHook()
         try:
             progress_bar_hook.on_phase_start(task, local_variables)
-            progress_bar_hook.on_update(task, local_variables)
+            progress_bar_hook.on_step(task, local_variables)
             progress_bar_hook.on_phase_end(task, local_variables)
         except Exception as e:
             self.fail("Received Exception when is_master() is False: {}".format(e))

@@ -30,7 +30,7 @@ class ClassyHook(ABC):
     are listed below in the chronological order.
 
         on_start -> on_phase_start -> on_forward -> on_loss_and_meter ->
-            on_update -> on_phase_end -> on_end
+            on_step -> on_phase_end -> on_end
 
     Deriving classes should call ``super().__init__()`` and store any state in
     ``self.state``. Any state added to this property should be serializable.
@@ -93,7 +93,7 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_update(
+    def on_step(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """Called each time after parameters have been updated by the optimizer."""
