@@ -658,8 +658,6 @@ class ClassificationTask(ClassyTask):
         with torch.no_grad():
             local_variables["output"] = self.model(local_variables["sample"]["input"])
 
-            self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
-
             local_variables["local_loss"] = self.compute_loss(
                 local_variables["output"], local_variables["sample"]
             )
@@ -712,8 +710,6 @@ class ClassificationTask(ClassyTask):
         with torch.enable_grad():
             # Forward pass
             local_variables["output"] = self.model(local_variables["sample"]["input"])
-
-            self.run_hooks(local_variables, ClassyHookFunctions.on_forward.name)
 
             local_variables["local_loss"] = self.compute_loss(
                 local_variables["output"], local_variables["sample"]
