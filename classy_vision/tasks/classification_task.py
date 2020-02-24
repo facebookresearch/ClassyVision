@@ -746,8 +746,6 @@ class ClassificationTask(ClassyTask):
         self.optimizer.update_schedule_on_step(self.where)
         self.optimizer.step()
 
-        self.run_hooks(local_variables, ClassyHookFunctions.on_update.name)
-
         self.num_updates += self.get_global_batchsize()
 
     def compute_loss(self, model_output, sample):

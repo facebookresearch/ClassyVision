@@ -51,11 +51,11 @@ class ProgressBarHook(ClassyHook):
             self.progress_bar = progressbar.ProgressBar(self.bar_size)
             self.progress_bar.start()
 
-    def on_update(
+    def on_step(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """Update the progress bar with the batch size."""
-        if is_master() and self.progress_bar is not None:
+        if task.train and is_master() and self.progress_bar is not None:
             self.batches += 1
             self.progress_bar.update(min(self.batches, self.bar_size))
 

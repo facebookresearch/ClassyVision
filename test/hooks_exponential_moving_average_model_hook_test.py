@@ -53,7 +53,7 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
         task.base_model.update_fc_weight()
         fc_weight = model.fc.weight.clone()
         for _ in range(num_updates):
-            exponential_moving_average_hook.on_update(task, local_variables)
+            exponential_moving_average_hook.on_step(task, local_variables)
         exponential_moving_average_hook.on_phase_end(task, local_variables)
         # the model weights shouldn't have changed
         self.assertTrue(torch.allclose(model.fc.weight, fc_weight))

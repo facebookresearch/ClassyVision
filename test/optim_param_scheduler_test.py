@@ -207,7 +207,10 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             on_phase_end = ClassyHook._noop
             on_end = ClassyHook._noop
 
-            def on_update(self, task: ClassyTask, local_variables) -> None:
+            def on_step(self, task: ClassyTask, local_variables) -> None:
+                if not task.train:
+                    return
+
                 # make sure we have non-zero param groups
                 test_instance.assertGreater(
                     len(task.optimizer.optimizer.param_groups), 0

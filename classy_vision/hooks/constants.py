@@ -16,6 +16,6 @@ class ClassyHookFunctions(Enum):
     on_phase_start = auto()
     on_forward = auto()
     on_loss_and_meter = auto()
-    on_update = auto()
+    on_step = auto()
     on_phase_end = auto()
     on_end = auto()
