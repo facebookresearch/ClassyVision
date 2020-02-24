@@ -78,7 +78,7 @@ class ElasticTrainer(ClassyTrainer):
             if state.run_start_hooks:
                 # need this to ensure we don't run the on_start hooks every time
                 # a trainer starts
-                state.task.run_hooks(local_variables, ClassyHookFunctions.on_start.name)
+                state.task.on_start(local_variables)
                 state.run_start_hooks = False
                 return state, self._ClassyWorkerStats(None)
 
@@ -86,7 +86,7 @@ class ElasticTrainer(ClassyTrainer):
 
         torchelastic.train(self.elastic_coordinator, elastic_train_step, state)
 
-        task.run_hooks(local_variables, ClassyHookFunctions.on_end.name)
+        task.on_end(local_variables)
 
     def _run_step(self, state, local_variables, use_gpu):
         # Check for training complete but only terminate when the last phase is done
@@ -94,17 +94,9 @@ class ElasticTrainer(ClassyTrainer):
             raise StopIteration
 
         if state.advance_to_next_phase:
-            logging.info("Begin advance_phase")
-            self.elastic_coordinator._log_event("before advance_phase")
-            state.task.advance_phase()
             self.elastic_coordinator.barrier()
-            logging.info("Done advance_phase")
-            self.elastic_coordinator._log_event("after advance_phase")
-
-            # Start phase hooks
-            state.task.run_hooks(
-                local_variables, ClassyHookFunctions.on_phase_start.name
-            )
+            self.elastic_coordinator._log_event("on_phase_start")
+            state.task.on_phase_start(local_variables)
 
             state.advance_to_next_phase = False
 
@@ -117,16 +109,10 @@ class ElasticTrainer(ClassyTrainer):
                 state.task.step(use_gpu, local_variables)
         except StopIteration:
             state.advance_to_next_phase = True
+
         if state.advance_to_next_phase:
-            logging.info("Syncing meters on phase end...")
-            for meter in state.task.meters:
-                meter.sync_state()
             self.elastic_coordinator.barrier()
-            logging.info("...meters synced")
-            # Phase complete
-            # NOTE: this is a good time to checkpoint, as it guarantees
-            # that loading from checkpoint will properly advance the phase.
-            state.task.run_hooks(local_variables, ClassyHookFunctions.on_phase_end.name)
+            state.task.on_phase_end(local_variables)
 
         progress_rate = None  # using None to signal 'unknown'
         perf_stats = local_variables.get("perf_stats", None)
