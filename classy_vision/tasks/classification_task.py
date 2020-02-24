@@ -672,8 +672,6 @@ class ClassificationTask(ClassyTask):
 
             self.update_meters(local_variables["output"], local_variables["sample"])
 
-            self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
-
     def train_step(self, use_gpu, local_variables=None):
         """Train step to be executed in train loop
 
@@ -724,10 +722,6 @@ class ClassificationTask(ClassyTask):
             )
 
             self.update_meters(local_variables["output"], local_variables["sample"])
-
-            # After both loss and meters are updated, we run hooks. Among hooks,
-            # `LossLrMeterLoggingHook` will log both loss and meter status
-            self.run_hooks(local_variables, ClassyHookFunctions.on_loss_and_meter.name)
 
         # Run backwards pass / update optimizer
         if self.amp_opt_level is not None:

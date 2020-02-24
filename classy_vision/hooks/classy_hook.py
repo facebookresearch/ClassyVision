@@ -29,7 +29,7 @@ class ClassyHook(ABC):
     Hooks allow to inject behavior at different places of the training loop, which
     are listed below in the chronological order.
 
-        on_start -> on_phase_start -> on_loss_and_meter ->
+        on_start -> on_phase_start ->
             on_step -> on_phase_end -> on_end
 
     Deriving classes should call ``super().__init__()`` and store any state in
@@ -76,13 +76,6 @@ class ClassyHook(ABC):
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """Called at the start of each phase."""
-        pass
-
-    @abstractmethod
-    def on_loss_and_meter(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
-        """Called each time after a loss has been computed and meters are updated."""
         pass
 
     @abstractmethod
