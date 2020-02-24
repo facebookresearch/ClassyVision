@@ -32,19 +32,6 @@ class LossLrMeterLoggingHook(ClassyHook):
         super().__init__()
         self.log_freq: Optional[int] = log_freq
 
-    def on_loss_and_meter(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
-        """
-        Log metrics every log_freq batches, if log_freq is not None.
-        """
-        if self.log_freq is None:
-            return
-        batches = len(task.losses)
-        if batches and batches % self.log_freq == 0:
-            logging.info("Local unsynced metric values:")
-            self._log_loss_meters(task, local_variables)
-
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
@@ -73,6 +60,8 @@ class LossLrMeterLoggingHook(ClassyHook):
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
             self._log_lr(task, local_variables)
+            logging.info("Local unsynced metric values:")
+            self._log_loss_meters(task, local_variables)
 
     def _log_lr(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
