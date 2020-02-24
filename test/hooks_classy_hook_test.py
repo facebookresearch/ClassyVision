@@ -17,7 +17,7 @@ class TestHook(ClassyHook):
     on_forward = ClassyHook._noop
     on_loss_and_meter = ClassyHook._noop
     on_backward = ClassyHook._noop
-    on_update = ClassyHook._noop
+    on_step = ClassyHook._noop
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 

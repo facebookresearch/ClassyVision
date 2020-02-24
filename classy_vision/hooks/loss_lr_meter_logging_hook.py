@@ -62,13 +62,13 @@ class LossLrMeterLoggingHook(ClassyHook):
             if task.train:
                 self._log_lr(task, local_variables)
 
-    def on_update(
+    def on_step(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
     ) -> None:
         """
         Log the LR every log_freq batches, if log_freq is not None.
         """
-        if self.log_freq is None:
+        if self.log_freq is None or not task.train:
             return
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
