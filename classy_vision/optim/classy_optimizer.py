@@ -278,7 +278,10 @@ class ClassyOptimizer:
         Args:
             closure: A closure that re-evaluates the model and returns the loss
         """
-        self.optimizer.step(closure)
+        if closure is None:
+            self.optimizer.step()
+        else:
+            self.optimizer.step(closure)
 
     def zero_grad(self):
         """
