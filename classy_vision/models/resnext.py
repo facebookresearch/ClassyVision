@@ -235,6 +235,7 @@ class ResNeXt(ClassyModel):
         base_width_and_cardinality: Optional[Union[Tuple, List]] = None,
         basic_layer: bool = False,
         final_bn_relu: bool = True,
+        bn_weight_decay: Optional[bool] = None,
     ):
         """
             Implementation of `ResNeXt <https://arxiv.org/pdf/1611.05431.pdf>`_.
@@ -251,6 +252,7 @@ class ResNeXt(ClassyModel):
         assert all(is_pos_int(n) for n in num_blocks)
         assert is_pos_int(init_planes) and is_pos_int(reduction)
         assert type(small_input) == bool
+        assert type(bn_weight_decay) == bool or bn_weight_decay is None
         assert (
             type(zero_init_bn_residuals) == bool
         ), "zero_init_bn_residuals must be a boolean, set to true if gamma of last\
@@ -262,9 +264,14 @@ class ResNeXt(ClassyModel):
             and is_pos_int(base_width_and_cardinality[1])
         )
 
-        # we apply weight decay to batch norm if the model is a ResNeXt and we don't if
-        # it is a ResNet
-        self.bn_weight_decay = base_width_and_cardinality is not None
+        # Determines whether to apply weight decay to batch norm
+        # params.If not provided we apply weight decay to batch norm
+        # if the model is a ResNeXt and we don't if it is a ResNet by
+        # default. This was determined empirically to match the
+        # associated ResNet and ResNeXt paper results
+        self.bn_weight_decay = bn_weight_decay
+        if self.bn_weight_decay is None:
+            self.bn_weight_decay = base_width_and_cardinality is not None
 
         # initial convolutional block:
         self.num_blocks = num_blocks
@@ -374,6 +381,7 @@ class ResNeXt(ClassyModel):
             "basic_layer": config.get("basic_layer", False),
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
+            "bn_weight_decay": config.get("bn_weight_decay"),
         }
         return cls(**config)
 
