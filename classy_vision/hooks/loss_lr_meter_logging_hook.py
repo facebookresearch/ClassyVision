@@ -45,13 +45,11 @@ class LossLrMeterLoggingHook(ClassyHook):
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
             logging.info("End of phase metric values:")
-            self._log_loss_meters(task, local_variables)
+            self._log_loss_meters(task)
             if task.train:
-                self._log_lr(task, local_variables)
+                self._log_lr(task)
 
-    def on_step(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_step(self, task: "tasks.ClassyTask") -> None:
         """
         Log the LR every log_freq batches, if log_freq is not None.
         """
@@ -59,22 +57,18 @@ class LossLrMeterLoggingHook(ClassyHook):
             return
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
-            self._log_lr(task, local_variables)
+            self._log_lr(task)
             logging.info("Local unsynced metric values:")
-            self._log_loss_meters(task, local_variables)
+            self._log_loss_meters(task)
 
-    def _log_lr(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def _log_lr(self, task: "tasks.ClassyTask") -> None:
         """
         Compute and log the optimizer LR.
         """
         optimizer_lr = task.optimizer.parameters.lr
         logging.info("Learning Rate: {}\n".format(optimizer_lr))
 
-    def _log_loss_meters(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def _log_loss_meters(self, task: "tasks.ClassyTask") -> None:
         """
         Compute and log the loss and meters.
         """
