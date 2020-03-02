@@ -8,7 +8,7 @@ import copy
 import enum
 import logging
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
 from classy_vision.dataset import ClassyDataset, build_dataset
@@ -52,6 +52,13 @@ class BroadcastBuffersMode(enum.Enum):
     # synchronizing buffers is for buffers to be consistent during eval, use
     # this instead of FORWARD_PASS to reduce training overhead.
     BEFORE_EVAL = enum.auto()
+
+
+class LastBatchInfo(NamedTuple):
+    loss: torch.Tensor
+    output: torch.Tensor
+    target: torch.Tensor
+    sample: Dict[str, Any]
 
 
 @register_task("classification_task")
@@ -672,6 +679,14 @@ class ClassificationTask(ClassyTask):
 
             self.update_meters(local_variables["output"], local_variables["sample"])
 
+        # Move some data to the task so hooks get a chance to access it
+        self.last_batch = LastBatchInfo(
+            loss=local_variables["loss"],
+            output=local_variables["output"],
+            target=local_variables["target"],
+            sample=local_variables["sample"],
+        )
+
     def train_step(self, use_gpu, local_variables=None):
         """Train step to be executed in train loop
 
@@ -683,6 +698,8 @@ class ClassificationTask(ClassyTask):
 
         if local_variables is None:
             local_variables = {}
+
+        self.last_batch = None
 
         # Process next sample
         sample = next(self.get_data_iterator())
@@ -737,6 +754,14 @@ class ClassificationTask(ClassyTask):
         self.optimizer.step()
 
         self.num_updates += self.get_global_batchsize()
+
+        # Move some data to the task so hooks get a chance to access it
+        self.last_batch = LastBatchInfo(
+            loss=local_variables["loss"],
+            output=local_variables["output"],
+            target=local_variables["target"],
+            sample=local_variables["sample"],
+        )
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
