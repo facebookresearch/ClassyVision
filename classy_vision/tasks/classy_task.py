@@ -107,7 +107,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def train_step(self, use_gpu, local_variables: Optional[Dict] = None) -> None:
+    def train_step(self, use_gpu) -> None:
         """
         Run a train step.
 
@@ -115,8 +115,6 @@ class ClassyTask(ABC):
 
         Args:
             use_gpu: True if training on GPUs, False otherwise
-            local_variables: Local variables created in the function. Can be passed to
-                custom :class:`classy_vision.hooks.ClassyHook`.
         """
         pass
 
@@ -157,7 +155,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def eval_step(self, use_gpu, local_variables: Optional[Dict] = None) -> None:
+    def eval_step(self, use_gpu) -> None:
         """
         Run an evaluation step.
 
@@ -165,18 +163,16 @@ class ClassyTask(ABC):
 
         Args:
             use_gpu: True if training on GPUs, False otherwise
-            local_variables: Local variables created in the function. Can be passed to
-                custom :class:`classy_vision.hooks.ClassyHook`.
         """
         pass
 
-    def step(self, use_gpu, local_variables: Optional[Dict] = None) -> None:
+    def step(self, use_gpu) -> None:
         from classy_vision.hooks import ClassyHookFunctions
 
         if self.train:
-            self.train_step(use_gpu, local_variables)
+            self.train_step(use_gpu)
         else:
-            self.eval_step(use_gpu, local_variables)
+            self.eval_step(use_gpu)
 
         for hook in self.hooks:
             hook.on_step(self)
