@@ -179,8 +179,8 @@ def _layer_flops(layer, x, _):
         bias_ops = layer.bias.numel() if layer.bias is not None else 0
         return x.size()[0] * (weight_ops + bias_ops)
 
-    # 2D/3D batch normalization:
-    elif layer_type in ["BatchNorm2d", "BatchNorm3d"]:
+    # 2D/3D (synced) batch normalization:
+    elif layer_type in ["BatchNorm2d", "BatchNorm3d", "SyncBatchNorm"]:
         return 2 * x.numel()
 
     # 3D convolution
