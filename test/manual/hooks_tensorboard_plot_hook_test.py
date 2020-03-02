@@ -62,7 +62,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
             # the writer if on_phase_start() is not called for initialization
             # before on_step() is called.
             with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_step(task, local_variables)
+                tensorboard_plot_hook.on_step(task)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -88,7 +88,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
 
             for loss in losses:
                 task.losses.append(loss)
-                tensorboard_plot_hook.on_step(task, local_variables)
+                tensorboard_plot_hook.on_step(task)
 
             tensorboard_plot_hook.on_phase_end(task, local_variables)
 

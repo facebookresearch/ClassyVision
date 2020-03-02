@@ -207,7 +207,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             on_phase_end = ClassyHook._noop
             on_end = ClassyHook._noop
 
-            def on_step(self, task: ClassyTask, local_variables) -> None:
+            def on_step(self, task: ClassyTask) -> None:
                 if not task.train:
                     return
 

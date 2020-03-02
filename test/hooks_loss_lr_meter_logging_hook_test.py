@@ -51,27 +51,27 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
 
                     for i in range(num_batches):
                         task.losses = list(range(i))
-                        loss_lr_meter_hook.on_step(task, local_variables)
+                        loss_lr_meter_hook.on_step(task)
                         if log_freq is not None and i and i % log_freq == 0:
-                            mock_fn.assert_called_with(task, local_variables)
+                            mock_fn.assert_called_with(task)
                             mock_fn.reset_mock()
-                            mock_lr_fn.assert_called_with(task, local_variables)
+                            mock_lr_fn.assert_called_with(task)
                             mock_lr_fn.reset_mock()
                             continue
                         mock_fn.assert_not_called()
                         mock_lr_fn.assert_not_called()
 
                     loss_lr_meter_hook.on_phase_end(task, local_variables)
-                    mock_fn.assert_called_with(task, local_variables)
+                    mock_fn.assert_called_with(task)
                     if task.train:
-                        mock_lr_fn.assert_called_with(task, local_variables)
+                        mock_lr_fn.assert_called_with(task)
 
             # test _log_loss_lr_meters()
             task.losses = losses
 
             with self.assertLogs():
-                loss_lr_meter_hook._log_loss_meters(task, local_variables)
-                loss_lr_meter_hook._log_lr(task, local_variables)
+                loss_lr_meter_hook._log_loss_meters(task)
+                loss_lr_meter_hook._log_lr(task)
 
             task.phase_idx += 1
 
@@ -95,7 +95,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
         lr_order = [0.0, 1 / 6, 1 / 6, 2 / 6, 3 / 6, 3 / 6, 4 / 6, 5 / 6, 5 / 6]
         lr_list = []
 
-        def mock_log_lr(task: ClassyTask, local_variables) -> None:
+        def mock_log_lr(task: ClassyTask) -> None:
             lr_list.append(task.optimizer.parameters.lr)
 
         with mock.patch.object(

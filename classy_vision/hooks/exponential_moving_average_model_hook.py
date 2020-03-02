@@ -103,7 +103,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             # state in the test phase
             self._save_current_model_state(task.base_model, self.state.model_state)
 
-    def on_step(self, task: ClassyTask, local_variables: Dict[str, Any]) -> None:
+    def on_step(self, task: ClassyTask) -> None:
         if not task.train:
             return
 
