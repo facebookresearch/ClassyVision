@@ -47,7 +47,7 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
             decay=decay, device=hook_device
         )
 
-        exponential_moving_average_hook.on_start(task, local_variables)
+        exponential_moving_average_hook.on_start(task)
         exponential_moving_average_hook.on_phase_start(task, local_variables)
         # set the weights to all ones and simulate 10 updates
         task.base_model.update_fc_weight()

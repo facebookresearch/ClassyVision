@@ -45,7 +45,7 @@ class TestCheckpointHook(unittest.TestCase):
         # checkpoint directory doesn't exist
         # call the on start function
         with self.assertRaises(FileNotFoundError):
-            checkpoint_hook.on_start(task, local_variables)
+            checkpoint_hook.on_start(task)
         # call the on end phase function
         with self.assertRaises(AssertionError):
             checkpoint_hook.on_phase_end(task, local_variables)
@@ -55,7 +55,7 @@ class TestCheckpointHook(unittest.TestCase):
 
         # create checkpoint dir, verify on_start hook runs
         os.mkdir(checkpoint_folder)
-        checkpoint_hook.on_start(task, local_variables)
+        checkpoint_hook.on_start(task)
 
         # Phase_type is test, expect no checkpoint
         task.train = False
@@ -101,7 +101,7 @@ class TestCheckpointHook(unittest.TestCase):
             os.mkdir(checkpoint_folder)
 
             # call the on start function
-            checkpoint_hook.on_start(task, local_variables)
+            checkpoint_hook.on_start(task)
 
             # shouldn't create any checkpoints until there are checkpoint_period
             # phases which are in phase_types

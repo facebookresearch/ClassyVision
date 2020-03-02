@@ -65,9 +65,7 @@ class ClassyHook(ABC):
         return cls.__name__
 
     @abstractmethod
-    def on_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_start(self, task: "tasks.ClassyTask") -> None:
         """Called at the start of training."""
         pass
 
