@@ -72,7 +72,7 @@ class ClassyTrainer:
 
         local_variables = {}
 
-        task.on_start(local_variables)
+        task.on_start()
         while not task.done_training():
             task.on_phase_start(local_variables)
             while True:

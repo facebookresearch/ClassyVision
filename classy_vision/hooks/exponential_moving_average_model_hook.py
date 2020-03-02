@@ -78,7 +78,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         for name, param in self.get_model_state_iterator(model):
             model_state[name] = param.detach().clone().to(device=self.device)
 
-    def on_start(self, task: ClassyTask, local_variables: Dict[str, Any]) -> None:
+    def on_start(self, task: ClassyTask) -> None:
         if self.state.model_state:
             # loaded state from checkpoint, do not re-initialize, only move the state
             # to the right device
