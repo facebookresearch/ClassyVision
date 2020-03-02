@@ -49,7 +49,7 @@ class TestTimeMetricsHook(unittest.TestCase):
             mock_time.return_value = start_time
             time_metrics_hook.on_phase_start(task, local_variables)
             self.assertEqual(time_metrics_hook.start_time, start_time)
-            self.assertTrue(isinstance(local_variables.get("perf_stats"), PerfStats))
+            self.assertTrue(isinstance(task.perf_stats, PerfStats))
 
             # test that the code doesn't raise an exception if losses is empty
             try:
@@ -66,15 +66,15 @@ class TestTimeMetricsHook(unittest.TestCase):
 
                 for i in range(num_batches):
                     task.losses = list(range(i))
-                    time_metrics_hook.on_step(task, local_variables)
+                    time_metrics_hook.on_step(task)
                     if log_freq is not None and i and i % log_freq == 0:
-                        mock_fn.assert_called_with(task, local_variables)
+                        mock_fn.assert_called_with(task)
                         mock_fn.reset_mock()
                         continue
                     mock_fn.assert_not_called()
 
                 time_metrics_hook.on_phase_end(task, local_variables)
-                mock_fn.assert_called_with(task, local_variables)
+                mock_fn.assert_called_with(task)
 
             task.losses = [0.23, 0.45, 0.34, 0.67]
 
@@ -84,7 +84,7 @@ class TestTimeMetricsHook(unittest.TestCase):
 
             # test _log_performance_metrics()
             with self.assertLogs() as log_watcher:
-                time_metrics_hook._log_performance_metrics(task, local_variables)
+                time_metrics_hook._log_performance_metrics(task)
 
             # there should 2 be info logs for train and 1 for test
             self.assertEqual(len(log_watcher.output), 2 if train else 1)
@@ -112,7 +112,7 @@ class TestTimeMetricsHook(unittest.TestCase):
 
             # if on_phase_start() is not called, 2 warnings should be logged
             # create a new time metrics hook
-            local_variables = {}
+            task.perf_stats = None
             time_metrics_hook_new = TimeMetricsHook()
 
             with self.assertLogs() as log_watcher:
