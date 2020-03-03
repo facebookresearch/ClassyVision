@@ -637,118 +637,83 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
-    def eval_step(self, use_gpu, local_variables=None):
-        if local_variables is None:
-            local_variables = {}
-
+    def eval_step(self, use_gpu):
         # Process next sample
         sample = next(self.get_data_iterator())
-        local_variables["sample"] = sample
 
-        assert (
-            isinstance(local_variables["sample"], dict)
-            and "input" in local_variables["sample"]
-            and "target" in local_variables["sample"]
-        ), (
+        assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
             + "'target' keys"
         )
 
         # Copy sample to GPU
-        local_variables["target"] = local_variables["sample"]["target"]
+        target = sample["target"]
         if use_gpu:
-            for key, value in local_variables["sample"].items():
-                local_variables["sample"][key] = recursive_copy_to_gpu(
-                    value, non_blocking=True
-                )
+            for key, value in sample.items():
+                sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
 
         with torch.no_grad():
-            local_variables["output"] = self.model(local_variables["sample"]["input"])
+            output = self.model(sample["input"])
 
-            local_variables["local_loss"] = self.compute_loss(
-                local_variables["output"], local_variables["sample"]
-            )
+            local_loss = self.compute_loss(output, sample)
 
-            local_variables["loss"] = local_variables["local_loss"].detach().clone()
-            local_variables["loss"] = all_reduce_mean(local_variables["loss"])
+            loss = local_loss.detach().clone()
+            loss = all_reduce_mean(loss)
 
-            self.losses.append(
-                local_variables["loss"].data.cpu().item()
-                * local_variables["target"].size(0)
-            )
+            self.losses.append(loss.data.cpu().item() * target.size(0))
 
-            self.update_meters(local_variables["output"], local_variables["sample"])
+            self.update_meters(output, sample)
 
         # Move some data to the task so hooks get a chance to access it
         self.last_batch = LastBatchInfo(
-            loss=local_variables["loss"],
-            output=local_variables["output"],
-            target=local_variables["target"],
-            sample=local_variables["sample"],
+            loss=loss, output=output, target=target, sample=sample
         )
 
-    def train_step(self, use_gpu, local_variables=None):
+    def train_step(self, use_gpu):
         """Train step to be executed in train loop
 
         Args:
             use_gpu: if true, execute training on GPU
-            local_variables: Dict containing intermediate values
-                in train_step for access by hooks
         """
-
-        if local_variables is None:
-            local_variables = {}
 
         self.last_batch = None
 
         # Process next sample
         sample = next(self.get_data_iterator())
-        local_variables["sample"] = sample
 
-        assert (
-            isinstance(local_variables["sample"], dict)
-            and "input" in local_variables["sample"]
-            and "target" in local_variables["sample"]
-        ), (
+        assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
             + "'target' keys"
         )
 
         # Copy sample to GPU
-        local_variables["target"] = local_variables["sample"]["target"]
+        target = sample["target"]
         if use_gpu:
-            for key, value in local_variables["sample"].items():
-                local_variables["sample"][key] = recursive_copy_to_gpu(
-                    value, non_blocking=True
-                )
+            for key, value in sample.items():
+                sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
 
         with torch.enable_grad():
             # Forward pass
-            local_variables["output"] = self.model(local_variables["sample"]["input"])
+            output = self.model(sample["input"])
 
-            local_variables["local_loss"] = self.compute_loss(
-                local_variables["output"], local_variables["sample"]
-            )
+            local_loss = self.compute_loss(output, sample)
 
-            local_variables["loss"] = local_variables["local_loss"].detach().clone()
-            local_variables["loss"] = all_reduce_mean(local_variables["loss"])
+            loss = local_loss.detach().clone()
+            loss = all_reduce_mean(loss)
 
-            self.losses.append(
-                local_variables["loss"].data.cpu().item()
-                * local_variables["target"].size(0)
-            )
+            self.losses.append(loss.data.cpu().item() * target.size(0))
 
-            self.update_meters(local_variables["output"], local_variables["sample"])
+            self.update_meters(output, sample)
 
         # Run backwards pass / update optimizer
         if self.amp_opt_level is not None:
             self.optimizer.zero_grad()
             with apex.amp.scale_loss(
-                local_variables["local_loss"], self.optimizer.optimizer
+                local_loss, self.optimizer.optimizer
             ) as scaled_loss:
                 scaled_loss.backward()
         else:
-            self.optimizer.backward(local_variables["local_loss"])
+            self.optimizer.backward(local_loss)
 
         self.optimizer.update_schedule_on_step(self.where)
         self.optimizer.step()
@@ -757,10 +722,7 @@ class ClassificationTask(ClassyTask):
 
         # Move some data to the task so hooks get a chance to access it
         self.last_batch = LastBatchInfo(
-            loss=local_variables["loss"],
-            output=local_variables["output"],
-            target=local_variables["target"],
-            sample=local_variables["sample"],
+            loss=loss, output=output, target=target, sample=sample
         )
 
     def compute_loss(self, model_output, sample):
