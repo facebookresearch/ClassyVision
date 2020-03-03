@@ -881,8 +881,9 @@ class ClassificationTask(ClassyTask):
 
         self.log_phase_end("total")
 
-    def on_end(self, local_variables):
-        self.run_hooks(local_variables, ClassyHookFunctions.on_end.name)
+    def on_end(self):
+        for hook in self.hooks:
+            hook.on_end(self)
 
     def log_phase_end(self, tag):
         if not self.train:

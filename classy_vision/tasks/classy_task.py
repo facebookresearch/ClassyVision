@@ -146,7 +146,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def on_end(self, local_variables):
+    def on_end(self):
         """
         Training end.
 

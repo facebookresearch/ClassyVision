@@ -81,4 +81,4 @@ class ClassyTrainer:
                 except StopIteration:
                     break
             task.on_phase_end(local_variables)
-        task.on_end(local_variables)
+        task.on_end()
