@@ -40,11 +40,9 @@ class TimeMetricsHook(ClassyHook):
         Initialize start time and reset perf stats
         """
         self.start_time = time.time()
-        local_variables["perf_stats"] = PerfStats()
+        task.perf_stats = PerfStats()
 
-    def on_step(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_step(self, task: "tasks.ClassyTask") -> None:
         """
         Log metrics every log_freq batches, if log_freq is not None.
         """
@@ -52,7 +50,7 @@ class TimeMetricsHook(ClassyHook):
             return
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
-            self._log_performance_metrics(task, local_variables)
+            self._log_performance_metrics(task)
 
     def on_phase_end(
         self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
@@ -62,11 +60,9 @@ class TimeMetricsHook(ClassyHook):
         """
         batches = len(task.losses)
         if batches:
-            self._log_performance_metrics(task, local_variables)
+            self._log_performance_metrics(task)
 
-    def _log_performance_metrics(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def _log_performance_metrics(self, task: "tasks.ClassyTask") -> None:
         """
         Compute and log performance metrics.
         """
@@ -85,11 +81,11 @@ class TimeMetricsHook(ClassyHook):
             )
 
         # Train step time breakdown
-        if local_variables.get("perf_stats") is None:
-            logging.warning('"perf_stats" not set in local_variables')
+        if not hasattr(task, "perf_stats") or task.perf_stats is None:
+            logging.warning('"perf_stats" not set in task')
         elif task.train:
             logging.info(
                 "Train step time breakdown (rank {}):\n{}".format(
-                    get_rank(), local_variables["perf_stats"].report_str()
+                    get_rank(), task.perf_stats.report_str()
                 )
             )

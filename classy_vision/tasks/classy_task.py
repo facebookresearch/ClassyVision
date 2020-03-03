@@ -178,7 +178,8 @@ class ClassyTask(ABC):
         else:
             self.eval_step(use_gpu, local_variables)
 
-        self.run_hooks(local_variables, ClassyHookFunctions.on_step.name)
+        for hook in self.hooks:
+            hook.on_step(self)
 
     def run_hooks(self, local_variables: Dict[str, Any], hook_function: str) -> None:
         """
