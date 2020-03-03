@@ -119,7 +119,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def on_start(self, local_variables):
+    def on_start(self):
         """
         Start training.
 

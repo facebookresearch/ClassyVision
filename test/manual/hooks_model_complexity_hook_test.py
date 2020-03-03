@@ -18,8 +18,6 @@ class TestModelComplexityHook(unittest.TestCase):
         task = get_test_classy_task()
         task.prepare()
 
-        local_variables = {}
-
         # create a model complexity hook
         model_complexity_hook = ModelComplexityHook()
 
@@ -29,4 +27,4 @@ class TestModelComplexityHook(unittest.TestCase):
             task.base_model = model
 
             with self.assertLogs():
-                model_complexity_hook.on_start(task, local_variables)
+                model_complexity_hook.on_start(task)

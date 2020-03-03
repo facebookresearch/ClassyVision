@@ -78,9 +78,7 @@ class CheckpointHook(ClassyHook):
         if checkpoint_file:
             PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
-    def on_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_start(self, task: "tasks.ClassyTask") -> None:
         if not is_master() or getattr(task, "test_only", False):
             return
         if not PathManager.exists(self.checkpoint_folder):
