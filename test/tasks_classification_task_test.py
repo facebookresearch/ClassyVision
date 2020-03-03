@@ -73,7 +73,6 @@ class TestClassificationTask(unittest.TestCase):
         task_2 = build_task(config).set_hooks([LossLrMeterLoggingHook()])
 
         use_gpu = torch.cuda.is_available()
-        local_variables = {}
 
         # prepare the tasks for the right device
         task.prepare(use_gpu=use_gpu)
@@ -96,8 +95,8 @@ class TestClassificationTask(unittest.TestCase):
 
             # test that the train step runs the same way on both states
             # and the loss remains the same
-            task.train_step(use_gpu, local_variables)
-            task_2.train_step(use_gpu, local_variables)
+            task.train_step(use_gpu)
+            task_2.train_step(use_gpu)
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_final_train_checkpoint(self):
