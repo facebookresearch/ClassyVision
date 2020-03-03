@@ -48,7 +48,7 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
         )
 
         exponential_moving_average_hook.on_start(task)
-        exponential_moving_average_hook.on_phase_start(task, local_variables)
+        exponential_moving_average_hook.on_phase_start(task)
         # set the weights to all ones and simulate 10 updates
         task.base_model.update_fc_weight()
         fc_weight = model.fc.weight.clone()
@@ -60,7 +60,7 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
 
         # simulate a test phase now
         task.train = False
-        exponential_moving_average_hook.on_phase_start(task, local_variables)
+        exponential_moving_average_hook.on_phase_start(task)
         exponential_moving_average_hook.on_phase_end(task, local_variables)
 
         # the model weights should be updated to the ema weights
@@ -72,7 +72,7 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
 
         # simulate a train phase again
         task.train = True
-        exponential_moving_average_hook.on_phase_start(task, local_variables)
+        exponential_moving_average_hook.on_phase_start(task)
 
         # the model weights should be back to the old value
         self.assertTrue(torch.allclose(model.fc.weight, fc_weight))

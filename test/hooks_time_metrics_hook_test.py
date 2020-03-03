@@ -47,7 +47,7 @@ class TestTimeMetricsHook(unittest.TestCase):
             # on_phase_start() should set the start time and perf_stats
             start_time = 1.2
             mock_time.return_value = start_time
-            time_metrics_hook.on_phase_start(task, local_variables)
+            time_metrics_hook.on_phase_start(task)
             self.assertEqual(time_metrics_hook.start_time, start_time)
             self.assertTrue(isinstance(task.perf_stats, PerfStats))
 

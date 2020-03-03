@@ -74,7 +74,7 @@ class ClassyTrainer:
 
         task.on_start()
         while not task.done_training():
-            task.on_phase_start(local_variables)
+            task.on_phase_start()
             while True:
                 try:
                     task.step(self.use_gpu)

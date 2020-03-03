@@ -855,12 +855,13 @@ class ClassificationTask(ClassyTask):
         for hook in self.hooks:
             hook.on_start(self)
 
-    def on_phase_start(self, local_variables):
+    def on_phase_start(self):
         self.phase_start_time_total = time.perf_counter()
 
         self.advance_phase()
 
-        self.run_hooks(local_variables, ClassyHookFunctions.on_phase_start.name)
+        for hook in self.hooks:
+            hook.on_phase_start(self)
 
         self.phase_start_time_train = time.perf_counter()
 

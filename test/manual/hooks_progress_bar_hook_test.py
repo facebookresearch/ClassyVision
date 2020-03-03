@@ -40,7 +40,7 @@ class TestProgressBarHook(unittest.TestCase):
         progress_bar_hook = ProgressBarHook()
 
         # progressbar.ProgressBar should be init-ed with num_batches
-        progress_bar_hook.on_phase_start(task, local_variables)
+        progress_bar_hook.on_phase_start(task)
         mock_progressbar_pkg.ProgressBar.assert_called_once_with(num_batches)
         mock_progress_bar.start.assert_called_once_with()
         mock_progress_bar.start.reset_mock()
@@ -80,7 +80,7 @@ class TestProgressBarHook(unittest.TestCase):
         mock_is_master.return_value = False
         progress_bar_hook = ProgressBarHook()
         try:
-            progress_bar_hook.on_phase_start(task, local_variables)
+            progress_bar_hook.on_phase_start(task)
             progress_bar_hook.on_step(task)
             progress_bar_hook.on_phase_end(task, local_variables)
         except Exception as e:

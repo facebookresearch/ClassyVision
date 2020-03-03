@@ -84,7 +84,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
             summary_writer.add_scalar.reset_mock()
 
             # run the hook in the correct order
-            tensorboard_plot_hook.on_phase_start(task, local_variables)
+            tensorboard_plot_hook.on_phase_start(task)
 
             for loss in losses:
                 task.losses.append(loss)
