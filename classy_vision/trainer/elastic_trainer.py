@@ -78,7 +78,7 @@ class ElasticTrainer(ClassyTrainer):
             if state.run_start_hooks:
                 # need this to ensure we don't run the on_start hooks every time
                 # a trainer starts
-                state.task.on_start(local_variables)
+                state.task.on_start()
                 state.run_start_hooks = False
                 return state, self._ClassyWorkerStats(None)
 

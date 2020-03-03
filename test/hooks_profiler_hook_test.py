@@ -32,13 +32,12 @@ class TestProfilerHook(unittest.TestCase):
 
         for task in [get_test_classy_task(), get_test_classy_video_task()]:
             task.prepare()
-            local_variables = {}
 
             # create a model tensorboard hook
             profiler_hook = ProfilerHook()
 
             with self.assertLogs():
-                profiler_hook.on_start(task, local_variables)
+                profiler_hook.on_start(task)
 
             # a new profile should be created with use_cuda=True
             mock_profile_cls.assert_called_once_with(use_cuda=True)

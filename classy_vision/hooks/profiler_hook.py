@@ -25,9 +25,7 @@ class ProfilerHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def on_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_start(self, task: "tasks.ClassyTask") -> None:
         """Profile the forward pass."""
         logging.info("Profiling forward pass...")
         batchsize_per_replica = getattr(
