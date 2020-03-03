@@ -64,9 +64,7 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times = []
         self.num_steps_global = []
 
-    def on_step(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_step(self, task: "tasks.ClassyTask") -> None:
         """Store the observed learning rates."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")

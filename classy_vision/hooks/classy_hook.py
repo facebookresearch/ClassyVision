@@ -51,7 +51,7 @@ class ClassyHook(ABC):
     def __init__(self):
         self.state = ClassyHookState()
 
-    def _noop(self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]) -> None:
+    def _noop(self, *args, **kwargs) -> None:
         """Derived classes can set their hook functions to this.
 
         This is useful if they want those hook functions to not do anything.
@@ -79,9 +79,7 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_step(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_step(self, task: "tasks.ClassyTask") -> None:
         """Called each time after parameters have been updated by the optimizer."""
         pass
 
