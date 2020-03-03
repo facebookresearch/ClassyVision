@@ -86,7 +86,7 @@ class ElasticTrainer(ClassyTrainer):
 
         torchelastic.train(self.elastic_coordinator, elastic_train_step, state)
 
-        task.on_end(local_variables)
+        task.on_end()
 
     def _run_step(self, state, local_variables, use_gpu):
         # Check for training complete but only terminate when the last phase is done
