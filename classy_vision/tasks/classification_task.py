@@ -851,8 +851,9 @@ class ClassificationTask(ClassyTask):
         """
         return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
 
-    def on_start(self, local_variables):
-        self.run_hooks(local_variables, ClassyHookFunctions.on_start.name)
+    def on_start(self):
+        for hook in self.hooks:
+            hook.on_start(self)
 
     def on_phase_start(self, local_variables):
         self.phase_start_time_total = time.perf_counter()

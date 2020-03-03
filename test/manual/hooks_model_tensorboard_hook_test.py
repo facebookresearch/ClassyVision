@@ -28,7 +28,6 @@ class TestModelTensorboardHook(unittest.TestCase):
         for master in [False, True]:
             mock_is_master_func.return_value = master
             model_configs = get_test_model_configs()
-            local_variables = {}
 
             for model_config in model_configs:
                 model = build_model(model_config)
@@ -37,7 +36,7 @@ class TestModelTensorboardHook(unittest.TestCase):
                 # create a model tensorboard hook
                 model_tensorboard_hook = ModelTensorboardHook(mock_summary_writer)
 
-                model_tensorboard_hook.on_start(task, local_variables)
+                model_tensorboard_hook.on_start(task)
 
                 if master:
                     # SummaryWriter should have been init-ed with the correct

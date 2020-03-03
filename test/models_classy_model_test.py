@@ -59,7 +59,7 @@ class TestClassyModel(unittest.TestCase):
 
         # Create checkpoint dir, save checkpoint
         os.mkdir(checkpoint_folder)
-        checkpoint_hook.on_start(task, local_variables)
+        checkpoint_hook.on_start(task)
 
         task.train = True
         checkpoint_hook.on_phase_end(task, local_variables)
