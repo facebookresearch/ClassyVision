@@ -20,7 +20,7 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
 
         .. code-block:: python
 
-          base_lr: 0.1
+          base_value: 0.1
           gamma: 0.1
           num_decays: 3
           num_epochs: 120
@@ -40,9 +40,9 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
         Returns:
             A StepWithFixedGammaParamScheduler instance.
         """
-        for key in ["base_lr", "gamma", "num_decays", "num_epochs"]:
+        for key in ["base_value", "gamma", "num_decays", "num_epochs"]:
             assert key in config, f"Step with fixed decay scheduler requires: {key}"
-        for key in ["base_lr", "gamma"]:
+        for key in ["base_value", "gamma"]:
             assert (
                 isinstance(config[key], (int, float)) and config[key] > 0
             ), f"{key} must be a positive number"
@@ -52,20 +52,20 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
             ), f"{key} must be a positive integer"
 
         return cls(
-            base_lr=config["base_lr"],
+            base_value=config["base_value"],
             num_decays=config["num_decays"],
             gamma=config["gamma"],
             num_epochs=config["num_epochs"],
         )
 
-    def __init__(self, base_lr, num_decays, gamma, num_epochs):
+    def __init__(self, base_value, num_decays, gamma, num_epochs):
         super().__init__()
 
-        self.base_lr = base_lr
+        self.base_value = base_value
         self.num_decays = num_decays
         self.gamma = gamma
         self.num_epochs = num_epochs
-        values = [base_lr]
+        values = [base_value]
         for _ in range(num_decays):
             values.append(values[-1] * gamma)
 
