@@ -19,17 +19,17 @@ class PolynomialDecayParamScheduler(ClassyParamScheduler):
 
         .. code-block:: python
 
-          base_lr: 0.1
+          base_value: 0.1
           power: 0.9
 
     Then the param value will be 0.1 for epoch 0, 0.099 for epoch 1, and
     so on.
     """
 
-    def __init__(self, base_lr, power):
+    def __init__(self, base_value, power):
         super().__init__()
 
-        self._base_lr = base_lr
+        self._base_value = base_value
         self._power = power
 
     @classmethod
@@ -44,9 +44,9 @@ class PolynomialDecayParamScheduler(ClassyParamScheduler):
             A PolynomialDecayParamScheduler instance.
         """
         assert (
-            "base_lr" in config and "power" in config
+            "base_value" in config and "power" in config
         ), "Polynomial decay scheduler requires a base lr and a power of decay"
-        return cls(base_lr=config["base_lr"], power=config["power"])
+        return cls(base_value=config["base_value"], power=config["power"])
 
     def __call__(self, where: float):
-        return self._base_lr * (1 - where) ** self._power
+        return self._base_value * (1 - where) ** self._power

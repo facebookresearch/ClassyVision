@@ -4,7 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 import math
 from typing import Any, Dict
 
@@ -23,14 +22,14 @@ class CosineParamScheduler(ClassyParamScheduler):
 
         .. code-block:: python
 
-          start_lr: 0.1
-          end_lr: 0.0001
+          start_value: 0.1
+          end_value: 0.0001
     """
 
-    def __init__(self, start_lr: float, end_lr: float):
+    def __init__(self, start_value: float, end_value: float):
         super().__init__()
-        self._start_lr = start_lr
-        self._end_lr = end_lr
+        self._start_value = start_value
+        self._end_value = end_value
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "CosineParamScheduler":
@@ -44,12 +43,12 @@ class CosineParamScheduler(ClassyParamScheduler):
             A CosineParamScheduler instance.
         """
         assert (
-            "start_lr" in config and "end_lr" in config
-        ), "Cosine scheduler requires a start_lr and a end_lr"
+            "start_value" in config and "end_value" in config
+        ), "Cosine scheduler requires a start_value and a end_value"
 
-        return cls(start_lr=config["start_lr"], end_lr=config["end_lr"])
+        return cls(start_value=config["start_value"], end_value=config["end_value"])
 
     def __call__(self, where: float):
-        return self._end_lr + 0.5 * (self._start_lr - self._end_lr) * (
+        return self._end_value + 0.5 * (self._start_value - self._end_value) * (
             1 + math.cos(math.pi * where)
         )
