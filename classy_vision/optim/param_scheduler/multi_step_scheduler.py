@@ -10,7 +10,12 @@ from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from classy_vision.generic.util import is_pos_int
 
-from . import ClassyParamScheduler, UpdateInterval, register_param_scheduler
+from . import (
+    ClassyParamScheduler,
+    UpdateInterval,
+    register_param_scheduler,
+    update_interval_from_config,
+)
 
 
 @register_param_scheduler("multistep")
@@ -18,6 +23,7 @@ class MultiStepParamScheduler(ClassyParamScheduler):
     """
     Takes a predefined schedule for a param value, and a list of epochs
     which stand for the upper boundary (excluded) of each range.
+    The schedule is updated after every train epoch by default.
 
     Example:
 
@@ -37,10 +43,10 @@ class MultiStepParamScheduler(ClassyParamScheduler):
         self,
         values,
         num_epochs: int,
-        update_interval: UpdateInterval,
         milestones: Optional[List[int]] = None,
+        update_interval: UpdateInterval = UpdateInterval.EPOCH,
     ):
-        super().__init__(update_interval)
+        super().__init__(update_interval=update_interval)
         self._param_schedule = values
         self._num_epochs = num_epochs
         self._milestones = milestones
@@ -96,11 +102,12 @@ class MultiStepParamScheduler(ClassyParamScheduler):
                 "Non-Equi Step scheduler requires a list of %d epochs"
                 % (len(config["values"]) - 1)
             )
+
         return cls(
             values=config["values"],
             num_epochs=config["num_epochs"],
-            update_interval=UpdateInterval(config.get("update_interval", "epoch")),
             milestones=milestones,
+            update_interval=update_interval_from_config(config, UpdateInterval.EPOCH),
         )
 
     def __call__(self, where: float):

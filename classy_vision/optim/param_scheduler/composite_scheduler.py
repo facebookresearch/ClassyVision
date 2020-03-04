@@ -12,6 +12,7 @@ from . import (
     UpdateInterval,
     build_param_scheduler,
     register_param_scheduler,
+    update_interval_from_config,
 )
 
 
@@ -49,17 +50,17 @@ class CompositeParamScheduler(ClassyParamScheduler):
     The parameter value will be 0.42 for the first [0%, 30%) of steps,
     and then will cosine decay from 0.42 to 0.0001 for [30%, 100%) of
     training.
+    The schedule is updated after every train step by default.
     """
 
     def __init__(
         self,
         schedulers: Sequence[ClassyParamScheduler],
         lengths: Sequence[float],
-        update_interval: UpdateInterval,
         interval_scaling: Sequence[IntervalScaling],
+        update_interval: UpdateInterval = UpdateInterval.STEP,
     ):
-        super().__init__()
-        self.update_interval = update_interval
+        super().__init__(update_interval=update_interval)
         self._lengths = lengths
         self._schedulers = schedulers
         self._interval_scaling = interval_scaling
@@ -89,13 +90,6 @@ class CompositeParamScheduler(ClassyParamScheduler):
         ), "The sum of all values in lengths must be 1"
         if sum(config["lengths"]) != 1.0:
             config["lengths"][-1] = 1.0 - sum(config["lengths"][:-1])
-        update_interval = UpdateInterval.STEP
-        if "update_interval" in config:
-            assert config["update_interval"] in {
-                "step",
-                "epoch",
-            }, "Choices for update interval are 'step' or 'epoch'"
-            update_interval = UpdateInterval[config["update_interval"].upper()]
         interval_scaling = []
         if "interval_scaling" in config:
             assert len(config["schedulers"]) == len(
@@ -119,7 +113,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
                 build_param_scheduler(scheduler) for scheduler in config["schedulers"]
             ],
             lengths=config["lengths"],
-            update_interval=update_interval,
+            update_interval=update_interval_from_config(config, UpdateInterval.STEP),
             interval_scaling=interval_scaling,
         )
 

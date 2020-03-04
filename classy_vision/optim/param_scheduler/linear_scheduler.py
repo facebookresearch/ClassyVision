@@ -6,7 +6,12 @@
 
 from typing import Any, Dict
 
-from . import ClassyParamScheduler, register_param_scheduler
+from . import (
+    ClassyParamScheduler,
+    UpdateInterval,
+    register_param_scheduler,
+    update_interval_from_config,
+)
 
 
 @register_param_scheduler("linear")
@@ -14,6 +19,7 @@ class LinearParamScheduler(ClassyParamScheduler):
     """
     Linearly interpolates parameter between ``start_value`` and ``end_value``.
     Can be used for either warmup or decay based on start and end values.
+    The schedule is updated after every train step by default.
 
     Example:
 
@@ -24,8 +30,13 @@ class LinearParamScheduler(ClassyParamScheduler):
     Corresponds to a linear increasing schedule with values in [0.0001, 0.01)
     """
 
-    def __init__(self, start_value: float, end_value: float):
-        super().__init__()
+    def __init__(
+        self,
+        start_value: float,
+        end_value: float,
+        update_interval: UpdateInterval = UpdateInterval.STEP,
+    ):
+        super().__init__(update_interval=update_interval)
         self._start_value = start_value
         self._end_value = end_value
 
@@ -43,7 +54,12 @@ class LinearParamScheduler(ClassyParamScheduler):
         assert (
             "start_value" in config and "end_value" in config
         ), "Linear scheduler requires a start and a end"
-        return cls(start_value=config["start_value"], end_value=config["end_value"])
+
+        return cls(
+            start_value=config["start_value"],
+            end_value=config["end_value"],
+            update_interval=update_interval_from_config(config, UpdateInterval.STEP),
+        )
 
     def __call__(self, where: float):
         # interpolate between start and end values

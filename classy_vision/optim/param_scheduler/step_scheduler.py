@@ -6,7 +6,12 @@
 
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
-from . import ClassyParamScheduler, register_param_scheduler
+from . import (
+    ClassyParamScheduler,
+    UpdateInterval,
+    register_param_scheduler,
+    update_interval_from_config,
+)
 
 
 @register_param_scheduler("step")
@@ -15,6 +20,7 @@ class StepParamScheduler(ClassyParamScheduler):
     Takes a fixed schedule for a param value.  If the length of the
     fixed schedule is less than the number of epochs, then the epochs
     are divided evenly among the param schedule.
+    The schedule is updated after every train epoch by default.
 
     Example:
 
@@ -27,8 +33,13 @@ class StepParamScheduler(ClassyParamScheduler):
     epochs 30-59, 0.001 for epoch 60-89, 0.0001 for epochs 90-119.
     """
 
-    def __init__(self, num_epochs: Union[int, float], values: List[float]):
-        super().__init__()
+    def __init__(
+        self,
+        num_epochs: Union[int, float],
+        values: List[float],
+        update_interval: UpdateInterval = UpdateInterval.EPOCH,
+    ):
+        super().__init__(update_interval=update_interval)
 
         self._param_schedule = values
 
@@ -50,7 +61,11 @@ class StepParamScheduler(ClassyParamScheduler):
         ), "Step scheduler requires a list of at least one param value"
         assert config["num_epochs"] > 0, "Num epochs must be greater than 0"
 
-        return cls(num_epochs=config["num_epochs"], values=config["values"])
+        return cls(
+            num_epochs=config["num_epochs"],
+            values=config["values"],
+            update_interval=update_interval_from_config(config, UpdateInterval.EPOCH),
+        )
 
     def __call__(self, where: float):
         ind = int((where + self.WHERE_EPSILON) * len(self._param_schedule))
