@@ -12,6 +12,7 @@ from classy_vision.generic.registry_utils import import_all_modules
 from .classy_vision_param_scheduler import (  # noqa F401
     ClassyParamScheduler,
     UpdateInterval,
+    update_interval_from_config,
 )
 
 

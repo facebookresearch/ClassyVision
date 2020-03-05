@@ -6,7 +6,7 @@
 
 from typing import Any, Dict
 
-from . import ClassyParamScheduler, register_param_scheduler
+from . import ClassyParamScheduler, UpdateInterval, register_param_scheduler
 
 
 @register_param_scheduler("constant")
@@ -16,7 +16,7 @@ class ConstantParamScheduler(ClassyParamScheduler):
     """
 
     def __init__(self, value: float):
-        super().__init__()
+        super().__init__(update_interval=UpdateInterval.EPOCH)
         self._value = value
 
     @classmethod

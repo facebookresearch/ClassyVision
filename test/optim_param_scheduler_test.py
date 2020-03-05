@@ -16,6 +16,7 @@ from classy_vision.optim.param_scheduler import (
     ClassyParamScheduler,
     UpdateInterval,
     register_param_scheduler,
+    update_interval_from_config,
 )
 from classy_vision.tasks import ClassificationTask, ClassyTask
 from classy_vision.trainer import LocalTrainer
@@ -250,3 +251,21 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         # the weight decay scheduler uses an epoch update interval
         self.assertEqual(weight_decay_list, [0 / 6, 0 / 6, 4 / 6, 4 / 6, 8 / 6, 8 / 6])
         self.assertEqual(momentum_list, [0.9, 0.9, 0.9, 0.9, 0.9, 0.9])
+
+    def test_update_interval_from_config(self):
+        # test a config which specifies an update interval
+        config = {"update_interval": "epoch"}
+        self.assertEqual(
+            update_interval_from_config(config, UpdateInterval.STEP),
+            UpdateInterval.EPOCH,
+        )
+        # test a config which doesn't specify an update interval
+        config = {}
+        self.assertEqual(
+            update_interval_from_config(config, UpdateInterval.STEP),
+            UpdateInterval.STEP,
+        )
+        # test a config with an invalid update interval
+        config = {"update_interval": "invalid"}
+        with self.assertRaises(Exception):
+            update_interval_from_config(config, UpdateInterval.EPOCH)
