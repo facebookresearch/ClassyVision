@@ -200,7 +200,9 @@ class TestOptimizer(ABC):
         _test_lr_schedule(opt, num_epochs, epochs, targets)
 
         # Test step learning schedule
-        config["lr"] = {"name": "step", "values": [0.1, 0.01, 0.001]}
+        config["param_schedulers"] = {
+            "lr": {"name": "step", "values": [0.1, 0.01, 0.001]}
+        }
         opt = build_optimizer(config)
         opt.init_pytorch_optimizer(mock_classy_vision_model)
         targets = [0.1] * 8 + [0.01] * 3 + [0.001] * 4
@@ -209,15 +211,17 @@ class TestOptimizer(ABC):
         # Test step learning schedule with warmup
         init_lr = 0.01
         warmup_epochs = 0.1
-        config["lr"] = {
-            "name": "composite",
-            "schedulers": [
-                {"name": "linear", "start_value": init_lr, "end_value": 0.1},
-                {"name": "step", "values": [0.1, 0.01, 0.001]},
-            ],
-            "update_interval": "epoch",
-            "interval_scaling": ["rescaled", "fixed"],
-            "lengths": [warmup_epochs / num_epochs, 1 - warmup_epochs / num_epochs],
+        config["param_schedulers"] = {
+            "lr": {
+                "name": "composite",
+                "schedulers": [
+                    {"name": "linear", "start_value": init_lr, "end_value": 0.1},
+                    {"name": "step", "values": [0.1, 0.01, 0.001]},
+                ],
+                "update_interval": "epoch",
+                "interval_scaling": ["rescaled", "fixed"],
+                "lengths": [warmup_epochs / num_epochs, 1 - warmup_epochs / num_epochs],
+            }
         }
 
         opt = build_optimizer(config)
