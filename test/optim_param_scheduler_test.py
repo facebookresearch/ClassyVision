@@ -250,3 +250,20 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         # the weight decay scheduler uses an epoch update interval
         self.assertEqual(weight_decay_list, [0 / 6, 0 / 6, 4 / 6, 4 / 6, 8 / 6, 8 / 6])
         self.assertEqual(momentum_list, [0.9, 0.9, 0.9, 0.9, 0.9, 0.9])
+
+    def test_update_interval_from_config(self):
+        # test a config which specifies an update interval
+        config = {"update_interval": "epoch"}
+        self.assertEqual(
+            UpdateInterval.from_config(config, UpdateInterval.STEP),
+            UpdateInterval.EPOCH,
+        )
+        # test a config which doesn't specify an update interval
+        config = {}
+        self.assertEqual(
+            UpdateInterval.from_config(config, UpdateInterval.STEP), UpdateInterval.STEP
+        )
+        # test a config with an invalid update interval
+        config = {"update_interval": "invalid"}
+        with self.assertRaises(Exception):
+            UpdateInterval.from_config(config, UpdateInterval.EPOCH)

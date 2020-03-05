@@ -93,7 +93,7 @@ class TestCompositeScheduler(unittest.TestCase):
         # Bad value for update_interval
         bad_config["lengths"] = copy.deepcopy(config["lengths"])
         bad_config["update_interval"] = "epochs"
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(Exception):
             CompositeParamScheduler.from_config(bad_config)
 
         # Bad value for composition_mode

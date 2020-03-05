@@ -7,7 +7,7 @@
 import math
 from typing import Any, Dict
 
-from . import ClassyParamScheduler, register_param_scheduler
+from . import ClassyParamScheduler, UpdateInterval, register_param_scheduler
 
 
 @register_param_scheduler("cosine")
@@ -17,6 +17,7 @@ class CosineParamScheduler(ClassyParamScheduler):
     //arxiv.org/pdf/1608.03983.pdf>`_.
     Can be used for either cosine decay or cosine warmup schedules based on
     start and end values.
+    The schedule is updated after every train step by default.
 
     Example:
 
@@ -26,8 +27,13 @@ class CosineParamScheduler(ClassyParamScheduler):
           end_value: 0.0001
     """
 
-    def __init__(self, start_value: float, end_value: float):
-        super().__init__()
+    def __init__(
+        self,
+        start_value: float,
+        end_value: float,
+        update_interval: UpdateInterval = UpdateInterval.STEP,
+    ):
+        super().__init__(update_interval=update_interval)
         self._start_value = start_value
         self._end_value = end_value
 
@@ -46,7 +52,11 @@ class CosineParamScheduler(ClassyParamScheduler):
             "start_value" in config and "end_value" in config
         ), "Cosine scheduler requires a start_value and a end_value"
 
-        return cls(start_value=config["start_value"], end_value=config["end_value"])
+        return cls(
+            start_value=config["start_value"],
+            end_value=config["end_value"],
+            update_interval=UpdateInterval.from_config(config, UpdateInterval.STEP),
+        )
 
     def __call__(self, where: float):
         return self._end_value + 0.5 * (self._start_value - self._end_value) * (

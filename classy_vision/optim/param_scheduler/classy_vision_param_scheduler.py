@@ -20,6 +20,25 @@ class UpdateInterval(Enum):
     EPOCH = "epoch"
     STEP = "step"
 
+    @classmethod
+    def from_config(
+        cls, config: Dict[str, Any], default: "UpdateInterval" = None
+    ) -> "UpdateInterval":
+        """Fetches the update interval from a config
+
+        Args:
+            config: The config for the parameter scheduler
+            default: The value to use if the config doesn't specify an update interval.
+                If not set, STEP is used.
+        """
+        if default is None:
+            default = cls.STEP
+        if "update_interval" not in config:
+            return default
+        if config.get("update_interval").lower() not in ["step", "epoch"]:
+            raise ValueError("Choices for update interval are 'step' or 'epoch'")
+        return cls[config["update_interval"].upper()]
+
 
 class ClassyParamScheduler(object):
     """
@@ -33,7 +52,7 @@ class ClassyParamScheduler(object):
     # To be used for comparisons with where
     WHERE_EPSILON = 1e-6
 
-    def __init__(self, update_interval: UpdateInterval = UpdateInterval.EPOCH):
+    def __init__(self, update_interval: UpdateInterval):
         """
         Constructor for ClassyParamScheduler
 
