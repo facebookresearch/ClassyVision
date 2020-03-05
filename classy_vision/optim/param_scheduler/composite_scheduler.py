@@ -41,7 +41,7 @@ class CompositeParamScheduler(ClassyParamScheduler):
               update_interval = "step"
               schedulers = [
                 {"name": "constant", "value": 0.42},
-                {"name": "cosine_decay", "start_lr": 0.42, "end_lr": 0.0001}
+                {"name": "cosine_decay", "start_value": 0.42, "end_value": 0.0001}
               ]
               interval_scaling = ['rescaled', 'rescaled'],
               lengths =  [0.3, 0.7]

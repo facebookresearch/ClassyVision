@@ -18,20 +18,20 @@ class TestLienarScheduler(unittest.TestCase):
         return [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09]
 
     def _get_valid_config(self):
-        return {"name": "linear", "start_lr": 0.0, "end_lr": 0.1}
+        return {"name": "linear", "start_value": 0.0, "end_value": 0.1}
 
     def test_invalid_config(self):
         config = self._get_valid_config()
 
         bad_config = copy.deepcopy(config)
         # No start lr
-        del bad_config["start_lr"]
+        del bad_config["start_value"]
         with self.assertRaises(AssertionError):
             LinearParamScheduler.from_config(bad_config)
 
         # No end lr
-        bad_config["start_lr"] = config["start_lr"]
-        del bad_config["end_lr"]
+        bad_config["start_value"] = config["start_value"]
+        del bad_config["end_value"]
         with self.assertRaises(AssertionError):
             LinearParamScheduler.from_config(bad_config)
 
@@ -44,19 +44,19 @@ class TestLienarScheduler(unittest.TestCase):
             round(scheduler(epoch_num / self._num_epochs), 4)
             for epoch_num in range(self._num_epochs)
         ]
-        expected_schedule = [config["start_lr"]] + self._get_valid_intermediate()
+        expected_schedule = [config["start_value"]] + self._get_valid_intermediate()
         self.assertEqual(schedule, expected_schedule)
 
         # Check as decay
-        tmp = config["start_lr"]
-        config["start_lr"] = config["end_lr"]
-        config["end_lr"] = tmp
+        tmp = config["start_value"]
+        config["start_value"] = config["end_value"]
+        config["end_value"] = tmp
         scheduler = LinearParamScheduler.from_config(config)
         schedule = [
             round(scheduler(epoch_num / self._num_epochs), 4)
             for epoch_num in range(self._num_epochs)
         ]
-        expected_schedule = [config["start_lr"]] + list(
+        expected_schedule = [config["start_value"]] + list(
             reversed(self._get_valid_intermediate())
         )
         self.assertEqual(schedule, expected_schedule)
