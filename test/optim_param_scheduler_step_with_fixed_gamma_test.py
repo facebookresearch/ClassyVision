@@ -19,7 +19,7 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
     def _get_valid_config(self):
         return {
             "name": "step_with_fixed_gamma",
-            "base_lr": 1,
+            "base_value": 1,
             "gamma": 0.1,
             "num_decays": 3,
             "num_epochs": self._num_epochs,
@@ -39,9 +39,9 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
         with self.assertRaises(AssertionError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 
-        # Invalid base_lr
+        # Invalid base_value
         bad_config = copy.deepcopy(config)
-        bad_config["base_lr"] = -0.01
+        bad_config["base_value"] = -0.01
         with self.assertRaises(AssertionError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 

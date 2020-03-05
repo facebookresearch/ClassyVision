@@ -212,7 +212,7 @@ class TestOptimizer(ABC):
         config["lr"] = {
             "name": "composite",
             "schedulers": [
-                {"name": "linear", "start_lr": init_lr, "end_lr": 0.1},
+                {"name": "linear", "start_value": init_lr, "end_value": 0.1},
                 {"name": "step", "values": [0.1, 0.01, 0.001]},
             ],
             "update_interval": "epoch",

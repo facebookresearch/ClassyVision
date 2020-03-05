@@ -83,7 +83,7 @@ class APITest(unittest.TestCase):
 
         optimizer = SGD(momentum=0.9, weight_decay=1e-4, nesterov=True)
         optimizer.set_param_schedulers(
-            {"lr": LinearParamScheduler(start_lr=0.01, end_lr=0.009)}
+            {"lr": LinearParamScheduler(start_value=0.01, end_value=0.009)}
         )
 
         task = (

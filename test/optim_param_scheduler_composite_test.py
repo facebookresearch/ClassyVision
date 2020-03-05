@@ -45,7 +45,7 @@ class TestCompositeScheduler(unittest.TestCase):
             "name": "composite",
             "schedulers": [
                 {"name": "step", "values": [0.1, 0.2, 0.3, 0.4, 0.5], "num_epochs": 10},
-                {"name": "cosine", "start_lr": 0.42, "end_lr": 0.0001},
+                {"name": "cosine", "start_value": 0.42, "end_value": 0.0001},
             ],
             "lengths": [0.5, 0.5],
         }
@@ -54,8 +54,8 @@ class TestCompositeScheduler(unittest.TestCase):
         return {
             "name": "composite",
             "schedulers": [
-                {"name": "linear", "start_lr": 0.0, "end_lr": 0.5},
-                {"name": "linear", "start_lr": 0.5, "end_lr": 1.0},
+                {"name": "linear", "start_value": 0.0, "end_value": 0.5},
+                {"name": "linear", "start_value": 0.5, "end_value": 1.0},
             ],
             "lengths": [0.5, 0.5],
             "interval_scaling": ["rescaled", "rescaled"],
