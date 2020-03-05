@@ -20,7 +20,7 @@ class TestPolynomialScheduler(unittest.TestCase):
         return {
             "name": "polynomial",
             "num_epochs": self._num_epochs,
-            "base_lr": 0.1,
+            "base_value": 0.1,
             "power": 1,
         }
 
@@ -30,7 +30,7 @@ class TestPolynomialScheduler(unittest.TestCase):
 
         # Invalid Base lr
         bad_config = copy.deepcopy(config)
-        del bad_config["base_lr"]
+        del bad_config["base_value"]
         with self.assertRaises(AssertionError):
             PolynomialDecayParamScheduler.from_config(bad_config)
 

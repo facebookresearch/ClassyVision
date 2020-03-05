@@ -12,22 +12,22 @@ from . import ClassyParamScheduler, register_param_scheduler
 @register_param_scheduler("linear")
 class LinearParamScheduler(ClassyParamScheduler):
     """
-    Linearly interpolates parameter between ``start_lr`` and ``end_lr``.
+    Linearly interpolates parameter between ``start_value`` and ``end_value``.
     Can be used for either warmup or decay based on start and end values.
 
     Example:
 
         .. code-block:: python
 
-            start_lr: 0.0001
-            end_lr: 0.01
+            start_value: 0.0001
+            end_value: 0.01
     Corresponds to a linear increasing schedule with values in [0.0001, 0.01)
     """
 
-    def __init__(self, start_lr: float, end_lr: float):
+    def __init__(self, start_value: float, end_value: float):
         super().__init__()
-        self._start_lr = start_lr
-        self._end_lr = end_lr
+        self._start_value = start_value
+        self._end_value = end_value
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "LinearParamScheduler":
@@ -41,10 +41,10 @@ class LinearParamScheduler(ClassyParamScheduler):
             A LinearParamScheduler instance.
         """
         assert (
-            "start_lr" in config and "end_lr" in config
+            "start_value" in config and "end_value" in config
         ), "Linear scheduler requires a start and a end"
-        return cls(start_lr=config["start_lr"], end_lr=config["end_lr"])
+        return cls(start_value=config["start_value"], end_value=config["end_value"])
 
     def __call__(self, where: float):
         # interpolate between start and end values
-        return self._end_lr * where + self._start_lr * (1 - where)
+        return self._end_value * where + self._start_value * (1 - where)
