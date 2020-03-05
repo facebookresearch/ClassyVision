@@ -15,6 +15,7 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     """
     Decays the param value by gamma at equal number of steps so as to have the
     specified total number of decays.
+    The schedule is updated after every train step by default.
 
     Example:
 
@@ -28,6 +29,31 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
     Then the param value will be 0.1 for epochs 0-29, 0.01 for
     epochs 30-59, 0.001 for epoch 60-89, 0.0001 for epochs 90-119.
     """
+
+    def __init__(
+        self,
+        base_value: float,
+        num_decays: int,
+        gamma: float,
+        num_epochs: int,
+        update_interval: UpdateInterval = UpdateInterval.STEP,
+    ):
+        super().__init__(update_interval=update_interval)
+
+        self.base_value = base_value
+        self.num_decays = num_decays
+        self.gamma = gamma
+        self.num_epochs = num_epochs
+        values = [base_value]
+        for _ in range(num_decays):
+            values.append(values[-1] * gamma)
+
+        self._step_param_scheduler = StepParamScheduler(
+            num_epochs=num_epochs, values=values
+        )
+
+        # make this a STEP scheduler
+        self.update_interval = UpdateInterval.STEP
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "StepWithFixedGammaParamScheduler":
@@ -56,25 +82,8 @@ class StepWithFixedGammaParamScheduler(ClassyParamScheduler):
             num_decays=config["num_decays"],
             gamma=config["gamma"],
             num_epochs=config["num_epochs"],
+            update_interval=UpdateInterval.from_config(config, UpdateInterval.STEP),
         )
-
-    def __init__(self, base_value, num_decays, gamma, num_epochs):
-        super().__init__()
-
-        self.base_value = base_value
-        self.num_decays = num_decays
-        self.gamma = gamma
-        self.num_epochs = num_epochs
-        values = [base_value]
-        for _ in range(num_decays):
-            values.append(values[-1] * gamma)
-
-        self._step_param_scheduler = StepParamScheduler(
-            num_epochs=num_epochs, values=values
-        )
-
-        # make this a STEP scheduler
-        self.update_interval = UpdateInterval.STEP
 
     def __call__(self, where: float) -> float:
         return self._step_param_scheduler(where)
