@@ -41,17 +41,6 @@ def build_optimizer(config):
     param_scheduler_config = copy.deepcopy(config.get("param_schedulers", {}))
 
     # build the param schedulers
-    if "lr" in config and isinstance(config["lr"], dict):
-        message = (
-            'Passing an lr schedule in the config using "lr" is deprecated and '
-            "will be removed in version 0.2.0. See the docs for build_optimizer for "
-            "the recommended format."
-        )
-        warnings.warn(message, DeprecationWarning, stacklevel=2)
-        assert (
-            param_scheduler_config == {}
-        ), 'Cannot pass both "lr" and "param_schedulers" to the config'
-        param_scheduler_config = {"lr": config["lr"]}
     for cfg in param_scheduler_config.values():
         cfg["num_epochs"] = config["num_epochs"]
 
