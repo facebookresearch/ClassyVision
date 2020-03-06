@@ -26,8 +26,6 @@ class TestProgressBarHook(unittest.TestCase):
 
         mock_is_master.return_value = True
 
-        local_variables = {}
-
         task = get_test_classy_task()
         task.prepare()
         task.advance_phase()
@@ -60,7 +58,7 @@ class TestProgressBarHook(unittest.TestCase):
             mock_progress_bar.update.reset_mock()
 
         # finish should be called on the progress bar
-        progress_bar_hook.on_phase_end(task, local_variables)
+        progress_bar_hook.on_phase_end(task)
         mock_progress_bar.finish.assert_called_once_with()
         mock_progress_bar.finish.reset_mock()
 
@@ -69,7 +67,7 @@ class TestProgressBarHook(unittest.TestCase):
         progress_bar_hook = ProgressBarHook()
         try:
             progress_bar_hook.on_step(task)
-            progress_bar_hook.on_phase_end(task, local_variables)
+            progress_bar_hook.on_phase_end(task)
         except Exception as e:
             self.fail(
                 "Received Exception when on_phase_start() isn't called: {}".format(e)
@@ -82,7 +80,7 @@ class TestProgressBarHook(unittest.TestCase):
         try:
             progress_bar_hook.on_phase_start(task)
             progress_bar_hook.on_step(task)
-            progress_bar_hook.on_phase_end(task, local_variables)
+            progress_bar_hook.on_phase_end(task)
         except Exception as e:
             self.fail("Received Exception when is_master() is False: {}".format(e))
         self.assertIsNone(progress_bar_hook.progress_bar)

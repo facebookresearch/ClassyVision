@@ -32,7 +32,6 @@ class TestTimeMetricsHook(unittest.TestCase):
         mock_get_rank.return_value = rank
 
         mock_report_str.return_value = ""
-        local_variables = {}
 
         for log_freq, train in product([5, None], [True, False]):
             # create a time metrics hook
@@ -53,7 +52,7 @@ class TestTimeMetricsHook(unittest.TestCase):
 
             # test that the code doesn't raise an exception if losses is empty
             try:
-                time_metrics_hook.on_phase_end(task, local_variables)
+                time_metrics_hook.on_phase_end(task)
             except Exception as e:
                 self.fail("Received Exception when losses is []: {}".format(e))
 
@@ -73,7 +72,7 @@ class TestTimeMetricsHook(unittest.TestCase):
                         continue
                     mock_fn.assert_not_called()
 
-                time_metrics_hook.on_phase_end(task, local_variables)
+                time_metrics_hook.on_phase_end(task)
                 mock_fn.assert_called_with(task)
 
             task.losses = [0.23, 0.45, 0.34, 0.67]
@@ -116,7 +115,7 @@ class TestTimeMetricsHook(unittest.TestCase):
             time_metrics_hook_new = TimeMetricsHook()
 
             with self.assertLogs() as log_watcher:
-                time_metrics_hook_new.on_phase_end(task, local_variables)
+                time_metrics_hook_new.on_phase_end(task)
 
             self.assertEqual(len(log_watcher.output), 2)
             self.assertTrue(

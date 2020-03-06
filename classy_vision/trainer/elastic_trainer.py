@@ -70,8 +70,6 @@ class ElasticTrainer(ClassyTrainer):
         )
         state = self._ClassyElasticState(task, self.input_args)
 
-        local_variables = {}
-
         state.advance_to_next_phase = True
 
         def elastic_train_step(orig_state):
@@ -82,13 +80,13 @@ class ElasticTrainer(ClassyTrainer):
                 state.run_start_hooks = False
                 return state, self._ClassyWorkerStats(None)
 
-            return self._run_step(orig_state, local_variables, self.use_gpu)
+            return self._run_step(orig_state, self.use_gpu)
 
         torchelastic.train(self.elastic_coordinator, elastic_train_step, state)
 
         task.on_end()
 
-    def _run_step(self, state, local_variables, use_gpu):
+    def _run_step(self, state, use_gpu):
         # Check for training complete but only terminate when the last phase is done
         if state.task.done_training() and state.advance_to_next_phase:
             raise StopIteration
@@ -112,10 +110,10 @@ class ElasticTrainer(ClassyTrainer):
 
         if state.advance_to_next_phase:
             self.elastic_coordinator.barrier()
-            state.task.on_phase_end(local_variables)
+            state.task.on_phase_end()
 
         progress_rate = None  # using None to signal 'unknown'
-        perf_stats = local_variables.get("perf_stats", None)
+        perf_stats = getattr(state.task, "perf_stats", None)
         if perf_stats is not None:
             batch_time = perf_stats._cuda_stats["train_step_total"].smoothed_value
             if batch_time is not None and batch_time > 0.0:
