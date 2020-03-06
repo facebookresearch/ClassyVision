@@ -49,8 +49,6 @@ class TestTensorboardPlotHook(unittest.TestCase):
 
             losses = [1.23, 4.45, 12.3, 3.4]
 
-            local_variables = {}
-
             summary_writer = SummaryWriter(self.base_dir)
             # create a spy on top of summary_writer
             summary_writer = mock.MagicMock(wraps=summary_writer)
@@ -74,7 +72,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
             # the writer if on_phase_start() is not called for initialization
             # if on_phase_end() is called.
             with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_phase_end(task, local_variables)
+                tensorboard_plot_hook.on_phase_end(task)
 
             self.assertTrue(
                 len(log_watcher.records) == 1
@@ -90,7 +88,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
                 task.losses.append(loss)
                 tensorboard_plot_hook.on_step(task)
 
-            tensorboard_plot_hook.on_phase_end(task, local_variables)
+            tensorboard_plot_hook.on_phase_end(task)
 
             if master:
                 # add_scalar() should have been called with the right scalars

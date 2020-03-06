@@ -50,9 +50,7 @@ class TimeMetricsHook(ClassyHook):
         if batches and batches % self.log_freq == 0:
             self._log_performance_metrics(task)
 
-    def on_phase_end(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
         Log metrics at the end of a phase if log_freq is None.
         """

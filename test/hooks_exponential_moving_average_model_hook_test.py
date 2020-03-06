@@ -37,7 +37,6 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
     def _test_exponential_moving_average_hook(self, model_device, hook_device):
         task = mock.MagicMock()
         model = TestModel().to(device=self._map_device_string(model_device))
-        local_variables = {}
         task.base_model = model
         task.train = True
         decay = 0.5
@@ -54,14 +53,14 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
         fc_weight = model.fc.weight.clone()
         for _ in range(num_updates):
             exponential_moving_average_hook.on_step(task)
-        exponential_moving_average_hook.on_phase_end(task, local_variables)
+        exponential_moving_average_hook.on_phase_end(task)
         # the model weights shouldn't have changed
         self.assertTrue(torch.allclose(model.fc.weight, fc_weight))
 
         # simulate a test phase now
         task.train = False
         exponential_moving_average_hook.on_phase_start(task)
-        exponential_moving_average_hook.on_phase_end(task, local_variables)
+        exponential_moving_average_hook.on_phase_end(task)
 
         # the model weights should be updated to the ema weights
         self.assertTrue(

@@ -27,8 +27,6 @@ class TestVisdomHook(unittest.TestCase):
         mock_visdom = mock.create_autospec(Visdom, instance=True)
         mock_visdom_cls.return_value = mock_visdom
 
-        local_variables = {}
-
         # set up the task and state
         config = get_test_task_config()
         config["dataset"]["train"]["batchsize_per_replica"] = 2
@@ -69,14 +67,14 @@ class TestVisdomHook(unittest.TestCase):
                 # visdom.line() is not called
                 task.losses = []
                 original_metrics = copy.deepcopy(visdom_hook.metrics)
-                visdom_hook.on_phase_end(task, local_variables)
+                visdom_hook.on_phase_end(task)
                 self.assertDictEqual(original_metrics, visdom_hook.metrics)
                 mock_visdom.line.assert_not_called()
 
                 # test that the metrics are updated correctly when losses
                 # is non empty
                 task.losses = [loss * count for loss in losses]
-                visdom_hook.on_phase_end(task, local_variables)
+                visdom_hook.on_phase_end(task)
 
                 # every meter should be present and should have the correct length
                 for meter in task.meters:

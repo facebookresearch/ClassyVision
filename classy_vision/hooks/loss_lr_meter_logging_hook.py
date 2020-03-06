@@ -32,9 +32,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         super().__init__()
         self.log_freq: Optional[int] = log_freq
 
-    def on_phase_end(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
         Log the loss, optimizer LR, and meters for the phase.
         """

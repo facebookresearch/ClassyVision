@@ -34,7 +34,6 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
 
         losses = [1.2, 2.3, 3.4, 4.5]
 
-        local_variables = {}
         task.phase_idx = 0
 
         for log_freq in [5, None]:
@@ -61,7 +60,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
                         mock_fn.assert_not_called()
                         mock_lr_fn.assert_not_called()
 
-                    loss_lr_meter_hook.on_phase_end(task, local_variables)
+                    loss_lr_meter_hook.on_phase_end(task)
                     mock_fn.assert_called_with(task)
                     if task.train:
                         mock_lr_fn.assert_called_with(task)

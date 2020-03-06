@@ -45,7 +45,6 @@ class TestClassyModel(unittest.TestCase):
         task = build_task(config)
         task.prepare()
 
-        local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
         input_args = {"config": config}
 
@@ -62,7 +61,7 @@ class TestClassyModel(unittest.TestCase):
         checkpoint_hook.on_start(task)
 
         task.train = True
-        checkpoint_hook.on_phase_end(task, local_variables)
+        checkpoint_hook.on_phase_end(task)
 
         # Model should be checkpointed. load and compare
         checkpoint = load_checkpoint(checkpoint_folder)
