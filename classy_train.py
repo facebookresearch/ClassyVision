@@ -43,6 +43,7 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
+from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.opts import check_generic_args, parse_train_arguments
 from classy_vision.generic.registry_utils import import_all_packages_from_directory
 from classy_vision.generic.util import load_checkpoint, load_json
@@ -104,6 +105,10 @@ def main(args, config):
 
     trainer = trainer_class(use_gpu=use_gpu, num_dataloader_workers=args.num_workers)
 
+    logging.info(
+        f"Starting training on rank {get_rank()} worker. "
+        f"World size is {get_world_size()}"
+    )
     # That's it! When this call returns, training is done.
     trainer.train(task)
 
