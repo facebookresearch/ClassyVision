@@ -97,7 +97,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         # restore the right state depending on the phase type
         self.set_model_state(task, use_ema=not task.train)
 
-    def on_phase_end(self, task: ClassyTask, local_variables: Dict[str, Any]) -> None:
+    def on_phase_end(self, task: ClassyTask) -> None:
         if task.train:
             # save the current model state since this will be overwritten by the ema
             # state in the test phase

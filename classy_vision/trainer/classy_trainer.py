@@ -70,8 +70,6 @@ class ClassyTrainer:
         # this helps catch hangs which would have happened elsewhere
         barrier()
 
-        local_variables = {}
-
         task.on_start()
         while not task.done_training():
             task.on_phase_start()
@@ -80,5 +78,5 @@ class ClassyTrainer:
                     task.step(self.use_gpu)
                 except StopIteration:
                     break
-            task.on_phase_end(local_variables)
+            task.on_phase_end()
         task.on_end()

@@ -87,9 +87,7 @@ class CheckpointHook(ClassyHook):
             )
             raise FileNotFoundError(err_msg)
 
-    def on_phase_end(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """Checkpoint the task every checkpoint_period phases.
 
         We do not necessarily checkpoint the task at the end of every phase.

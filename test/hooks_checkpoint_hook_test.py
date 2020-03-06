@@ -33,7 +33,6 @@ class TestCheckpointHook(unittest.TestCase):
         task = build_task(config)
         task.prepare()
 
-        local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
         input_args = {"foo": "bar"}
 
@@ -48,7 +47,7 @@ class TestCheckpointHook(unittest.TestCase):
             checkpoint_hook.on_start(task)
         # call the on end phase function
         with self.assertRaises(AssertionError):
-            checkpoint_hook.on_phase_end(task, local_variables)
+            checkpoint_hook.on_phase_end(task)
         # try loading a non-existent checkpoint
         checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNone(checkpoint)
@@ -60,13 +59,13 @@ class TestCheckpointHook(unittest.TestCase):
         # Phase_type is test, expect no checkpoint
         task.train = False
         # call the on end phase function
-        checkpoint_hook.on_phase_end(task, local_variables)
+        checkpoint_hook.on_phase_end(task)
         checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNone(checkpoint)
 
         task.train = True
         # call the on end phase function
-        checkpoint_hook.on_phase_end(task, local_variables)
+        checkpoint_hook.on_phase_end(task)
         # model should be checkpointed. load and compare
         checkpoint = load_checkpoint(checkpoint_folder)
         self.assertIsNotNone(checkpoint)
@@ -84,7 +83,6 @@ class TestCheckpointHook(unittest.TestCase):
         task = build_task(config)
         task.prepare()
 
-        local_variables = {}
         checkpoint_folder = self.base_dir + "/checkpoint_end_test/"
         checkpoint_period = 10
 
@@ -110,7 +108,7 @@ class TestCheckpointHook(unittest.TestCase):
             while valid_phase_count < checkpoint_period - 1:
                 task.train = count % 2 == 0
                 # call the on end phase function
-                checkpoint_hook.on_phase_end(task, local_variables)
+                checkpoint_hook.on_phase_end(task)
                 checkpoint = load_checkpoint(checkpoint_folder)
                 self.assertIsNone(checkpoint)
                 valid_phase_count += 1 if task.phase_type in phase_types else 0
@@ -119,7 +117,7 @@ class TestCheckpointHook(unittest.TestCase):
             # create a phase which is in phase_types
             task.train = True
             # call the on end phase function
-            checkpoint_hook.on_phase_end(task, local_variables)
+            checkpoint_hook.on_phase_end(task)
             # model should be checkpointed. load and compare
             checkpoint = load_checkpoint(checkpoint_folder)
             self.assertIsNotNone(checkpoint)
@@ -137,13 +135,11 @@ class TestCheckpointHook(unittest.TestCase):
 
         task.prepare(use_gpu=cuda_available)
 
-        local_variables = {}
-
         # create a checkpoint hook
         checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
 
         # call the on end phase function
-        checkpoint_hook.on_phase_end(task, local_variables)
+        checkpoint_hook.on_phase_end(task)
 
         # we should be able to train a task using the checkpoint on all available
         # devices

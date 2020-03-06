@@ -137,7 +137,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def on_phase_end(self, local_variables):
+    def on_phase_end(self):
         """
         Epoch end.
 

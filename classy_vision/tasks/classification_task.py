@@ -868,7 +868,7 @@ class ClassificationTask(ClassyTask):
 
         self.phase_start_time_train = time.perf_counter()
 
-    def on_phase_end(self, local_variables):
+    def on_phase_end(self):
         self.log_phase_end("train")
 
         logging.info("Syncing meters on phase end...")
@@ -877,7 +877,8 @@ class ClassificationTask(ClassyTask):
         logging.info("...meters synced")
         barrier()
 
-        self.run_hooks(local_variables, ClassyHookFunctions.on_phase_end.name)
+        for hook in self.hooks:
+            hook.on_phase_end(self)
         self.perf_log = []
 
         self.log_phase_end("total")

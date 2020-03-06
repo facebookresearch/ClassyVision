@@ -78,9 +78,7 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times.append(time.time())
         self.num_steps_global.append(task.num_updates)
 
-    def on_phase_end(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """Add the losses and learning rates to tensorboard."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")
