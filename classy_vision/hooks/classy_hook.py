@@ -70,9 +70,7 @@ class ClassyHook(ABC):
         pass
 
     @abstractmethod
-    def on_phase_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Called at the start of each phase."""
         pass
 
