@@ -96,7 +96,7 @@ class ElasticTrainer(ClassyTrainer):
         if state.advance_to_next_phase:
             self.elastic_coordinator.barrier()
             self.elastic_coordinator._log_event("on_phase_start")
-            state.task.on_phase_start(local_variables)
+            state.task.on_phase_start()
 
             state.advance_to_next_phase = False
 

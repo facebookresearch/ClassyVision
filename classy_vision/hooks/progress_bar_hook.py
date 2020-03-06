@@ -36,9 +36,7 @@ class ProgressBarHook(ClassyHook):
         self.bar_size: int = 0
         self.batches: int = 0
 
-    def on_phase_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Create and display a progress bar with 0 progress."""
         if not progressbar_available:
             raise RuntimeError(

@@ -56,9 +56,7 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times: Optional[List[float]] = None
         self.num_steps_global: Optional[List[int]] = None
 
-    def on_phase_start(
-        self, task: "tasks.ClassyTask", local_variables: Dict[str, Any]
-    ) -> None:
+    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Initialize losses and learning_rates."""
         self.learning_rates = []
         self.wall_times = []
