@@ -57,7 +57,8 @@ class TestDistributedTrainer(unittest.TestCase):
             --device={device} \
             --config={self.config_files[config_key]} \
             --num_workers=4 \
-            --log_freq=100
+            --log_freq=100 \
+            --distributed_backend=ddp
             """
             result = subprocess.run(cmd, shell=True)
             success = result.returncode == 0
