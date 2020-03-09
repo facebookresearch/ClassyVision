@@ -774,3 +774,18 @@ def get_model_dummy_input(
         if input_key:
             input = {input_key: input}
     return input
+
+
+@contextlib.contextmanager
+def train_mode(model: nn.Module, train_mode: bool):
+    """Context manager which sets the train mode of a model. After returning, it
+    restores the state of every module inside the model individually."""
+    train_modes = {}
+    for name, module in model.named_modules():
+        train_modes[name] = module.training
+    try:
+        model.train(train_mode)
+        yield
+    finally:
+        for name, module in model.named_modules():
+            module.training = train_modes[name]

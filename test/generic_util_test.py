@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import shutil
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
+import torch.nn as nn
 from classy_vision.generic.util import (
     CHECKPOINT_FILE,
     load_checkpoint,
@@ -367,6 +369,52 @@ class TestUtilMethods(unittest.TestCase):
                 model, input_shape, input_key, batchsize
             )
             self.assertEqual(result.size(), tuple([batchsize] + input_shape))
+
+    def _compare_model_train_mode(self, model_1, model_2):
+        for name_1, module_1 in model_1.named_modules():
+            found = False
+            for name_2, module_2 in model_2.named_modules():
+                if name_1 == name_2:
+                    found = True
+                    if module_1.training != module_2.training:
+                        return False
+            if not found:
+                return False
+        return True
+
+    def _check_model_train_mode(self, model, expected_mode):
+        for module in model.modules():
+            if module.training != expected_mode:
+                return False
+        return True
+
+    def test_train_mode(self):
+        class TestModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.linear = nn.Linear(1, 2)
+                self.dropout = nn.Dropout()
+                self.seq = nn.Sequential(
+                    nn.ReLU(), nn.Conv2d(1, 2, 3), nn.BatchNorm2d(1, 2)
+                )
+
+        test_model = TestModel()
+        for train in [True, False]:
+            test_model.train(train)
+
+            # flip some of the modes
+            test_model.dropout.train(not train)
+            test_model.seq[1].train(not train)
+
+            orig_model = copy.deepcopy(test_model)
+            for context_train in [True, False]:
+                with util.train_mode(test_model, context_train):
+                    self._check_model_train_mode(test_model, context_train)
+                    # the modes should be different inside the context manager
+                    self.assertFalse(
+                        self._compare_model_train_mode(orig_model, test_model)
+                    )
+                self.assertTrue(self._compare_model_train_mode(orig_model, test_model))
 
 
 class TestUpdateStateFunctions(unittest.TestCase):

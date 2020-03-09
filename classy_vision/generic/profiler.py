@@ -10,7 +10,12 @@ import operator
 
 import torch
 import torch.nn as nn
-from classy_vision.generic.util import get_model_dummy_input, is_leaf, is_on_gpu
+from classy_vision.generic.util import (
+    get_model_dummy_input,
+    is_leaf,
+    is_on_gpu,
+    train_mode,
+)
 from torch.cuda import cudart
 
 
@@ -24,7 +29,6 @@ def profile(
     """
     Performs CPU or GPU profiling of the specified model on the specified input.
     """
-
     # assertions:
     if use_nvprof:
         raise NotImplementedError
@@ -41,18 +45,19 @@ def profile(
         batchsize=batchsize_per_replica,
         non_blocking=False,
     )
-    # perform profiling:
-    with torch.no_grad():
-        model(input)  # warm up CUDA memory allocator and profiler
-        if use_nvprof:  # nvprof profiling (TODO: Can we infer this?)
-            cudart().cudaProfilerStart()
-            model(input)
-            cudart().cudaProfilerStop()
-            exit()  # exit gracefully
-        else:  # regular profiling
-            with torch.autograd.profiler.profile(use_cuda=True) as profiler:
+    # perform profiling in eval mode
+    with train_mode(model, False):
+        with torch.no_grad():
+            model(input)  # warm up CUDA memory allocator and profiler
+            if use_nvprof:  # nvprof profiling (TODO: Can we infer this?)
+                cudart().cudaProfilerStart()
                 model(input)
-                return profiler
+                cudart().cudaProfilerStop()
+                exit()  # exit gracefully
+            else:  # regular profiling
+                with torch.autograd.profiler.profile(use_cuda=True) as profiler:
+                    model(input)
+                    return profiler
 
 
 def _layer_flops(layer, x, _):
@@ -365,7 +370,6 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     """
     Compute the complexity of a forward pass.
     """
-
     # assertions, input, and upvalue in which we will perform the count:
     assert isinstance(model, nn.Module)
     if not isinstance(input_shape, abc.Sequence):
@@ -376,7 +380,10 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     # measure FLOPs:
     modify_forward(model, compute_list, compute_fn)
     try:
-        model.forward(input)
+        # compute complexity in eval mode
+        with train_mode(model, False):
+            with torch.no_grad():
+                model.forward(input)
     except NotImplementedError as err:
         raise err
     finally:
