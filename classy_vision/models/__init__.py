@@ -67,16 +67,16 @@ def build_model(config):
     (see :func:`register_model`) and call .from_config on it."""
 
     assert config["name"] in MODEL_REGISTRY, "unknown model"
-    model = MODEL_REGISTRY[config["name"]].from_config(config)
-    if "heads" in config:
+    config = copy.deepcopy(config)
+    name = config.pop("name")
+    heads_config = config.pop("heads", None)
+    model = MODEL_REGISTRY[name].from_config(config)
+    if heads_config is not None:
         heads = defaultdict(dict)
-        for head_config in config["heads"]:
+        for head_config in heads_config:
             assert "fork_block" in head_config, "Expect fork_block in config"
-            fork_block = head_config["fork_block"]
-            updated_config = copy.deepcopy(head_config)
-            del updated_config["fork_block"]
-
-            head = build_head(updated_config)
+            fork_block = head_config.pop("fork_block")
+            head = build_head(head_config)
             heads[fork_block][head.unique_id] = head
         model.set_heads(heads)
     return model
