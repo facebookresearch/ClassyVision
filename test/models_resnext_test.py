@@ -8,7 +8,7 @@ import unittest
 from test.generic.utils import compare_model_state
 
 import torch
-from classy_vision.models import build_model
+from classy_vision.models import ResNeXt, build_model
 
 
 MODELS = {
@@ -51,6 +51,26 @@ MODELS = {
             }
         ],
     },
+    "small_resnet_se": {
+        "name": "resnet",
+        "num_blocks": [1, 1, 1, 1],
+        "init_planes": 4,
+        "reduction": 4,
+        "small_input": True,
+        "zero_init_bn_residuals": True,
+        "basic_layer": True,
+        "final_bn_relu": True,
+        "use_se": True,
+        "heads": [
+            {
+                "name": "fully_connected",
+                "unique_id": "default_head",
+                "num_classes": 1000,
+                "fork_block": "block3-0",
+                "in_plane": 128,
+            }
+        ],
+    },
 }
 
 
@@ -78,8 +98,17 @@ class TestResnext(unittest.TestCase):
 
         compare_model_state(self, state, new_state, check_heads=True)
 
+    def test_build_preset_model(self):
+        configs = [{"name": "resnet18"}, {"name": "resnet18", "use_se": True}]
+        for config in configs:
+            model = build_model(config)
+            self.assertIsInstance(model, ResNeXt)
+
     def test_small_resnext(self):
         self._test_model(MODELS["small_resnext"])
 
     def test_small_resnet(self):
         self._test_model(MODELS["small_resnet"])
+
+    def test_small_resnet_se(self):
+        self._test_model(MODELS["small_resnet_se"])
