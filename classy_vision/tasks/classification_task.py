@@ -697,7 +697,7 @@ class ClassificationTask(ClassyTask):
 
         with torch.enable_grad():
             # Forward pass
-            output = self.model(sample["input"])
+            output = self.compute_features(sample)
 
             local_loss = self.compute_loss(output, sample)
 
@@ -727,6 +727,9 @@ class ClassificationTask(ClassyTask):
         self.last_batch = LastBatchInfo(
             loss=loss, output=output, target=target, sample=sample
         )
+
+    def compute_features(self, sample):
+        return self.model(sample["input"])
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
