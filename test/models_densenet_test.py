@@ -30,7 +30,27 @@ MODELS = {
                 "zero_init_bias": True,
             }
         ],
-    }
+    },
+    "small_densenet_se": {
+        "name": "densenet",
+        "num_blocks": [1, 1, 1, 1],
+        "init_planes": 4,
+        "growth_rate": 32,
+        "expansion": 4,
+        "final_bn_relu": True,
+        "small_input": True,
+        "use_se": True,
+        "heads": [
+            {
+                "name": "fully_connected",
+                "unique_id": "default_head",
+                "num_classes": 1000,
+                "fork_block": "trunk_output",
+                "in_plane": 60,
+                "zero_init_bias": True,
+            }
+        ],
+    },
 }
 
 
