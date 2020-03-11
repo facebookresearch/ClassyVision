@@ -140,7 +140,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
 
         config = get_test_mlp_task_config()
         config["num_epochs"] = 3
-        config["dataset"]["train"]["batchsize_per_replica"] = 5
+        config["dataset"]["train"]["batchsize_per_replica"] = 10
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
 
@@ -152,7 +152,7 @@ class TestTensorboardPlotHook(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # We have 10 samples, batch size is 5. Each epoch is done in two steps.
+        # We have 20 samples, batch size is 10. Each epoch is done in two steps.
         self.assertEqual(
             writer.scalar_logs["train_learning_rate_updates"],
             [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6],

@@ -83,7 +83,7 @@ class TestLossLrMeterLoggingHook(unittest.TestCase):
         mock_lr_scheduler.update_interval = UpdateInterval.STEP
         config = get_test_mlp_task_config()
         config["num_epochs"] = 3
-        config["dataset"]["train"]["batchsize_per_replica"] = 5
+        config["dataset"]["train"]["batchsize_per_replica"] = 10
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
         task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
