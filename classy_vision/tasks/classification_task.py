@@ -23,7 +23,6 @@ from classy_vision.generic.util import (
     recursive_copy_to_gpu,
     update_classy_state,
 )
-from classy_vision.hooks import ClassyHookFunctions
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
@@ -305,9 +304,6 @@ class ClassificationTask(ClassyTask):
         amp_opt_level = config.get("amp_opt_level")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
-        # put model in eval mode in case any hooks modify model states, it'll
-        # be reset to train mode before training
-        model.eval()
         optimizer = build_optimizer(optimizer_config)
 
         task = (

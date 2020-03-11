@@ -13,6 +13,7 @@ import math
 import os
 import sys
 import traceback
+from functools import partial
 from typing import Dict, Optional
 
 import numpy as np
@@ -774,3 +775,32 @@ def get_model_dummy_input(
         if input_key:
             input = {input_key: input}
     return input
+
+
+@contextlib.contextmanager
+def _train_mode(model: nn.Module, train_mode: bool):
+    """Context manager which sets the train mode of a model. After returning, it
+    restores the state of every sub-module individually."""
+    train_modes = {}
+    for name, module in model.named_modules():
+        train_modes[name] = module.training
+    try:
+        model.train(train_mode)
+        yield
+    finally:
+        for name, module in model.named_modules():
+            module.training = train_modes[name]
+
+
+train_model = partial(_train_mode, train_mode=True)
+train_model.__doc__ = """Context manager which puts the model in train mode.
+
+    After returning, it restores the state of every sub-module individually.
+    """
+
+
+eval_model = partial(_train_mode, train_mode=False)
+eval_model.__doc__ = """Context manager which puts the model in eval mode.
+
+    After returning, it restores the state of every sub-module individually.
+    """
