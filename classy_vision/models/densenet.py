@@ -16,6 +16,7 @@ from classy_vision.generic.util import is_pos_int
 
 from . import register_model
 from .classy_model import ClassyModel
+from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
 
 # global setting for in-place ReLU:
@@ -23,12 +24,16 @@ INPLACE = True
 
 
 class _DenseLayer(nn.Sequential):
-    """
-        Single layer of a DenseNet.
-    """
+    """Single layer of a DenseNet."""
 
-    def __init__(self, in_planes, growth_rate=32, expansion=4):
-
+    def __init__(
+        self,
+        in_planes,
+        growth_rate=32,
+        expansion=4,
+        use_se=False,
+        se_reduction_ratio=16,
+    ):
         # assertions:
         assert is_pos_int(in_planes)
         assert is_pos_int(growth_rate)
@@ -56,6 +61,13 @@ class _DenseLayer(nn.Sequential):
                 bias=False,
             ),
         )
+        if use_se:
+            self.add_module(
+                "se",
+                SqueezeAndExcitationLayer(
+                    growth_rate, reduction_ratio=se_reduction_ratio
+                ),
+            )
 
     def forward(self, x):
         new_features = super(_DenseLayer, self).forward(x)
@@ -98,15 +110,11 @@ class DenseNet(ClassyModel):
         expansion,
         small_input,
         final_bn_relu,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
         """
             Implementation of a standard densely connected network (DenseNet).
-
-            Set `small_input` to `True` for 32x32 sized image inputs.
-
-            Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
-            layers. These settings are useful when
-            training Siamese networks.
 
             Contains the following attachable blocks:
                 block{block_idx}-{idx}: This is the output of each dense block,
@@ -114,6 +122,15 @@ class DenseNet(ClassyModel):
                 transition-{idx}: This is the output of the transition layers
                 trunk_output: The final output of the `DenseNet`. This is
                     where a `fully_connected` head is normally attached.
+
+            Args:
+                small_input: set to `True` for 32x32 sized image inputs.
+                final_bn_relu: set to `False` to exclude the final batchnorm and
+                    ReLU layers. These settings are useful when training Siamese
+                    networks.
+                use_se: Enable squeeze and excitation
+                se_reduction_ratio: The reduction ratio to apply in the excitation
+                    stage. Only used if `use_se` is `True`.
         """
         super().__init__()
 
@@ -158,6 +175,8 @@ class DenseNet(ClassyModel):
                 idx,
                 growth_rate=growth_rate,
                 expansion=expansion,
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
             blocks.append(block)
             num_planes = num_planes + num_layers * growth_rate
@@ -192,7 +211,14 @@ class DenseNet(ClassyModel):
         return self.build_attachable_block("trunk_output", layers)
 
     def _make_dense_block(
-        self, num_layers, in_planes, block_idx, growth_rate=32, expansion=4
+        self,
+        num_layers,
+        in_planes,
+        block_idx,
+        growth_rate=32,
+        expansion=4,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
         assert is_pos_int(in_planes)
         assert is_pos_int(growth_rate)
@@ -208,6 +234,8 @@ class DenseNet(ClassyModel):
                         in_planes + idx * growth_rate,
                         growth_rate=growth_rate,
                         expansion=expansion,
+                        use_se=use_se,
+                        se_reduction_ratio=se_reduction_ratio,
                     ),
                 )
             )
@@ -233,6 +261,8 @@ class DenseNet(ClassyModel):
             "expansion": config.get("expansion", 4),
             "small_input": config.get("small_input", False),
             "final_bn_relu": config.get("final_bn_relu", True),
+            "use_se": config.get("use_se", False),
+            "se_reduction_ratio": config.get("se_reduction_ratio", 16),
         }
         return cls(**config)
 
