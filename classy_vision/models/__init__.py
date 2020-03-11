@@ -93,6 +93,7 @@ from .mlp import MLP  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D  # isort:skip
+from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer  # isort:skip
 
 
 __all__ = [
@@ -107,4 +108,5 @@ __all__ = [
     "ResNet",
     "ResNeXt",
     "ResNeXt3D",
+    "SqueezeAndExcitationLayer",
 ]
