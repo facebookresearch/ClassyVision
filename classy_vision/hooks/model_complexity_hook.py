@@ -22,8 +22,6 @@ class ModelComplexityHook(ClassyHook):
     """
 
     on_phase_start = ClassyHook._noop
-    on_forward = ClassyHook._noop
-    on_loss_and_meter = ClassyHook._noop
     on_step = ClassyHook._noop
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
