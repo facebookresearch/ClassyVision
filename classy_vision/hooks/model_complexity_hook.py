@@ -40,6 +40,7 @@ class ModelComplexityHook(ClassyHook):
                 self.num_flops = compute_flops(
                     task.base_model,
                     input_shape=task.base_model.input_shape,
+                    input_batchsize=task.base_model.input_batchsize,
                     input_key=task.base_model.input_key
                     if hasattr(task.base_model, "input_key")
                     else None,
@@ -48,6 +49,7 @@ class ModelComplexityHook(ClassyHook):
                     logging.info("FLOPs for forward pass: skipped.")
                     self.num_flops = 0
                 else:
+                    self.num_flops /= task.base_model.input_batchsize
                     logging.info(
                         "FLOPs for forward pass: %d MFLOPs"
                         % (float(self.num_flops) / 1e6)
@@ -62,10 +64,12 @@ class ModelComplexityHook(ClassyHook):
                 self.num_activations = compute_activations(
                     task.base_model,
                     input_shape=task.base_model.input_shape,
+                    input_batchsize=task.base_model.input_batchsize,
                     input_key=task.base_model.input_key
                     if hasattr(task.base_model, "input_key")
                     else None,
                 )
+                self.num_activations /= task.base_model.input_batchsize
                 logging.info(f"Number of activations in model: {self.num_activations}")
             except NotImplementedError:
                 logging.info(

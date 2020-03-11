@@ -288,6 +288,17 @@ class ClassyModel(nn.Module):
         raise NotImplementedError
 
     @property
+    def input_batchsize(self):
+        """Return the batchsize in the input tensor to the model.
+
+        Default value is 1, which is sufficient for most cases. For some corner
+        cases, we may need batchsize larger than 1 to avoid degenerate cases
+        where the number of samples per channel in the input tensor of BatchNorm
+        operator is only 1, which will fail the BatchNorm operator.
+        """
+        return 1
+
+    @property
     def output_shape(self):
         """If implemented, returns expected output tensor shape
         """

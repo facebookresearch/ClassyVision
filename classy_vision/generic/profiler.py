@@ -372,7 +372,7 @@ def restore_forward(model):
     return model
 
 
-def compute_complexity(model, compute_fn, input_shape, input_key=None):
+def compute_complexity(model, compute_fn, input_shape, input_batchsize, input_key=None):
     """
     Compute the complexity of a forward pass.
     """
@@ -381,7 +381,9 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     assert isinstance(model, nn.Module)
     if not isinstance(input_shape, abc.Sequence):
         return None
-    input = get_model_dummy_input(model, input_shape, input_key)
+    input = get_model_dummy_input(
+        model, input_shape, input_key, batchsize=input_batchsize
+    )
     compute_list = []
 
     # measure FLOPs:
@@ -395,18 +397,24 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     return sum(compute_list)
 
 
-def compute_flops(model, input_shape=(3, 224, 224), input_key=None):
+def compute_flops(model, input_shape=(3, 224, 224), input_batchsize=1, input_key=None):
     """
     Compute the number of FLOPs needed for a forward pass.
     """
-    return compute_complexity(model, _layer_flops, input_shape, input_key)
+    return compute_complexity(
+        model, _layer_flops, input_shape, input_batchsize, input_key
+    )
 
 
-def compute_activations(model, input_shape=(3, 224, 224), input_key=None):
+def compute_activations(
+    model, input_shape=(3, 224, 224), input_batchsize=1, input_key=None
+):
     """
     Compute the number of activations created in a forward pass.
     """
-    return compute_complexity(model, _layer_activations, input_shape, input_key)
+    return compute_complexity(
+        model, _layer_activations, input_shape, input_batchsize, input_key
+    )
 
 
 def count_params(model):
