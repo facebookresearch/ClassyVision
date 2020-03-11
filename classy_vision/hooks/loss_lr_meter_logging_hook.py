@@ -19,7 +19,6 @@ class LossLrMeterLoggingHook(ClassyHook):
 
     on_start = ClassyHook._noop
     on_phase_start = ClassyHook._noop
-    on_forward = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:

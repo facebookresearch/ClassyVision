@@ -27,8 +27,6 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         increase memory usage significantly.
     """
 
-    on_forward = ClassyHook._noop
-    on_loss_and_meter = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(
