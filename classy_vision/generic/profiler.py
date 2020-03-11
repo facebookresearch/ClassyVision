@@ -55,6 +55,17 @@ def profile(
                 return profiler
 
 
+def _get_batchsize_per_replica(x):
+    """
+    Some layer may take tuple/list as input in forward function. We recursively dive
+    into the tuple/list until we meet a tensor and infer the batch size
+    """
+    while isinstance(x, (list, tuple)):
+        assert len(x) > 0, "input x of tuple/list type must have at least one element"
+        x = x[0]
+    return x.size()[0]
+
+
 def _layer_flops(layer, x, _):
     """
     Computes the number of FLOPs required for a single layer.
@@ -73,7 +84,7 @@ def _layer_flops(layer, x, _):
     # get layer type:
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
-    batchsize_per_replica = x.size()[0]
+    batchsize_per_replica = _get_batchsize_per_replica(x)
     # 1D convolution:
     if layer_type in ["Conv1d"]:
         # x shape is N x C x W
