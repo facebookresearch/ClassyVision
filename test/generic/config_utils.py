@@ -176,9 +176,9 @@ def get_test_mlp_task_config():
                 "num_classes": 2,
                 "crop_size": 20,
                 "class_ratio": 0.5,
-                "num_samples": 10,
+                "num_samples": 20,
                 "seed": 0,
-                "batchsize_per_replica": 3,
+                "batchsize_per_replica": 6,
                 "use_augmentation": False,
                 "use_shuffle": True,
                 "transforms": [
@@ -228,6 +228,7 @@ def get_test_mlp_task_config():
             "input_dim": 1200,
             "output_dim": 1000,
             "hidden_dims": [10],
+            "use_batchnorm": True,  # used for testing sync batchnorm
         },
         "meters": {"accuracy": {"topk": [1]}},
         "optimizer": {

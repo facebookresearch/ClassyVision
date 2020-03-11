@@ -50,6 +50,7 @@ from classy_vision.generic.util import load_checkpoint, load_json
 from classy_vision.hooks import (
     CheckpointHook,
     LossLrMeterLoggingHook,
+    ModelComplexityHook,
     ProfilerHook,
     ProgressBarHook,
     TensorboardPlotHook,
@@ -118,7 +119,7 @@ def main(args, config):
 
 
 def configure_hooks(args, config):
-    hooks = [LossLrMeterLoggingHook(args.log_freq)]
+    hooks = [LossLrMeterLoggingHook(args.log_freq), ModelComplexityHook()]
 
     # Make a folder to store checkpoints and tensorboard logging outputs
     suffix = datetime.now().isoformat()

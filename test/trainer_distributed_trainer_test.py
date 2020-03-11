@@ -22,10 +22,13 @@ class TestDistributedTrainer(unittest.TestCase):
         config = get_test_mlp_task_config()
         invalid_config = copy.deepcopy(config)
         invalid_config["name"] = "invalid_task"
+        sync_bn_config = copy.deepcopy(config)
+        sync_bn_config["sync_batch_norm_mode"] = "pytorch"
         self.config_files = {}
         for config_key, config in [
             ("config", config),
             ("invalid_config", invalid_config),
+            ("sync_bn_config", sync_bn_config),
         ]:
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
                 json.dump(config, f)
@@ -63,3 +66,26 @@ class TestDistributedTrainer(unittest.TestCase):
             result = subprocess.run(cmd, shell=True)
             success = result.returncode == 0
             self.assertEqual(success, expected_success)
+
+    @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
+    def test_sync_batch_norm(self):
+        """Test that sync batch norm training doesn't hang."""
+
+        num_processes = 2
+        device = "gpu"
+
+        cmd = f"""{sys.executable} -m torch.distributed.launch \
+        --nnodes=1 \
+        --nproc_per_node={num_processes} \
+        --master_addr=localhost \
+        --master_port=29500 \
+        --use_env \
+        {self.path}/../classy_train.py \
+        --device={device} \
+        --config={self.config_files["sync_bn_config"]} \
+        --num_workers=4 \
+        --log_freq=100 \
+        --distributed_backend=ddp
+        """
+        result = subprocess.run(cmd, shell=True)
+        self.assertEqual(result.returncode, 0)

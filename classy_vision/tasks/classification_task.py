@@ -11,6 +11,7 @@ import time
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
+import torch.nn as nn
 from classy_vision.dataset import ClassyDataset, build_dataset
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
@@ -51,6 +52,12 @@ class BroadcastBuffersMode(enum.Enum):
     # synchronizing buffers is for buffers to be consistent during eval, use
     # this instead of FORWARD_PASS to reduce training overhead.
     BEFORE_EVAL = enum.auto()
+
+
+class BatchNormSyncMode(enum.Enum):
+    DISABLED = enum.auto()  # No Synchronized Batch Normalization
+    PYTORCH = enum.auto()  # Use torch.nn.SyncBatchNorm
+    APEX = enum.auto()  # Use apex.parallel.SyncBatchNorm, needs apex to be installed
 
 
 class LastBatchInfo(NamedTuple):
@@ -133,6 +140,7 @@ class ClassificationTask(ClassyTask):
         self.amp_opt_level = None
         self.perf_log = []
         self.last_batch = None
+        self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -204,14 +212,35 @@ class ClassificationTask(ClassyTask):
         self.meters = meters
         return self
 
-    def set_distributed_options(self, broadcast_buffers_mode: BroadcastBuffersMode):
+    def set_distributed_options(
+        self,
+        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.DISABLED,
+        batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
+    ):
         """Set distributed options.
 
         Args:
             broadcast_buffers_mode: Broadcast buffers mode. See
                 :class:`BroadcastBuffersMode` for options.
+            batch_norm_sync_mode: Batch normalization synchronization mode. See
+                :class:`BatchNormSyncMode` for options.
+
+        Raises:
+            RuntimeError: If batch_norm_sync_mode is `BatchNormSyncMode.APEX` and apex
+                is not installed.
         """
         self.broadcast_buffers_mode = broadcast_buffers_mode
+
+        if batch_norm_sync_mode == BatchNormSyncMode.DISABLED:
+            logging.info("Synchronized Batch Normalization is disabled")
+        else:
+            if batch_norm_sync_mode == BatchNormSyncMode.APEX and not apex_available:
+                raise RuntimeError("apex is not installed")
+            logging.info(
+                f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
+            )
+        self.batch_norm_sync_mode = batch_norm_sync_mode
+
         return self
 
     def set_hooks(self, hooks: List["ClassyHook"]):
@@ -317,7 +346,12 @@ class ClassificationTask(ClassyTask):
             .set_meters(meters)
             .set_amp_opt_level(amp_opt_level)
             .set_distributed_options(
-                BroadcastBuffersMode[config.get("broadcast_buffers", "DISABLED")]
+                broadcast_buffers_mode=BroadcastBuffersMode[
+                    config.get("broadcast_buffers", "disabled").upper()
+                ],
+                batch_norm_sync_mode=BatchNormSyncMode[
+                    config.get("batch_norm_sync_mode", "disabled").upper()
+                ],
             )
         )
         for phase_type in phase_types:
@@ -493,6 +527,11 @@ class ClassificationTask(ClassyTask):
             pin_memory=pin_memory,
             multiprocessing_context=dataloader_mp_context,
         )
+
+        if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
+            self.base_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.base_model)
+        elif self.batch_norm_sync_mode == BatchNormSyncMode.APEX:
+            self.base_model = apex.parallel.convert_syncbn_model(self.base_model)
 
         # move the model and loss to the right device
         if use_gpu:
