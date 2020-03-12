@@ -78,13 +78,22 @@ class ClassyOptimizer:
         trainable_params = [
             params for params in model.parameters() if params.requires_grad
         ]
+        non_trainable_params = [
+            params for params in model.parameters() if not params.requires_grad
+        ]
         assert len(trainable_params) == len(
             optimizer_params["regularized_params"]
         ) + len(optimizer_params["unregularized_params"]), (
             "get_optimizer_params() of {0} should return params that cover all"
             "trainable params of model".format(type(model).__name__)
         )
-
+        assert len(trainable_params) + len(non_trainable_params) == len(
+            list(model.parameters())
+        ), (
+            "#trainable_params + #non_trainable_params should be equal to all"
+            "model parameters"
+        )
+        optimizer_params["non_trainable_params"] = non_trainable_params
         return optimizer_params
 
     def _validate_and_get_optimizer_params(
@@ -155,6 +164,7 @@ class ClassyOptimizer:
 
         param_groups_override = []
         self.contains_unregularized_params = False
+        self.contains_non_trainable_params = False
         if len(self.optimizer_params["unregularized_params"]) != 0:
             param_groups_override.append(
                 {
@@ -168,6 +178,16 @@ class ClassyOptimizer:
             param_groups_override.append(
                 {"params": self.optimizer_params["regularized_params"]}
             )
+
+        if len(self.optimizer_params["non_trainable_params"]) != 0:
+            param_groups_override.append(
+                {
+                    "params": self.optimizer_params["non_trainable_params"],
+                    "weight_decay": 0.0,
+                    "lr": 0.0,
+                }
+            )
+            self.contains_non_trainable_params = True
         self.param_groups_override = param_groups_override
 
     def get_classy_state(self) -> Dict[str, Any]:
