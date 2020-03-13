@@ -539,6 +539,15 @@ class ClassificationTask(ClassyTask):
         # the appropriate device
         self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
 
+        if self.amp_args is not None:
+            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
+            # which is wrapped by the ClassyOptimizer in self.optimizer).
+            # Please note this must happen before loading the checkpoint, cause
+            # there's amp state to be restored.
+            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                self.base_model, self.optimizer.optimizer, **self.amp_args
+            )
+
         classy_state_dict = (
             None
             if self.checkpoint is None
@@ -551,12 +560,6 @@ class ClassificationTask(ClassyTask):
                 state_load_success
             ), "Update classy state from checkpoint was unsuccessful."
 
-        if self.amp_args is not None:
-            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
-            # which is wrapped by the ClassyOptimizer in self.optimizer)
-            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                self.base_model, self.optimizer.optimizer, **self.amp_args
-            )
         self.init_distributed_data_parallel_model()
 
     def init_distributed_data_parallel_model(self):
@@ -629,6 +632,8 @@ class ClassificationTask(ClassyTask):
         }
         if isinstance(self.loss, ClassyLoss):
             classy_state_dict["loss"] = self.loss.get_classy_state()
+        if self.amp_args is not None:
+            classy_state_dict["amp"] = apex.amp.state_dict()
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
         return classy_state_dict
@@ -653,6 +658,9 @@ class ClassificationTask(ClassyTask):
         self.optimizer.set_classy_state(state["optimizer"])
         if state.get("loss") and isinstance(self.loss, ClassyLoss):
             self.loss.set_classy_state(state["loss"])
+
+        if "amp" in state:
+            apex.amp.load_state_dict(state["amp"])
 
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
