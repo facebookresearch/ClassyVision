@@ -137,7 +137,7 @@ class ClassificationTask(ClassyTask):
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
             BroadcastBuffersMode.DISABLED
         )
-        self.amp_opt_level = None
+        self.amp_args = None
         self.perf_log = []
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
@@ -278,36 +278,31 @@ class ClassificationTask(ClassyTask):
         self.test_only = test_only
         return self
 
-    def set_amp_opt_level(self, opt_level: Optional[str]):
-        """Disable / enable apex.amp and set the automatic mixed precision level.
+    def set_amp_args(self, amp_args: Dict[str, Any]):
+        """Disable / enable apex.amp and set the automatic mixed precision parameters.
 
         apex.amp can be utilized for mixed / half precision training.
 
         Args:
-            opt_level: Opt level used to initialize apex.amp. Set to None to disable
-                amp. Supported modes are -
-                    O0: FP32 training
-                    O1: Mixed Precision
-                    O2: "Almost FP16" Mixed Precision
-                    O3: FP16 training
-                See https://nvidia.github.io/apex/amp.html#opt-levels for more info.
+            amp_args: Dictionary containing arguments to be passed to
+            amp.initialize. Set to None to disable amp.  To enable mixed
+            precision training, pass amp_args={"opt_level": "O1"} here.
+            See https://nvidia.github.io/apex/amp.html for more info.
+
         Raises:
             RuntimeError: If opt_level is not None and apex is not installed.
 
         Warning: apex needs to be installed to utilize this feature.
         """
-        if opt_level not in [None, "O0", "O1", "O2", "O3"]:
-            raise ValueError(f"Unsupported opt_level: {opt_level}")
+        self.amp_args = amp_args
 
-        self.amp_opt_level = opt_level
-
-        if opt_level is None:
+        if amp_args is None:
             logging.info(f"AMP disabled")
         else:
             if not apex_available:
                 raise RuntimeError("apex is not installed, cannot enable amp")
 
-            logging.info(f"AMP enabled with opt_level {opt_level}")
+            logging.info(f"AMP enabled with args {amp_args}")
         return self
 
     @classmethod
@@ -330,7 +325,7 @@ class ClassificationTask(ClassyTask):
             datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         test_only = config.get("test_only", False)
-        amp_opt_level = config.get("amp_opt_level")
+        amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
         optimizer = build_optimizer(optimizer_config)
@@ -344,7 +339,7 @@ class ClassificationTask(ClassyTask):
             .set_model(model)
             .set_optimizer(optimizer)
             .set_meters(meters)
-            .set_amp_opt_level(amp_opt_level)
+            .set_amp_args(amp_args)
             .set_distributed_options(
                 broadcast_buffers_mode=BroadcastBuffersMode[
                     config.get("broadcast_buffers", "disabled").upper()
@@ -556,11 +551,11 @@ class ClassificationTask(ClassyTask):
                 state_load_success
             ), "Update classy state from checkpoint was unsuccessful."
 
-        if self.amp_opt_level is not None:
+        if self.amp_args is not None:
             # Initialize apex.amp. This updates the model and the PyTorch optimizer (
             # which is wrapped by the ClassyOptimizer in self.optimizer)
             self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                self.base_model, self.optimizer.optimizer, opt_level=self.amp_opt_level
+                self.base_model, self.optimizer.optimizer, **self.amp_args
             )
         self.init_distributed_data_parallel_model()
 
@@ -744,7 +739,7 @@ class ClassificationTask(ClassyTask):
             self.update_meters(output, sample)
 
         # Run backwards pass / update optimizer
-        if self.amp_opt_level is not None:
+        if self.amp_args is not None:
             self.optimizer.zero_grad()
             with apex.amp.scale_loss(
                 local_loss, self.optimizer.optimizer
