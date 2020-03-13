@@ -19,24 +19,18 @@ class TestClassificationTaskAMP(unittest.TestCase):
         task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
         # check that AMP is disabled by default
-        self.assertIsNone(task.amp_opt_level)
+        self.assertIsNone(task.amp_args)
 
         # test a valid AMP opt level
         config = copy.deepcopy(config)
-        config["amp_opt_level"] = "O1"
+        config["amp_args"] = {"opt_level": "O1"}
         task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
-
-        # test an invalid AMP opt level
-        config = copy.deepcopy(config)
-        config["amp_opt_level"] = "O5"
-        with self.assertRaises(Exception):
-            task = build_task(config)
 
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
     def test_training(self):
         config = get_fast_test_task_config()
-        config["amp_opt_level"] = "O2"
+        config["amp_args"] = {"opt_level": "O2"}
         task = build_task(config)
         trainer = LocalTrainer(use_gpu=True)
         trainer.train(task)
