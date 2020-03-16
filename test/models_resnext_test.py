@@ -99,7 +99,34 @@ class TestResnext(unittest.TestCase):
         compare_model_state(self, state, new_state, check_heads=True)
 
     def test_build_preset_model(self):
-        configs = [{"name": "resnet18"}, {"name": "resnet18", "use_se": True}]
+        configs = [
+            {"name": "resnet18"},
+            {"name": "resnet18", "use_se": True},
+            {
+                "name": "resnet50",
+                "heads": [
+                    {
+                        "name": "fully_connected",
+                        "unique_id": "default_head",
+                        "num_classes": 1000,
+                        "fork_block": "block3-2",
+                        "in_plane": 2048,
+                    }
+                ],
+            },
+            {
+                "name": "resnext50_32x4d",
+                "heads": [
+                    {
+                        "name": "fully_connected",
+                        "unique_id": "default_head",
+                        "num_classes": 1000,
+                        "fork_block": "block3-2",
+                        "in_plane": 2048,
+                    }
+                ],
+            },
+        ]
         for config in configs:
             model = build_model(config)
             self.assertIsInstance(model, ResNeXt)
