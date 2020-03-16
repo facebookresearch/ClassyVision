@@ -463,6 +463,8 @@ class _ResNeXt(ResNeXt):
     def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
         config = copy.deepcopy(config)
         config.pop("name")
+        if "heads" in config:
+            config.pop("heads")
         return cls(**config)
 
 
