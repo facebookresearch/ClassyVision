@@ -93,24 +93,20 @@ class TestTensorboardPlotHook(unittest.TestCase):
             if master:
                 # add_scalar() should have been called with the right scalars
                 if train:
-                    loss_key = f"{phase_type}_loss"
-                    learning_rate_key = f"{phase_type}_learning_rate_updates"
-                    summary_writer.add_scalar.assert_any_call(
-                        loss_key, mock.ANY, global_step=mock.ANY, walltime=mock.ANY
-                    )
+                    learning_rate_key = f"Learning Rate/{phase_type}"
                     summary_writer.add_scalar.assert_any_call(
                         learning_rate_key,
                         mock.ANY,
                         global_step=mock.ANY,
                         walltime=mock.ANY,
                     )
-                avg_loss_key = f"avg_{phase_type}_loss"
+                avg_loss_key = f"Losses/{phase_type}"
                 summary_writer.add_scalar.assert_any_call(
                     avg_loss_key, mock.ANY, global_step=mock.ANY
                 )
                 for meter in task.meters:
                     for name in meter.value:
-                        meter_key = f"{phase_type}_{meter.name}_{name}"
+                        meter_key = f"Meters/{phase_type}/{meter.name}/{name}"
                         summary_writer.add_scalar.assert_any_call(
                             meter_key, mock.ANY, global_step=mock.ANY
                         )
@@ -135,6 +131,11 @@ class TestTensorboardPlotHook(unittest.TestCase):
             def add_scalar(self, key, value, global_step=None, walltime=None) -> None:
                 self.scalar_logs[key] = self.scalar_logs.get(key, []) + [value]
 
+            def add_histogram(
+                self, key, value, global_step=None, walltime=None
+            ) -> None:
+                return
+
             def flush(self):
                 return
 
@@ -154,6 +155,6 @@ class TestTensorboardPlotHook(unittest.TestCase):
 
         # We have 20 samples, batch size is 10. Each epoch is done in two steps.
         self.assertEqual(
-            writer.scalar_logs["train_learning_rate_updates"],
+            writer.scalar_logs["Learning Rate/train"],
             [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6],
         )
