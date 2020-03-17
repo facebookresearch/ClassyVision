@@ -701,6 +701,8 @@ class ClassificationTask(ClassyTask):
             loss = local_loss.detach().clone()
             loss = all_reduce_mean(loss)
 
+            self.check_inf_nan(loss)
+
             self.losses.append(loss.data.cpu().item() * target.size(0))
 
             self.update_meters(output, sample)
@@ -709,6 +711,10 @@ class ClassificationTask(ClassyTask):
         self.last_batch = LastBatchInfo(
             loss=loss, output=output, target=target, sample=sample
         )
+
+    def check_inf_nan(self, loss):
+        if loss == float("inf") or loss == float("-inf") or loss != loss:
+            raise FloatingPointError(f"Loss is infinity or NaN: {loss}")
 
     def train_step(self, use_gpu):
         """Train step to be executed in train loop
@@ -755,6 +761,8 @@ class ClassificationTask(ClassyTask):
                 scaled_loss.backward()
         else:
             self.optimizer.backward(local_loss)
+
+        self.check_inf_nan(loss)
 
         self.optimizer.update_schedule_on_step(self.where)
         self.optimizer.step()
