@@ -28,7 +28,7 @@ class CheckpointHook(ClassyHook):
     def __init__(
         self,
         checkpoint_folder: str,
-        input_args: Any,
+        input_args: Any = None,
         phase_types: Optional[Collection[str]] = None,
         checkpoint_period: int = 1,
     ) -> None:
@@ -58,6 +58,13 @@ class CheckpointHook(ClassyHook):
         self.phase_types: Collection[str] = phase_types
         self.checkpoint_period: int = checkpoint_period
         self.phase_counter: int = 0
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "CheckpointHook":
+        assert isinstance(
+            config["checkpoint_folder"], str
+        ), "checkpoint_folder must be a string specifying the checkpoint directory"
+        return CheckpointHook(**config)
 
     def _save_checkpoint(self, task, filename):
         if getattr(task, "test_only", False):
