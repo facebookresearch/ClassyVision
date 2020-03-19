@@ -10,6 +10,7 @@ from typing import Any, Dict
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.visualize import plot_model
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
@@ -21,6 +22,7 @@ except ImportError:
     tbx_available = False
 
 
+@register_hook("model_tensorboard")
 class ModelTensorboardHook(ClassyHook):
     """
     Shows the model graph in `TensorBoard <https
@@ -48,6 +50,17 @@ class ModelTensorboardHook(ClassyHook):
             )
 
         self.tb_writer = tb_writer
+
+    @classmethod
+    def from_config(cls, config: [Dict[str, Any]]) -> "ModelTensorboardHook":
+        """The config is expected to include the key
+        "tensorboard_summary_writer" with arguments which correspond
+        to those listed at <https://tensorboardx.
+        readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter>:
+
+        """
+        tb_writer = SummaryWriter(**config["tensorboard_summary_writer"])
+        return ModelTensorboardHook(tb_writer=tb_writer)
 
     def on_start(self, task: "tasks.ClassyTask") -> None:
         """
