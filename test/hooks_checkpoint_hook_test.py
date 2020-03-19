@@ -13,7 +13,7 @@ from test.generic.config_utils import get_fast_test_task_config, get_test_task_c
 
 import torch
 from classy_vision.generic.util import load_checkpoint
-from classy_vision.hooks import CheckpointHook
+from classy_vision.hooks import CheckpointHook, build_hook
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 
@@ -43,9 +43,13 @@ class TestCheckpointHook(unittest.TestCase):
             checkpoint_period=config["checkpoint_period"],
         )
         hook2 = CheckpointHook.from_config(config)
+        config["name"] = "checkpoint"
+        hook3 = build_hook(config)
+        del config["name"]
 
         self.assertTrue(isinstance(hook1, CheckpointHook))
         self.assertTrue(isinstance(hook2, CheckpointHook))
+        self.assertTrue(isinstance(hook3, CheckpointHook))
 
         # Verify assert logic works correctly
         with self.assertRaises(AssertionError):
