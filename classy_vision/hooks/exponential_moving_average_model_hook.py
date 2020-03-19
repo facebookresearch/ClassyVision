@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterable, Tuple
 
 import torch
 import torch.nn as nn
-from classy_vision.hooks import ClassyHook
+from classy_vision.hooks.classy_hook import ClassyHook
 from classy_vision.tasks import ClassyTask
 
 
