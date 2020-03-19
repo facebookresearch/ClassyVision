@@ -11,9 +11,11 @@ from typing import Any, Dict, Optional
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import get_rank
 from classy_vision.generic.perf_stats import PerfStats
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("time_metrics")
 class TimeMetricsHook(ClassyHook):
     """
     Computes and prints performance metrics. Logs at the end of a phase.
@@ -29,8 +31,15 @@ class TimeMetricsHook(ClassyHook):
             log_freq: if specified, logs every log_freq batches also.
         """
         super().__init__()
+        assert log_freq is None or isinstance(
+            log_freq, int
+        ), "log_freq must be None or an int"
         self.log_freq: Optional[int] = log_freq
         self.start_time: Optional[float] = None
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "TimeMetricsHook":
+        return TimeMetricsHook(**config)
 
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """

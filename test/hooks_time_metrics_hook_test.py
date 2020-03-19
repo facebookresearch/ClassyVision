@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import re
 import unittest
@@ -12,10 +13,32 @@ from itertools import product
 from test.generic.config_utils import get_test_classy_task
 
 from classy_vision.generic.perf_stats import PerfStats
-from classy_vision.hooks import TimeMetricsHook
+from classy_vision.hooks import TimeMetricsHook, build_hook
 
 
 class TestTimeMetricsHook(unittest.TestCase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"log_freq": 1}
+
+        hook1 = TimeMetricsHook(log_freq=config["log_freq"])
+        hook2 = TimeMetricsHook.from_config(config)
+        config["name"] = "time_metrics"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, TimeMetricsHook))
+        self.assertTrue(isinstance(hook2, TimeMetricsHook))
+        self.assertTrue(isinstance(hook3, TimeMetricsHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["log_freq"] = "this is not an int"
+            TimeMetricsHook.from_config(bad_config)
+
     @mock.patch("time.time")
     @mock.patch("classy_vision.hooks.time_metrics_hook.PerfStats.report_str")
     @mock.patch("classy_vision.hooks.time_metrics_hook.get_rank")
