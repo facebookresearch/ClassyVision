@@ -5,15 +5,82 @@
 # LICENSE file in the root directory of this source tree.
 
 from pathlib import Path
+from typing import Any, Dict, List
 
 from classy_vision.generic.registry_utils import import_all_modules
 
 
-# The order of imports matters here because of a circular dependency. constants
-# must come before any hook
 from .constants import ClassyHookFunctions  # isort:skip
-from .checkpoint_hook import CheckpointHook  # isort:skip
 from .classy_hook import ClassyHook  # isort:skip
+
+
+FILE_ROOT = Path(__file__).parent
+
+HOOK_REGISTRY = {}
+HOOK_CLASS_NAMES = set()
+
+
+def register_hook(name):
+    """Registers a :class:`ClassyHook` subclass.
+
+    This decorator allows Classy Vision to instantiate a subclass of
+    :class:`ClassyHook` from a configuration file, even if the class
+    itself is not part of the base Classy Vision framework. To use it,
+    apply this decorator to a ClassyHook subclass, like this:
+
+    .. code-block:: python
+
+      @register_hook('custom_hook')
+      class CustomHook(ClassyHook):
+         ...
+
+    To instantiate a hook from a configuration file, see
+    :func:`build_hook`.
+    """
+
+    def register_hook_cls(cls):
+        if name in HOOK_REGISTRY:
+            raise ValueError("Cannot register duplicate hook ({})".format(name))
+        if not issubclass(cls, ClassyHook):
+            raise ValueError(
+                "Hook ({}: {}) must extend ClassyHook".format(name, cls.__name__)
+            )
+        if cls.__name__ in HOOK_CLASS_NAMES:
+            raise ValueError(
+                "Cannot register hook with duplicate class name ({})".format(
+                    cls.__name__
+                )
+            )
+        HOOK_REGISTRY[name] = cls
+        HOOK_CLASS_NAMES.add(cls.__name__)
+        return cls
+
+    return register_hook_cls
+
+
+def build_hooks(hook_configs: List[Dict[str, Any]]):
+    return [build_hook(config) for config in hook_configs]
+
+
+def build_hook(hook_config: Dict[str, Any]):
+    """Builds a ClassyHook from a config.
+
+    This assumes a 'name' key in the config which is used to determine
+    what hook class to instantiate. For instance, a config `{"name":
+    "my_hook", "foo": "bar"}` will find a class that was registered as
+    "my_hook" (see :func:`register_hook`) and call .from_config on
+    it."""
+    assert hook_config["name"] in HOOK_REGISTRY, (
+        "Unregistered hook. Did you make sure to use the register_hook decorator "
+        "AND import the hook file before calling this function??"
+    )
+    return HOOK_REGISTRY[hook_config["name"]].from_config(hook_config)
+
+
+# automatically import any Python files in the hooks/ directory
+import_all_modules(FILE_ROOT, "classy_vision.hooks")
+
+from .checkpoint_hook import CheckpointHook  # isort:skip
 from .exponential_moving_average_model_hook import (  # isort:skip
     ExponentialMovingAverageModelHook,
 )
@@ -28,6 +95,9 @@ from .visdom_hook import VisdomHook  # isort:skip
 
 
 __all__ = [
+    "build_hooks",
+    "build_hook",
+    "register_hook",
     "CheckpointHook",
     "ClassyHook",
     "ClassyHookFunctions",
@@ -41,8 +111,3 @@ __all__ = [
     "TimeMetricsHook",
     "VisdomHook",
 ]
-
-FILE_ROOT = Path(__file__).parent
-
-# automatically import any Python files in the hooks/ directory
-import_all_modules(FILE_ROOT, "classy_vision.hooks")
