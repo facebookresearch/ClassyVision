@@ -9,9 +9,11 @@ from typing import Any, Dict
 
 from classy_vision import tasks
 from classy_vision.generic.profiler import profile, summarize_profiler_info
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("profiler")
 class ProfilerHook(ClassyHook):
     """
     Hook to profile a model and to show model runtime information, such as
@@ -22,6 +24,10 @@ class ProfilerHook(ClassyHook):
     on_step = ClassyHook._noop
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "ProfilerHook":
+        return ProfilerHook(**config)
 
     def on_start(self, task: "tasks.ClassyTask") -> None:
         """Profile the forward pass."""

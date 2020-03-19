@@ -8,10 +8,26 @@ import unittest
 import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task, get_test_classy_video_task
 
-from classy_vision.hooks import ProfilerHook
+from classy_vision.hooks import ProfilerHook, build_hook
 
 
 class TestProfilerHook(unittest.TestCase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {}
+
+        hook1 = ProfilerHook()
+        hook2 = ProfilerHook.from_config(config)
+        config["name"] = "profiler"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, ProfilerHook))
+        self.assertTrue(isinstance(hook2, ProfilerHook))
+        self.assertTrue(isinstance(hook3, ProfilerHook))
+
     @mock.patch("torch.autograd.profiler.profile", auto_spec=True)
     @mock.patch("classy_vision.hooks.profiler_hook.summarize_profiler_info")
     def test_profiler(
