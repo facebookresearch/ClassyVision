@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import os
 import shutil
 import tempfile
@@ -12,7 +13,7 @@ from test.generic.config_utils import get_fast_test_task_config, get_test_task_c
 
 import torch
 from classy_vision.generic.util import load_checkpoint
-from classy_vision.hooks import CheckpointHook
+from classy_vision.hooks import CheckpointHook, build_hook
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 
@@ -23,6 +24,38 @@ class TestCheckpointHook(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {
+            "checkpoint_folder": "/test/",
+            "input_args": {"foo": "bar"},
+            "phase_types": ["train"],
+            "checkpoint_period": 2,
+        }
+
+        hook1 = CheckpointHook(
+            checkpoint_folder=config["checkpoint_folder"],
+            input_args=config["input_args"],
+            phase_types=config["phase_types"],
+            checkpoint_period=config["checkpoint_period"],
+        )
+        hook2 = CheckpointHook.from_config(config)
+        config["name"] = "checkpoint"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, CheckpointHook))
+        self.assertTrue(isinstance(hook2, CheckpointHook))
+        self.assertTrue(isinstance(hook3, CheckpointHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["checkpoint_folder"] = 12
+            CheckpointHook.from_config(bad_config)
 
     def test_state_checkpointing(self) -> None:
         """
