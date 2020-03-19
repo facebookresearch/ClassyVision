@@ -9,10 +9,26 @@ import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task
 
 import progressbar
-from classy_vision.hooks import ProgressBarHook
+from classy_vision.hooks import ProgressBarHook, build_hook
 
 
 class TestProgressBarHook(unittest.TestCase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {}
+
+        hook1 = ProgressBarHook()
+        hook2 = ProgressBarHook.from_config(config)
+        config["name"] = "progress_bar"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, ProgressBarHook))
+        self.assertTrue(isinstance(hook2, ProgressBarHook))
+        self.assertTrue(isinstance(hook3, ProgressBarHook))
+
     @mock.patch("classy_vision.hooks.progress_bar_hook.progressbar")
     @mock.patch("classy_vision.hooks.progress_bar_hook.is_master")
     def test_progress_bar(

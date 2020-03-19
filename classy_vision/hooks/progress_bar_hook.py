@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
@@ -19,6 +20,7 @@ except ImportError:
     progressbar_available = False
 
 
+@register_hook("progress_bar")
 class ProgressBarHook(ClassyHook):
     """
     Displays a progress bar to show progress in processing batches.
@@ -33,6 +35,10 @@ class ProgressBarHook(ClassyHook):
         self.progress_bar: Optional[progressbar.ProgressBar] = None
         self.bar_size: int = 0
         self.batches: int = 0
+
+    @classmethod
+    def from_config(cls, config) -> "ProgressBarHook":
+        return ProgressBarHook(**config)
 
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Create and display a progress bar with 0 progress."""
