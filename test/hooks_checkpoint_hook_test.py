@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import os
 import shutil
 import tempfile
@@ -23,6 +24,29 @@ class TestCheckpointHook(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {
+            "checkpoint_folder": "/test/",
+            "input_args": {"foo": "bar"},
+            "phase_types": ["train"],
+            "checkpoint_period": 2,
+        }
+
+        hook1 = CheckpointHook(**config)
+        hook2 = CheckpointHook.from_config(config)
+
+        self.assertTrue(isinstance(hook1, CheckpointHook))
+        self.assertTrue(isinstance(hook2, CheckpointHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["checkpoint_folder"] = 12
+            CheckpointHook.from_config(bad_config)
 
     def test_state_checkpointing(self) -> None:
         """
