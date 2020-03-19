@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import shutil
 import tempfile
@@ -12,7 +13,7 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
 
-from classy_vision.hooks import TensorboardPlotHook
+from classy_vision.hooks import TensorboardPlotHook, build_hook
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
@@ -25,6 +26,28 @@ class TestTensorboardPlotHook(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"tensorboard_summary_writer": {}, "log_period": 5}
+
+        hook1 = TensorboardPlotHook(tb_writer=SummaryWriter())
+        hook2 = TensorboardPlotHook.from_config(config)
+        config["name"] = "tensorboard_plot"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, TensorboardPlotHook))
+        self.assertTrue(isinstance(hook2, TensorboardPlotHook))
+        self.assertTrue(isinstance(hook3, TensorboardPlotHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["log_period"] = "this is not an int"
+            TensorboardPlotHook.from_config(bad_config)
 
     @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
     def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
