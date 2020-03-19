@@ -4,18 +4,41 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
 
-from classy_vision.hooks import LossLrMeterLoggingHook
+from classy_vision.hooks import LossLrMeterLoggingHook, build_hook
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks import ClassyTask, build_task
 from classy_vision.trainer import LocalTrainer
 
 
 class TestLossLrMeterLoggingHook(unittest.TestCase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"log_freq": 1}
+
+        hook1 = LossLrMeterLoggingHook(log_freq=config["log_freq"])
+        hook2 = LossLrMeterLoggingHook.from_config(config)
+        config["name"] = "loss_lr_meter_logging"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, LossLrMeterLoggingHook))
+        self.assertTrue(isinstance(hook2, LossLrMeterLoggingHook))
+        self.assertTrue(isinstance(hook3, LossLrMeterLoggingHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["log_freq"] = "this_is_not_an_int"
+            LossLrMeterLoggingHook.from_config(bad_config)
+
     @mock.patch("classy_vision.hooks.loss_lr_meter_logging_hook.get_rank")
     def test_logging(self, mock_get_rank: mock.MagicMock) -> None:
         """

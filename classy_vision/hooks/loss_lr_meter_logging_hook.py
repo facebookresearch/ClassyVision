@@ -9,9 +9,11 @@ from typing import Any, Dict, Optional
 
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import get_rank
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("loss_lr_meter_logging")
 class LossLrMeterLoggingHook(ClassyHook):
     """
     Logs the loss, optimizer LR, and meters. Logs at the end of a phase.
@@ -29,7 +31,14 @@ class LossLrMeterLoggingHook(ClassyHook):
 
         """
         super().__init__()
+        assert log_freq is None or isinstance(
+            log_freq, int
+        ), "log_freq must be an int or None"
         self.log_freq: Optional[int] = log_freq
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "LossLrMeterLoggingHook":
+        return LossLrMeterLoggingHook(**config)
 
     def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
