@@ -10,12 +10,33 @@ import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_task_config
 
-from classy_vision.hooks import VisdomHook
+from classy_vision.hooks import VisdomHook, build_hook
 from classy_vision.tasks import build_task
 from visdom import Visdom
 
 
 class TestVisdomHook(unittest.TestCase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {
+            "server": "test_server",
+            "port": "test_port",
+            "env": "test_env",
+            "title_suffix": "_test_suffix",
+        }
+
+        hook1 = VisdomHook(**config)
+        hook2 = VisdomHook.from_config(config)
+        config["name"] = "visdom"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, VisdomHook))
+        self.assertTrue(isinstance(hook2, VisdomHook))
+        self.assertTrue(isinstance(hook3, VisdomHook))
+
     @mock.patch("classy_vision.hooks.visdom_hook.is_master")
     @mock.patch("classy_vision.hooks.visdom_hook.Visdom", autospec=True)
     def test_visdom(
