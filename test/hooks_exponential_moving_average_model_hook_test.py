@@ -4,13 +4,14 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import math
 import unittest
 import unittest.mock as mock
 
 import torch
 import torch.nn as nn
-from classy_vision.hooks import ExponentialMovingAverageModelHook
+from classy_vision.hooks import ExponentialMovingAverageModelHook, build_hook
 from classy_vision.models import ClassyModel
 
 
@@ -75,6 +76,37 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
 
         # the model weights should be back to the old value
         self.assertTrue(torch.allclose(model.fc.weight, fc_weight))
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"decay": 0.5, "consider_bn_buffers": True, "device": "cpu"}
+
+        hook1 = ExponentialMovingAverageModelHook(
+            decay=config["decay"],
+            consider_bn_buffers=config["consider_bn_buffers"],
+            device=config["device"],
+        )
+        hook2 = ExponentialMovingAverageModelHook.from_config(config)
+        config["name"] = "exponential_moving_average"
+        hook3 = build_hook(config)
+        del config["name"]
+
+        self.assertTrue(isinstance(hook1, ExponentialMovingAverageModelHook))
+        self.assertTrue(isinstance(hook2, ExponentialMovingAverageModelHook))
+        self.assertTrue(isinstance(hook3, ExponentialMovingAverageModelHook))
+
+        # Verify assert logic works correctly
+        with self.assertRaises((AssertionError, TypeError)):
+            bad_config = copy.deepcopy(config)
+            del bad_config["decay"]
+            ExponentialMovingAverageModelHook.from_config(bad_config)
+
+        with self.assertRaises(AssertionError):
+            bad_config = copy.deepcopy(config)
+            bad_config["device"] = "crazy_hardware"
+            ExponentialMovingAverageModelHook.from_config(bad_config)
 
     def test_get_model_state_iterator(self):
         device = "gpu" if torch.cuda.is_available() else "cpu"

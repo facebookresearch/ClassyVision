@@ -10,10 +10,12 @@ from typing import Any, Dict, Iterable, Tuple
 
 import torch
 import torch.nn as nn
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 from classy_vision.tasks import ClassyTask
 
 
+@register_hook("exponential_moving_average")
 class ExponentialMovingAverageModelHook(ClassyHook):
     """
     Hook which keeps a track of the exponential moving average (EMA) of the model's
@@ -53,6 +55,10 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             f"{self.__class__.__name__} initialized with a decay of "
             f"{decay} on device {device}"
         )
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "ExponentialMovingAverageModelHook":
+        return ExponentialMovingAverageModelHook(**config)
 
     def get_model_state_iterator(self, model: nn.Module) -> Iterable[Tuple[str, Any]]:
         """Get an iterator over the model state to apply EMA to."""
