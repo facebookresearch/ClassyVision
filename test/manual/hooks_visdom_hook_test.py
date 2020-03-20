@@ -9,13 +9,31 @@ import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import VisdomHook
 from classy_vision.tasks import build_task
 from visdom import Visdom
 
 
-class TestVisdomHook(unittest.TestCase):
+class TestVisdomHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {
+            "server": "test_server",
+            "port": "test_port",
+            "env": "test_env",
+            "title_suffix": "_test_suffix",
+        }
+        self.constructor_test_helper(
+            [config["server"], config["port"], config["env"], config["title_suffix"]],
+            config,
+            VisdomHook,
+            "visdom",
+        )
+
     @mock.patch("classy_vision.hooks.visdom_hook.is_master")
     @mock.patch("classy_vision.hooks.visdom_hook.Visdom", autospec=True)
     def test_visdom(
