@@ -13,9 +13,11 @@ from classy_vision.generic.profiler import (
     compute_flops,
     count_params,
 )
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("model_complexity")
 class ModelComplexityHook(ClassyHook):
     """
     Logs the number of paramaters and forward pass FLOPs and activations of the model.
@@ -25,6 +27,10 @@ class ModelComplexityHook(ClassyHook):
     on_step = ClassyHook._noop
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
+
+    @classmethod
+    def from_config(cls, config) -> "ModelComplexityHook":
+        return cls(**config)
 
     def on_start(self, task: "tasks.ClassyTask") -> None:
         """Measure number of parameters, FLOPs and activations."""
