@@ -10,6 +10,7 @@ import shutil
 import tempfile
 import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.generic.util import load_checkpoint
@@ -18,7 +19,7 @@ from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 
 
-class TestCheckpointHook(unittest.TestCase):
+class TestCheckpointHook(HookTestBase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
 
@@ -35,23 +36,21 @@ class TestCheckpointHook(unittest.TestCase):
             "phase_types": ["train"],
             "checkpoint_period": 2,
         }
+        invalid_config = copy.deepcopy(config)
+        invalid_config["checkpoint_folder"] = 12
 
-        hook1 = CheckpointHook(
-            checkpoint_folder=config["checkpoint_folder"],
-            input_args=config["input_args"],
-            phase_types=config["phase_types"],
-            checkpoint_period=config["checkpoint_period"],
+        self.constructor_test_helper(
+            [
+                config["checkpoint_folder"],
+                config["input_args"],
+                config["phase_types"],
+                config["checkpoint_period"],
+            ],
+            config,
+            CheckpointHook,
+            "checkpoint",
+            [invalid_config],
         )
-        hook2 = CheckpointHook.from_config(config)
-
-        self.assertTrue(isinstance(hook1, CheckpointHook))
-        self.assertTrue(isinstance(hook2, CheckpointHook))
-
-        # Verify assert logic works correctly
-        with self.assertRaises(AssertionError):
-            bad_config = copy.deepcopy(config)
-            bad_config["checkpoint_folder"] = 12
-            CheckpointHook.from_config(bad_config)
 
     def test_state_checkpointing(self) -> None:
         """

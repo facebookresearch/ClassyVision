@@ -10,10 +10,12 @@ from typing import Any, Collection, Dict, Optional
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 from fvcore.common.file_io import PathManager
 
 
+@register_hook("checkpoint")
 class CheckpointHook(ClassyHook):
     """
     Hook to checkpoint a model's task.
@@ -68,7 +70,7 @@ class CheckpointHook(ClassyHook):
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "CheckpointHook":
-        return CheckpointHook(**config)
+        return cls(**config)
 
     def _save_checkpoint(self, task, filename):
         if getattr(task, "test_only", False):
