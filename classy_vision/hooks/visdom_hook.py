@@ -12,6 +12,7 @@ from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import flatten_dict
 from classy_vision.generic.visualize import plot_learning_curves
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
@@ -23,6 +24,7 @@ except ImportError:
     visdom_available = False
 
 
+@register_hook("visdom")
 class VisdomHook(ClassyHook):
     """Plots metrics on to `Visdom <https://github.com/facebookresearch/visdom>`_.
 
@@ -57,6 +59,10 @@ class VisdomHook(ClassyHook):
 
         self.metrics: Dict = {}
         self.visdom: Visdom = Visdom(self.server, self.port)
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "VisdomHook":
+        return cls(**config)
 
     def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
