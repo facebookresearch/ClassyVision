@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
@@ -24,6 +25,7 @@ except ImportError:
 log = logging.getLogger()
 
 
+@register_hook("tensorboard_plot")
 class TensorboardPlotHook(ClassyHook):
     """
     Hook for writing the losses, learning rates and meters to `tensorboard <https
@@ -48,12 +50,25 @@ class TensorboardPlotHook(ClassyHook):
             raise RuntimeError(
                 "tensorboardX not installed, cannot use TensorboardPlotHook"
             )
+        assert isinstance(log_period, int), "log_period must be an int"
 
         self.tb_writer = tb_writer
         self.learning_rates: Optional[List[float]] = None
         self.wall_times: Optional[List[float]] = None
         self.num_updates: Optional[List[int]] = None
         self.log_period = log_period
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "TensorboardPlotHook":
+        """The config is expected to include the key
+        "summary_writer" with arguments which correspond
+        to those listed at <https://tensorboardx.
+        readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter>:
+
+        """
+        tb_writer = SummaryWriter(**config["summary_writer"])
+        log_period = config.get("log_period", 10)
+        return cls(tb_writer=tb_writer, log_period=log_period)
 
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Initialize losses and learning_rates."""
