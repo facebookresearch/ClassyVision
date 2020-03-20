@@ -4,18 +4,36 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import re
 import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_classy_task
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.generic.perf_stats import PerfStats
 from classy_vision.hooks import TimeMetricsHook
 
 
-class TestTimeMetricsHook(unittest.TestCase):
+class TestTimeMetricsHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"log_freq": 1}
+        invalid_config = copy.deepcopy(config)
+        invalid_config["log_freq"] = "this is not an int"
+
+        self.constructor_test_helper(
+            [config["log_freq"]],
+            config,
+            TimeMetricsHook,
+            "time_metrics",
+            [invalid_config],
+        )
+
     @mock.patch("time.time")
     @mock.patch("classy_vision.hooks.time_metrics_hook.PerfStats.report_str")
     @mock.patch("classy_vision.hooks.time_metrics_hook.get_rank")
