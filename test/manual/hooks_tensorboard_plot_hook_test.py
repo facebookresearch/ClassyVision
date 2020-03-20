@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import shutil
 import tempfile
@@ -11,6 +12,7 @@ import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import TensorboardPlotHook
 from classy_vision.optim.param_scheduler import UpdateInterval
@@ -19,12 +21,28 @@ from classy_vision.trainer import LocalTrainer
 from tensorboardX import SummaryWriter
 
 
-class TestTensorboardPlotHook(unittest.TestCase):
+class TestTensorboardPlotHook(HookTestBase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"summary_writer": {}, "log_period": 5}
+        invalid_config = copy.deepcopy(config)
+        invalid_config["log_period"] = "this is not an int"
+
+        self.constructor_test_helper(
+            [config["summary_writer"], config["log_period"]],
+            config,
+            TensorboardPlotHook,
+            "tensorboard_plot",
+            [invalid_config],
+        )
 
     @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
     def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
