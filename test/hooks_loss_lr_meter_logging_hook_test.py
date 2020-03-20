@@ -4,10 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.optim.param_scheduler import UpdateInterval
@@ -15,7 +17,23 @@ from classy_vision.tasks import ClassyTask, build_task
 from classy_vision.trainer import LocalTrainer
 
 
-class TestLossLrMeterLoggingHook(unittest.TestCase):
+class TestLossLrMeterLoggingHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"log_freq": 1}
+        invalid_config = copy.deepcopy(config)
+        invalid_config["log_freq"] = "this is not an int"
+
+        self.constructor_test_helper(
+            [config["log_freq"]],
+            config,
+            LossLrMeterLoggingHook,
+            "loss_lr_meter_logging",
+            [invalid_config],
+        )
+
     @mock.patch("classy_vision.hooks.loss_lr_meter_logging_hook.get_rank")
     def test_logging(self, mock_get_rank: mock.MagicMock) -> None:
         """
