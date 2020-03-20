@@ -7,13 +7,27 @@
 import unittest
 import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task, get_test_model_configs
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import ModelTensorboardHook
 from classy_vision.models import build_model
 from tensorboardX import SummaryWriter
 
 
-class TestModelTensorboardHook(unittest.TestCase):
+class TestModelTensorboardHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"summary_writer": {}}
+
+        self.constructor_test_helper(
+            [config["summary_writer"]],
+            config,
+            ModelTensorboardHook,
+            "model_tensorboard",
+        )
+
     @mock.patch("classy_vision.hooks.model_tensorboard_hook.is_master")
     def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
         """
