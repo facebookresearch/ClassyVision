@@ -6,8 +6,7 @@
 
 import unittest
 
-
-# from classy_vision.hooks import build_hook -- Add this back in next diff
+from classy_vision.hooks import build_hook
 
 
 class HookTestBase(unittest.TestCase):
@@ -20,11 +19,11 @@ class HookTestBase(unittest.TestCase):
         hook2 = hook_type.from_config(config)
         self.assertTrue(isinstance(hook2, hook_type))
 
-        # if hook_registry_name is not None:
-        #     config["name"] = hook_registry_name
-        #     hook3 = build_hook(config)
-        #     del config["name"]
-        #     self.assertTrue(isinstance(hook3, hook_type))
+        if hook_registry_name is not None:
+            config["name"] = hook_registry_name
+            hook3 = build_hook(config)
+            del config["name"]
+            self.assertTrue(isinstance(hook3, hook_type))
 
         if invalid_configs is not None:
             # Verify assert logic works correctly

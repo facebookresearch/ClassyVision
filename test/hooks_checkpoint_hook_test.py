@@ -36,7 +36,12 @@ class TestCheckpointHook(unittest.TestCase):
             "checkpoint_period": 2,
         }
 
-        hook1 = CheckpointHook(**config)
+        hook1 = CheckpointHook(
+            checkpoint_folder=config["checkpoint_folder"],
+            input_args=config["input_args"],
+            phase_types=config["phase_types"],
+            checkpoint_period=config["checkpoint_period"],
+        )
         hook2 = CheckpointHook.from_config(config)
 
         self.assertTrue(isinstance(hook1, CheckpointHook))
