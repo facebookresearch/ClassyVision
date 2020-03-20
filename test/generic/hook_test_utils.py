@@ -28,5 +28,5 @@ class HookTestBase(unittest.TestCase):
         if invalid_configs is not None:
             # Verify assert logic works correctly
             for cfg in invalid_configs:
-                with self.assertRaises(AssertionError):
+                with self.assertRaises((AssertionError, TypeError)):
                     hook_type.from_config(cfg)
