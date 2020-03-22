@@ -443,14 +443,16 @@ def get_checkpoint_dict(task, input_args, deep_copy=False):
 
 
 def load_checkpoint(
-    checkpoint_path: str, device: torch.device = CPU_DEVICE
+    checkpoint_path: str,
+    device: torch.device = CPU_DEVICE,
+    checkpoint_file: str = CHECKPOINT_FILE,
 ) -> Optional[Dict]:
     """Loads a checkpoint from the specified checkpoint path.
 
     Args:
         checkpoint_path: The path to load the checkpoint from. Can be a file or a
             directory. If it is a directory, the checkpoint is loaded from
-            :py:data:`CHECKPOINT_FILE` inside the directory.
+            :py:data:`checkpoint_file` inside the directory.
         device: device to load the checkpoint to
 
     Returns:
@@ -468,7 +470,7 @@ def load_checkpoint(
         logging.warning(f"Checkpoint path {checkpoint_path} not found")
         return None
     if PathManager.isdir(checkpoint_path):
-        checkpoint_path = f"{checkpoint_path.rstrip('/')}/{CHECKPOINT_FILE}"
+        checkpoint_path = f"{checkpoint_path.rstrip('/')}/{checkpoint_file}"
 
     if not PathManager.exists(checkpoint_path):
         logging.warning(f"Checkpoint file {checkpoint_path} not found.")
