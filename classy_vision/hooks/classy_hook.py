@@ -51,6 +51,10 @@ class ClassyHook(ABC):
     def __init__(self):
         self.state = ClassyHookState()
 
+    @classmethod
+    def from_config(cls, config) -> "ClassyHook":
+        return cls(**config)
+
     def _noop(self, *args, **kwargs) -> None:
         """Derived classes can set their hook functions to this.
 
