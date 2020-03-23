@@ -60,7 +60,9 @@ class ModelTensorboardHook(ClassyHook):
 
         """
         tb_writer = SummaryWriter(**config["summary_writer"])
-        return cls(tb_writer=tb_writer)
+        config = {}
+        config["tb_writer"] = tb_writer
+        return super().from_config(config)
 
     def on_start(self, task: "tasks.ClassyTask") -> None:
         """

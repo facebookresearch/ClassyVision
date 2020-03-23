@@ -36,10 +36,6 @@ class LossLrMeterLoggingHook(ClassyHook):
         ), "log_freq must be an int or None"
         self.log_freq: Optional[int] = log_freq
 
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "LossLrMeterLoggingHook":
-        return cls(**config)
-
     def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
         Log the loss, optimizer LR, and meters for the phase.

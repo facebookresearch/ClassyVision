@@ -68,10 +68,6 @@ class CheckpointHook(ClassyHook):
         self.checkpoint_period: int = checkpoint_period
         self.phase_counter: int = 0
 
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "CheckpointHook":
-        return cls(**config)
-
     def _save_checkpoint(self, task, filename):
         if getattr(task, "test_only", False):
             return

@@ -56,10 +56,6 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             f"{decay} on device {device}"
         )
 
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ExponentialMovingAverageModelHook":
-        return cls(**config)
-
     def get_model_state_iterator(self, model: nn.Module) -> Iterable[Tuple[str, Any]]:
         """Get an iterator over the model state to apply EMA to."""
         iterable = model.named_parameters()

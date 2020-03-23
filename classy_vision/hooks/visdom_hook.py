@@ -60,10 +60,6 @@ class VisdomHook(ClassyHook):
         self.metrics: Dict = {}
         self.visdom: Visdom = Visdom(self.server, self.port)
 
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "VisdomHook":
-        return cls(**config)
-
     def on_phase_end(self, task: "tasks.ClassyTask") -> None:
         """
         Plot the metrics on visdom.

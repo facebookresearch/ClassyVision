@@ -68,7 +68,10 @@ class TensorboardPlotHook(ClassyHook):
         """
         tb_writer = SummaryWriter(**config["summary_writer"])
         log_period = config.get("log_period", 10)
-        return cls(tb_writer=tb_writer, log_period=log_period)
+        config = {}
+        config["log_period"] = log_period
+        config["tb_writer"] = tb_writer
+        return super().from_config(config)
 
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Initialize losses and learning_rates."""
