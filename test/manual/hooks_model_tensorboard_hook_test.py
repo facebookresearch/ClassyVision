@@ -22,10 +22,10 @@ class TestModelTensorboardHook(HookTestBase):
         config = {"summary_writer": {}}
 
         self.constructor_test_helper(
-            [config["summary_writer"]],
-            config,
-            ModelTensorboardHook,
-            "model_tensorboard",
+            config=config,
+            hook_type=ModelTensorboardHook,
+            hook_registry_name="model_tensorboard",
+            hook_kwargs={"tb_writer": SummaryWriter()},
         )
 
     @mock.patch("classy_vision.hooks.model_tensorboard_hook.is_master")

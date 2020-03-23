@@ -19,7 +19,9 @@ class TestProgressBarHook(HookTestBase):
         Test that the hooks are constructed correctly.
         """
         config = {}
-        self.constructor_test_helper([], config, ProgressBarHook, "progress_bar")
+        self.constructor_test_helper(
+            config=config, hook_type=ProgressBarHook, hook_registry_name="progress_bar"
+        )
 
     @mock.patch("classy_vision.hooks.progress_bar_hook.progressbar")
     @mock.patch("classy_vision.hooks.progress_bar_hook.is_master")

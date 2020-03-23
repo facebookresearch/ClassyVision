@@ -27,11 +27,10 @@ class TestLossLrMeterLoggingHook(HookTestBase):
         invalid_config["log_freq"] = "this is not an int"
 
         self.constructor_test_helper(
-            [config["log_freq"]],
-            config,
-            LossLrMeterLoggingHook,
-            "loss_lr_meter_logging",
-            [invalid_config],
+            config=config,
+            hook_type=LossLrMeterLoggingHook,
+            hook_registry_name="loss_lr_meter_logging",
+            invalid_configs=[invalid_config],
         )
 
     @mock.patch("classy_vision.hooks.loss_lr_meter_logging_hook.get_rank")

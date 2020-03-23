@@ -28,10 +28,7 @@ class TestVisdomHook(HookTestBase):
             "title_suffix": "_test_suffix",
         }
         self.constructor_test_helper(
-            [config["server"], config["port"], config["env"], config["title_suffix"]],
-            config,
-            VisdomHook,
-            "visdom",
+            config=config, hook_type=VisdomHook, hook_registry_name="visdom"
         )
 
     @mock.patch("classy_vision.hooks.visdom_hook.is_master")
