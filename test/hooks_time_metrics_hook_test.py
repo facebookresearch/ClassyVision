@@ -27,11 +27,10 @@ class TestTimeMetricsHook(HookTestBase):
         invalid_config["log_freq"] = "this is not an int"
 
         self.constructor_test_helper(
-            [config["log_freq"]],
-            config,
-            TimeMetricsHook,
-            "time_metrics",
-            [invalid_config],
+            config=config,
+            hook_type=TimeMetricsHook,
+            hook_registry_name="time_metrics",
+            invalid_configs=[invalid_config],
         )
 
     @mock.patch("time.time")
