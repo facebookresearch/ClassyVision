@@ -89,11 +89,10 @@ class TestExponentialMovingAverageModelHook(HookTestBase):
         invalid_config2["device"] = "crazy_hardware"
 
         self.constructor_test_helper(
-            [config["decay"], config["consider_bn_buffers"], config["device"]],
-            config,
-            ExponentialMovingAverageModelHook,
-            "ema_model_weights",
-            [invalid_config1, invalid_config2],
+            config=config,
+            hook_type=ExponentialMovingAverageModelHook,
+            hook_registry_name="ema_model_weights",
+            invalid_configs=[invalid_config1, invalid_config2],
         )
 
     def test_get_model_state_iterator(self):

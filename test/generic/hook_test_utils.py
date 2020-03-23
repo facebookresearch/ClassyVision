@@ -11,9 +11,15 @@ from classy_vision.hooks import build_hook
 
 class HookTestBase(unittest.TestCase):
     def constructor_test_helper(
-        self, arg_list, config, hook_type, hook_registry_name=None, invalid_configs=None
+        self,
+        config,
+        hook_type,
+        hook_registry_name=None,
+        hook_kwargs=None,
+        invalid_configs=None,
     ):
-        hook1 = hook_type(*arg_list)
+        hook_kwargs = config if hook_kwargs is None else hook_kwargs
+        hook1 = hook_type(**hook_kwargs)
         self.assertTrue(isinstance(hook1, hook_type))
 
         hook2 = hook_type.from_config(config)

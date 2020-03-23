@@ -40,16 +40,10 @@ class TestCheckpointHook(HookTestBase):
         invalid_config["checkpoint_folder"] = 12
 
         self.constructor_test_helper(
-            [
-                config["checkpoint_folder"],
-                config["input_args"],
-                config["phase_types"],
-                config["checkpoint_period"],
-            ],
-            config,
-            CheckpointHook,
-            "checkpoint",
-            [invalid_config],
+            config=config,
+            hook_type=CheckpointHook,
+            hook_registry_name="checkpoint",
+            invalid_configs=[invalid_config],
         )
 
     def test_state_checkpointing(self) -> None:

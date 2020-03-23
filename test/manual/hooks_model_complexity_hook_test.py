@@ -20,7 +20,9 @@ class TestModelComplexityHook(HookTestBase):
         config = {}
 
         self.constructor_test_helper(
-            [], config, ModelComplexityHook, "model_complexity"
+            config=config,
+            hook_type=ModelComplexityHook,
+            hook_registry_name="model_complexity",
         )
 
     def test_model_complexity_hook(self) -> None:

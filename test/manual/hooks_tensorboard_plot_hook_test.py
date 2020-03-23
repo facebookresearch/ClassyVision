@@ -37,11 +37,11 @@ class TestTensorboardPlotHook(HookTestBase):
         invalid_config["log_period"] = "this is not an int"
 
         self.constructor_test_helper(
-            [config["summary_writer"], config["log_period"]],
-            config,
-            TensorboardPlotHook,
-            "tensorboard_plot",
-            [invalid_config],
+            config=config,
+            hook_type=TensorboardPlotHook,
+            hook_registry_name="tensorboard_plot",
+            hook_kwargs={"tb_writer": SummaryWriter(), "log_period": 5},
+            invalid_configs=[invalid_config],
         )
 
     @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
