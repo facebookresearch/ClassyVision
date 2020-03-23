@@ -37,10 +37,6 @@ class TimeMetricsHook(ClassyHook):
         self.log_freq: Optional[int] = log_freq
         self.start_time: Optional[float] = None
 
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "TimeMetricsHook":
-        return cls(**config)
-
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """
         Initialize start time and reset perf stats

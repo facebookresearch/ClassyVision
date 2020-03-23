@@ -36,10 +36,6 @@ class ProgressBarHook(ClassyHook):
         self.bar_size: int = 0
         self.batches: int = 0
 
-    @classmethod
-    def from_config(cls, config) -> "ProgressBarHook":
-        return cls(**config)
-
     def on_phase_start(self, task: "tasks.ClassyTask") -> None:
         """Create and display a progress bar with 0 progress."""
         if not progressbar_available:
