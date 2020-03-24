@@ -13,6 +13,7 @@ import torch.nn as nn
 from classy_vision.generic.util import (
     eval_model,
     get_model_dummy_input,
+    get_multimodel_dummy_input,
     is_leaf,
     is_on_gpu,
 )
@@ -63,10 +64,20 @@ def _get_batchsize_per_replica(x):
     """
     Some layer may take tuple/list as input in forward function. We recursively dive
     into the tuple/list until we meet a tensor and infer the batch size
+
+    Layers in MultimodalVideo take Dict or List[Dict] as input in forward function.
     """
     while isinstance(x, (list, tuple)):
         assert len(x) > 0, "input x of tuple/list type must have at least one element"
         x = x[0]
+
+    if not isinstance(x, torch.Tensor):
+        while isinstance(x, (dict,)):
+            if "data" in x:
+                assert len(x["data"]) > 0
+                x = x["data"]
+                break
+
     return x.size()[0]
 
 
@@ -194,8 +205,14 @@ def _layer_flops(layer, x, _):
         bias_ops = layer.bias.numel() if layer.bias is not None else 0
         return x.size()[0] * (weight_ops + bias_ops)
 
-    # 2D/3D (synced) batch normalization:
-    elif layer_type in ["BatchNorm2d", "BatchNorm3d", "SyncBatchNorm"]:
+    # batch normalization / layer normalization:
+    elif layer_type in [
+        "BatchNorm1d",
+        "BatchNorm2d",
+        "BatchNorm3d",
+        "SyncBatchNorm",
+        "LayerNorm",
+    ]:
         return 2 * x.numel()
 
     # 3D convolution
@@ -356,7 +373,7 @@ def modify_forward(model, compute_list, compute_fn):
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
-    if is_leaf(model):
+    if is_leaf(model) or hasattr(model, "flops"):
         model.__class__ = _patched_computation_module(model, compute_list, compute_fn)
     for child in model.children():
         modify_forward(child, compute_list, compute_fn)
@@ -368,7 +385,7 @@ def restore_forward(model):
     """
     Restore original forward in model:
     """
-    if is_leaf(model):
+    if is_leaf(model) or hasattr(model, "flops"):
         model.__class__ = model.orig_type
     for child in model.children():
         restore_forward(child)
@@ -382,9 +399,15 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     """
     # assertions, input, and upvalue in which we will perform the count:
     assert isinstance(model, nn.Module)
-    if not isinstance(input_shape, abc.Sequence):
+
+    # input_shape for MultimodalVideo is a dict with different modalities
+    if isinstance(input_shape, dict):
+        input = get_multimodel_dummy_input(model, input_shape)
+    elif not isinstance(input_shape, abc.Sequence):
         return None
-    input = get_model_dummy_input(model, input_shape, input_key)
+    else:
+        input = get_model_dummy_input(model, input_shape, input_key)
+
     compute_list = []
 
     # measure FLOPs:

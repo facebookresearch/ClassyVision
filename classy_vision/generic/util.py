@@ -777,6 +777,35 @@ def get_model_dummy_input(
     return input
 
 
+# dummy imput for MultimodalVideo
+def get_multimodel_dummy_input(model, input_shape, batchsize=1, non_blocking=False):
+    input = {}
+    on_gpu = is_on_gpu(model)
+    for key, shape in input_shape.items():
+        if isinstance(shape, tuple):
+            shape = list(shape)
+
+        if on_gpu:
+            input[key] = {
+                "data": torch.randn([batchsize] + shape)
+                .float()
+                .cuda(non_blocking=non_blocking),
+                "lengths": torch.Tensor([1] * batchsize)
+                .int()
+                .cuda(non_blocking=non_blocking),
+                "valid": torch.Tensor([1] * batchsize)
+                .bool()
+                .cuda(non_blocking=non_blocking),
+            }
+        else:
+            input[key] = {
+                "data": torch.randn([batchsize] + shape).float(),
+                "lengths": torch.Tensor([1] * batchsize).int(),
+                "valid": torch.Tensor([1] * batchsize).bool(),
+            }
+    return input
+
+
 @contextlib.contextmanager
 def _train_mode(model: nn.Module, train_mode: bool):
     """Context manager which sets the train mode of a model. After returning, it
