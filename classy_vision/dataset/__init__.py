@@ -72,20 +72,30 @@ from .classy_hmdb51 import HMDB51Dataset  # isort:skip
 from .classy_imagenet import ImageNetDataset  # isort:skip
 from .classy_kinetics400 import Kinetics400Dataset  # isort:skip
 from .classy_synthetic_image import SyntheticImageDataset  # isort:skip
+from .classy_synthetic_image_streaming import (  # isort:skip
+    SyntheticImageStreamingDataset,  # isort:skip
+)  # isort:skip
 from .classy_synthetic_video import SyntheticVideoDataset  # isort:skip
 from .classy_ucf101 import UCF101Dataset  # isort:skip
 from .classy_video_dataset import ClassyVideoDataset  # isort:skip
+from .dataloader_limit_wrapper import DataloaderLimitWrapper  # isort:skip
+from .dataloader_skip_none_wrapper import DataloaderSkipNoneWrapper  # isort:skip
+from .dataloader_wrapper import DataloaderWrapper  # isort:skip
 from .image_path_dataset import ImagePathDataset  # isort:skip
 
 __all__ = [
     "CIFARDataset",
     "ClassyDataset",
     "ClassyVideoDataset",
+    "DataloaderLimitWrapper",
+    "DataloaderSkipNoneWrapper",
+    "DataloaderWrapper",
     "HMDB51Dataset",
     "ImageNetDataset",
     "ImagePathDataset",
     "Kinetics400Dataset",
     "SyntheticImageDataset",
+    "SyntheticImageStreamingDataset",
     "SyntheticVideoDataset",
     "UCF101Dataset",
     "build_dataset",
