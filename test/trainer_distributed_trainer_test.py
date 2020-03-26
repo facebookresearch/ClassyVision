@@ -23,7 +23,7 @@ class TestDistributedTrainer(unittest.TestCase):
         invalid_config = copy.deepcopy(config)
         invalid_config["name"] = "invalid_task"
         sync_bn_config = copy.deepcopy(config)
-        sync_bn_config["sync_batch_norm_mode"] = "pytorch"
+        sync_bn_config["batch_norm_sync_mode"] = "pytorch"
         self.config_files = {}
         for config_key, config in [
             ("config", config),
