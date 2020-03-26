@@ -31,16 +31,17 @@ class TestClassyBlock(unittest.TestCase):
             )
 
         def forward(self, x):
-            out = self.layer1(x)
-            return self.layer2(out)
+            block_outs = {}
+            out, block_outs = self.layer1(x, block_outs)
+            return self.layer2(out, block_outs)
 
     def test_head_execution(self):
         model = self.DummyTestModel()
         head = self.DummyTestHead()
         model.set_heads({"dummy_block2": {head.unique_id: head}})
         input = torch.randn(1, 2)
-        output = model(input)
-        head_output = model.execute_heads()
+        output, block_outs = model(input)
+        head_output = model.execute_heads(block_outs)
         self.assertTrue(torch.allclose(head(output), head_output["head_id"]))
 
     def test_duplicated_head_ids(self):
@@ -65,8 +66,8 @@ class TestClassyBlock(unittest.TestCase):
         )
         model.set_heads({"dummy_block2": {head.unique_id: head}})
         input = torch.randn(1, 2)
-        model(input)
-        head_outputs = model.execute_heads()
+        _, block_outs = model(input)
+        head_outputs = model.execute_heads(block_outs)
         self.assertEqual(len(head_outputs), 1, "should have output for one head")
 
         # remove all heads

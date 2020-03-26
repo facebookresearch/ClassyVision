@@ -45,7 +45,6 @@ class ClassyModel(nn.Module):
 
         self._attachable_blocks = {}
         self._heads = nn.ModuleDict()
-        self._head_outputs = {}
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyModel":
@@ -165,7 +164,6 @@ class ClassyModel(nn.Module):
     def _clear_heads(self):
         # clear all existing heads
         self._heads.clear()
-        self._head_outputs.clear()
 
     def set_heads(self, heads: Dict[str, Dict[str, ClassyHead]]):
         """Attach all the heads to corresponding blocks.
@@ -194,7 +192,6 @@ class ClassyModel(nn.Module):
                 raise ValueError(
                     "block {} does not exist or can not be attached".format(block_name)
                 )
-            self._attachable_blocks[block_name].set_cache_output()
             for head in block_heads.values():
                 if head.unique_id in head_ids:
                     raise ValueError("head id {} already exists".format(head.unique_id))
@@ -211,27 +208,17 @@ class ClassyModel(nn.Module):
         """
         return {block_name: dict(heads) for block_name, heads in self._heads.items()}
 
-    @property
-    def head_outputs(self):
-        """Return outputs of all heads in the format of Dict[head_id, output]
-
-        Head outputs are cached during a forward pass.
+    def execute_heads(
+        self, block_outs: Dict[str, torch.Tensor]
+    ) -> Dict[str, torch.Tensor]:
         """
-        return self._head_outputs.copy()
-
-    def get_block_outputs(self) -> Dict[str, torch.Tensor]:
-        outputs = {}
-        for name, block in self._attachable_blocks.items():
-            outputs[name] = block.output
-        return outputs
-
-    def execute_heads(self) -> Dict[str, torch.Tensor]:
-        block_outs = self.get_block_outputs()
+        Execute heads of the model based on base blocks outputs that has been recorded in
+        `block_outs`
+        """
         outputs = {}
         for block_name, heads in self._heads.items():
             for head in heads.values():
                 outputs[head.unique_id] = head(block_outs[block_name])
-        self._head_outputs = outputs
         return outputs
 
     def get_optimizer_params(self, bn_weight_decay=False):

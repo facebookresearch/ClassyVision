@@ -11,6 +11,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
 
 from . import register_model
+from .classy_block import BlockSequential
 from .classy_model import ClassyModel, ClassyModelEvaluationMode
 from .resnext3d_stage import ResStage
 from .resnext3d_stem import R2Plus1DStem, ResNeXt3DStem
@@ -247,9 +248,9 @@ class ResNeXt3DBase(ClassyModel):
                 x = torch.unsqueeze(x, 2)
 
         out = self.stem([x])
-        out = self.stages(out)
+        out, block_outs = self.stages(out, {})
 
-        head_outputs = self.execute_heads()
+        head_outputs = self.execute_heads(block_outs)
         if len(head_outputs) == 0:
             raise Exception("Expecting at least one head that generates output")
         elif len(head_outputs) == 1:
@@ -406,7 +407,7 @@ class ResNeXt3D(ResNeXt3DBase):
             )
             stages.append(stage)
 
-        self.stages = nn.Sequential(*stages)
+        self.stages = BlockSequential(*stages)
         self._init_parameter(zero_init_residual_transform)
 
     @classmethod

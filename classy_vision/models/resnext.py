@@ -16,6 +16,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int
 
 from . import register_model
+from .classy_block import BlockSequential
 from .classy_model import ClassyModel
 from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
@@ -327,8 +328,8 @@ class ResNeXt(ClassyModel):
                 use_se=use_se,
                 se_reduction_ratio=se_reduction_ratio,
             )
-            blocks.append(nn.Sequential(*new_block))
-        self.blocks = nn.Sequential(*blocks)
+            blocks.append(BlockSequential(*new_block))
+        self.blocks = BlockSequential(*blocks)
 
         self.out_planes = out_planes[-1]
         self._num_classes = out_planes
@@ -426,12 +427,12 @@ class ResNeXt(ClassyModel):
 
         # evaluate all residual blocks:
         # TODO: (kaizh) T43794289 exit early if there is no block that has heads
-        self.blocks(out)
+        _, block_outs = self.blocks(out, {})
 
         # By default the classification layer is implemented as one head on top
         # of the last block. The head is automatically computed right after the
         # last block.
-        head_outputs = self.execute_heads()
+        head_outputs = self.execute_heads(block_outs)
         if len(head_outputs) == 0:
             raise Exception("Expecting at least one head that generates output")
         elif len(head_outputs) == 1:
