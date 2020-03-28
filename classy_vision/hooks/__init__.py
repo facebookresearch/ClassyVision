@@ -93,7 +93,6 @@ from .model_tensorboard_hook import ModelTensorboardHook  # isort:skip
 from .profiler_hook import ProfilerHook  # isort:skip
 from .progress_bar_hook import ProgressBarHook  # isort:skip
 from .tensorboard_plot_hook import TensorboardPlotHook  # isort:skip
-from .time_metrics_hook import TimeMetricsHook  # isort:skip
 from .visdom_hook import VisdomHook  # isort:skip
 
 
@@ -111,6 +110,5 @@ __all__ = [
     "ModelTensorboardHook",
     "ProfilerHook",
     "ProgressBarHook",
-    "TimeMetricsHook",
     "VisdomHook",
 ]
