@@ -4,7 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import argparse
 import collections
 import contextlib
 import json
@@ -757,7 +756,16 @@ def bind_method_to_class(method, cls):
 def get_model_dummy_input(
     model, input_shape, input_key, batchsize=1, non_blocking=False
 ):
-    if isinstance(input_key, list):
+
+    # input_shape with type dict of dict
+    # e.g. {"key_1": {"key_1_1": [2, 3], "key_1_2": [4, 5, 6], "key_1_3": []}
+    if isinstance(input_shape, dict):
+        input = {}
+        for key, value in input_shape.items():
+            input[key] = get_model_dummy_input(
+                model, value, input_key, batchsize, non_blocking
+            )
+    elif isinstance(input_key, list):
         # av mode, with multiple input keys
         input = {}
         for i, key in enumerate(input_key):
