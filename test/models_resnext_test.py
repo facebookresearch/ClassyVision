@@ -4,10 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import collections
 import unittest
 from test.generic.utils import compare_model_state
 
 import torch
+import torchvision.models
 from classy_vision.models import ResNeXt, build_model
 
 
@@ -100,7 +102,6 @@ class TestResnext(unittest.TestCase):
 
     def test_build_preset_model(self):
         configs = [
-            {"name": "resnet18"},
             {"name": "resnet18", "use_se": True},
             {
                 "name": "resnet50",
@@ -139,3 +140,43 @@ class TestResnext(unittest.TestCase):
 
     def test_small_resnet_se(self):
         self._test_model(MODELS["small_resnet_se"])
+
+
+class TestTorchvisionEquivalence(unittest.TestCase):
+    @staticmethod
+    def tensor_sizes(state):
+        size_count = collections.defaultdict(int)
+        for key, value in state.items():
+            if key.startswith("fc."):
+                continue  # "head" for torchvision
+            size_count[value.size()] += 1
+        return dict(size_count)
+
+    def assert_tensor_sizes_match_torchvision(self, model_name):
+        classy_model = build_model({"name": model_name})
+        torchvision_model = getattr(torchvision.models, model_name)(pretrained=False)
+        classy_sizes = self.tensor_sizes(
+            classy_model.get_classy_state()["model"]["trunk"]
+        )
+        torchvision_sizes = self.tensor_sizes(torchvision_model.state_dict())
+        self.assertEqual(
+            classy_sizes,
+            torchvision_sizes,
+            f"{model_name} tensor shapes do not match torchvision",
+        )
+
+    def test_resnet18(self):
+        """Resnet18 tensor shapes should match torchvision."""
+        self.assert_tensor_sizes_match_torchvision("resnet18")
+
+    def test_resnet34(self):
+        """Resnet34 tensor shapes should match torchvision."""
+        self.assert_tensor_sizes_match_torchvision("resnet34")
+
+    def test_resnet50(self):
+        """Resnet50 tensor shapes should match torchvision."""
+        self.assert_tensor_sizes_match_torchvision("resnet50")
+
+    def test_resnext50_32x4d(self):
+        """Resnext50_32x4d tensor shapes should match torchvision."""
+        self.assert_tensor_sizes_match_torchvision("resnext50_32x4d")

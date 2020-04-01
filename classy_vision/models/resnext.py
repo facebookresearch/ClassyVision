@@ -125,7 +125,7 @@ class BasicLayer(GenericLayer):
         out_planes,
         stride=1,
         mid_planes_and_cardinality=None,
-        reduction=4,
+        reduction=1,
         final_bn_relu=True,
         use_se=False,
         se_reduction_ratio=16,
@@ -404,13 +404,15 @@ class ResNeXt(ClassyModel):
             A ResNeXt instance.
         """
         assert "num_blocks" in config
+
+        basic_layer = config.get("basic_layer", False)
         config = {
             "num_blocks": config["num_blocks"],
             "init_planes": config.get("init_planes", 64),
-            "reduction": config.get("reduction", 4),
+            "reduction": config.get("reduction", 1 if basic_layer else 4),
             "base_width_and_cardinality": config.get("base_width_and_cardinality"),
             "small_input": config.get("small_input", False),
-            "basic_layer": config.get("basic_layer", False),
+            "basic_layer": basic_layer,
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
             "bn_weight_decay": config.get("bn_weight_decay", False),
@@ -475,17 +477,19 @@ class ResNet18(_ResNeXt):
             num_blocks=[2, 2, 2, 2],
             basic_layer=True,
             zero_init_bn_residuals=True,
+            reduction=1,
             **kwargs,
         )
 
 
 @register_model("resnet34")
-class ResNet34(ResNeXt):
+class ResNet34(_ResNeXt):
     def __init__(self, **kwargs):
         super().__init__(
             num_blocks=[3, 4, 6, 3],
             basic_layer=True,
             zero_init_bn_residuals=True,
+            reduction=1,
             **kwargs,
         )
 
