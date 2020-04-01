@@ -475,17 +475,19 @@ class ResNet18(_ResNeXt):
             num_blocks=[2, 2, 2, 2],
             basic_layer=True,
             zero_init_bn_residuals=True,
+            reduction=1,
             **kwargs,
         )
 
 
 @register_model("resnet34")
-class ResNet34(ResNeXt):
+class ResNet34(_ResNeXt):
     def __init__(self, **kwargs):
         super().__init__(
             num_blocks=[3, 4, 6, 3],
             basic_layer=True,
             zero_init_bn_residuals=True,
+            reduction=1,
             **kwargs,
         )
 
