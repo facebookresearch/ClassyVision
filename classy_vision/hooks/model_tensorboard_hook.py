@@ -7,7 +7,6 @@
 import logging
 from typing import Any, Dict
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.visualize import plot_model
 from classy_vision.hooks import register_hook
@@ -62,7 +61,7 @@ class ModelTensorboardHook(ClassyHook):
         tb_writer = SummaryWriter(**config["summary_writer"])
         return cls(tb_writer=tb_writer)
 
-    def on_start(self, task: "tasks.ClassyTask") -> None:
+    def on_start(self, task) -> None:
         """
         Plot the model on Tensorboard.
         """

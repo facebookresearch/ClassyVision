@@ -432,7 +432,7 @@ def compute_pr_curves(class_hist, total_hist):
 
 
 def get_checkpoint_dict(task, input_args, deep_copy=False):
-    assert isinstance(
+    assert input_args is None or isinstance(
         input_args, dict
     ), f"Unexpected input_args of type: {type(input_args)}"
     return {
