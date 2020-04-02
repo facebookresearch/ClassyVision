@@ -8,7 +8,6 @@ import collections
 import logging
 from typing import Any, Dict
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import flatten_dict
 from classy_vision.generic.visualize import plot_learning_curves
@@ -60,7 +59,7 @@ class VisdomHook(ClassyHook):
         self.metrics: Dict = {}
         self.visdom: Visdom = Visdom(self.server, self.port)
 
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """
         Plot the metrics on visdom.
         """

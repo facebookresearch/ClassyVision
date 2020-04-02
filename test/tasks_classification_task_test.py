@@ -44,6 +44,13 @@ class TestClassificationTask(unittest.TestCase):
         task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
 
+    def test_hooks_config_builds_correctly(self):
+        config = get_test_task_config()
+        config["hooks"] = [{"name": "loss_lr_meter_logging"}]
+        task = build_task(config)
+        self.assertTrue(len(task.hooks) == 1)
+        self.assertTrue(isinstance(task.hooks[0], LossLrMeterLoggingHook))
+
     def test_get_state(self):
         config = get_test_task_config()
         loss = build_loss(config["loss"])
