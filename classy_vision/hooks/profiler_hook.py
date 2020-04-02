@@ -7,7 +7,6 @@
 import logging
 from typing import Any, Dict
 
-from classy_vision import tasks
 from classy_vision.generic.profiler import profile, summarize_profiler_info
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -25,7 +24,7 @@ class ProfilerHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def on_start(self, task: "tasks.ClassyTask") -> None:
+    def on_start(self, task) -> None:
         """Profile the forward pass."""
         logging.info("Profiling forward pass...")
         batchsize_per_replica = getattr(

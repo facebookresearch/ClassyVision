@@ -8,7 +8,6 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -70,7 +69,7 @@ class TensorboardPlotHook(ClassyHook):
         log_period = config.get("log_period", 10)
         return cls(tb_writer=tb_writer, log_period=log_period)
 
-    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_start(self, task) -> None:
         """Initialize losses and learning_rates."""
         self.learning_rates = []
         self.wall_times = []
@@ -87,7 +86,7 @@ class TensorboardPlotHook(ClassyHook):
                     f"Parameters/{name}", parameter, global_step=-1
                 )
 
-    def on_step(self, task: "tasks.ClassyTask") -> None:
+    def on_step(self, task) -> None:
         """Store the observed learning rates."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")
@@ -106,7 +105,7 @@ class TensorboardPlotHook(ClassyHook):
 
         self.step_idx += 1
 
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """Add the losses and learning rates to tensorboard."""
         if self.learning_rates is None:
             logging.warning("learning_rates is not initialized")

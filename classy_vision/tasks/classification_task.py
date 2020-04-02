@@ -24,6 +24,7 @@ from classy_vision.generic.util import (
     recursive_copy_to_gpu,
     update_classy_state,
 )
+from classy_vision.hooks import build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
@@ -328,6 +329,13 @@ class ClassificationTask(ClassyTask):
         amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
+
+        # hooks config is optional
+        hooks_config = config.get("hooks")
+        hooks = []
+        if hooks_config is not None:
+            hooks = build_hooks(hooks_config)
+
         optimizer = build_optimizer(optimizer_config)
 
         task = (
@@ -348,7 +356,9 @@ class ClassificationTask(ClassyTask):
                     config.get("batch_norm_sync_mode", "disabled").upper()
                 ],
             )
+            .set_hooks(hooks)
         )
+
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
 

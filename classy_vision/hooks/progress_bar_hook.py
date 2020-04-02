@@ -6,7 +6,6 @@
 
 from typing import Any, Dict, Optional
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -36,7 +35,7 @@ class ProgressBarHook(ClassyHook):
         self.bar_size: int = 0
         self.batches: int = 0
 
-    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_start(self, task) -> None:
         """Create and display a progress bar with 0 progress."""
         if not progressbar_available:
             raise RuntimeError(
@@ -49,13 +48,13 @@ class ProgressBarHook(ClassyHook):
             self.progress_bar = progressbar.ProgressBar(self.bar_size)
             self.progress_bar.start()
 
-    def on_step(self, task: "tasks.ClassyTask") -> None:
+    def on_step(self, task) -> None:
         """Update the progress bar with the batch size."""
         if task.train and is_master() and self.progress_bar is not None:
             self.batches += 1
             self.progress_bar.update(min(self.batches, self.bar_size))
 
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """Clear the progress bar at the end of the phase."""
         if is_master() and self.progress_bar is not None:
             self.progress_bar.finish()
