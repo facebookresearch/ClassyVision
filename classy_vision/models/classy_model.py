@@ -5,8 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import types
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -20,7 +21,112 @@ class ClassyModelEvaluationMode(Enum):
     VIDEO_CLIP_AVERAGING = 1
 
 
-class ClassyModel(nn.Module):
+class _ClassyModelMeta(type):
+    """Metaclass to return a ClassyModel instance wrapped by a ClassyModelWrapper."""
+
+    def __call__(cls, *args, **kwargs):
+        """Override the __call__ function for the metaclass.
+
+        This is called when a new instance of a class with this class as its metaclass
+        is initialized. For example -
+
+        .. code-block:: python
+          class MyClass(metaclass=_ClassyModelMeta):
+              wrapper_cls = MyWrapper
+
+          my_class_instance = MyClass()  # returned instance will be a MyWrapper
+        """
+        classy_model = super().__call__(*args, **kwargs)
+
+        wrapper_cls = cls.wrapper_cls
+        if wrapper_cls is not None:
+            # wrap the ClassyModel instance with a wrapper class and return that instead
+            classy_model = wrapper_cls(classy_model)
+        return classy_model
+
+
+class _ClassyModelMethod:
+    """Class to override ClassyModel method calls to ensure the wrapper is returned.
+
+    This helps override calls like model.cuda() which return self, to return the
+    wrapper instead of the underlying classy_model.
+    """
+
+    def __init__(self, wrapper, classy_method):
+        self.wrapper = wrapper
+        self.classy_method = classy_method
+
+    def __call__(self, *args, **kwargs):
+        ret_val = self.classy_method(*args, **kwargs)
+        if ret_val is self.wrapper.classy_model:
+            # if the method is returning the classy_model, return the wrapper instead
+            ret_val = self.wrapper
+        return ret_val
+
+
+class ClassyModelWrapper:
+    """Base ClassyModel wrapper class.
+
+    This class acts as a thin pass through wrapper which lets users modify the behavior
+    of ClassyModels, such as changing the return output of the forward() call.
+    This wrapper acts as a ClassyModel by itself and the underlying model can be
+    accessed by the `classy_model` attribute.
+    """
+
+    # TODO: Make this torchscriptable by inheriting from nn.Module / ClassyModel
+
+    def __init__(self, classy_model):
+        self.classy_model = classy_model
+
+    def __getattr__(self, name):
+        if name != "classy_model" and hasattr(self, "classy_model"):
+            attr = getattr(self.classy_model, name)
+            if isinstance(attr, types.MethodType):
+                attr = _ClassyModelMethod(self, attr)
+            return attr
+        else:
+            return super().__getattr__(name)
+
+    def __setattr__(self, name, value):
+        # __setattr__ works differently from __getattr__ and is called even when the
+        # attribute is a method, like forward.
+        if name not in ["classy_model", "forward"] and hasattr(self, "classy_model"):
+            setattr(self.classy_model, name, value)
+        else:
+            super().__setattr__(name, value)
+
+    def forward(self, *args, **kwargs):
+        return self.classy_model(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
+
+    def __repr__(self):
+        return f"Classy {type(self.classy_model)}:\n{self.classy_model.__repr__()}"
+
+    @property
+    def __class__(self):
+        return self.classy_model.__class__
+
+
+class ClassyModelHeadExecutorWrapper(ClassyModelWrapper):
+    """Wrapper which changes the forward to also execute and return head output."""
+
+    def forward(self, *args, **kwargs):
+        out = self.classy_model(*args, **kwargs)
+
+        if len(self._heads) == 0:
+            return out
+
+        # heads have been attached to the model, return their output instead
+        head_outputs = self.execute_heads()
+        if len(head_outputs) == 1:
+            return list(head_outputs.values())[0]
+        else:
+            return head_outputs
+
+
+class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
     """Base class for models in classy vision.
 
     A model refers either to a specific architecture (e.g. ResNet50) or a
@@ -37,7 +143,15 @@ class ClassyModel(nn.Module):
     blocks.  Making your model support the trunk-heads paradigm is
     completely optional.
 
+    NOTE: Advanced users can modify the behavior of their implemented models by
+        specifying the `wrapper_cls` class attribute, which should be a class
+        derived from :class:`ClassyModelWrapper` (see the documentation for that class
+        for more information). Users can set it to `None` to skip wrapping their model
+        and to make their model torchscriptable. This is set to
+        :class:`ClassyModelHeadExecutorWrapper` by default.
     """
+
+    wrapper_cls = ClassyModelHeadExecutorWrapper
 
     _attachable_block_names: List[str]
 
@@ -60,6 +174,30 @@ class ClassyModel(nn.Module):
             A ClassyModel instance.
         """
         raise NotImplementedError
+
+    @classmethod
+    def from_model(
+        cls,
+        model: nn.Module,
+        input_shape: Optional[Tuple] = None,
+        output_shape: Optional[Tuple] = None,
+        model_depth: Optional[int] = None,
+    ):
+        """Converts an :class:`nn.Module` to a `ClassyModel`.
+
+        Args:
+            model: The model to convert
+            For the remaining args, look at the corresponding properties of ClassyModel
+
+        Returns:
+            A ClassyModel instance.
+        """
+        return _ClassyModelAdapter(
+            model,
+            input_shape=input_shape,
+            output_shape=output_shape,
+            model_depth=model_depth,
+        )
 
     @classmethod
     def from_checkpoint(cls, checkpoint):
@@ -89,7 +227,7 @@ class ClassyModel(nn.Module):
         # clear heads to get the state of the model without any heads, which we refer to
         # as the trunk state. If the model doesn't have heads attached, all of the
         # model's state lives in the trunk.
-        self._clear_heads()
+        self.clear_heads()
         trunk_state_dict = self.state_dict()
         self.set_heads(attached_heads)
 
@@ -137,7 +275,7 @@ class ClassyModel(nn.Module):
         # structure of the model and its state dict. So, the trunk state is always
         # fetched / set when there are no blocks attached.
         attached_heads = self.get_heads()
-        self._clear_heads()
+        self.clear_heads()
         self.load_state_dict(state["model"]["trunk"])
 
         # set the heads back again
@@ -176,7 +314,7 @@ class ClassyModel(nn.Module):
         """
         return self._attachable_block_names
 
-    def _clear_heads(self):
+    def clear_heads(self):
         # clear all existing heads
         self._heads.clear()
         self._head_outputs.clear()
@@ -223,7 +361,7 @@ class ClassyModel(nn.Module):
                       {"team1": classifier_head1, "team2": classifier_head2}
                   }
         """
-        self._clear_heads()
+        self.clear_heads()
 
         head_ids = set()
         for block_name, block_heads in heads.items():
@@ -339,3 +477,52 @@ class ClassyModel(nn.Module):
         # TODO: Remove this once we have a video task, this logic should
         # live in a video specific task
         return ClassyModelEvaluationMode.DEFAULT
+
+
+class _ClassyModelAdapter(ClassyModel):
+    """
+    Class which adapts an `nn.Module <https://pytorch.org/docs/stable/
+    nn.html#torch.nn.Module>`_ to a ClassyModel by wrapping the model.
+
+    The only required argument is the model, the additional args are needed
+    to get some additional capabilities from Classy Vision to work.
+    """
+
+    def __init__(
+        self,
+        model: nn.Module,
+        input_shape: Optional[Tuple] = None,
+        output_shape: Optional[Tuple] = None,
+        model_depth: Optional[int] = None,
+    ):
+        super().__init__()
+        self.model = model
+        self._input_shape = input_shape
+        self._output_shape = output_shape
+        self._model_depth = model_depth
+
+    def forward(self, x):
+        return self.model(x)
+
+    def extract_features(self, x):
+        if hasattr(self.model, "extract_features"):
+            return self.model.extract_features(x)
+        return super().extract_features(x)
+
+    @property
+    def input_shape(self):
+        if self._input_shape is not None:
+            return self._input_shape
+        return super().input_shape
+
+    @property
+    def output_shape(self):
+        if self._output_shape is not None:
+            return self._output_shape
+        return super().output_shape
+
+    @property
+    def model_depth(self):
+        if self._model_depth is not None:
+            return self._model_depth
+        return super().model_depth
