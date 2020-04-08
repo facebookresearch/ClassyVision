@@ -155,7 +155,7 @@ class TestCheckpointHook(HookTestBase):
         cuda_available = torch.cuda.is_available()
         task = build_task(config)
 
-        task.prepare(use_gpu=cuda_available)
+        task.prepare()
 
         # create a checkpoint hook
         checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
@@ -175,8 +175,8 @@ class TestCheckpointHook(HookTestBase):
             # set the checkpoint
             task.set_checkpoint(checkpoint)
 
-            task.prepare(use_gpu=use_gpu)
+            task.set_use_gpu(use_gpu)
 
             # we should be able to run the trainer using the checkpoint
-            trainer = LocalTrainer(use_gpu=use_gpu)
+            trainer = LocalTrainer()
             trainer.train(task)

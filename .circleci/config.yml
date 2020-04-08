@@ -106,7 +106,7 @@ jobs:
             pip install .
             classy-project my-project
             pushd my-project
-            ./classy_train.py --device cpu --config configs/template_config.json
+            ./classy_train.py --config configs/template_config.json
             popd
             rm -rf my-project
 
