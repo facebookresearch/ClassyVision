@@ -142,6 +142,7 @@ class ClassificationTask(ClassyTask):
         self.perf_log = []
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
+        self.find_unused_parameters = True
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -217,6 +218,7 @@ class ClassificationTask(ClassyTask):
         self,
         broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.DISABLED,
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
+        find_unused_parameters: bool = True,
     ):
         """Set distributed options.
 
@@ -225,6 +227,8 @@ class ClassificationTask(ClassyTask):
                 :class:`BroadcastBuffersMode` for options.
             batch_norm_sync_mode: Batch normalization synchronization mode. See
                 :class:`BatchNormSyncMode` for options.
+            find_unused_parameters: See
+                :class:`torch.nn.parallel.DistributedDataParallel` for information.
 
         Raises:
             RuntimeError: If batch_norm_sync_mode is `BatchNormSyncMode.APEX` and apex
@@ -241,6 +245,8 @@ class ClassificationTask(ClassyTask):
                 f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
             )
         self.batch_norm_sync_mode = batch_norm_sync_mode
+
+        self.find_unused_parameters = find_unused_parameters
 
         return self
 
@@ -355,6 +361,7 @@ class ClassificationTask(ClassyTask):
                 batch_norm_sync_mode=BatchNormSyncMode[
                     config.get("batch_norm_sync_mode", "disabled").upper()
                 ],
+                find_unused_parameters=config.get("find_unused_parameters", True),
             )
             .set_hooks(hooks)
         )
@@ -590,12 +597,16 @@ class ClassificationTask(ClassyTask):
             self.broadcast_buffers_mode == BroadcastBuffersMode.FORWARD_PASS
         )
         self.distributed_model = init_distributed_data_parallel_model(
-            self.base_model, broadcast_buffers=broadcast_buffers
+            self.base_model,
+            broadcast_buffers=broadcast_buffers,
+            find_unused_parameters=self.find_unused_parameters,
         )
         if isinstance(self.loss, ClassyLoss) and self.loss.has_learned_parameters():
             logging.info("Initializing distributed loss")
             self.loss = init_distributed_data_parallel_model(
-                self.loss, broadcast_buffers=broadcast_buffers
+                self.loss,
+                broadcast_buffers=broadcast_buffers,
+                find_unused_parameters=self.find_unused_parameters,
             )
 
     @property

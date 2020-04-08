@@ -164,7 +164,7 @@ def get_cuda_device_index() -> int:
 
 
 def init_distributed_data_parallel_model(
-    model, broadcast_buffers=False, find_unused_parameters=False
+    model, broadcast_buffers=False, find_unused_parameters=True
 ):
     global _cuda_device_index
 
