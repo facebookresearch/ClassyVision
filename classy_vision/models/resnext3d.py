@@ -178,6 +178,11 @@ class ResNeXt3DBase(ClassyModel):
         # We need to support both regular checkpoint loading and 2D conv weight
         # inflation into 3D conv weight in this function.
         self.load_head_states(state)
+
+        # clear the heads to set the trunk state
+        attached_heads = self.get_heads()
+        self._clear_heads()
+
         current_state = self.state_dict()
         for name, weight_src in state["model"]["trunk"].items():
             assert name in current_state, (
@@ -217,7 +222,10 @@ class ResNeXt3DBase(ClassyModel):
                 )
 
             current_state[name] = weight_src.clone()
-        super().load_state_dict(current_state)
+        self.load_state_dict(current_state)
+
+        # set the heads back again
+        self.set_heads(attached_heads)
 
     def forward(self, x):
         """
@@ -400,7 +408,6 @@ class ResNeXt3D(ResNeXt3DBase):
                 [num_groups],
                 skip_transformation_type,
                 residual_transformation_type,
-                block_callback=self.build_attachable_block,
                 disable_pre_activation=(s == 0),
                 final_stage=(s == (num_stages - 1)),
             )
