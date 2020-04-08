@@ -91,7 +91,6 @@ class ResStage(ResStageBase):
         num_groups,
         skip_transformation_type,
         residual_transformation_type,
-        block_callback=None,
         inplace_relu=True,
         bn_eps=1e-5,
         bn_mmt=0.1,
@@ -127,8 +126,6 @@ class ResStage(ResStageBase):
                 num_groups>1 is for ResNeXt like networks.
             skip_transformation_type (str): the type of skip transformation
             residual_transformation_type (str): the type of residual transformation
-            block_callback (function object): a callback function to be called with
-                residual block and its name as input arguments
             disable_pre_activation (bool): If true, disable the preactivation,
                 which includes BatchNorm3D and ReLU.
             final_stage (bool): If true, this is the last stage in the model.
@@ -171,8 +168,6 @@ class ResStage(ResStageBase):
                     disable_pre_activation=block_disable_pre_activation,
                 )
                 block_name = self._block_name(p, stage_idx, i)
-                if block_callback:
-                    res_block = block_callback(block_name, res_block)
                 blocks.append((block_name, res_block))
 
             if final_stage and (
@@ -185,8 +180,6 @@ class ResStage(ResStageBase):
                 activate_relu = nn.ReLU(inplace=True)
                 activate_bn_name = "-".join([block_name, "bn"])
                 activate_relu_name = "-".join([block_name, "relu"])
-                if block_callback:
-                    activate_relu = block_callback(activate_relu_name, activate_relu)
                 blocks.append((activate_bn_name, activate_bn))
                 blocks.append((activate_relu_name, activate_relu))
 

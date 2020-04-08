@@ -8,6 +8,7 @@
 
 # dependencies:
 import math
+from collections import OrderedDict
 from typing import Any, Dict
 
 import torch
@@ -166,7 +167,7 @@ class DenseNet(ClassyModel):
             )
         # loop over spatial resolutions:
         num_planes = init_planes
-        blocks = []
+        blocks = nn.Sequential()
         for idx, num_layers in enumerate(num_blocks):
             # add dense block
             block = self._make_dense_block(
@@ -178,18 +179,20 @@ class DenseNet(ClassyModel):
                 use_se=use_se,
                 se_reduction_ratio=se_reduction_ratio,
             )
-            blocks.append(block)
+            blocks.add_module(f"block_{idx}", block)
             num_planes = num_planes + num_layers * growth_rate
 
             # add transition layer:
             if idx != len(num_blocks) - 1:
                 trans = _Transition(num_planes, num_planes // 2)
-                blocks.append(self.build_attachable_block(f"transition-{idx}", trans))
+                blocks.add_module(f"transition-{idx}", trans)
                 num_planes = num_planes // 2
 
-        blocks.append(self._make_trunk_output_block(num_planes, final_bn_relu))
+        blocks.add_module(
+            "trunk_output", self._make_trunk_output_block(num_planes, final_bn_relu)
+        )
 
-        self.features = nn.Sequential(*blocks)
+        self.features = blocks
 
         # initialize weights of convolutional and batchnorm layers:
         for m in self.modules():
@@ -208,7 +211,7 @@ class DenseNet(ClassyModel):
             # final batch normalization:
             layers.add_module("norm-final", nn.BatchNorm2d(num_planes))
             layers.add_module("relu-final", nn.ReLU(inplace=INPLACE))
-        return self.build_attachable_block("trunk_output", layers)
+        return layers
 
     def _make_dense_block(
         self,
@@ -225,21 +228,16 @@ class DenseNet(ClassyModel):
         assert is_pos_int(expansion)
 
         # create a block of dense layers at same resolution:
-        layers = []
+        layers = OrderedDict()
         for idx in range(num_layers):
-            layers.append(
-                self.build_attachable_block(
-                    f"block{block_idx}-{idx}",
-                    _DenseLayer(
-                        in_planes + idx * growth_rate,
-                        growth_rate=growth_rate,
-                        expansion=expansion,
-                        use_se=use_se,
-                        se_reduction_ratio=se_reduction_ratio,
-                    ),
-                )
+            layers[f"block{block_idx}-{idx}"] = _DenseLayer(
+                in_planes + idx * growth_rate,
+                growth_rate=growth_rate,
+                expansion=expansion,
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-        return nn.Sequential(*layers)
+        return nn.Sequential(layers)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "DenseNet":
