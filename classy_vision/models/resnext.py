@@ -10,6 +10,9 @@ Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf)
 
 import copy
 import math
+import re
+import warnings
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch.nn as nn
@@ -20,6 +23,8 @@ from .classy_model import ClassyModel
 from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
 
+# version number for the current implementation
+VERSION = 0.2
 # global setting for in-place ReLU:
 INPLACE = True
 
@@ -327,7 +332,7 @@ class ResNeXt(ClassyModel):
                 use_se=use_se,
                 se_reduction_ratio=se_reduction_ratio,
             )
-            blocks.append(nn.Sequential(*new_block))
+            blocks.append(new_block)
         self.blocks = nn.Sequential(*blocks)
 
         self.out_planes = out_planes[-1]
@@ -371,26 +376,21 @@ class ResNeXt(ClassyModel):
         use_se=False,
         se_reduction_ratio=16,
     ):
-
         # add the desired number of residual blocks:
-        blocks = []
+        blocks = OrderedDict()
         for idx in range(num_blocks):
-            blocks.append(
-                self.build_attachable_block(
-                    "block{}-{}".format(resolution_idx, idx),
-                    self.layer_type(
-                        in_planes if idx == 0 else out_planes,
-                        out_planes,
-                        stride=stride if idx == 0 else 1,  # only first block has stride
-                        mid_planes_and_cardinality=mid_planes_and_cardinality,
-                        reduction=reduction,
-                        final_bn_relu=final_bn_relu or (idx != (num_blocks - 1)),
-                        use_se=use_se,
-                        se_reduction_ratio=se_reduction_ratio,
-                    ),
-                )
+            block_name = "block{}-{}".format(resolution_idx, idx)
+            blocks[block_name] = self.layer_type(
+                in_planes if idx == 0 else out_planes,
+                out_planes,
+                stride=stride if idx == 0 else 1,  # only first block has stride
+                mid_planes_and_cardinality=mid_planes_and_cardinality,
+                reduction=reduction,
+                final_bn_relu=final_bn_relu or (idx != (num_blocks - 1)),
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-        return blocks
+        return nn.Sequential(blocks)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
@@ -458,6 +458,48 @@ class ResNeXt(ClassyModel):
     @property
     def model_depth(self):
         return sum(self.num_blocks)
+
+    def _convert_model_state(self, state):
+        """Convert model state from the old implementation to the current format.
+
+        Updates the state dict in place and returns True if the state dict was updated.
+        """
+        pattern = r"blocks\.(?P<block_id_0>[0-9])\.(?P<block_id_1>[0-9])\._module\."
+        repl = r"blocks.\g<block_id_0>.block\g<block_id_0>-\g<block_id_1>."
+        trunk_dict = state["model"]["trunk"]
+        new_trunk_dict = {}
+        replaced_keys = False
+        for key, value in trunk_dict.items():
+            new_key = re.sub(pattern, repl, key)
+            if new_key != key:
+                replaced_keys = True
+            new_trunk_dict[new_key] = value
+        state["model"]["trunk"] = new_trunk_dict
+        state["version"] = VERSION
+        return replaced_keys
+
+    def get_classy_state(self, deep_copy=False):
+        state = super().get_classy_state(deep_copy=deep_copy)
+        state["version"] = VERSION
+        return state
+
+    def set_classy_state(self, state):
+        version = state.get("version")
+        if version is None:
+            # convert the weights from the previous implementation of ResNeXt to the
+            # current one
+            if not self._convert_model_state(state):
+                raise RuntimeError("ResNeXt state conversion failed")
+            message = (
+                "Provided state dict is from an old implementation of ResNeXt. "
+                "This has been deprecated and will be removed soon."
+            )
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+        elif version != VERSION:
+            raise ValueError(
+                f"Unsupported ResNeXt version: {version}. Expected: {VERSION}"
+            )
+        super().set_classy_state(state)
 
 
 class _ResNeXt(ResNeXt):
