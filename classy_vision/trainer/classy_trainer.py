@@ -27,25 +27,18 @@ class ClassyTrainer:
 
     def __init__(
         self,
-        use_gpu: Optional[bool] = None,
         num_dataloader_workers: int = 0,
         dataloader_mp_context: Optional[str] = None,
     ):
         """Constructor for ClassyTrainer.
 
         Args:
-            use_gpu: If true, then use GPUs for training.
-                If None, then check if we have GPUs available, if we do
-                then use GPU for training.
             num_dataloader_workers: Number of CPU processes doing dataloading
                 per GPU. If 0, then dataloading is done on main thread.
             dataloader_mp_context: Determines how to launch
                 new processes for dataloading. Must be one of "fork", "forkserver",
                 "spawn". If None, process launching is inherited from parent.
         """
-        if use_gpu is None:
-            use_gpu = torch.cuda.is_available()
-        self.use_gpu = use_gpu
         self.num_dataloader_workers = num_dataloader_workers
         self.dataloader_mp_context = dataloader_mp_context
 
@@ -57,11 +50,8 @@ class ClassyTrainer:
                 everything that is needed for training
         """
 
-        pin_memory = self.use_gpu and torch.cuda.device_count() > 1
         task.prepare(
             num_dataloader_workers=self.num_dataloader_workers,
-            pin_memory=pin_memory,
-            use_gpu=self.use_gpu,
             dataloader_mp_context=self.dataloader_mp_context,
         )
         assert isinstance(task, ClassyTask)
@@ -75,7 +65,7 @@ class ClassyTrainer:
             task.on_phase_start()
             while True:
                 try:
-                    task.step(self.use_gpu)
+                    task.step()
                 except StopIteration:
                     break
             task.on_phase_end()

@@ -437,7 +437,7 @@ class TestUpdateStateFunctions(unittest.TestCase):
         task = build_task(config)
         task_2 = build_task(config)
         task_2.prepare()
-        trainer = LocalTrainer(use_gpu=False)
+        trainer = LocalTrainer()
         trainer.train(task)
         update_classy_state(task_2, task.get_classy_state(deep_copy=True))
         self._compare_states(task.get_classy_state(), task_2.get_classy_state())
@@ -449,13 +449,12 @@ class TestUpdateStateFunctions(unittest.TestCase):
         """
         config = get_fast_test_task_config()
         task = build_task(config)
-        use_gpu = torch.cuda.is_available()
-        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer = LocalTrainer()
         trainer.train(task)
         for reset_heads in [False, True]:
             task_2 = build_task(config)
             # prepare task_2 for the right device
-            task_2.prepare(use_gpu=use_gpu)
+            task_2.prepare()
             update_classy_model(
                 task_2.model, task.model.get_classy_state(deep_copy=True), reset_heads
             )

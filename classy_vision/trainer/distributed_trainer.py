@@ -56,39 +56,19 @@ class DistributedTrainer(ClassyTrainer):
     """Distributed trainer for using multiple training processes
     """
 
-    def __init__(
-        self,
-        use_gpu: Optional[bool] = None,
-        num_dataloader_workers: int = 0,
-        dataloader_mp_context: Optional[str] = None,
-    ):
-        """Constructor for DistributedTrainer.
-
-        Args:
-            use_gpu: If true, then use GPU 0 for training.
-                If None, then check if we have GPUs available, if we do
-                then use GPU for training.
-            num_dataloader_workers: Number of CPU processes doing dataloading
-                per GPU. If 0, then dataloading is done on main thread.
-            dataloader_mp_context: Determines how to launch
-                new processes for dataloading. Must be one of "fork", "forkserver",
-                "spawn". If None, process launching is inherited from parent.
-        """
-        super().__init__(
-            use_gpu=use_gpu,
-            num_dataloader_workers=num_dataloader_workers,
-            dataloader_mp_context=dataloader_mp_context,
-        )
+    def train(self, task):
         _init_env_vars()
-        _init_distributed(self.use_gpu)
+        _init_distributed(task.use_gpu)
         logging.info(
             f"Done setting up distributed process_group with rank {get_rank()}"
             + f", world_size {get_world_size()}"
         )
         local_rank = int(os.environ["LOCAL_RANK"])
-        if self.use_gpu:
+        if task.use_gpu:
             logging.info("Using GPU, CUDA device index: {}".format(local_rank))
             set_cuda_device_index(local_rank)
         else:
             logging.info("Using CPU")
             set_cpu_device()
+
+        super().train(task)

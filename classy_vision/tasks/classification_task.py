@@ -143,6 +143,16 @@ class ClassificationTask(ClassyTask):
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
+        self.use_gpu = torch.cuda.is_available()
+
+    def set_use_gpu(self, use_gpu: bool):
+        self.use_gpu = use_gpu
+
+        assert (
+            not self.use_gpu or torch.cuda.is_available()
+        ), "CUDA required to train on GPUs"
+
+        return self
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -366,6 +376,10 @@ class ClassificationTask(ClassyTask):
             .set_hooks(hooks)
         )
 
+        use_gpu = config.get("use_gpu")
+        if use_gpu is not None:
+            task.set_use_gpu(use_gpu)
+
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
 
@@ -515,24 +529,19 @@ class ClassificationTask(ClassyTask):
             for phase_type in self.datasets.keys()
         }
 
-    def prepare(
-        self,
-        num_dataloader_workers=0,
-        pin_memory=False,
-        use_gpu=False,
-        dataloader_mp_context=None,
-    ):
+    def prepare(self, num_dataloader_workers=0, dataloader_mp_context=None):
         """Prepares task for training, populates all derived attributes
 
         Args:
             num_dataloader_workers: Number of dataloading processes. If 0,
                 dataloading is done on main process
-            pin_memory: if true pin memory on GPU
-            use_gpu: if true, load model, optimizer, loss, etc on GPU
             dataloader_mp_context: Determines how processes are spawned.
                 Value must be one of None, "spawn", "fork", "forkserver".
                 If None, then context is inherited from parent process
         """
+
+        pin_memory = self.use_gpu and torch.cuda.device_count() > 1
+
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
             num_workers=num_dataloader_workers,
@@ -546,7 +555,7 @@ class ClassificationTask(ClassyTask):
             self.base_model = apex.parallel.convert_syncbn_model(self.base_model)
 
         # move the model and loss to the right device
-        if use_gpu:
+        if self.use_gpu:
             self.base_model, self.loss = copy_model_to_gpu(self.base_model, self.loss)
         else:
             self.loss.cpu()
@@ -697,7 +706,7 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
-    def eval_step(self, use_gpu):
+    def eval_step(self):
         self.last_batch = None
 
         # Process next sample
@@ -710,7 +719,7 @@ class ClassificationTask(ClassyTask):
 
         # Copy sample to GPU
         target = sample["target"]
-        if use_gpu:
+        if self.use_gpu:
             for key, value in sample.items():
                 sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
 
@@ -737,12 +746,8 @@ class ClassificationTask(ClassyTask):
         if loss == float("inf") or loss == float("-inf") or loss != loss:
             raise FloatingPointError(f"Loss is infinity or NaN: {loss}")
 
-    def train_step(self, use_gpu):
-        """Train step to be executed in train loop
-
-        Args:
-            use_gpu: if true, execute training on GPU
-        """
+    def train_step(self):
+        """Train step to be executed in train loop."""
 
         self.last_batch = None
 
@@ -756,7 +761,7 @@ class ClassificationTask(ClassyTask):
 
         # Copy sample to GPU
         target = sample["target"]
-        if use_gpu:
+        if self.use_gpu:
             for key, value in sample.items():
                 sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
 

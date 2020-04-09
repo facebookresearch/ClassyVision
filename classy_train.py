@@ -93,18 +93,13 @@ def main(args, config):
     # Configure hooks to do tensorboard logging, checkpoints and so on
     task.set_hooks(configure_hooks(args, config))
 
-    use_gpu = None
-    if args.device is not None:
-        use_gpu = args.device == "gpu"
-        assert torch.cuda.is_available() or not use_gpu, "CUDA is unavailable"
-
     # LocalTrainer is used for a single node. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.
     trainer_class = {"none": LocalTrainer, "ddp": DistributedTrainer}[
         args.distributed_backend
     ]
 
-    trainer = trainer_class(use_gpu=use_gpu, num_dataloader_workers=args.num_workers)
+    trainer = trainer_class(num_dataloader_workers=args.num_workers)
 
     logging.info(
         f"Starting training on rank {get_rank()} worker. "
