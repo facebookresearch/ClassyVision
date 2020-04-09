@@ -455,7 +455,7 @@ class ResNeXt(ClassyModel):
 
         Updates the state dict in place and returns True if the state dict was updated.
         """
-        pattern = r"blocks\.(?P<block_id_0>[0-9])\.(?P<block_id_1>[0-9])\._module\."
+        pattern = r"blocks\.(?P<block_id_0>[0-9]*)\.(?P<block_id_1>[0-9]*)\._module\."
         repl = r"blocks.\g<block_id_0>.block\g<block_id_0>-\g<block_id_1>."
         trunk_dict = state["model"]["trunk"]
         new_trunk_dict = {}
