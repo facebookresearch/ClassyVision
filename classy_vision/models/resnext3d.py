@@ -181,7 +181,7 @@ class ResNeXt3DBase(ClassyModel):
 
         # clear the heads to set the trunk state
         attached_heads = self.get_heads()
-        self._clear_heads()
+        self.clear_heads()
 
         current_state = self.state_dict()
         for name, weight_src in state["model"]["trunk"].items():

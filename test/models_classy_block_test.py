@@ -9,7 +9,11 @@ import unittest
 import torch
 import torch.nn as nn
 from classy_vision.heads import ClassyHead
-from classy_vision.models import ClassyModel
+from classy_vision.models import (
+    ClassyModel,
+    ClassyModelHeadExecutorWrapper,
+    ClassyModelWrapper,
+)
 
 
 class TestClassyBlock(unittest.TestCase):
@@ -43,15 +47,33 @@ class TestClassyBlock(unittest.TestCase):
             return self.features.dummy_block(out)
 
     def test_head_execution(self):
+        orig_wrapper_cls = self.DummyTestModel.wrapper_cls
+
+        # test head outputs without any extra wrapper logic, which is the case with
+        # no wrappers or the base ClassyModelWrapper class
+        for wrapper_class in [None, ClassyModelWrapper]:
+            self.DummyTestModel.wrapper_cls = wrapper_class
+            model = self.DummyTestModel()
+            head = self.DummyTestHead()
+            model.set_heads({"dummy_block2": {head.unique_id: head}})
+            input = torch.randn(1, 2)
+            output = model(input)
+            head_output = model.execute_heads()
+            self.assertTrue(torch.allclose(head(output), head_output["head_id"]))
+
+        # test that the head output is returned automatically with the
+        # ClassyModelHeadExecutorWrapper
+        self.DummyTestModel.wrapper_cls = ClassyModelHeadExecutorWrapper
         model = self.DummyTestModel()
         head = self.DummyTestHead()
         model.set_heads({"dummy_block2": {head.unique_id: head}})
         input = torch.randn(1, 2)
         output = model(input)
         head_output = model.execute_heads()
-        print("head_output", head_output)
-        print("head output", head(output))
-        self.assertTrue(torch.allclose(head(output), head_output["head_id"]))
+        self.assertTrue(torch.allclose(output, head_output["head_id"]))
+
+        # restore the wrapper class
+        self.DummyTestModel.wrapper_cls = orig_wrapper_cls
 
     def test_duplicated_head_ids(self):
         model = self.DummyTestModel()

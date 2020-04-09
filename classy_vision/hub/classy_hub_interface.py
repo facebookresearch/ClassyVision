@@ -4,14 +4,14 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Callable, Dict, Iterator, List, Optional, Union
+from typing import Any, Callable, Iterator, List, Optional, Union
 
 import torch
 import torch.nn as nn
 from classy_vision.dataset import ClassyDataset
 from classy_vision.dataset.image_path_dataset import ImagePathDataset
 from classy_vision.dataset.transforms.util import build_field_transform_default_imagenet
-from classy_vision.models import ClassyModel, ClassyModelWrapper
+from classy_vision.models import ClassyModel
 from classy_vision.tasks import ClassyTask
 
 
@@ -78,7 +78,7 @@ class ClassyHubInterface:
 
         """
         if not isinstance(model, ClassyModel):
-            model = ClassyModelWrapper(model)
+            model = ClassyModel.from_model(model)
         return cls(model=model)
 
     def create_image_dataset(
