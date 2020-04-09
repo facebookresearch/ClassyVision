@@ -106,7 +106,7 @@ class TestClassyModel(unittest.TestCase):
         for block_name, hs in model.get_heads().items():
             self.assertEqual(hs, heads[block_name])
 
-        model._clear_heads()
+        model.clear_heads()
         self._compare_model_state(model.get_classy_state(), trunk_state)
 
         model.set_heads(heads)
