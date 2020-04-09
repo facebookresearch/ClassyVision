@@ -81,6 +81,9 @@ class SyntheticImageStreamingDataset(ClassyDataset):
             length=length,
         )
 
+    def __len__(self):
+        return len(self.dataset)
+
     def iterator(self, *args, **kwargs):
         return DataloaderLimitWrapper(
             super().iterator(*args, **kwargs),

@@ -40,7 +40,12 @@ class DataloaderLimitWrapper(DataloaderWrapper):
         super().__init__(dataloader)
         # we use self.__dict__ to set the attributes since the __setattr__ method
         # is overridden
-        attributes = {"limit": limit, "wrap_around": wrap_around, "_count": None}
+        attributes = {
+            "limit": limit,
+            "wrap_around": wrap_around,
+            "_count": None,
+            "_repeats": None,
+        }
         self.__dict__.update(attributes)
 
     def __iter__(self) -> Iterator[Any]:
@@ -56,6 +61,8 @@ class DataloaderLimitWrapper(DataloaderWrapper):
             return next(self._iter)
         except StopIteration:
             if self.wrap_around:
+                # start counting repeats
+                self._repeats = 0
                 # create a new iterator to load data from the beginning
                 logging.info(
                     f"Wrapping around after {self._count} calls. Limit: {self.limit}"
@@ -72,6 +79,13 @@ class DataloaderLimitWrapper(DataloaderWrapper):
                 raise RuntimeError(
                     f"StopIteration raised before {self.limit} items were returned"
                 )
+        finally:
+            if self._repeats is not None:
+                self._repeats += 1
 
     def __len__(self) -> int:
         return self.limit
+
+    @property
+    def repeats(self):
+        return self._repeats if self._repeats else 0
