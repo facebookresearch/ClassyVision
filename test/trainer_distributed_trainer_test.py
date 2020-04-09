@@ -44,7 +44,6 @@ class TestDistributedTrainer(unittest.TestCase):
         """Checks we can train a small MLP model."""
 
         num_processes = 2
-        device = "gpu" if torch.cuda.is_available() else "cpu"
 
         for config_key, expected_success in [
             ("invalid_config", False),
@@ -57,7 +56,6 @@ class TestDistributedTrainer(unittest.TestCase):
             --master_port=29500 \
             --use_env \
             {self.path}/../classy_train.py \
-            --device={device} \
             --config={self.config_files[config_key]} \
             --num_workers=4 \
             --log_freq=100 \
@@ -72,7 +70,6 @@ class TestDistributedTrainer(unittest.TestCase):
         """Test that sync batch norm training doesn't hang."""
 
         num_processes = 2
-        device = "gpu"
 
         cmd = f"""{sys.executable} -m torch.distributed.launch \
         --nnodes=1 \
@@ -81,7 +78,6 @@ class TestDistributedTrainer(unittest.TestCase):
         --master_port=29500 \
         --use_env \
         {self.path}/../classy_train.py \
-        --device={device} \
         --config={self.config_files["sync_bn_config"]} \
         --num_workers=4 \
         --log_freq=100 \

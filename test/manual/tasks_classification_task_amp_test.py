@@ -32,5 +32,6 @@ class TestClassificationTaskAMP(unittest.TestCase):
         config = get_fast_test_task_config()
         config["amp_args"] = {"opt_level": "O2"}
         task = build_task(config)
-        trainer = LocalTrainer(use_gpu=True)
+        task.set_use_gpu(True)
+        trainer = LocalTrainer()
         trainer.train(task)
