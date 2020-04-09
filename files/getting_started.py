@@ -111,7 +111,7 @@ torch.cuda.is_available()
 
 # ## 4. Loading checkpoints
 # 
-# Now that we've run `classy_train.py`, let's see how to load the resulting model. At the end of execution, `classy_train.py` will print the checkpoint directory used for that run. Each run will output to a different directory, typically named `output_<timestamp>/checkpoints`.
+# Now that we've run `classy_train.py`, let's see how to load the resulting model. At the end of execution, `classy_train.py` will print the checkpoint directory used for that run. Each run will output to a different directory, typically named `output_<timestamp>/checkpoints`. This can be configured by passing the `--checkpoint_folder` argument to `classy_train.py`
 
 # In[ ]:
 
@@ -134,12 +134,12 @@ model
 # 
 # ## 5. Resuming from checkpoints
 # 
-# Resuming from a checkpoint is as simple as training: `classy_train.py` takes a `--checkpoint_folder` argument, which specifies the checkpoint to resume from:
+# Resuming from a checkpoint is as simple as training: `classy_train.py` takes a `--checkpoint_load_path` argument, which specifies the checkpoint path to resume from:
 
 # In[ ]:
 
 
-! ./classy_train.py --config configs/template_config.json --checkpoint_folder ./output_<timestamp>/checkpoints
+! ./classy_train.py --config configs/template_config.json --checkpoint_load_path ./output_<timestamp>/checkpoints
 
 # ## 6. Interactive development
 # 

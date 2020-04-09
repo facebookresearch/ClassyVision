@@ -324,7 +324,7 @@ configure logging and checkpoints for training:</p>
 
 <span class="n">hooks</span> <span class="o">=</span> <span class="p">[</span><span class="n">LossLrMeterLoggingHook</span><span class="p">(</span><span class="n">log_freq</span><span class="o">=</span><span class="mi">4</span><span class="p">)]</span>
 
-<span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/classy_checkpoint_{time.time()}"</span>
+<span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/classy_checkpoint_</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">)</span>
 <span class="n">hooks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CheckpointHook</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="n">input_args</span><span class="o">=</span><span class="p">{}))</span>
 

@@ -12,17 +12,17 @@
 <div class="body" role="main">
 <div class="section" id="module-classy_vision.optim">
 <span id="optimizers"></span><h1>Optimizers<a class="headerlink" href="#module-classy_vision.optim" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="classy_vision.optim.Adam">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">Adam</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">betas: Tuple[float</em>, <em class="sig-param">float] = (0.9</em>, <em class="sig-param">0.999)</em>, <em class="sig-param">eps: float = 1e-08</em>, <em class="sig-param">weight_decay: float = 0.0</em>, <em class="sig-param">amsgrad: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.Adam" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">Adam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">betas</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.9, 0.999</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">amsgrad</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.Adam" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
 <dt id="classy_vision.optim.Adam.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">betas: Tuple[float</em>, <em class="sig-param">float] = (0.9</em>, <em class="sig-param">0.999)</em>, <em class="sig-param">eps: float = 1e-08</em>, <em class="sig-param">weight_decay: float = 0.0</em>, <em class="sig-param">amsgrad: bool = False</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.Adam.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">betas</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.9, 0.999</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">amsgrad</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.Adam.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyOptimizer.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.Adam.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.optim.adam.Adam<a class="headerlink" href="#classy_vision.optim.Adam.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.adam.Adam<a class="headerlink" href="#classy_vision.optim.Adam.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a Adam from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -34,10 +34,10 @@ See <a class="reference internal" href="#classy_vision.optim.Adam.__init__" titl
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.Adam.init_pytorch_optimizer">
-<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.Adam.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
+<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.Adam.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
 <p>Using the provided model, create param groups for the optimizer with a
 weight decay override for params which should be left unregularized.</p>
 <div class="admonition note">
@@ -53,11 +53,11 @@ device.</p>
 </div>
 </dd></dl>
 </dd></dl>
-<dl class="class">
+<dl class="py class">
 <dt id="classy_vision.optim.ClassyOptimizer">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">ClassyOptimizer</code><a class="headerlink" href="#classy_vision.optim.ClassyOptimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for classy optimizers.</p>
-<p>This wraps a <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance, handles learning
+<p>This wraps a <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance, handles learning
 rate scheduling by using a <a class="reference internal" href="param_scheduler.html#classy_vision.optim.param_scheduler.ClassyParamScheduler" title="classy_vision.optim.param_scheduler.ClassyParamScheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">param_scheduler.ClassyParamScheduler</span></code></a>
 and supports specifying regularized and unregularized param groups.
 Specifying unregularized params is especially useful to avoid applying
@@ -65,22 +65,22 @@ weight decay on batch norm. See
 <a class="reference internal" href="models.html#classy_vision.models.ClassyModel.get_optimizer_params" title="classy_vision.models.ClassyModel.get_optimizer_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">classy_vision.models.ClassyModel.get_optimizer_params()</span></code></a> for more
 information.</p>
 <p>Deriving classes can extend functionality be overriding the appropriate functions.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyOptimizer.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.backward">
-<code class="sig-name descname">backward</code><span class="sig-paren">(</span><em class="sig-param">loss: torch.Tensor</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.backward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">backward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loss</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))">torch.Tensor</a></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.backward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computer gradients with respect to the loss.</p>
 <p>Calls <a class="reference internal" href="#classy_vision.optim.ClassyOptimizer.zero_grad" title="classy_vision.optim.ClassyOptimizer.zero_grad"><code class="xref py py-func docutils literal notranslate"><span class="pre">zero_grad()</span></code></a> and then computes the gradient using
-<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.backward">torch.Tensor.backward</a>. See <a class="reference external" href="https://pytorch.org/docs/stable/autograd.html#module-torch.autograd" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-mod docutils literal notranslate"><span class="pre">torch.autograd</span></code></a> for
+<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor.backward">torch.Tensor.backward</a>. See <a class="reference external" href="https://pytorch.org/docs/stable/autograd.html#module-torch.autograd" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-mod docutils literal notranslate"><span class="pre">torch.autograd</span></code></a> for
 more information.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.optim.classy_optimizer.ClassyOptimizer<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.classy_optimizer.ClassyOptimizer<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a ClassyOptimizer from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -91,9 +91,9 @@ more information.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.get_classy_state">
-<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict[str, Any]<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.get_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the state of the ClassyOptimizer.</p>
 <p>The returned state is used for checkpointing.</p>
 <dl class="field-list simple">
@@ -102,10 +102,10 @@ more information.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.init_pytorch_optimizer">
-<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param">model: classy_vision.models.classy_model.ClassyModel</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
+<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">classy_vision.models.classy_model.ClassyModel</span></em>, <em class="sig-param"><span class="n">loss</span><span class="p">:</span> <span class="n">Union[classy_vision.losses.classy_loss.ClassyLoss, Any, None]</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
 <p>Using the provided model, create param groups for the optimizer with a
 weight decay override for params which should be left unregularized.</p>
 <div class="admonition note">
@@ -120,9 +120,9 @@ in this call. The simplest way to do this after a call to</p>
 device.</p>
 </div>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.set_classy_state">
-<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state: Dict[str, Any]</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.set_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the state of the ClassyOptimizer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -132,9 +132,9 @@ device.</p>
 </dl>
 <p>This is used to load the state of the optimizer from a checkpoint.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.set_param_schedulers">
-<code class="sig-name descname">set_param_schedulers</code><span class="sig-paren">(</span><em class="sig-param">param_schedulers: Dict[str, classy_vision.optim.param_scheduler.classy_vision_param_scheduler.ClassyParamScheduler]</em><span class="sig-paren">)</span> → classy_vision.optim.classy_optimizer.ClassyOptimizer<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.set_param_schedulers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_param_schedulers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param_schedulers</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>classy_vision.optim.param_scheduler.classy_vision_param_scheduler.ClassyParamScheduler<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.classy_optimizer.ClassyOptimizer<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.set_param_schedulers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the param schedulers for the Classy Optimizer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -146,9 +146,9 @@ the parameter scheduler to use for every parameter.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param">closure: Optional[Callable] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">closure</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a single optimization step.</p>
 <p>See <a href="#id3"><span class="problematic" id="id4">`</span></a>torch.optim.Optimizer.step &lt;<a class="reference external" href="https://pytorch.org/docs/stable/">https://pytorch.org/docs/stable/</a>
 optim.html#torch.optim.Optimizer.step&gt;`_for more information.</p>
@@ -158,9 +158,9 @@ optim.html#torch.optim.Optimizer.step&gt;`_for more information.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.update_schedule_on_epoch">
-<code class="sig-name descname">update_schedule_on_epoch</code><span class="sig-paren">(</span><em class="sig-param">where: float</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.update_schedule_on_epoch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update_schedule_on_epoch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">where</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.update_schedule_on_epoch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the param schedule at the end of an epoch.</p>
 <p>This should be called by the task at the end of every epoch to update the
 schedule of epoch based param schedulers (See
@@ -172,9 +172,9 @@ schedule of epoch based param schedulers (See
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.update_schedule_on_step">
-<code class="sig-name descname">update_schedule_on_step</code><span class="sig-paren">(</span><em class="sig-param">where: float</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.update_schedule_on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update_schedule_on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">where</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.update_schedule_on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the param schedule at the end of a train step.</p>
 <p>This should be called by the task at the end of every train step (
 <code class="xref py py-func docutils literal notranslate"><span class="pre">tasks.ClassyTask.train_step()</span></code>) to update the schedule of step
@@ -187,24 +187,24 @@ for more information).</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.ClassyOptimizer.zero_grad">
 <code class="sig-name descname">zero_grad</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.ClassyOptimizer.zero_grad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the gradients of all optimized parameters.</p>
 <p>See <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer.zero_grad">torch.optim.Optimizer.zero_grad</a> for more information.</p>
 </dd></dl>
 </dd></dl>
-<dl class="class">
+<dl class="py class">
 <dt id="classy_vision.optim.RMSProp">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">RMSProp</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">momentum: float = 0</em>, <em class="sig-param">weight_decay: float = 0</em>, <em class="sig-param">alpha: float = 0.99</em>, <em class="sig-param">eps: float = 1e-08</em>, <em class="sig-param">centered: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSProp" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">RMSProp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.99</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSProp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
 <dt id="classy_vision.optim.RMSProp.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">momentum: float = 0</em>, <em class="sig-param">weight_decay: float = 0</em>, <em class="sig-param">alpha: float = 0.99</em>, <em class="sig-param">eps: float = 1e-08</em>, <em class="sig-param">centered: bool = False</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.RMSProp.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.99</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.RMSProp.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyOptimizer.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.RMSProp.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.optim.rmsprop.RMSProp<a class="headerlink" href="#classy_vision.optim.RMSProp.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.rmsprop.RMSProp<a class="headerlink" href="#classy_vision.optim.RMSProp.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a RMSProp from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -216,10 +216,10 @@ See <a class="reference internal" href="#classy_vision.optim.RMSProp.__init__" t
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.RMSProp.init_pytorch_optimizer">
-<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSProp.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
+<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSProp.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
 <p>Using the provided model, create param groups for the optimizer with a
 weight decay override for params which should be left unregularized.</p>
 <div class="admonition note">
@@ -235,17 +235,58 @@ device.</p>
 </div>
 </dd></dl>
 </dd></dl>
-<dl class="class">
-<dt id="classy_vision.optim.SGD">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">SGD</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">momentum: float = 0.0</em>, <em class="sig-param">weight_decay: float = 0.0</em>, <em class="sig-param">nesterov: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="classy_vision.optim.SGD.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">lr: float = 0.1</em>, <em class="sig-param">momentum: float = 0.0</em>, <em class="sig-param">weight_decay: float = 0.0</em>, <em class="sig-param">nesterov: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt id="classy_vision.optim.RMSPropTF">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">RMSPropTF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.99</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSPropTF" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="classy_vision.optim.RMSPropTF.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">alpha</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.99</span></em>, <em class="sig-param"><span class="n">eps</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.optim.RMSPropTF.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyOptimizer.</p>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
+<dt id="classy_vision.optim.RMSPropTF.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.rmsprop_tf.RMSPropTF<a class="headerlink" href="#classy_vision.optim.RMSPropTF.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a RMSPropTF from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for a RMSPropTF.
+See <a class="reference internal" href="#classy_vision.optim.RMSPropTF.__init__" title="classy_vision.optim.RMSPropTF.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code></a> for parameters expected in the config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A RMSPropTF instance.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.optim.RMSPropTF.init_pytorch_optimizer">
+<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.RMSPropTF.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
+<p>Using the provided model, create param groups for the optimizer with a
+weight decay override for params which should be left unregularized.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Deriving classes should initialize the underlying Pytorch optimizer
+in this call. The simplest way to do this after a call to</p>
+<p><code class="docutils literal notranslate"><span class="pre">super().init_pytorch_optimizer()</span></code></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This should called only after the model has been moved to the correct
+device.</p>
+</div>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.optim.SGD">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">SGD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">larc_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">nesterov</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_larc</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="classy_vision.optim.SGD.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">larc_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">weight_decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">nesterov</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_larc</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor for ClassyOptimizer.</p>
+</dd></dl>
+<dl class="py method">
 <dt id="classy_vision.optim.SGD.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.optim.sgd.SGD<a class="headerlink" href="#classy_vision.optim.SGD.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.optim.sgd.SGD<a class="headerlink" href="#classy_vision.optim.SGD.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a SGD from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -257,10 +298,10 @@ See <a class="reference internal" href="#classy_vision.optim.SGD.__init__" title
 </dd>
 </dl>
 </dd></dl>
-<dl class="method">
+<dl class="py method">
 <dt id="classy_vision.optim.SGD.init_pytorch_optimizer">
-<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+ac9da29 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
+<code class="sig-name descname">init_pytorch_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.SGD.init_pytorch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the underlying <a class="reference external" href="https://pytorch.org/docs/stable/optim.html#torch.optim.Optimizer" title="(in PyTorch vmaster (1.4.0a0+919fcbb ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code></a> instance.</p>
 <p>Using the provided model, create param groups for the optimizer with a
 weight decay override for params which should be left unregularized.</p>
 <div class="admonition note">
@@ -276,9 +317,9 @@ device.</p>
 </div>
 </dd></dl>
 </dd></dl>
-<dl class="function">
+<dl class="py function">
 <dt id="classy_vision.optim.build_optimizer">
-<code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">build_optimizer</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.build_optimizer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">build_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.build_optimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a ClassyOptimizer from a config.</p>
 <p>This assumes a ‘name’ key in the config which is used to determine what
 optimizer class to instantiate. For instance, a config <cite>{“name”: “my_optimizer”,
@@ -290,9 +331,9 @@ dictionary of param scheduler configs, keyed by the parameter they control. Adds
 “num_epochs” to each of the scheduler configs and then calls
 <code class="xref py py-func docutils literal notranslate"><span class="pre">build_param_scheduler()</span></code> on each config in the dictionary.</p>
 </dd></dl>
-<dl class="function">
+<dl class="py function">
 <dt id="classy_vision.optim.register_optimizer">
-<code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">register_optimizer</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.register_optimizer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.optim.</code><code class="sig-name descname">register_optimizer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.register_optimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers a ClassyOptimizer subclass.</p>
 <p>This decorator allows Classy Vision to instantiate a subclass of
 ClassyOptimizer from a configuration file, even if the class itself is not
@@ -345,7 +386,7 @@ ClassyOptimizer subclass, like this:</p>
 </form>
 </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 </div>
 </div>
 <div class="clearer"></div>
