@@ -6,7 +6,7 @@
 
 import copy
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import torch
 import torch.nn as nn
@@ -39,11 +39,13 @@ class ClassyModel(nn.Module):
 
     """
 
+    _attachable_block_names: List[str]
+
     def __init__(self):
         """Constructor for ClassyModel."""
         super().__init__()
-
         self._attachable_blocks = {}
+        self._attachable_block_names = []
         self._heads = nn.ModuleDict()
         self._head_outputs = {}
 
@@ -72,6 +74,10 @@ class ClassyModel(nn.Module):
 
         The returned state is used for checkpointing.
 
+        NOTE: For advanced users, the structure of the returned dict is -
+            `{"model": {"trunk": trunk_state, "heads": heads_state}}`.
+            The trunk state is the state of the model when no heads are attached.
+
         Args:
             deep_copy: If True, creates a deep copy of the state Dict. Otherwise, the
                 returned Dict's state will be tied to the object's.
@@ -79,13 +85,12 @@ class ClassyModel(nn.Module):
         Returns:
             A state dictionary containing the state of the model.
         """
-        # If the model doesn't have head for fine-tuning, all of model's state
-        # live in the trunk
         attached_heads = self.get_heads()
-        # clear heads to get trunk only states. There shouldn't be any component
-        # states depend on heads
+        # clear heads to get the state of the model without any heads, which we refer to
+        # as the trunk state. If the model doesn't have heads attached, all of the
+        # model's state lives in the trunk.
         self._clear_heads()
-        trunk_state_dict = super().state_dict()
+        trunk_state_dict = self.state_dict()
         self.set_heads(attached_heads)
 
         head_state_dict = {}
@@ -124,11 +129,19 @@ class ClassyModel(nn.Module):
 
         This is used to load the state of the model from a checkpoint.
         """
+        # load the state for heads
         self.load_head_states(state)
 
-        current_state = self.state_dict()
-        current_state.update(state["model"]["trunk"])
-        super().load_state_dict(current_state)
+        # clear the heads to set the trunk's state. This is done because when heads are
+        # attached to modules, we wrap them by ClassyBlocks, thereby changing the
+        # structure of the model and its state dict. So, the trunk state is always
+        # fetched / set when there are no blocks attached.
+        attached_heads = self.get_heads()
+        self._clear_heads()
+        self.load_state_dict(state["model"]["trunk"])
+
+        # set the heads back again
+        self.set_heads(attached_heads)
 
     def forward(self, x):
         """
@@ -145,7 +158,7 @@ class ClassyModel(nn.Module):
         """
         return self.forward(x)
 
-    def build_attachable_block(self, name, module):
+    def _build_attachable_block(self, name, module):
         """
         Add a wrapper to the module to allow to attach heads to the module.
         """
@@ -153,6 +166,7 @@ class ClassyModel(nn.Module):
             raise ValueError("Found duplicated block name {}".format(name))
         block = ClassyBlock(name, module)
         self._attachable_blocks[name] = block
+        self._attachable_block_names.append(name)
         return block
 
     @property
@@ -160,12 +174,35 @@ class ClassyModel(nn.Module):
         """
         Return names of all attachable blocks.
         """
-        return self._attachable_blocks.keys()
+        return self._attachable_block_names
 
     def _clear_heads(self):
         # clear all existing heads
         self._heads.clear()
         self._head_outputs.clear()
+        self._strip_classy_blocks(self)
+        self._attachable_blocks = {}
+        self._attachable_block_names = []
+
+    def _strip_classy_blocks(self, module):
+        for name, child_module in module.named_children():
+            if isinstance(child_module, ClassyBlock):
+                module.add_module(name, child_module.wrapped_module())
+            self._strip_classy_blocks(child_module)
+
+    def _make_module_attachable(self, module, module_name):
+        found = False
+        for name, child_module in module.named_children():
+            if name == module_name:
+                module.add_module(
+                    name, self._build_attachable_block(name, child_module)
+                )
+                found = True
+                # do not exit - we will check all possible modules and raise an
+                # exception if there are duplicates
+            found_in_child = self._make_module_attachable(child_module, module_name)
+            found = found or found_in_child
+        return found
 
     def set_heads(self, heads: Dict[str, Dict[str, ClassyHead]]):
         """Attach all the heads to corresponding blocks.
@@ -190,11 +227,8 @@ class ClassyModel(nn.Module):
 
         head_ids = set()
         for block_name, block_heads in heads.items():
-            if block_name not in self._attachable_blocks:
-                raise ValueError(
-                    "block {} does not exist or can not be attached".format(block_name)
-                )
-            self._attachable_blocks[block_name].set_cache_output()
+            if not self._make_module_attachable(self, block_name):
+                raise KeyError(f"{block_name} not found in the model")
             for head in block_heads.values():
                 if head.unique_id in head_ids:
                     raise ValueError("head id {} already exists".format(head.unique_id))

@@ -19,16 +19,11 @@ class ClassyBlock(nn.Module):
         self.name = name
         self.output = torch.zeros(0)
         self._module = module
-        self._should_cache_output = False
 
-    def set_cache_output(self, should_cache_output: bool = True):
-        """
-        Whether to cache the output of wrapped module for head execution.
-        """
-        self._should_cache_output = should_cache_output
+    def wrapped_module(self):
+        return self._module
 
     def forward(self, input):
         output = self._module(input)
-        if self._should_cache_output:
-            self.output = output
+        self.output = output
         return output
