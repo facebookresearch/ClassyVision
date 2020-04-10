@@ -7,6 +7,7 @@
 import copy
 import enum
 import logging
+import math
 import time
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
@@ -122,6 +123,7 @@ class ClassificationTask(ClassyTask):
         self.meters = []
         self.num_epochs = 1
         self.test_phase_period = 1
+        self.train_phases_per_epoch = 0
         self.test_only = False
         self.base_model = None
         self.optimizer = None
@@ -195,6 +197,8 @@ class ClassificationTask(ClassyTask):
             "test",
         ], "phase_type must be in ['train', 'test']"
         self.datasets[phase_type] = dataset
+        if phase_type == "train":
+            self.train_phases_per_epoch = getattr(dataset, "phases_per_epoch", 1)
         return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
@@ -334,7 +338,10 @@ class ClassificationTask(ClassyTask):
             A ClassificationTask instance.
         """
         optimizer_config = config["optimizer"]
-        optimizer_config["num_epochs"] = config["num_epochs"]
+
+        # TODO Make distinction between epochs and phases in optimizer clear
+        train_phases_per_epoch = config["dataset"]["train"].get("phases_per_epoch", 1)
+        optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
 
         datasets = {}
         phase_types = ["train", "test"]
@@ -450,7 +457,10 @@ class ClassificationTask(ClassyTask):
         phases + x test phases, interleaved.
         """
         if not self.test_only:
-            phases = [{"train": True} for _ in range(self.num_epochs)]
+            phases = [
+                {"train": True}
+                for _ in range(math.ceil(self.train_phases_per_epoch * self.num_epochs))
+            ]
 
             final_phases = []
             for i, phase in enumerate(phases):
