@@ -145,6 +145,7 @@ class TestClassificationTask(unittest.TestCase):
         train_config["num_epochs"] = 10
         test_config = get_fast_test_task_config()
         test_config["test_only"] = True
+        del test_config["dataset"]["train"]
         train_task = build_task(train_config).set_hooks([LossLrMeterLoggingHook()])
         test_only_task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
 

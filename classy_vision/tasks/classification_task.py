@@ -338,17 +338,19 @@ class ClassificationTask(ClassyTask):
             A ClassificationTask instance.
         """
         optimizer_config = config["optimizer"]
+        test_only = config.get("test_only", False)
 
         # TODO Make distinction between epochs and phases in optimizer clear
-        train_phases_per_epoch = config["dataset"]["train"].get("phases_per_epoch", 1)
+        train_phases_per_epoch = (
+            1 if test_only else config["dataset"]["train"].get("phases_per_epoch", 1)
+        )
         optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
 
         datasets = {}
-        phase_types = ["train", "test"]
+        phase_types = ["train", "test"] if not test_only else ["test"]
         for phase_type in phase_types:
             datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
-        test_only = config.get("test_only", False)
         amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
