@@ -14,6 +14,7 @@ from typing import Any, Dict, List, NamedTuple, Optional, Union
 import torch
 import torch.nn as nn
 from classy_vision.dataset import ClassyDataset, build_dataset
+from classy_vision.dataset.transforms.mixup import MixupTransform
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
     barrier,
@@ -141,6 +142,7 @@ class ClassificationTask(ClassyTask):
             BroadcastBuffersMode.DISABLED
         )
         self.amp_args = None
+        self.mixup_transform = None
         self.perf_log = []
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
@@ -326,6 +328,19 @@ class ClassificationTask(ClassyTask):
             logging.info(f"AMP enabled with args {amp_args}")
         return self
 
+    def set_mixup_transform(self, mixup_transform: Optional["MixupTransform"]):
+        """Disable / enable mixup transform for data augmentation
+
+        Args::
+            mixup_transform: a callable object which performs mixup data augmentation
+        """
+        self.mixup_transform = mixup_transform
+        if mixup_transform is None:
+            logging.info(f"mixup disabled")
+        else:
+            logging.info(f"mixup enabled")
+        return self
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassificationTask":
         """Instantiates a ClassificationTask from a configuration.
@@ -353,6 +368,13 @@ class ClassificationTask(ClassyTask):
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
 
+        mixup_transform = None
+        if config.get("mixup") is not None:
+            assert "alpha" in config["mixup"], "key alpha is missing in mixup dict"
+            mixup_transform = MixupTransform(
+                config["mixup"]["alpha"], config["mixup"].get("num_classes")
+            )
+
         # hooks config is optional
         hooks_config = config.get("hooks")
         hooks = []
@@ -371,6 +393,7 @@ class ClassificationTask(ClassyTask):
             .set_optimizer(optimizer)
             .set_meters(meters)
             .set_amp_args(amp_args)
+            .set_mixup_transform(mixup_transform)
             .set_distributed_options(
                 broadcast_buffers_mode=BroadcastBuffersMode[
                     config.get("broadcast_buffers", "disabled").upper()
@@ -774,6 +797,9 @@ class ClassificationTask(ClassyTask):
         if self.use_gpu:
             for key, value in sample.items():
                 sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
+
+        if self.mixup_transform is not None:
+            sample = self.mixup_transform(sample)
 
         with torch.enable_grad():
             # Forward pass
