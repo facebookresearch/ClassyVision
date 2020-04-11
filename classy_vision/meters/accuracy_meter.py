@@ -145,7 +145,6 @@ class AccuracyMeter(ClassyMeter):
         for i, k in enumerate(self._topk):
             self._curr_correct_predictions_k[i] += (
                 torch.gather(target, dim=1, index=pred[:, :k])
-                .long()
                 .max(dim=1)
                 .values.sum()
                 .item()

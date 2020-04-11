@@ -736,12 +736,11 @@ def maybe_convert_to_one_hot(target, model_output):
     ):
         target = convert_to_one_hot(target.view(-1, 1), model_output.shape[1])
 
-    assert (target.shape == model_output.shape) and (
-        torch.min(target.eq(0) + target.eq(1)) == 1
-    ), (
-        "Target must be one-hot/multi-label encoded and of the "
-        "same shape as model_output."
-    )
+    # target are not necessarily hard 0/1 encoding. It can be soft
+    # (i.e. fractional) in some cases, such as mixup label
+    assert (
+        target.shape == model_output.shape
+    ), "Target must of the same shape as model_output."
 
     return target
 

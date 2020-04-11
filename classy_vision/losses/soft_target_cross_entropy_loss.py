@@ -10,6 +10,7 @@ from typing import Any, Dict
 import numpy as np
 import torch
 import torch.nn.functional as F
+from classy_vision.generic.util import convert_to_one_hot
 from classy_vision.losses import ClassyLoss, register_loss
 
 
@@ -58,13 +59,19 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
     def forward(self, output, target):
         """for N examples and C classes
         - output: N x C these are raw outputs (without softmax/sigmoid)
-        - target: N x C corresponding targets
+        - target: N x C or N corresponding targets
 
         Target elements set to ignore_index contribute 0 loss.
 
         Samples where all entries are ignore_index do not contribute to the loss
         reduction.
         """
+        # check if targets are inputted as class integers
+        if target.ndim == 1:
+            assert (
+                output.shape[0] == target.shape[0]
+            ), "SoftTargetCrossEntropyLoss requires output and target to have same batch size"
+            target = convert_to_one_hot(target.view(-1, 1), output.shape[1])
         assert (
             output.shape == target.shape
         ), "SoftTargetCrossEntropyLoss requires output and target to be same"
