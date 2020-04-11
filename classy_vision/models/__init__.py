@@ -92,6 +92,7 @@ from .classy_model import (  # isort:skip
     ClassyModelHeadExecutorWrapper,  # isort:skip
 )  # isort:skip
 from .densenet import DenseNet  # isort:skip
+from .efficientnet import EfficientNet  # isort:skip
 from .mlp import MLP  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
@@ -108,6 +109,7 @@ __all__ = [
     "ClassyModelHeadExecutorWrapper",
     "ClassyModelWrapper",
     "DenseNet",
+    "EfficientNet",
     "MLP",
     "ResNet",
     "ResNeXt",
