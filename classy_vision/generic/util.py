@@ -4,7 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import argparse
 import collections
 import contextlib
 import json
@@ -13,6 +12,7 @@ import math
 import os
 import sys
 import traceback
+from functools import partial
 from typing import Dict, Optional
 
 import numpy as np
@@ -432,7 +432,7 @@ def compute_pr_curves(class_hist, total_hist):
 
 
 def get_checkpoint_dict(task, input_args, deep_copy=False):
-    assert isinstance(
+    assert input_args is None or isinstance(
         input_args, dict
     ), f"Unexpected input_args of type: {type(input_args)}"
     return {
@@ -736,12 +736,11 @@ def maybe_convert_to_one_hot(target, model_output):
     ):
         target = convert_to_one_hot(target.view(-1, 1), model_output.shape[1])
 
-    assert (target.shape == model_output.shape) and (
-        torch.min(target.eq(0) + target.eq(1)) == 1
-    ), (
-        "Target must be one-hot/multi-label encoded and of the "
-        "same shape as model_output."
-    )
+    # target are not necessarily hard 0/1 encoding. It can be soft
+    # (i.e. fractional) in some cases, such as mixup label
+    assert (
+        target.shape == model_output.shape
+    ), "Target must of the same shape as model_output."
 
     return target
 
@@ -756,7 +755,16 @@ def bind_method_to_class(method, cls):
 def get_model_dummy_input(
     model, input_shape, input_key, batchsize=1, non_blocking=False
 ):
-    if isinstance(input_key, list):
+
+    # input_shape with type dict of dict
+    # e.g. {"key_1": {"key_1_1": [2, 3], "key_1_2": [4, 5, 6], "key_1_3": []}
+    if isinstance(input_shape, dict):
+        input = {}
+        for key, value in input_shape.items():
+            input[key] = get_model_dummy_input(
+                model, value, input_key, batchsize, non_blocking
+            )
+    elif isinstance(input_key, list):
         # av mode, with multiple input keys
         input = {}
         for i, key in enumerate(input_key):
@@ -774,3 +782,32 @@ def get_model_dummy_input(
         if input_key:
             input = {input_key: input}
     return input
+
+
+@contextlib.contextmanager
+def _train_mode(model: nn.Module, train_mode: bool):
+    """Context manager which sets the train mode of a model. After returning, it
+    restores the state of every sub-module individually."""
+    train_modes = {}
+    for name, module in model.named_modules():
+        train_modes[name] = module.training
+    try:
+        model.train(train_mode)
+        yield
+    finally:
+        for name, module in model.named_modules():
+            module.training = train_modes[name]
+
+
+train_model = partial(_train_mode, train_mode=True)
+train_model.__doc__ = """Context manager which puts the model in train mode.
+
+    After returning, it restores the state of every sub-module individually.
+    """
+
+
+eval_model = partial(_train_mode, train_mode=False)
+eval_model.__doc__ = """Context manager which puts the model in eval mode.
+
+    After returning, it restores the state of every sub-module individually.
+    """

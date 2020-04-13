@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import shutil
 import tempfile
@@ -11,6 +12,7 @@ import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import TensorboardPlotHook
 from classy_vision.optim.param_scheduler import UpdateInterval
@@ -19,12 +21,28 @@ from classy_vision.trainer import LocalTrainer
 from tensorboardX import SummaryWriter
 
 
-class TestTensorboardPlotHook(unittest.TestCase):
+class TestTensorboardPlotHook(HookTestBase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"summary_writer": {}, "log_period": 5}
+        invalid_config = copy.deepcopy(config)
+        invalid_config["log_period"] = "this is not an int"
+
+        self.constructor_test_helper(
+            config=config,
+            hook_type=TensorboardPlotHook,
+            hook_registry_name="tensorboard_plot",
+            hook_kwargs={"tb_writer": SummaryWriter(), "log_period": 5},
+            invalid_configs=[invalid_config],
+        )
 
     @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
     def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
@@ -93,24 +111,20 @@ class TestTensorboardPlotHook(unittest.TestCase):
             if master:
                 # add_scalar() should have been called with the right scalars
                 if train:
-                    loss_key = f"{phase_type}_loss"
-                    learning_rate_key = f"{phase_type}_learning_rate_updates"
-                    summary_writer.add_scalar.assert_any_call(
-                        loss_key, mock.ANY, global_step=mock.ANY, walltime=mock.ANY
-                    )
+                    learning_rate_key = f"Learning Rate/{phase_type}"
                     summary_writer.add_scalar.assert_any_call(
                         learning_rate_key,
                         mock.ANY,
                         global_step=mock.ANY,
                         walltime=mock.ANY,
                     )
-                avg_loss_key = f"avg_{phase_type}_loss"
+                avg_loss_key = f"Losses/{phase_type}"
                 summary_writer.add_scalar.assert_any_call(
                     avg_loss_key, mock.ANY, global_step=mock.ANY
                 )
                 for meter in task.meters:
                     for name in meter.value:
-                        meter_key = f"{phase_type}_{meter.name}_{name}"
+                        meter_key = f"Meters/{phase_type}/{meter.name}/{name}"
                         summary_writer.add_scalar.assert_any_call(
                             meter_key, mock.ANY, global_step=mock.ANY
                         )
@@ -135,25 +149,31 @@ class TestTensorboardPlotHook(unittest.TestCase):
             def add_scalar(self, key, value, global_step=None, walltime=None) -> None:
                 self.scalar_logs[key] = self.scalar_logs.get(key, []) + [value]
 
+            def add_histogram(
+                self, key, value, global_step=None, walltime=None
+            ) -> None:
+                return
+
             def flush(self):
                 return
 
         config = get_test_mlp_task_config()
         config["num_epochs"] = 3
-        config["dataset"]["train"]["batchsize_per_replica"] = 5
+        config["dataset"]["train"]["batchsize_per_replica"] = 10
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
 
         writer = DummySummaryWriter()
         hook = TensorboardPlotHook(writer)
+        hook.log_period = 1
         task.set_hooks([hook])
         task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
 
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # We have 10 samples, batch size is 5. Each epoch is done in two steps.
+        # We have 20 samples, batch size is 10. Each epoch is done in two steps.
         self.assertEqual(
-            writer.scalar_logs["train_learning_rate_updates"],
+            writer.scalar_logs["Learning Rate/train"],
             [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6],
         )

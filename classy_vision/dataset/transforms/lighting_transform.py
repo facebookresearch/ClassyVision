@@ -40,9 +40,9 @@ class LightingTransform(ClassyTransform):
         eigvec=_IMAGENET_EIGEN_VEC,
     ):
         self.alphastd = alphastd
+        self.eigval = torch.tensor(eigval)
         # Divide by 255 as the Lighting operation is expected to be applied
         # on `img` pixels ranging between [0.0, 1.0]
-        self.eigval = torch.tensor(eigval) / 255.0
         self.eigvec = torch.tensor(eigvec) / 255.0
 
     def __call__(self, img):

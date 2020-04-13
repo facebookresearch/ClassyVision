@@ -7,11 +7,14 @@
 import copy
 import enum
 import logging
+import math
 import time
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
+import torch.nn as nn
 from classy_vision.dataset import ClassyDataset, build_dataset
+from classy_vision.dataset.transforms.mixup import MixupTransform
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
     barrier,
@@ -23,7 +26,7 @@ from classy_vision.generic.util import (
     recursive_copy_to_gpu,
     update_classy_state,
 )
-from classy_vision.hooks import ClassyHookFunctions
+from classy_vision.hooks import build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import build_meters
 from classy_vision.models import ClassyModel, build_model
@@ -52,6 +55,12 @@ class BroadcastBuffersMode(enum.Enum):
     # synchronizing buffers is for buffers to be consistent during eval, use
     # this instead of FORWARD_PASS to reduce training overhead.
     BEFORE_EVAL = enum.auto()
+
+
+class BatchNormSyncMode(enum.Enum):
+    DISABLED = enum.auto()  # No Synchronized Batch Normalization
+    PYTORCH = enum.auto()  # Use torch.nn.SyncBatchNorm
+    APEX = enum.auto()  # Use apex.parallel.SyncBatchNorm, needs apex to be installed
 
 
 class LastBatchInfo(NamedTuple):
@@ -115,6 +124,7 @@ class ClassificationTask(ClassyTask):
         self.meters = []
         self.num_epochs = 1
         self.test_phase_period = 1
+        self.train_phases_per_epoch = 0
         self.test_only = False
         self.base_model = None
         self.optimizer = None
@@ -131,9 +141,22 @@ class ClassificationTask(ClassyTask):
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
             BroadcastBuffersMode.DISABLED
         )
-        self.amp_opt_level = None
+        self.amp_args = None
+        self.mixup_transform = None
         self.perf_log = []
         self.last_batch = None
+        self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
+        self.find_unused_parameters = True
+        self.use_gpu = torch.cuda.is_available()
+
+    def set_use_gpu(self, use_gpu: bool):
+        self.use_gpu = use_gpu
+
+        assert (
+            not self.use_gpu or torch.cuda.is_available()
+        ), "CUDA required to train on GPUs"
+
+        return self
 
     def set_checkpoint(self, checkpoint):
         """Sets checkpoint on task.
@@ -176,6 +199,8 @@ class ClassificationTask(ClassyTask):
             "test",
         ], "phase_type must be in ['train', 'test']"
         self.datasets[phase_type] = dataset
+        if phase_type == "train":
+            self.train_phases_per_epoch = getattr(dataset, "phases_per_epoch", 1)
         return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
@@ -205,14 +230,40 @@ class ClassificationTask(ClassyTask):
         self.meters = meters
         return self
 
-    def set_distributed_options(self, broadcast_buffers_mode: BroadcastBuffersMode):
+    def set_distributed_options(
+        self,
+        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.DISABLED,
+        batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
+        find_unused_parameters: bool = True,
+    ):
         """Set distributed options.
 
         Args:
             broadcast_buffers_mode: Broadcast buffers mode. See
                 :class:`BroadcastBuffersMode` for options.
+            batch_norm_sync_mode: Batch normalization synchronization mode. See
+                :class:`BatchNormSyncMode` for options.
+            find_unused_parameters: See
+                :class:`torch.nn.parallel.DistributedDataParallel` for information.
+
+        Raises:
+            RuntimeError: If batch_norm_sync_mode is `BatchNormSyncMode.APEX` and apex
+                is not installed.
         """
         self.broadcast_buffers_mode = broadcast_buffers_mode
+
+        if batch_norm_sync_mode == BatchNormSyncMode.DISABLED:
+            logging.info("Synchronized Batch Normalization is disabled")
+        else:
+            if batch_norm_sync_mode == BatchNormSyncMode.APEX and not apex_available:
+                raise RuntimeError("apex is not installed")
+            logging.info(
+                f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
+            )
+        self.batch_norm_sync_mode = batch_norm_sync_mode
+
+        self.find_unused_parameters = find_unused_parameters
+
         return self
 
     def set_hooks(self, hooks: List["ClassyHook"]):
@@ -250,36 +301,44 @@ class ClassificationTask(ClassyTask):
         self.test_only = test_only
         return self
 
-    def set_amp_opt_level(self, opt_level: Optional[str]):
-        """Disable / enable apex.amp and set the automatic mixed precision level.
+    def set_amp_args(self, amp_args: Optional[Dict[str, Any]]):
+        """Disable / enable apex.amp and set the automatic mixed precision parameters.
 
         apex.amp can be utilized for mixed / half precision training.
 
         Args:
-            opt_level: Opt level used to initialize apex.amp. Set to None to disable
-                amp. Supported modes are -
-                    O0: FP32 training
-                    O1: Mixed Precision
-                    O2: "Almost FP16" Mixed Precision
-                    O3: FP16 training
-                See https://nvidia.github.io/apex/amp.html#opt-levels for more info.
+            amp_args: Dictionary containing arguments to be passed to
+            amp.initialize. Set to None to disable amp.  To enable mixed
+            precision training, pass amp_args={"opt_level": "O1"} here.
+            See https://nvidia.github.io/apex/amp.html for more info.
+
         Raises:
             RuntimeError: If opt_level is not None and apex is not installed.
 
         Warning: apex needs to be installed to utilize this feature.
         """
-        if opt_level not in [None, "O0", "O1", "O2", "O3"]:
-            raise ValueError(f"Unsupported opt_level: {opt_level}")
+        self.amp_args = amp_args
 
-        self.amp_opt_level = opt_level
-
-        if opt_level is None:
+        if amp_args is None:
             logging.info(f"AMP disabled")
         else:
             if not apex_available:
                 raise RuntimeError("apex is not installed, cannot enable amp")
 
-            logging.info(f"AMP enabled with opt_level {opt_level}")
+            logging.info(f"AMP enabled with args {amp_args}")
+        return self
+
+    def set_mixup_transform(self, mixup_transform: Optional["MixupTransform"]):
+        """Disable / enable mixup transform for data augmentation
+
+        Args::
+            mixup_transform: a callable object which performs mixup data augmentation
+        """
+        self.mixup_transform = mixup_transform
+        if mixup_transform is None:
+            logging.info(f"mixup disabled")
+        else:
+            logging.info(f"mixup enabled")
         return self
 
     @classmethod
@@ -294,7 +353,10 @@ class ClassificationTask(ClassyTask):
             A ClassificationTask instance.
         """
         optimizer_config = config["optimizer"]
-        optimizer_config["num_epochs"] = config["num_epochs"]
+
+        # TODO Make distinction between epochs and phases in optimizer clear
+        train_phases_per_epoch = config["dataset"]["train"].get("phases_per_epoch", 1)
+        optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
 
         datasets = {}
         phase_types = ["train", "test"]
@@ -302,12 +364,23 @@ class ClassificationTask(ClassyTask):
             datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         test_only = config.get("test_only", False)
-        amp_opt_level = config.get("amp_opt_level")
+        amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
-        # put model in eval mode in case any hooks modify model states, it'll
-        # be reset to train mode before training
-        model.eval()
+
+        mixup_transform = None
+        if config.get("mixup") is not None:
+            assert "alpha" in config["mixup"], "key alpha is missing in mixup dict"
+            mixup_transform = MixupTransform(
+                config["mixup"]["alpha"], config["mixup"].get("num_classes")
+            )
+
+        # hooks config is optional
+        hooks_config = config.get("hooks")
+        hooks = []
+        if hooks_config is not None:
+            hooks = build_hooks(hooks_config)
+
         optimizer = build_optimizer(optimizer_config)
 
         task = (
@@ -319,11 +392,24 @@ class ClassificationTask(ClassyTask):
             .set_model(model)
             .set_optimizer(optimizer)
             .set_meters(meters)
-            .set_amp_opt_level(amp_opt_level)
+            .set_amp_args(amp_args)
+            .set_mixup_transform(mixup_transform)
             .set_distributed_options(
-                BroadcastBuffersMode[config.get("broadcast_buffers", "DISABLED")]
+                broadcast_buffers_mode=BroadcastBuffersMode[
+                    config.get("broadcast_buffers", "disabled").upper()
+                ],
+                batch_norm_sync_mode=BatchNormSyncMode[
+                    config.get("batch_norm_sync_mode", "disabled").upper()
+                ],
+                find_unused_parameters=config.get("find_unused_parameters", True),
             )
+            .set_hooks(hooks)
         )
+
+        use_gpu = config.get("use_gpu")
+        if use_gpu is not None:
+            task.set_use_gpu(use_gpu)
+
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
 
@@ -394,7 +480,10 @@ class ClassificationTask(ClassyTask):
         phases + x test phases, interleaved.
         """
         if not self.test_only:
-            phases = [{"train": True} for _ in range(self.num_epochs)]
+            phases = [
+                {"train": True}
+                for _ in range(math.ceil(self.train_phases_per_epoch * self.num_epochs))
+            ]
 
             final_phases = []
             for i, phase in enumerate(phases):
@@ -473,24 +562,19 @@ class ClassificationTask(ClassyTask):
             for phase_type in self.datasets.keys()
         }
 
-    def prepare(
-        self,
-        num_dataloader_workers=0,
-        pin_memory=False,
-        use_gpu=False,
-        dataloader_mp_context=None,
-    ):
+    def prepare(self, num_dataloader_workers=0, dataloader_mp_context=None):
         """Prepares task for training, populates all derived attributes
 
         Args:
             num_dataloader_workers: Number of dataloading processes. If 0,
                 dataloading is done on main process
-            pin_memory: if true pin memory on GPU
-            use_gpu: if true, load model, optimizer, loss, etc on GPU
             dataloader_mp_context: Determines how processes are spawned.
                 Value must be one of None, "spawn", "fork", "forkserver".
                 If None, then context is inherited from parent process
         """
+
+        pin_memory = self.use_gpu and torch.cuda.device_count() > 1
+
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
             num_workers=num_dataloader_workers,
@@ -498,8 +582,13 @@ class ClassificationTask(ClassyTask):
             multiprocessing_context=dataloader_mp_context,
         )
 
+        if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
+            self.base_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.base_model)
+        elif self.batch_norm_sync_mode == BatchNormSyncMode.APEX:
+            self.base_model = apex.parallel.convert_syncbn_model(self.base_model)
+
         # move the model and loss to the right device
-        if use_gpu:
+        if self.use_gpu:
             self.base_model, self.loss = copy_model_to_gpu(self.base_model, self.loss)
         else:
             self.loss.cpu()
@@ -508,6 +597,15 @@ class ClassificationTask(ClassyTask):
         # initialize the pytorch optimizer now since the model has been moved to
         # the appropriate device
         self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
+
+        if self.amp_args is not None:
+            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
+            # which is wrapped by the ClassyOptimizer in self.optimizer).
+            # Please note this must happen before loading the checkpoint, cause
+            # there's amp state to be restored.
+            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                self.base_model, self.optimizer.optimizer, **self.amp_args
+            )
 
         classy_state_dict = (
             None
@@ -521,12 +619,6 @@ class ClassificationTask(ClassyTask):
                 state_load_success
             ), "Update classy state from checkpoint was unsuccessful."
 
-        if self.amp_opt_level is not None:
-            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
-            # which is wrapped by the ClassyOptimizer in self.optimizer)
-            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                self.base_model, self.optimizer.optimizer, opt_level=self.amp_opt_level
-            )
         self.init_distributed_data_parallel_model()
 
     def init_distributed_data_parallel_model(self):
@@ -547,12 +639,16 @@ class ClassificationTask(ClassyTask):
             self.broadcast_buffers_mode == BroadcastBuffersMode.FORWARD_PASS
         )
         self.distributed_model = init_distributed_data_parallel_model(
-            self.base_model, broadcast_buffers=broadcast_buffers
+            self.base_model,
+            broadcast_buffers=broadcast_buffers,
+            find_unused_parameters=self.find_unused_parameters,
         )
         if isinstance(self.loss, ClassyLoss) and self.loss.has_learned_parameters():
             logging.info("Initializing distributed loss")
             self.loss = init_distributed_data_parallel_model(
-                self.loss, broadcast_buffers=broadcast_buffers
+                self.loss,
+                broadcast_buffers=broadcast_buffers,
+                find_unused_parameters=self.find_unused_parameters,
             )
 
     @property
@@ -599,6 +695,8 @@ class ClassificationTask(ClassyTask):
         }
         if isinstance(self.loss, ClassyLoss):
             classy_state_dict["loss"] = self.loss.get_classy_state()
+        if self.amp_args is not None:
+            classy_state_dict["amp"] = apex.amp.state_dict()
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
         return classy_state_dict
@@ -624,6 +722,9 @@ class ClassificationTask(ClassyTask):
         if state.get("loss") and isinstance(self.loss, ClassyLoss):
             self.loss.set_classy_state(state["loss"])
 
+        if "amp" in state:
+            apex.amp.load_state_dict(state["amp"])
+
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
             # hooks are removed
@@ -638,7 +739,7 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
-    def eval_step(self, use_gpu):
+    def eval_step(self):
         self.last_batch = None
 
         # Process next sample
@@ -651,7 +752,7 @@ class ClassificationTask(ClassyTask):
 
         # Copy sample to GPU
         target = sample["target"]
-        if use_gpu:
+        if self.use_gpu:
             for key, value in sample.items():
                 sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
 
@@ -663,6 +764,8 @@ class ClassificationTask(ClassyTask):
             loss = local_loss.detach().clone()
             loss = all_reduce_mean(loss)
 
+            self.check_inf_nan(loss)
+
             self.losses.append(loss.data.cpu().item() * target.size(0))
 
             self.update_meters(output, sample)
@@ -672,12 +775,12 @@ class ClassificationTask(ClassyTask):
             loss=loss, output=output, target=target, sample=sample
         )
 
-    def train_step(self, use_gpu):
-        """Train step to be executed in train loop
+    def check_inf_nan(self, loss):
+        if loss == float("inf") or loss == float("-inf") or loss != loss:
+            raise FloatingPointError(f"Loss is infinity or NaN: {loss}")
 
-        Args:
-            use_gpu: if true, execute training on GPU
-        """
+    def train_step(self):
+        """Train step to be executed in train loop."""
 
         self.last_batch = None
 
@@ -691,9 +794,12 @@ class ClassificationTask(ClassyTask):
 
         # Copy sample to GPU
         target = sample["target"]
-        if use_gpu:
+        if self.use_gpu:
             for key, value in sample.items():
                 sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
+
+        if self.mixup_transform is not None:
+            sample = self.mixup_transform(sample)
 
         with torch.enable_grad():
             # Forward pass
@@ -709,7 +815,7 @@ class ClassificationTask(ClassyTask):
             self.update_meters(output, sample)
 
         # Run backwards pass / update optimizer
-        if self.amp_opt_level is not None:
+        if self.amp_args is not None:
             self.optimizer.zero_grad()
             with apex.amp.scale_loss(
                 local_loss, self.optimizer.optimizer
@@ -717,6 +823,8 @@ class ClassificationTask(ClassyTask):
                 scaled_loss.backward()
         else:
             self.optimizer.backward(local_loss)
+
+        self.check_inf_nan(loss)
 
         self.optimizer.update_schedule_on_step(self.where)
         self.optimizer.step()

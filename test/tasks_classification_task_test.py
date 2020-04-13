@@ -44,6 +44,13 @@ class TestClassificationTask(unittest.TestCase):
         task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
 
+    def test_hooks_config_builds_correctly(self):
+        config = get_test_task_config()
+        config["hooks"] = [{"name": "loss_lr_meter_logging"}]
+        task = build_task(config)
+        self.assertTrue(len(task.hooks) == 1)
+        self.assertTrue(isinstance(task.hooks[0], LossLrMeterLoggingHook))
+
     def test_get_state(self):
         config = get_test_task_config()
         loss = build_loss(config["loss"])
@@ -58,10 +65,10 @@ class TestClassificationTask(unittest.TestCase):
             dataset = build_dataset(config["dataset"][phase_type])
             task.set_dataset(dataset, phase_type)
 
-        task.prepare(num_dataloader_workers=1, pin_memory=False)
+        task.prepare(num_dataloader_workers=1)
 
         task = build_task(config)
-        task.prepare(num_dataloader_workers=1, pin_memory=False)
+        task.prepare(num_dataloader_workers=1)
 
     def test_checkpointing(self):
         """
@@ -72,10 +79,10 @@ class TestClassificationTask(unittest.TestCase):
         task = build_task(config).set_hooks([LossLrMeterLoggingHook()])
         task_2 = build_task(config).set_hooks([LossLrMeterLoggingHook()])
 
-        use_gpu = torch.cuda.is_available()
+        task.set_use_gpu(torch.cuda.is_available())
 
         # prepare the tasks for the right device
-        task.prepare(use_gpu=use_gpu)
+        task.prepare()
 
         # test in both train and test mode
         for _ in range(2):
@@ -83,7 +90,7 @@ class TestClassificationTask(unittest.TestCase):
 
             # set task's state as task_2's checkpoint
             task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
-            task_2.prepare(use_gpu=use_gpu)
+            task_2.prepare()
 
             # task 2 should have the same state
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
@@ -95,8 +102,8 @@ class TestClassificationTask(unittest.TestCase):
 
             # test that the train step runs the same way on both states
             # and the loss remains the same
-            task.train_step(use_gpu)
-            task_2.train_step(use_gpu)
+            task.train_step()
+            task_2.train_step()
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_final_train_checkpoint(self):
@@ -108,9 +115,9 @@ class TestClassificationTask(unittest.TestCase):
         )
         task_2 = build_task(config)
 
-        use_gpu = torch.cuda.is_available()
+        task.set_use_gpu(torch.cuda.is_available())
 
-        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer = LocalTrainer()
         trainer.train(task)
 
         # load the final train checkpoint
@@ -123,7 +130,7 @@ class TestClassificationTask(unittest.TestCase):
 
         # set task_2's state as task's final train checkpoint
         task_2.set_checkpoint(checkpoint)
-        task_2.prepare(use_gpu=use_gpu)
+        task_2.prepare()
 
         # we should be able to train the task
         trainer.train(task_2)
@@ -141,20 +148,18 @@ class TestClassificationTask(unittest.TestCase):
         train_task = build_task(train_config).set_hooks([LossLrMeterLoggingHook()])
         test_only_task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
 
-        use_gpu = torch.cuda.is_available()
-
         # prepare the tasks for the right device
-        train_task.prepare(use_gpu=use_gpu)
+        train_task.prepare()
 
         # test in both train and test mode
-        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer = LocalTrainer()
         trainer.train(train_task)
 
         # set task's state as task_2's checkpoint
         test_only_task.set_checkpoint(
             get_checkpoint_dict(train_task, {}, deep_copy=True)
         )
-        test_only_task.prepare(use_gpu=use_gpu)
+        test_only_task.prepare()
         test_state = test_only_task.get_classy_state()
 
         # We expect the phase idx to be different for a test only task
@@ -170,7 +175,7 @@ class TestClassificationTask(unittest.TestCase):
         self.assertEqual(test_state["train_phase_idx"], -1)
 
         # Verify task will run
-        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer = LocalTrainer()
         trainer.train(test_only_task)
 
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
@@ -180,11 +185,13 @@ class TestClassificationTask(unittest.TestCase):
         task_2 = build_task(config)
 
         for use_gpu in [True, False]:
-            task.prepare(use_gpu=use_gpu)
+            task.set_use_gpu(use_gpu)
+            task.prepare()
 
             # set task's state as task_2's checkpoint
             task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
 
             # we should be able to run the trainer using state from a different device
-            trainer = LocalTrainer(use_gpu=not use_gpu)
+            trainer = LocalTrainer()
+            task_2.set_use_gpu(not use_gpu)
             trainer.train(task_2)

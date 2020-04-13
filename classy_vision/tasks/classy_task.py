@@ -85,13 +85,7 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def prepare(
-        self,
-        num_dataloader_workers=0,
-        pin_memory=False,
-        use_gpu=False,
-        dataloader_mp_context=None,
-    ) -> None:
+    def prepare(self, num_dataloader_workers=0, dataloader_mp_context=None) -> None:
         """
         Prepares the task for training.
 
@@ -102,19 +96,15 @@ class ClassyTask(ABC):
             num_dataloader_workers: Number of workers to create for the dataloaders
             pin_memory: Whether the dataloaders should copy the Tensors into CUDA
                 pinned memory (default False)
-            use_gpu: True if training on GPUs, False otherwise
         """
         pass
 
     @abstractmethod
-    def train_step(self, use_gpu) -> None:
+    def train_step(self) -> None:
         """
         Run a train step.
 
         This corresponds to training over one batch of data from the dataloaders.
-
-        Args:
-            use_gpu: True if training on GPUs, False otherwise
         """
         pass
 
@@ -155,24 +145,21 @@ class ClassyTask(ABC):
         pass
 
     @abstractmethod
-    def eval_step(self, use_gpu) -> None:
+    def eval_step(self) -> None:
         """
         Run an evaluation step.
 
         This corresponds to evaluating the model over one batch of data.
-
-        Args:
-            use_gpu: True if training on GPUs, False otherwise
         """
         pass
 
-    def step(self, use_gpu) -> None:
+    def step(self) -> None:
         from classy_vision.hooks import ClassyHookFunctions
 
         if self.train:
-            self.train_step(use_gpu)
+            self.train_step()
         else:
-            self.eval_step(use_gpu)
+            self.eval_step()
 
         for hook in self.hooks:
             hook.on_step(self)

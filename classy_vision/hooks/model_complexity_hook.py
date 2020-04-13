@@ -7,28 +7,27 @@
 import logging
 from typing import Any, Dict
 
-from classy_vision import tasks
 from classy_vision.generic.profiler import (
     compute_activations,
     compute_flops,
     count_params,
 )
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("model_complexity")
 class ModelComplexityHook(ClassyHook):
     """
     Logs the number of paramaters and forward pass FLOPs and activations of the model.
     """
 
     on_phase_start = ClassyHook._noop
-    on_forward = ClassyHook._noop
-    on_loss_and_meter = ClassyHook._noop
     on_step = ClassyHook._noop
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def on_start(self, task: "tasks.ClassyTask") -> None:
+    def on_start(self, task) -> None:
         """Measure number of parameters, FLOPs and activations."""
         self.num_flops = 0
         self.num_activations = 0

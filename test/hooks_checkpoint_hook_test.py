@@ -4,11 +4,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import os
 import shutil
 import tempfile
 import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.generic.util import load_checkpoint
@@ -17,12 +19,32 @@ from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 
 
-class TestCheckpointHook(unittest.TestCase):
+class TestCheckpointHook(HookTestBase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {
+            "checkpoint_folder": "/test/",
+            "input_args": {"foo": "bar"},
+            "phase_types": ["train"],
+            "checkpoint_period": 2,
+        }
+        invalid_config = copy.deepcopy(config)
+        invalid_config["checkpoint_folder"] = 12
+
+        self.constructor_test_helper(
+            config=config,
+            hook_type=CheckpointHook,
+            hook_registry_name="checkpoint",
+            invalid_configs=[invalid_config],
+        )
 
     def test_state_checkpointing(self) -> None:
         """
@@ -133,7 +155,7 @@ class TestCheckpointHook(unittest.TestCase):
         cuda_available = torch.cuda.is_available()
         task = build_task(config)
 
-        task.prepare(use_gpu=cuda_available)
+        task.prepare()
 
         # create a checkpoint hook
         checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
@@ -153,8 +175,8 @@ class TestCheckpointHook(unittest.TestCase):
             # set the checkpoint
             task.set_checkpoint(checkpoint)
 
-            task.prepare(use_gpu=use_gpu)
+            task.set_use_gpu(use_gpu)
 
             # we should be able to run the trainer using the checkpoint
-            trainer = LocalTrainer(use_gpu=use_gpu)
+            trainer = LocalTrainer()
             trainer.train(task)

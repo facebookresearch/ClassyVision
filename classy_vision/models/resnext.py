@@ -8,7 +8,11 @@
 Implementation of ResNeXt (https://arxiv.org/pdf/1611.05431.pdf)
 """
 
+import copy
 import math
+import re
+import warnings
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch.nn as nn
@@ -16,8 +20,11 @@ from classy_vision.generic.util import is_pos_int
 
 from . import register_model
 from .classy_model import ClassyModel
+from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
 
+# version number for the current implementation
+VERSION = 0.2
 # global setting for in-place ReLU:
 INPLACE = True
 
@@ -55,6 +62,8 @@ class GenericLayer(nn.Module):
         mid_planes_and_cardinality=None,
         reduction=4,
         final_bn_relu=True,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
 
         # assertions on inputs:
@@ -79,6 +88,12 @@ class GenericLayer(nn.Module):
                 nn.BatchNorm2d(out_planes),
             )
 
+        self.se = (
+            SqueezeAndExcitationLayer(out_planes, reduction_ratio=se_reduction_ratio)
+            if use_se
+            else None
+        )
+
     def forward(self, x):
 
         # if required, perform downsampling along shortcut connection:
@@ -92,6 +107,10 @@ class GenericLayer(nn.Module):
 
         if self.final_bn_relu:
             out = self.bn(out)
+
+        if self.se is not None:
+            out = self.se(out)
+
         # add residual connection, perform rely + batchnorm, and return result:
         out += residual
         if self.final_bn_relu:
@@ -101,7 +120,7 @@ class GenericLayer(nn.Module):
 
 class BasicLayer(GenericLayer):
     """
-        ResNeXt bottleneck layer with `in_planes` input planes and `out_planes`
+        ResNeXt layer with `in_planes` input planes and `out_planes`
         output planes.
     """
 
@@ -111,8 +130,10 @@ class BasicLayer(GenericLayer):
         out_planes,
         stride=1,
         mid_planes_and_cardinality=None,
-        reduction=4,
+        reduction=1,
         final_bn_relu=True,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
 
         # assertions on inputs:
@@ -128,13 +149,15 @@ class BasicLayer(GenericLayer):
         )
 
         # call constructor of generic layer:
-        super(BasicLayer, self).__init__(
+        super().__init__(
             convolutional_block,
             in_planes,
             out_planes,
             stride=stride,
             reduction=reduction,
             final_bn_relu=final_bn_relu,
+            use_se=use_se,
+            se_reduction_ratio=se_reduction_ratio,
         )
 
 
@@ -152,6 +175,8 @@ class BottleneckLayer(GenericLayer):
         mid_planes_and_cardinality=None,
         reduction=4,
         final_bn_relu=True,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
 
         # assertions on inputs:
@@ -185,6 +210,8 @@ class BottleneckLayer(GenericLayer):
             stride=stride,
             reduction=reduction,
             final_bn_relu=final_bn_relu,
+            use_se=use_se,
+            se_reduction_ratio=se_reduction_ratio,
         )
 
 
@@ -236,14 +263,20 @@ class ResNeXt(ClassyModel):
         basic_layer: bool = False,
         final_bn_relu: bool = True,
         bn_weight_decay: Optional[bool] = False,
+        use_se: bool = False,
+        se_reduction_ratio: int = 16,
     ):
         """
             Implementation of `ResNeXt <https://arxiv.org/pdf/1611.05431.pdf>`_.
 
-            Set ``small_input`` to `True` for 32x32 sized image inputs.
-
-            Set ``final_bn_relu`` to `False` to exclude the final batchnorm and
-            ReLU layers. These settings are useful when training Siamese networks.
+            Args:
+                small_input: set to `True` for 32x32 sized image inputs.
+                final_bn_relu: set to `False` to exclude the final batchnorm and
+                    ReLU layers. These settings are useful when training Siamese
+                    networks.
+                use_se: Enable squeeze and excitation
+                se_reduction_ratio: The reduction ratio to apply in the excitation
+                    stage. Only used if `use_se` is `True`.
         """
         super().__init__()
 
@@ -263,6 +296,7 @@ class ResNeXt(ClassyModel):
             and is_pos_int(base_width_and_cardinality[0])
             and is_pos_int(base_width_and_cardinality[1])
         )
+        assert isinstance(use_se, bool), "use_se has to be a boolean"
 
         # Chooses whether to apply weight decay to batch norm
         # parameters. This improves results in some situations,
@@ -295,8 +329,10 @@ class ResNeXt(ClassyModel):
                 mid_planes_and_cardinality=mid_planes_and_cardinality,
                 reduction=reduction,
                 final_bn_relu=final_bn_relu or (idx != (len(out_planes) - 1)),
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-            blocks.append(nn.Sequential(*new_block))
+            blocks.append(new_block)
         self.blocks = nn.Sequential(*blocks)
 
         self.out_planes = out_planes[-1]
@@ -337,25 +373,24 @@ class ResNeXt(ClassyModel):
         mid_planes_and_cardinality=None,
         reduction=4,
         final_bn_relu=True,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
-
         # add the desired number of residual blocks:
-        blocks = []
+        blocks = OrderedDict()
         for idx in range(num_blocks):
-            blocks.append(
-                self.build_attachable_block(
-                    "block{}-{}".format(resolution_idx, idx),
-                    self.layer_type(
-                        in_planes if idx == 0 else out_planes,
-                        out_planes,
-                        stride=stride if idx == 0 else 1,  # only first block has stride
-                        mid_planes_and_cardinality=mid_planes_and_cardinality,
-                        reduction=reduction,
-                        final_bn_relu=final_bn_relu or (idx != (num_blocks - 1)),
-                    ),
-                )
+            block_name = "block{}-{}".format(resolution_idx, idx)
+            blocks[block_name] = self.layer_type(
+                in_planes if idx == 0 else out_planes,
+                out_planes,
+                stride=stride if idx == 0 else 1,  # only first block has stride
+                mid_planes_and_cardinality=mid_planes_and_cardinality,
+                reduction=reduction,
+                final_bn_relu=final_bn_relu or (idx != (num_blocks - 1)),
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-        return blocks
+        return nn.Sequential(blocks)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
@@ -369,16 +404,20 @@ class ResNeXt(ClassyModel):
             A ResNeXt instance.
         """
         assert "num_blocks" in config
+
+        basic_layer = config.get("basic_layer", False)
         config = {
             "num_blocks": config["num_blocks"],
             "init_planes": config.get("init_planes", 64),
-            "reduction": config.get("reduction", 4),
+            "reduction": config.get("reduction", 1 if basic_layer else 4),
             "base_width_and_cardinality": config.get("base_width_and_cardinality"),
             "small_input": config.get("small_input", False),
-            "basic_layer": config.get("basic_layer", False),
+            "basic_layer": basic_layer,
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
             "bn_weight_decay": config.get("bn_weight_decay", False),
+            "use_se": config.get("use_se", False),
+            "se_reduction_ratio": config.get("se_reduction_ratio", 16),
         }
         return cls(**config)
 
@@ -389,18 +428,9 @@ class ResNeXt(ClassyModel):
 
         # evaluate all residual blocks:
         # TODO: (kaizh) T43794289 exit early if there is no block that has heads
-        self.blocks(out)
+        out = self.blocks(out)
 
-        # By default the classification layer is implemented as one head on top
-        # of the last block. The head is automatically computed right after the
-        # last block.
-        head_outputs = self.execute_heads()
-        if len(head_outputs) == 0:
-            raise Exception("Expecting at least one head that generates output")
-        elif len(head_outputs) == 1:
-            return list(head_outputs.values())[0]
-        else:
-            return head_outputs
+        return out
 
     def get_optimizer_params(self):
         return super().get_optimizer_params(bn_weight_decay=self.bn_weight_decay)
@@ -420,65 +450,114 @@ class ResNeXt(ClassyModel):
     def model_depth(self):
         return sum(self.num_blocks)
 
+    def _convert_model_state(self, state):
+        """Convert model state from the old implementation to the current format.
 
-@register_model("resnet18")
-class ResNet18(ResNeXt):
-    def __init__(self):
-        super().__init__(
-            num_blocks=[2, 2, 2, 2], basic_layer=True, zero_init_bn_residuals=True
-        )
+        Updates the state dict in place and returns True if the state dict was updated.
+        """
+        pattern = r"blocks\.(?P<block_id_0>[0-9]*)\.(?P<block_id_1>[0-9]*)\._module\."
+        repl = r"blocks.\g<block_id_0>.block\g<block_id_0>-\g<block_id_1>."
+        trunk_dict = state["model"]["trunk"]
+        new_trunk_dict = {}
+        replaced_keys = False
+        for key, value in trunk_dict.items():
+            new_key = re.sub(pattern, repl, key)
+            if new_key != key:
+                replaced_keys = True
+            new_trunk_dict[new_key] = value
+        state["model"]["trunk"] = new_trunk_dict
+        state["version"] = VERSION
+        return replaced_keys
 
+    def get_classy_state(self, deep_copy=False):
+        state = super().get_classy_state(deep_copy=deep_copy)
+        state["version"] = VERSION
+        return state
+
+    def set_classy_state(self, state):
+        version = state.get("version")
+        if version is None:
+            # convert the weights from the previous implementation of ResNeXt to the
+            # current one
+            if not self._convert_model_state(state):
+                raise RuntimeError("ResNeXt state conversion failed")
+            message = (
+                "Provided state dict is from an old implementation of ResNeXt. "
+                "This has been deprecated and will be removed soon."
+            )
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+        elif version != VERSION:
+            raise ValueError(
+                f"Unsupported ResNeXt version: {version}. Expected: {VERSION}"
+            )
+        super().set_classy_state(state)
+
+
+class _ResNeXt(ResNeXt):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
+        config = copy.deepcopy(config)
+        config.pop("name")
+        if "heads" in config:
+            config.pop("heads")
+        return cls(**config)
+
+
+@register_model("resnet18")
+class ResNet18(_ResNeXt):
+    def __init__(self, **kwargs):
+        super().__init__(
+            num_blocks=[2, 2, 2, 2],
+            basic_layer=True,
+            zero_init_bn_residuals=True,
+            reduction=1,
+            **kwargs,
+        )
 
 
 @register_model("resnet34")
-class ResNet34(ResNeXt):
-    def __init__(self):
+class ResNet34(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
-            num_blocks=[3, 4, 6, 3], basic_layer=True, zero_init_bn_residuals=True
+            num_blocks=[3, 4, 6, 3],
+            basic_layer=True,
+            zero_init_bn_residuals=True,
+            reduction=1,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 @register_model("resnet50")
-class ResNet50(ResNeXt):
-    def __init__(self):
+class ResNet50(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
-            num_blocks=[3, 4, 6, 3], basic_layer=False, zero_init_bn_residuals=True
+            num_blocks=[3, 4, 6, 3],
+            basic_layer=False,
+            zero_init_bn_residuals=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 @register_model("resnet101")
-class ResNet101(ResNeXt):
-    def __init__(self):
+class ResNet101(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
-            num_blocks=[3, 4, 23, 3], basic_layer=False, zero_init_bn_residuals=True
+            num_blocks=[3, 4, 23, 3],
+            basic_layer=False,
+            zero_init_bn_residuals=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 @register_model("resnet152")
-class ResNet152(ResNeXt):
-    def __init__(self):
+class ResNet152(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
-            num_blocks=[3, 8, 36, 3], basic_layer=False, zero_init_bn_residuals=True
+            num_blocks=[3, 8, 36, 3],
+            basic_layer=False,
+            zero_init_bn_residuals=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 # Note, the ResNeXt models all have weight decay enabled for the batch
@@ -488,48 +567,39 @@ class ResNet152(ResNeXt):
 # training on other datasets, we have observed losses in accuracy (for
 # example, the dataset used in https://arxiv.org/abs/1805.00932).
 @register_model("resnext50_32x4d")
-class ResNeXt50(ResNeXt):
-    def __init__(self):
+class ResNeXt50(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
             num_blocks=[3, 4, 6, 3],
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
             bn_weight_decay=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 @register_model("resnext101_32x4d")
-class ResNeXt101(ResNeXt):
-    def __init__(self):
+class ResNeXt101(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
             num_blocks=[3, 4, 23, 3],
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
             bn_weight_decay=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()
 
 
 @register_model("resnext152_32x4d")
-class ResNeXt152(ResNeXt):
-    def __init__(self):
+class ResNeXt152(_ResNeXt):
+    def __init__(self, **kwargs):
         super().__init__(
             num_blocks=[3, 8, 36, 3],
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
             bn_weight_decay=True,
+            **kwargs,
         )
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "ResNeXt":
-        return cls()

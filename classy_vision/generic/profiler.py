@@ -10,7 +10,12 @@ import operator
 
 import torch
 import torch.nn as nn
-from classy_vision.generic.util import get_model_dummy_input, is_leaf, is_on_gpu
+from classy_vision.generic.util import (
+    eval_model,
+    get_model_dummy_input,
+    is_leaf,
+    is_on_gpu,
+)
 from torch.cuda import cudart
 
 
@@ -24,7 +29,6 @@ def profile(
     """
     Performs CPU or GPU profiling of the specified model on the specified input.
     """
-
     # assertions:
     if use_nvprof:
         raise NotImplementedError
@@ -41,8 +45,8 @@ def profile(
         batchsize=batchsize_per_replica,
         non_blocking=False,
     )
-    # perform profiling:
-    with torch.no_grad():
+    # perform profiling in eval mode
+    with eval_model(model), torch.no_grad():
         model(input)  # warm up CUDA memory allocator and profiler
         if use_nvprof:  # nvprof profiling (TODO: Can we infer this?)
             cudart().cudaProfilerStart()
@@ -53,6 +57,23 @@ def profile(
             with torch.autograd.profiler.profile(use_cuda=True) as profiler:
                 model(input)
                 return profiler
+
+
+def _get_batchsize_per_replica(x):
+    """
+    Some layer may take tuple/list/dict/list[dict] as input in forward function. We
+    recursively dive into the tuple/list until we meet a tensor and infer the batch size
+    """
+    while isinstance(x, (list, tuple)):
+        assert len(x) > 0, "input x of tuple/list type must have at least one element"
+        x = x[0]
+
+    if isinstance(x, (dict,)):
+        # index zero is always equal to batch size. select an arbitrary key.
+        key_list = list(x.keys())
+        x = x[key_list[0]]
+
+    return x.size()[0]
 
 
 def _layer_flops(layer, x, _):
@@ -73,7 +94,7 @@ def _layer_flops(layer, x, _):
     # get layer type:
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
-    batchsize_per_replica = x.size()[0]
+    batchsize_per_replica = _get_batchsize_per_replica(x)
     # 1D convolution:
     if layer_type in ["Conv1d"]:
         # x shape is N x C x W
@@ -179,8 +200,14 @@ def _layer_flops(layer, x, _):
         bias_ops = layer.bias.numel() if layer.bias is not None else 0
         return x.size()[0] * (weight_ops + bias_ops)
 
-    # 2D/3D (synced) batch normalization:
-    elif layer_type in ["BatchNorm2d", "BatchNorm3d", "SyncBatchNorm"]:
+    # batch normalization / layer normalization:
+    elif layer_type in [
+        "BatchNorm1d",
+        "BatchNorm2d",
+        "BatchNorm3d",
+        "SyncBatchNorm",
+        "LayerNorm",
+    ]:
         return 2 * x.numel()
 
     # 3D convolution
@@ -341,10 +368,12 @@ def modify_forward(model, compute_list, compute_fn):
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
-    if is_leaf(model):
+    if is_leaf(model) or hasattr(model, "flops"):
         model.__class__ = _patched_computation_module(model, compute_list, compute_fn)
-    for child in model.children():
-        modify_forward(child, compute_list, compute_fn)
+
+    else:
+        for child in model.children():
+            modify_forward(child, compute_list, compute_fn)
 
     return model
 
@@ -353,10 +382,12 @@ def restore_forward(model):
     """
     Restore original forward in model:
     """
-    if is_leaf(model):
+    if is_leaf(model) or hasattr(model, "flops"):
         model.__class__ = model.orig_type
-    for child in model.children():
-        restore_forward(child)
+
+    else:
+        for child in model.children():
+            restore_forward(child)
 
     return model
 
@@ -365,22 +396,27 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     """
     Compute the complexity of a forward pass.
     """
-
     # assertions, input, and upvalue in which we will perform the count:
     assert isinstance(model, nn.Module)
-    if not isinstance(input_shape, abc.Sequence):
+
+    if not isinstance(input_shape, abc.Sequence) and not isinstance(input_shape, dict):
         return None
-    input = get_model_dummy_input(model, input_shape, input_key)
+    else:
+        input = get_model_dummy_input(model, input_shape, input_key)
+
     compute_list = []
 
     # measure FLOPs:
     modify_forward(model, compute_list, compute_fn)
     try:
-        model.forward(input)
+        # compute complexity in eval mode
+        with eval_model(model), torch.no_grad():
+            model.forward(input)
     except NotImplementedError as err:
         raise err
     finally:
         restore_forward(model)
+
     return sum(compute_list)
 
 

@@ -7,13 +7,14 @@
 import logging
 from typing import Any, Collection, Dict, Optional
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 from fvcore.common.file_io import PathManager
 
 
+@register_hook("checkpoint")
 class CheckpointHook(ClassyHook):
     """
     Hook to checkpoint a model's task.
@@ -22,15 +23,13 @@ class CheckpointHook(ClassyHook):
     """
 
     on_phase_start = ClassyHook._noop
-    on_forward = ClassyHook._noop
-    on_loss_and_meter = ClassyHook._noop
     on_step = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(
         self,
         checkpoint_folder: str,
-        input_args: Any,
+        input_args: Any = None,
         phase_types: Optional[Collection[str]] = None,
         checkpoint_period: int = 1,
     ) -> None:
@@ -46,6 +45,13 @@ class CheckpointHook(ClassyHook):
             checkpoint_period: Checkpoint at the end of every x phases (default 1)
         """
         super().__init__()
+        assert isinstance(
+            checkpoint_folder, str
+        ), "checkpoint_folder must be a string specifying the checkpoint directory"
+        assert (
+            isinstance(checkpoint_period, int) and checkpoint_period > 0
+        ), "checkpoint_period must be a positive integer"
+
         self.checkpoint_folder: str = checkpoint_folder
         self.input_args: Any = input_args
         if phase_types is None:
@@ -78,7 +84,7 @@ class CheckpointHook(ClassyHook):
         if checkpoint_file:
             PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
-    def on_start(self, task: "tasks.ClassyTask") -> None:
+    def on_start(self, task) -> None:
         if not is_master() or getattr(task, "test_only", False):
             return
         if not PathManager.exists(self.checkpoint_folder):
@@ -87,7 +93,7 @@ class CheckpointHook(ClassyHook):
             )
             raise FileNotFoundError(err_msg)
 
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """Checkpoint the task every checkpoint_period phases.
 
         We do not necessarily checkpoint the task at the end of every phase.

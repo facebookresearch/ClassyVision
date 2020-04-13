@@ -10,10 +10,11 @@ from typing import Any, Dict, Iterable, Tuple
 
 import torch
 import torch.nn as nn
-from classy_vision.hooks import ClassyHook
-from classy_vision.tasks import ClassyTask
+from classy_vision.hooks import register_hook
+from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("ema_model_weights")
 class ExponentialMovingAverageModelHook(ClassyHook):
     """
     Hook which keeps a track of the exponential moving average (EMA) of the model's
@@ -27,8 +28,6 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         increase memory usage significantly.
     """
 
-    on_forward = ClassyHook._noop
-    on_loss_and_meter = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(
@@ -78,7 +77,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         for name, param in self.get_model_state_iterator(model):
             model_state[name] = param.detach().clone().to(device=self.device)
 
-    def on_start(self, task: ClassyTask) -> None:
+    def on_start(self, task) -> None:
         if self.state.model_state:
             # loaded state from checkpoint, do not re-initialize, only move the state
             # to the right device
@@ -93,17 +92,17 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         self._save_current_model_state(task.base_model, self.state.model_state)
         self._save_current_model_state(task.base_model, self.state.ema_model_state)
 
-    def on_phase_start(self, task: ClassyTask) -> None:
+    def on_phase_start(self, task) -> None:
         # restore the right state depending on the phase type
         self.set_model_state(task, use_ema=not task.train)
 
-    def on_phase_end(self, task: ClassyTask) -> None:
+    def on_phase_end(self, task) -> None:
         if task.train:
             # save the current model state since this will be overwritten by the ema
             # state in the test phase
             self._save_current_model_state(task.base_model, self.state.model_state)
 
-    def on_step(self, task: ClassyTask) -> None:
+    def on_step(self, task) -> None:
         if not task.train:
             return
 
@@ -117,7 +116,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
                     device=self.device
                 )
 
-    def set_model_state(self, task: ClassyTask, use_ema: bool) -> None:
+    def set_model_state(self, task, use_ema: bool) -> None:
         """
         Depending on use_ema, set the appropriate state for the model.
         """

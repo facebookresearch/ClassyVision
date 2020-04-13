@@ -4,9 +4,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import math
 import unittest
 import unittest.mock as mock
+from test.generic.hook_test_utils import HookTestBase
 
 import torch
 import torch.nn as nn
@@ -30,7 +32,7 @@ class TestModel(ClassyModel):
         return self.bn(self.fc(x))
 
 
-class TestExponentialMovingAverageModelHook(unittest.TestCase):
+class TestExponentialMovingAverageModelHook(HookTestBase):
     def _map_device_string(self, device):
         return "cuda" if device == "gpu" else "cpu"
 
@@ -75,6 +77,23 @@ class TestExponentialMovingAverageModelHook(unittest.TestCase):
 
         # the model weights should be back to the old value
         self.assertTrue(torch.allclose(model.fc.weight, fc_weight))
+
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {"decay": 0.5, "consider_bn_buffers": True, "device": "cpu"}
+        invalid_config1 = copy.deepcopy(config)
+        del invalid_config1["decay"]
+        invalid_config2 = copy.deepcopy(config)
+        invalid_config2["device"] = "crazy_hardware"
+
+        self.constructor_test_helper(
+            config=config,
+            hook_type=ExponentialMovingAverageModelHook,
+            hook_registry_name="ema_model_weights",
+            invalid_configs=[invalid_config1, invalid_config2],
+        )
 
     def test_get_model_state_iterator(self):
         device = "gpu" if torch.cuda.is_available() else "cpu"

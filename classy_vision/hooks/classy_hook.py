@@ -7,8 +7,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-from classy_vision import tasks
-
 
 class ClassyHookState:
     """Class to store state within instances of ClassyHook.
@@ -51,6 +49,10 @@ class ClassyHook(ABC):
     def __init__(self):
         self.state = ClassyHookState()
 
+    @classmethod
+    def from_config(cls, config) -> "ClassyHook":
+        return cls(**config)
+
     def _noop(self, *args, **kwargs) -> None:
         """Derived classes can set their hook functions to this.
 
@@ -65,27 +67,27 @@ class ClassyHook(ABC):
         return cls.__name__
 
     @abstractmethod
-    def on_start(self, task: "tasks.ClassyTask") -> None:
+    def on_start(self, task) -> None:
         """Called at the start of training."""
         pass
 
     @abstractmethod
-    def on_phase_start(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_start(self, task) -> None:
         """Called at the start of each phase."""
         pass
 
     @abstractmethod
-    def on_step(self, task: "tasks.ClassyTask") -> None:
+    def on_step(self, task) -> None:
         """Called each time after parameters have been updated by the optimizer."""
         pass
 
     @abstractmethod
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """Called at the end of each phase (epoch)."""
         pass
 
     @abstractmethod
-    def on_end(self, task: "tasks.ClassyTask") -> None:
+    def on_end(self, task) -> None:
         """Called at the end of training."""
         pass
 

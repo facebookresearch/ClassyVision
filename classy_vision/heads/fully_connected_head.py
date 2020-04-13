@@ -71,7 +71,7 @@ class FullyConnectedHead(ClassyHead):
         out = self.avgpool(x)
 
         # final classifier:
-        out = out.reshape(out.size(0), -1)
+        out = out.flatten(start_dim=1)
         if self.fc is not None:
             out = self.fc(out)
         return out

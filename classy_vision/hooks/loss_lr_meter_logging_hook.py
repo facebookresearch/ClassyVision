@@ -7,11 +7,12 @@
 import logging
 from typing import Any, Dict, Optional
 
-from classy_vision import tasks
 from classy_vision.generic.distributed_util import get_rank
+from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
 
+@register_hook("loss_lr_meter_logging")
 class LossLrMeterLoggingHook(ClassyHook):
     """
     Logs the loss, optimizer LR, and meters. Logs at the end of a phase.
@@ -19,7 +20,6 @@ class LossLrMeterLoggingHook(ClassyHook):
 
     on_start = ClassyHook._noop
     on_phase_start = ClassyHook._noop
-    on_forward = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(self, log_freq: Optional[int] = None) -> None:
@@ -30,9 +30,12 @@ class LossLrMeterLoggingHook(ClassyHook):
 
         """
         super().__init__()
+        assert log_freq is None or isinstance(
+            log_freq, int
+        ), "log_freq must be an int or None"
         self.log_freq: Optional[int] = log_freq
 
-    def on_phase_end(self, task: "tasks.ClassyTask") -> None:
+    def on_phase_end(self, task) -> None:
         """
         Log the loss, optimizer LR, and meters for the phase.
         """
@@ -47,7 +50,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             if task.train:
                 self._log_lr(task)
 
-    def on_step(self, task: "tasks.ClassyTask") -> None:
+    def on_step(self, task) -> None:
         """
         Log the LR every log_freq batches, if log_freq is not None.
         """
@@ -59,14 +62,14 @@ class LossLrMeterLoggingHook(ClassyHook):
             logging.info("Local unsynced metric values:")
             self._log_loss_meters(task)
 
-    def _log_lr(self, task: "tasks.ClassyTask") -> None:
+    def _log_lr(self, task) -> None:
         """
         Compute and log the optimizer LR.
         """
         optimizer_lr = task.optimizer.parameters.lr
         logging.info("Learning Rate: {}\n".format(optimizer_lr))
 
-    def _log_loss_meters(self, task: "tasks.ClassyTask") -> None:
+    def _log_loss_meters(self, task) -> None:
         """
         Compute and log the loss and meters.
         """

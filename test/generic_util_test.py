@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import shutil
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
+import torch.nn as nn
 from classy_vision.generic.util import (
     CHECKPOINT_FILE,
     load_checkpoint,
@@ -368,6 +370,56 @@ class TestUtilMethods(unittest.TestCase):
             )
             self.assertEqual(result.size(), tuple([batchsize] + input_shape))
 
+    def _compare_model_train_mode(self, model_1, model_2):
+        for name_1, module_1 in model_1.named_modules():
+            found = False
+            for name_2, module_2 in model_2.named_modules():
+                if name_1 == name_2:
+                    found = True
+                    if module_1.training != module_2.training:
+                        return False
+            if not found:
+                return False
+        return True
+
+    def _check_model_train_mode(self, model, expected_mode):
+        for module in model.modules():
+            if module.training != expected_mode:
+                return False
+        return True
+
+    def test_train_model_eval_model(self):
+        class TestModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.linear = nn.Linear(1, 2)
+                self.dropout = nn.Dropout()
+                self.seq = nn.Sequential(
+                    nn.ReLU(), nn.Conv2d(1, 2, 3), nn.BatchNorm2d(1, 2)
+                )
+
+        test_model = TestModel()
+        for train in [True, False]:
+            test_model.train(train)
+
+            # flip some of the modes
+            test_model.dropout.train(not train)
+            test_model.seq[1].train(not train)
+
+            orig_model = copy.deepcopy(test_model)
+
+            with util.train_model(test_model):
+                self._check_model_train_mode(test_model, True)
+                # the modes should be different inside the context manager
+                self.assertFalse(self._compare_model_train_mode(orig_model, test_model))
+            self.assertTrue(self._compare_model_train_mode(orig_model, test_model))
+
+            with util.eval_model(test_model):
+                self._check_model_train_mode(test_model, False)
+                # the modes should be different inside the context manager
+                self.assertFalse(self._compare_model_train_mode(orig_model, test_model))
+            self.assertTrue(self._compare_model_train_mode(orig_model, test_model))
+
 
 class TestUpdateStateFunctions(unittest.TestCase):
     def _compare_states(self, state_1, state_2, check_heads=True):
@@ -385,7 +437,7 @@ class TestUpdateStateFunctions(unittest.TestCase):
         task = build_task(config)
         task_2 = build_task(config)
         task_2.prepare()
-        trainer = LocalTrainer(use_gpu=False)
+        trainer = LocalTrainer()
         trainer.train(task)
         update_classy_state(task_2, task.get_classy_state(deep_copy=True))
         self._compare_states(task.get_classy_state(), task_2.get_classy_state())
@@ -397,13 +449,12 @@ class TestUpdateStateFunctions(unittest.TestCase):
         """
         config = get_fast_test_task_config()
         task = build_task(config)
-        use_gpu = torch.cuda.is_available()
-        trainer = LocalTrainer(use_gpu=use_gpu)
+        trainer = LocalTrainer()
         trainer.train(task)
         for reset_heads in [False, True]:
             task_2 = build_task(config)
             # prepare task_2 for the right device
-            task_2.prepare(use_gpu=use_gpu)
+            task_2.prepare()
             update_classy_model(
                 task_2.model, task.model.get_classy_state(deep_copy=True), reset_heads
             )

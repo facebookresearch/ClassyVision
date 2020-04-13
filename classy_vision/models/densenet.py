@@ -8,6 +8,7 @@
 
 # dependencies:
 import math
+from collections import OrderedDict
 from typing import Any, Dict
 
 import torch
@@ -16,6 +17,7 @@ from classy_vision.generic.util import is_pos_int
 
 from . import register_model
 from .classy_model import ClassyModel
+from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
 
 # global setting for in-place ReLU:
@@ -23,12 +25,16 @@ INPLACE = True
 
 
 class _DenseLayer(nn.Sequential):
-    """
-        Single layer of a DenseNet.
-    """
+    """Single layer of a DenseNet."""
 
-    def __init__(self, in_planes, growth_rate=32, expansion=4):
-
+    def __init__(
+        self,
+        in_planes,
+        growth_rate=32,
+        expansion=4,
+        use_se=False,
+        se_reduction_ratio=16,
+    ):
         # assertions:
         assert is_pos_int(in_planes)
         assert is_pos_int(growth_rate)
@@ -56,6 +62,13 @@ class _DenseLayer(nn.Sequential):
                 bias=False,
             ),
         )
+        if use_se:
+            self.add_module(
+                "se",
+                SqueezeAndExcitationLayer(
+                    growth_rate, reduction_ratio=se_reduction_ratio
+                ),
+            )
 
     def forward(self, x):
         new_features = super(_DenseLayer, self).forward(x)
@@ -98,15 +111,11 @@ class DenseNet(ClassyModel):
         expansion,
         small_input,
         final_bn_relu,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
         """
             Implementation of a standard densely connected network (DenseNet).
-
-            Set `small_input` to `True` for 32x32 sized image inputs.
-
-            Set `final_bn_relu` to `False` to exclude the final batchnorm and ReLU
-            layers. These settings are useful when
-            training Siamese networks.
 
             Contains the following attachable blocks:
                 block{block_idx}-{idx}: This is the output of each dense block,
@@ -114,6 +123,15 @@ class DenseNet(ClassyModel):
                 transition-{idx}: This is the output of the transition layers
                 trunk_output: The final output of the `DenseNet`. This is
                     where a `fully_connected` head is normally attached.
+
+            Args:
+                small_input: set to `True` for 32x32 sized image inputs.
+                final_bn_relu: set to `False` to exclude the final batchnorm and
+                    ReLU layers. These settings are useful when training Siamese
+                    networks.
+                use_se: Enable squeeze and excitation
+                se_reduction_ratio: The reduction ratio to apply in the excitation
+                    stage. Only used if `use_se` is `True`.
         """
         super().__init__()
 
@@ -149,7 +167,7 @@ class DenseNet(ClassyModel):
             )
         # loop over spatial resolutions:
         num_planes = init_planes
-        blocks = []
+        blocks = nn.Sequential()
         for idx, num_layers in enumerate(num_blocks):
             # add dense block
             block = self._make_dense_block(
@@ -158,19 +176,23 @@ class DenseNet(ClassyModel):
                 idx,
                 growth_rate=growth_rate,
                 expansion=expansion,
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-            blocks.append(block)
+            blocks.add_module(f"block_{idx}", block)
             num_planes = num_planes + num_layers * growth_rate
 
             # add transition layer:
             if idx != len(num_blocks) - 1:
                 trans = _Transition(num_planes, num_planes // 2)
-                blocks.append(self.build_attachable_block(f"transition-{idx}", trans))
+                blocks.add_module(f"transition-{idx}", trans)
                 num_planes = num_planes // 2
 
-        blocks.append(self._make_trunk_output_block(num_planes, final_bn_relu))
+        blocks.add_module(
+            "trunk_output", self._make_trunk_output_block(num_planes, final_bn_relu)
+        )
 
-        self.features = nn.Sequential(*blocks)
+        self.features = blocks
 
         # initialize weights of convolutional and batchnorm layers:
         for m in self.modules():
@@ -189,29 +211,33 @@ class DenseNet(ClassyModel):
             # final batch normalization:
             layers.add_module("norm-final", nn.BatchNorm2d(num_planes))
             layers.add_module("relu-final", nn.ReLU(inplace=INPLACE))
-        return self.build_attachable_block("trunk_output", layers)
+        return layers
 
     def _make_dense_block(
-        self, num_layers, in_planes, block_idx, growth_rate=32, expansion=4
+        self,
+        num_layers,
+        in_planes,
+        block_idx,
+        growth_rate=32,
+        expansion=4,
+        use_se=False,
+        se_reduction_ratio=16,
     ):
         assert is_pos_int(in_planes)
         assert is_pos_int(growth_rate)
         assert is_pos_int(expansion)
 
         # create a block of dense layers at same resolution:
-        layers = []
+        layers = OrderedDict()
         for idx in range(num_layers):
-            layers.append(
-                self.build_attachable_block(
-                    f"block{block_idx}-{idx}",
-                    _DenseLayer(
-                        in_planes + idx * growth_rate,
-                        growth_rate=growth_rate,
-                        expansion=expansion,
-                    ),
-                )
+            layers[f"block{block_idx}-{idx}"] = _DenseLayer(
+                in_planes + idx * growth_rate,
+                growth_rate=growth_rate,
+                expansion=expansion,
+                use_se=use_se,
+                se_reduction_ratio=se_reduction_ratio,
             )
-        return nn.Sequential(*layers)
+        return nn.Sequential(layers)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "DenseNet":
@@ -233,6 +259,8 @@ class DenseNet(ClassyModel):
             "expansion": config.get("expansion", 4),
             "small_input": config.get("small_input", False),
             "final_bn_relu": config.get("final_bn_relu", True),
+            "use_se": config.get("use_se", False),
+            "se_reduction_ratio": config.get("se_reduction_ratio", 16),
         }
         return cls(**config)
 
@@ -245,16 +273,7 @@ class DenseNet(ClassyModel):
         # evaluate all dense blocks:
         out = self.features(out)
 
-        # By default the classification layer is implemented as one head on top
-        # of the last block. The head is automatically computed right after the
-        # last block.
-        head_outputs = self.execute_heads()
-        if len(head_outputs) == 0:
-            raise Exception("Expecting at least one head that generates output")
-        elif len(head_outputs) == 1:
-            return list(head_outputs.values())[0]
-        else:
-            return head_outputs
+        return out
 
     def get_optimizer_params(self):
         # use weight decay on BatchNorm for DenseNets

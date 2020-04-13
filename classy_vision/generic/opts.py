@@ -19,12 +19,6 @@ def add_generic_args(parser):
         "--config_file", type=str, help="path to config file for model", required=True
     )
     parser.add_argument(
-        "--device",
-        default=None,
-        type=str,
-        help="device to use: either 'cpu' or 'gpu'. If unspecified, will use GPU when available and CPU otherwise.",
-    )
-    parser.add_argument(
         "--num_workers",
         default=4,
         type=int,
@@ -145,13 +139,6 @@ def check_generic_args(args):
     # check types and values:
     assert is_pos_int(args.num_workers), "incorrect number of workers"
     assert is_pos_int(args.visdom_port), "incorrect visdom port"
-    assert (
-        args.device is None or args.device == "cpu" or args.device == "gpu"
-    ), "unknown device"
-
-    # check that CUDA is available:
-    if args.device == "gpu":
-        assert torch.cuda.is_available(), "CUDA required to train on GPUs"
 
     # create checkpoint folder if it does not exist:
     if args.checkpoint_folder != "" and not os.path.exists(args.checkpoint_folder):

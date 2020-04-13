@@ -6,12 +6,25 @@
 
 import unittest
 from test.generic.config_utils import get_test_classy_task, get_test_model_configs
+from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import ModelComplexityHook
 from classy_vision.models import build_model
 
 
-class TestModelComplexityHook(unittest.TestCase):
+class TestModelComplexityHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {}
+
+        self.constructor_test_helper(
+            config=config,
+            hook_type=ModelComplexityHook,
+            hook_registry_name="model_complexity",
+        )
+
     def test_model_complexity_hook(self) -> None:
         model_configs = get_test_model_configs()
 

@@ -86,13 +86,17 @@ def build_model(config):
 import_all_modules(FILE_ROOT, "classy_vision.models")
 
 from .classy_block import ClassyBlock  # isort:skip
-from .classy_model import ClassyModelEvaluationMode  # isort:skip
-from .classy_model_wrapper import ClassyModelWrapper  # isort:skip
+from .classy_model import (  # isort:skip
+    ClassyModelEvaluationMode,  # isort:skip
+    ClassyModelWrapper,  # isort:skip
+    ClassyModelHeadExecutorWrapper,  # isort:skip
+)  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .mlp import MLP  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D  # isort:skip
+from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer  # isort:skip
 
 
 __all__ = [
@@ -101,10 +105,12 @@ __all__ = [
     "ClassyBlock",
     "ClassyModel",
     "ClassyModelEvaluationMode",
+    "ClassyModelHeadExecutorWrapper",
     "ClassyModelWrapper",
     "DenseNet",
     "MLP",
     "ResNet",
     "ResNeXt",
     "ResNeXt3D",
+    "SqueezeAndExcitationLayer",
 ]

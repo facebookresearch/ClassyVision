@@ -7,12 +7,22 @@
 import unittest
 import unittest.mock as mock
 from test.generic.config_utils import get_test_classy_task
+from test.generic.hook_test_utils import HookTestBase
 
 import progressbar
 from classy_vision.hooks import ProgressBarHook
 
 
-class TestProgressBarHook(unittest.TestCase):
+class TestProgressBarHook(HookTestBase):
+    def test_constructors(self) -> None:
+        """
+        Test that the hooks are constructed correctly.
+        """
+        config = {}
+        self.constructor_test_helper(
+            config=config, hook_type=ProgressBarHook, hook_registry_name="progress_bar"
+        )
+
     @mock.patch("classy_vision.hooks.progress_bar_hook.progressbar")
     @mock.patch("classy_vision.hooks.progress_bar_hook.is_master")
     def test_progress_bar(
