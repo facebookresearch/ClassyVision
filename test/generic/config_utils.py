@@ -20,6 +20,7 @@ def get_test_task_config(head_num_classes=1000):
                 "num_samples": 2000,
                 "seed": 0,
                 "batchsize_per_replica": 32,
+                "num_workers": 1,
                 "use_shuffle": True,
                 "transforms": [
                     {
@@ -43,6 +44,7 @@ def get_test_task_config(head_num_classes=1000):
                 "num_samples": 2000,
                 "seed": 0,
                 "batchsize_per_replica": 32,
+                "num_workers": 1,
                 "use_shuffle": False,
                 "transforms": [
                     {
@@ -99,6 +101,7 @@ def get_fast_test_task_config(head_num_classes=1000):
                 "num_samples": 10,
                 "seed": 0,
                 "batchsize_per_replica": 2,
+                "num_workers": 1,
                 "use_shuffle": False,
                 "transforms": [
                     {
@@ -122,6 +125,7 @@ def get_fast_test_task_config(head_num_classes=1000):
                 "num_samples": 10,
                 "seed": 0,
                 "batchsize_per_replica": 2,
+                "num_workers": 1,
                 "use_shuffle": False,
                 "transforms": [
                     {

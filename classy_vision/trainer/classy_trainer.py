@@ -25,23 +25,6 @@ class ClassyTrainer:
 
     """
 
-    def __init__(
-        self,
-        num_dataloader_workers: int = 0,
-        dataloader_mp_context: Optional[str] = None,
-    ):
-        """Constructor for ClassyTrainer.
-
-        Args:
-            num_dataloader_workers: Number of CPU processes doing dataloading
-                per GPU. If 0, then dataloading is done on main thread.
-            dataloader_mp_context: Determines how to launch
-                new processes for dataloading. Must be one of "fork", "forkserver",
-                "spawn". If None, process launching is inherited from parent.
-        """
-        self.num_dataloader_workers = num_dataloader_workers
-        self.dataloader_mp_context = dataloader_mp_context
-
     def train(self, task: ClassyTask):
         """Runs training phases, phases are generated from the config.
 
@@ -50,10 +33,7 @@ class ClassyTrainer:
                 everything that is needed for training
         """
 
-        task.prepare(
-            num_dataloader_workers=self.num_dataloader_workers,
-            dataloader_mp_context=self.dataloader_mp_context,
-        )
+        task.prepare()
         assert isinstance(task, ClassyTask)
 
         # make sure all the workers start training at the same time

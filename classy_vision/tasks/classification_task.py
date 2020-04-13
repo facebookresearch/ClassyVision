@@ -10,6 +10,7 @@ import logging
 import math
 import time
 from typing import Any, Dict, List, NamedTuple, Optional, Union
+import multiprocessing as mp
 
 import torch
 import torch.nn as nn
@@ -148,6 +149,7 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
+        self.dataloader_mp_context = "spawn"
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -499,7 +501,6 @@ class ClassificationTask(ClassyTask):
     def build_dataloader(
         self,
         phase_type,
-        num_workers,
         pin_memory,
         multiprocessing_context=None,
         **kwargs,
@@ -508,12 +509,6 @@ class ClassificationTask(ClassyTask):
 
         Args:
             phase_type: "train" or "test" iterable
-            num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See `PyTorch dataloader
-                documentation <https://pytorch.org/docs/stable/
-                data.html#torch.utils.data.DataLoader>`_ for more details on
-                ``num_workers`` and the usage
-                of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
                 documentation for details on ``pin_memory``.
             multiprocessing_context: Determines how processes are spawned.
@@ -524,24 +519,17 @@ class ClassificationTask(ClassyTask):
             Returns a iterable over the dataset
         """
         return self.datasets[phase_type].iterator(
-            num_workers=num_workers,
             pin_memory=pin_memory,
             multiprocessing_context=multiprocessing_context,
             **kwargs,
         )
 
     def build_dataloaders(
-        self, num_workers, pin_memory, multiprocessing_context=None, **kwargs
+        self, pin_memory, multiprocessing_context=None, **kwargs
     ):
         """Build a dataloader for each phase type
 
         Args:
-            num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See `PyTorch dataloader
-                documentation <https://pytorch.org/docs/stable/
-                data.html#torch.utils.data.DataLoader>`_
-                for more details on num_workers and the usage
-                of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
                 documentation for details on pin_memory.
             multiprocessing_context: Determines how processes are spawned.
@@ -554,7 +542,6 @@ class ClassificationTask(ClassyTask):
         return {
             phase_type: self.build_dataloader(
                 phase_type,
-                num_workers=num_workers,
                 pin_memory=pin_memory,
                 multiprocessing_context=multiprocessing_context,
                 **kwargs,
@@ -562,24 +549,15 @@ class ClassificationTask(ClassyTask):
             for phase_type in self.datasets.keys()
         }
 
-    def prepare(self, num_dataloader_workers=0, dataloader_mp_context=None):
-        """Prepares task for training, populates all derived attributes
-
-        Args:
-            num_dataloader_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process
-            dataloader_mp_context: Determines how processes are spawned.
-                Value must be one of None, "spawn", "fork", "forkserver".
-                If None, then context is inherited from parent process
-        """
+    def prepare(self):
+        """Prepares task for training, populates all derived attributes """
 
         pin_memory = self.use_gpu and torch.cuda.device_count() > 1
 
         self.phases = self._build_phases()
         self.dataloaders = self.build_dataloaders(
-            num_workers=num_dataloader_workers,
             pin_memory=pin_memory,
-            multiprocessing_context=dataloader_mp_context,
+            multiprocessing_context=mp.get_context(self.dataloader_mp_context),
         )
 
         if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
