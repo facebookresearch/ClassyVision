@@ -6,6 +6,7 @@
 
 import copy
 import enum
+import json
 import logging
 import math
 import time
@@ -412,6 +413,10 @@ class ClassificationTask(ClassyTask):
 
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
+
+        # NOTE: this is a private member and only meant to be used for
+        # logging/debugging purposes. See __repr__ implementation
+        task._config = config
 
         return task
 
@@ -854,7 +859,7 @@ class ClassificationTask(ClassyTask):
         resets counters, shuffles dataset, rebuilds iterators, and
         sets the train / test state for phase.
         """
-        logging.info("Advancing phase")
+        logging.debug("Advancing phase")
         # Reset meters for next phase / epoch
         for meter in self.meters:
             meter.reset()
@@ -893,7 +898,7 @@ class ClassificationTask(ClassyTask):
         if phase_type is None:
             phase_type = self.phase_type
 
-        logging.info("Recreating data loader for new phase")
+        logging.debug("Recreating data loader for new phase")
         num_workers = 0
         if hasattr(self.dataloaders[phase_type], "num_workers"):
             num_workers = self.dataloaders[phase_type].num_workers
@@ -979,10 +984,10 @@ class ClassificationTask(ClassyTask):
     def on_phase_end(self):
         self.log_phase_end("train")
 
-        logging.info("Syncing meters on phase end...")
+        logging.debug("Syncing meters on phase end...")
         for meter in self.meters:
             meter.sync_state()
-        logging.info("...meters synced")
+        logging.debug("...meters synced")
         barrier()
 
         for hook in self.hooks:
@@ -1016,3 +1021,8 @@ class ClassificationTask(ClassyTask):
                 "im_per_sec": im_per_sec,
             }
         )
+
+    def __repr__(self):
+        if hasattr(self, "_config"):
+            return json.dumps(self._config, indent=4)
+        return super().__repr__()

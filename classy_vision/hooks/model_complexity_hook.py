@@ -53,10 +53,9 @@ class ModelComplexityHook(ClassyHook):
                     )
             except NotImplementedError:
                 logging.warning(
-                    """Model contains unsupported modules:
-                Could not compute FLOPs for model forward pass. Exception:""",
-                    exc_info=True,
+                    "Model contains unsupported modules, could not compute FLOPs for model forward pass."
                 )
+                logging.debug("Exception:", exc_info=True)
             try:
                 self.num_activations = compute_activations(
                     task.base_model,

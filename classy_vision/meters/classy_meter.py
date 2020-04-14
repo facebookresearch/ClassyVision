@@ -114,3 +114,7 @@ class ClassyMeter:
         This is used to load the state of the meter from a checkpoint.
         """
         raise NotImplementedError
+
+    def __repr__(self):
+        values = ",".join([f"{key}={value:.6f}" for key, value in self.value.items()])
+        return f"{self.name}_meter({values})"
