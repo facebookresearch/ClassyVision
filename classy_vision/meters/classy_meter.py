@@ -114,3 +114,16 @@ class ClassyMeter:
         This is used to load the state of the meter from a checkpoint.
         """
         raise NotImplementedError
+
+    def __repr__(self):
+        """Returns a string representation of the meter, used for logging.
+
+        The default implementation assumes value is a dict. value is not
+        required to be a dict, and in that case you should override this
+        method."""
+
+        if not isinstance(self.value, dict):
+            return super().__repr__()
+
+        values = ",".join([f"{key}={value:.6f}" for key, value in self.value.items()])
+        return f"{self.name}_meter({values})"

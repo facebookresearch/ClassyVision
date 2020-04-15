@@ -126,9 +126,6 @@ class RecallAtKMeter(ClassyMeter):
         self._curr_correct_predictions_k = state["curr_correct_predictions_k"].clone()
         self._curr_correct_targets = state["curr_correct_targets"].clone()
 
-    def __repr__(self):
-        return repr({"name": self.name, "value": self.value})
-
     def update(self, model_output, target, **kwargs):
         """
         args:
