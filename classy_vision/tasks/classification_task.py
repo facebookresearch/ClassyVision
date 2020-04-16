@@ -823,14 +823,14 @@ class ClassificationTask(ClassyTask):
             self.update_meters(output, sample)
 
         # Run backwards pass / update optimizer
+        self.optimizer.zero_grad()
         if self.amp_args is not None:
-            self.optimizer.zero_grad()
             with apex.amp.scale_loss(
                 local_loss, self.optimizer.optimizer
             ) as scaled_loss:
                 scaled_loss.backward()
         else:
-            self.optimizer.backward(local_loss)
+            local_loss.backward()
 
         self.check_inf_nan(loss)
 

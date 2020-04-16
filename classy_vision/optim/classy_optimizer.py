@@ -195,19 +195,6 @@ class ClassyOptimizer:
         self.optimizer.load_state_dict(state["optim"])
         self.parameters.update(state["parameters"])
 
-    def backward(self, loss: torch.Tensor) -> None:
-        """
-        Computer gradients with respect to the loss.
-
-        Calls :func:`zero_grad` and then computes the gradient using
-        `torch.Tensor.backward <https://pytorch.org/docs/stable/
-        tensors.html#torch.Tensor.backward>`_. See :mod:`torch.autograd` for
-        more information.
-        """
-        # TODO (aadcock): Add gradient accumulation logic
-        self.zero_grad()
-        loss.backward()
-
     def update_schedule_on_epoch(self, where: float) -> None:
         """
         Update the param schedule at the end of an epoch.
