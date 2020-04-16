@@ -178,6 +178,33 @@ class TestClassificationTask(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(test_only_task)
 
+    def test_test_only_task(self):
+        """
+        Tests the task in test mode by running train_steps
+        to make sure the train_steps run as expected on a
+        test_only task
+        """
+        test_config = get_fast_test_task_config()
+        test_config["test_only"] = True
+
+        # delete train dataset
+        del test_config["dataset"]["train"]
+
+        test_only_task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
+
+        test_only_task.prepare()
+        test_state = test_only_task.get_classy_state()
+
+        # We expect that test only state is test, no matter what train state is
+        self.assertFalse(test_state["train"])
+
+        # Num updates should be 0
+        self.assertEqual(test_state["num_updates"], 0)
+
+        # Verify task will run
+        trainer = LocalTrainer()
+        trainer.train(test_only_task)
+
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
     def test_checkpointing_different_device(self):
         config = get_fast_test_task_config()
