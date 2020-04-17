@@ -48,6 +48,13 @@ def is_pos_int_list(l):
     return type(l) == list and all(is_pos_int(n) for n in l)
 
 
+def is_pos_int_tuple(t):
+    """
+    Returns True if a tuple contains positive integers
+    """
+    return type(t) == tuple and all(is_pos_int(n) for n in t)
+
+
 def is_long_tensor(tensor):
     """
     Returns True if a tensor is a long tensor.
