@@ -345,6 +345,9 @@ class ResNeXt(ClassyModel):
         self._num_classes = out_planes
 
         # initialize weights:
+        self._initialize_weights(zero_init_bn_residuals)
+
+    def _initialize_weights(self, zero_init_bn_residuals):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
