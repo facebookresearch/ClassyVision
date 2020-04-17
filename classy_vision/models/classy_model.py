@@ -342,7 +342,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
             found = found or found_in_child
         return found
 
-    def set_heads(self, heads: Dict[str, Dict[str, ClassyHead]]):
+    def set_heads(self, heads: Dict[str, List[ClassyHead]]):
         """Attach all the heads to corresponding blocks.
 
         A head is expected to be a ClassyHead object. For more
@@ -350,7 +350,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
 
         Args:
             heads (Dict): a mapping between attachable block name
-                and a dictionary of heads attached to that block. For
+                and a list of heads attached to that block. For
                 example, if you have two different teams that want to
                 attach two different heads for downstream classifiers to
                 the 15th block, then they would use:
@@ -358,7 +358,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
                 .. code-block:: python
 
                   heads = {"block15":
-                      {"team1": classifier_head1, "team2": classifier_head2}
+                      [classifier_head1, classifier_head2]
                   }
         """
         self.clear_heads()
@@ -367,11 +367,13 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         for block_name, block_heads in heads.items():
             if not self._make_module_attachable(self, block_name):
                 raise KeyError(f"{block_name} not found in the model")
-            for head in block_heads.values():
+            for head in block_heads:
                 if head.unique_id in head_ids:
                     raise ValueError("head id {} already exists".format(head.unique_id))
                 head_ids.add(head.unique_id)
-            self._heads[block_name] = nn.ModuleDict(block_heads)
+            self._heads[block_name] = nn.ModuleDict(
+                {head.unique_id: head for head in block_heads}
+            )
 
     def get_heads(self):
         """Returns the heads on the model
@@ -381,7 +383,10 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         attached to that block.
 
         """
-        return {block_name: dict(heads) for block_name, heads in self._heads.items()}
+        return {
+            block_name: list(heads.values())
+            for block_name, heads in self._heads.items()
+        }
 
     @property
     def head_outputs(self):
