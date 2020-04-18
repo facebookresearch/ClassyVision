@@ -17,12 +17,17 @@ def _return_true(_sample):
     return True
 
 
+DEFAULT_NUM_WORKERS = 4
+
+
 class ClassyDataset:
     """
     Class representing a dataset abstraction.
 
     This class wraps a :class:`torch.utils.data.Dataset` via the `dataset` attribute
-    and configures the dataloaders needed to access the datasets.
+    and configures the dataloaders needed to access the datasets. By default,
+    this class will use `DEFAULT_NUM_WORKERS` processes to load the data
+    (num_workers in :class:`torch.utils.data.DataLoader`).
     Transforms which need to be applied to the data should be specified in this class.
     ClassyDataset can be instantiated from a configuration file as well.
     """
@@ -61,6 +66,7 @@ class ClassyDataset:
         self.transform = transform
         self.num_samples = num_samples
         self.dataset = dataset
+        self.num_workers = DEFAULT_NUM_WORKERS
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyDataset":
@@ -102,6 +108,9 @@ class ClassyDataset:
         num_samples = config.get("num_samples")
         transform_config = config.get("transforms")
         return transform_config, batchsize_per_replica, shuffle, num_samples
+
+    def set_num_workers(self, num_workers):
+        self.num_workers = num_workers
 
     def __getitem__(self, idx: int):
         assert idx >= 0 and idx < len(
@@ -155,13 +164,14 @@ class ClassyDataset:
         assert isinstance(shuffle_seed, int), "Shuffle seed must be an int"
         epoch = kwargs.get("current_phase_id", 0)
         assert isinstance(epoch, int), "Epoch must be an int"
+        num_workers_override = kwargs.get("num_workers", self.num_workers)
 
         offset_epoch = shuffle_seed + epoch
 
         return DataLoader(
             self,
             batch_size=self.batchsize_per_replica,
-            num_workers=kwargs.get("num_workers", 0),
+            num_workers=num_workers_override,
             pin_memory=kwargs.get("pin_memory", False),
             worker_init_fn=kwargs.get("worker_init_fn", None),
             multiprocessing_context=kwargs.get("multiprocessing_context", None),
