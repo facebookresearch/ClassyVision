@@ -234,7 +234,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         head_state_dict = {}
         for block, heads in attached_heads.items():
             head_state_dict[block] = {
-                head_name: head.state_dict() for head_name, head in heads.items()
+                head.unique_id: head.state_dict() for head in heads
             }
         model_state_dict = {
             "model": {"trunk": trunk_state_dict, "heads": head_state_dict}
