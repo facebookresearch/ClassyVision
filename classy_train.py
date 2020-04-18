@@ -99,7 +99,7 @@ def main(args, config):
         args.distributed_backend
     ]
 
-    trainer = trainer_class(num_dataloader_workers=args.num_workers)
+    trainer = trainer_class()
 
     logging.info(
         f"Starting training on rank {get_rank()} worker. "

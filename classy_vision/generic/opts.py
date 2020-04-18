@@ -19,12 +19,6 @@ def add_generic_args(parser):
         "--config_file", type=str, help="path to config file for model", required=True
     )
     parser.add_argument(
-        "--num_workers",
-        default=4,
-        type=int,
-        help="number of dataloading workers (default = 4)",
-    )
-    parser.add_argument(
         "--checkpoint_folder",
         default="",
         type=str,
@@ -137,7 +131,6 @@ def check_generic_args(args):
     """
 
     # check types and values:
-    assert is_pos_int(args.num_workers), "incorrect number of workers"
     assert is_pos_int(args.visdom_port), "incorrect visdom port"
 
     # create checkpoint folder if it does not exist:
