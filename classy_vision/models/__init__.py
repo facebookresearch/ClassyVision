@@ -69,7 +69,7 @@ def build_model(config):
     assert config["name"] in MODEL_REGISTRY, "unknown model"
     model = MODEL_REGISTRY[config["name"]].from_config(config)
     if "heads" in config:
-        heads = defaultdict(dict)
+        heads = defaultdict(list)
         for head_config in config["heads"]:
             assert "fork_block" in head_config, "Expect fork_block in config"
             fork_block = head_config["fork_block"]
@@ -77,7 +77,7 @@ def build_model(config):
             del updated_config["fork_block"]
 
             head = build_head(updated_config)
-            heads[fork_block][head.unique_id] = head
+            heads[fork_block].append(head)
         model.set_heads(heads)
     return model
 

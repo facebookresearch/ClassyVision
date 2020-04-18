@@ -250,6 +250,6 @@ class TestClassyModelAdapter(unittest.TestCase):
         head = FullyConnectedHead(
             unique_id="default", in_plane=2048, num_classes=num_classes
         )
-        classy_model.set_heads({"layer4": {head.unique_id: head}})
+        classy_model.set_heads({"layer4": [head]})
         input = torch.ones((1, 3, 224, 224))
         self.assertEqual(classy_model(input).shape, (1, num_classes))
