@@ -65,10 +65,10 @@ class TestClassificationTask(unittest.TestCase):
             dataset = build_dataset(config["dataset"][phase_type])
             task.set_dataset(dataset, phase_type)
 
-        task.prepare(num_dataloader_workers=1)
+        task.prepare()
 
         task = build_task(config)
-        task.prepare(num_dataloader_workers=1)
+        task.prepare()
 
     def test_checkpointing(self):
         """

@@ -66,13 +66,11 @@ class FineTuningTask(ClassificationTask):
         else:
             self.base_model.train(phase["train"])
 
-    def prepare(
-        self, num_dataloader_workers: int = 0, dataloader_mp_context=None
-    ) -> None:
+    def prepare(self) -> None:
         assert (
             self.pretrained_checkpoint is not None
         ), "Need a pretrained checkpoint for fine tuning"
-        super().prepare(num_dataloader_workers, dataloader_mp_context)
+        super().prepare()
         if self.checkpoint is None:
             # no checkpoint exists, load the model's state from the pretrained
             # checkpoint
