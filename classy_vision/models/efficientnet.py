@@ -143,6 +143,8 @@ class Conv2dSamePadding(nn.Conv2d):
         pad_w = max(
             (out_w - 1) * self.stride[1] + (kernel_w - 1) * dilation_w + 1 - image_w, 0
         )
+        self.out_h = out_h
+        self.out_w = out_w
         self.same_padding = None
         if pad_h > 0 or pad_w > 0:
             self.same_padding = nn.ZeroPad2d(
@@ -167,6 +169,22 @@ class Conv2dSamePadding(nn.Conv2d):
             self.groups,
         )
         return x
+
+    def flops(self, x):
+        batchsize_per_replica = x.size()[0]
+        return (
+            batchsize_per_replica
+            * self.in_channels
+            * self.out_channels
+            * self.kernel_size[0]
+            * self.kernel_size[1]
+            * self.out_h
+            * self.out_w
+            / self.groups
+        )
+
+    def activations(self, x, out):
+        return out.numel()
 
 
 class MBConvBlock(nn.Module):
@@ -527,7 +545,7 @@ class EfficientNet(ClassyModel):
         outputs = self.trunk_output(outputs)
 
         # Average Pooling
-        outputs = self.avg_pooling(outputs).squeeze()
+        outputs = self.avg_pooling(outputs).view(outputs.size(0), -1)
 
         # Dropout
         if self.dropout is not None:
