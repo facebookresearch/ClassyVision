@@ -61,7 +61,7 @@ class FineTuningTask(ClassificationTask):
             # convert all the sub-modules to the eval mode, except the heads
             self.base_model.eval()
             for heads in self.base_model.get_heads().values():
-                for h in heads.values():
+                for h in heads:
                     h.train(phase["train"])
         else:
             self.base_model.train(phase["train"])
@@ -89,7 +89,7 @@ class FineTuningTask(ClassificationTask):
             for param in self.base_model.parameters():
                 param.requires_grad = False
             for heads in self.base_model.get_heads().values():
-                for h in heads.values():
+                for h in heads:
                     for param in h.parameters():
                         param.requires_grad = True
             # re-create ddp model

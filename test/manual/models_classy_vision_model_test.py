@@ -94,10 +94,10 @@ class TestClassyModel(unittest.TestCase):
         model = build_model(config["model"])
         trunk_state = model.get_classy_state()
 
-        heads = defaultdict(dict)
+        heads = defaultdict(list)
         for head_config in head_configs:
             head = build_head(head_config)
-            heads[head_config["fork_block"]][head.unique_id] = head
+            heads[head_config["fork_block"]].append(head)
         model.set_heads(heads)
         model_state = model.get_classy_state()
 
