@@ -11,7 +11,7 @@ from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import ModelTensorboardHook
 from classy_vision.models import build_model
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 class TestModelTensorboardHook(HookTestBase):
