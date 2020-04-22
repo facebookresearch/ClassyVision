@@ -395,24 +395,15 @@ def _patched_computation_module(module, complexity_computer, module_name):
     return ComputeModule
 
 
-def modify_forward(model, complexity_computer, prefix="", patch_attr=None):
+def modify_forward(model, complexity_computer, patch_attr=None):
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
-    if is_leaf(model) or (patch_attr is not None and hasattr(model, patch_attr)):
-        model.__class__ = _patched_computation_module(
-            model, complexity_computer, prefix
-        )
-
-    else:
-        for name, child in model.named_children():
-            modify_forward(
-                child,
-                complexity_computer,
-                prefix=f"{prefix}.{name}",
-                patch_attr=patch_attr,
+    for name, module in model.named_modules():
+        if is_leaf(module) or (patch_attr is not None and hasattr(module, patch_attr)):
+            module.__class__ = _patched_computation_module(
+                module, complexity_computer, name
             )
-
     return model
 
 
@@ -420,13 +411,9 @@ def restore_forward(model, patch_attr=None):
     """
     Restore original forward in model.
     """
-    if is_leaf(model) or (patch_attr is not None and hasattr(model, patch_attr)):
-        model.__class__ = model.orig_type
-
-    else:
-        for child in model.children():
-            restore_forward(child, patch_attr=patch_attr)
-
+    for module in model.modules():
+        if is_leaf(module) or (patch_attr is not None and hasattr(module, patch_attr)):
+            module.__class__ = module.orig_type
     return model
 
 

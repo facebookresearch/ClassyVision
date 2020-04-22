@@ -70,6 +70,18 @@ class TestModel(nn.Module):
         return self.linear(out)
 
 
+class TestModel2(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # create a model which re-uses a module (conv_module in this case)
+        conv_module = nn.Conv2d(3, 3, (2, 2), bias=False)
+        self.seq_1 = nn.Sequential(conv_module)
+        self.seq_2 = nn.Sequential(conv_module)
+
+    def forward(self, x):
+        return self.seq_1(x) + self.seq_2(x)
+
+
 class TestProfilerFunctions(unittest.TestCase):
     def test_complexity_calculation_resnext(self) -> None:
         model_configs = get_test_model_configs()
@@ -107,3 +119,21 @@ class TestProfilerFunctions(unittest.TestCase):
             (2 * 3) + (2 * 3 * 4 * 4) + (4 * 5) + (300 * 300) + (10 * 10) + (2 * 2),
         )  # TestModule.linear + TestConvModule + TestConvModule.linear +
         # TestModel.linear + TestModel.extra_params + TestModel.unused_linear
+
+        # test that we calculate complexity correctly for a model which re-uses a module
+        model = TestModel2()
+        in_channels = 3
+        out_channels = 3
+        out_h, out_w = 9, 9
+        kernel_h, kernel_w = 2, 2
+        conv_flops = in_channels * out_channels * out_h * out_w * kernel_h * kernel_w
+        conv_activations = out_channels * out_h * out_w
+        self.assertEqual(
+            compute_activations(model, input_shape=input_shape), conv_activations * 2
+        )  # the conv is applied twice
+        self.assertEqual(
+            compute_flops(model, input_shape=input_shape), conv_flops * 2
+        )  # the conv is applied twice
+        self.assertEqual(
+            count_params(model), in_channels * out_channels * kernel_h * kernel_w
+        )
