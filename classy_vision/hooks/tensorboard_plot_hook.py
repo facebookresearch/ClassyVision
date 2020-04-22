@@ -7,6 +7,8 @@
 import logging
 import time
 from typing import Any, Dict, List, Optional
+from functools import partial
+from collections import defaultdict
 
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.hooks import register_hook
@@ -22,7 +24,6 @@ except ImportError:
 
 
 log = logging.getLogger()
-
 
 @register_hook("tensorboard_plot")
 class TensorboardPlotHook(ClassyHook):
@@ -69,12 +70,22 @@ class TensorboardPlotHook(ClassyHook):
         log_period = config.get("log_period", 10)
         return cls(tb_writer=tb_writer, log_period=log_period)
 
+    def fhook(self, layer_id, mod, inp, output):
+        self.activation_mean[layer_id] = output.data.mean()
+        self.activation_std[layer_id] = output.data.std()
+
+    def on_start(self, task):
+        for layer_id, module in enumerate(task.base_model.classy_model):
+            module.register_forward_hook(partial(self.fhook, layer_id))
+
     def on_phase_start(self, task) -> None:
         """Initialize losses and learning_rates."""
         self.learning_rates = []
         self.wall_times = []
         self.num_updates = []
         self.step_idx = 0
+        self.activation_mean = defaultdict(list)
+        self.activation_std = defaultdict(list)
 
         if not is_master():
             return
@@ -102,6 +113,9 @@ class TensorboardPlotHook(ClassyHook):
             self.learning_rates.append(learning_rate_val)
             self.wall_times.append(time.time())
             self.num_updates.append(task.num_updates)
+
+            self.tb_writer.add_scalars("Activation/mean", {f'layer {layer_id}': mean for layer_id, mean in self.activation_mean.items()}, global_step=task.num_updates)
+            self.tb_writer.add_scalars("Activation/std", {f'layer {layer_id}': mean for layer_id, mean in self.activation_std.items()}, global_step=task.num_updates)
 
         self.step_idx += 1
 
@@ -137,6 +151,7 @@ class TensorboardPlotHook(ClassyHook):
                 self.tb_writer.add_histogram(
                     f"Parameters/{name}", parameter, global_step=phase_type_idx
                 )
+
 
         loss_avg = sum(task.losses) / (batches * task.get_batchsize_per_replica())
 

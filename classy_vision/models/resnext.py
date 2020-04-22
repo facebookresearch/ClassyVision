@@ -363,6 +363,10 @@ class ResNeXt(ClassyModel):
                     if hasattr(m, "bn"):
                         nn.init.constant_(m.bn.weight, 0)
 
+    def __iter__(self):
+        yield self.initial_block
+        yield from iter(self.blocks)
+
     def _make_initial_block(self, small_input, init_planes, basic_layer):
         if small_input:
             self.initial_block = SmallInputInitialBlock(init_planes)
