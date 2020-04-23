@@ -12,9 +12,13 @@
 <div class="body" role="main">
 <div class="section" id="module-classy_vision.hooks">
 <span id="hooks"></span><h1>Hooks<a class="headerlink" href="#module-classy_vision.hooks" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
+<dl class="function">
+<dt id="classy_vision.hooks.build_hooks">
+<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">build_hooks</code><span class="sig-paren">(</span><em class="sig-param">hook_configs: List[Dict[str, Any]]</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.build_hooks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="function">
 <dt id="classy_vision.hooks.build_hook">
-<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">build_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hook_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.build_hook" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">build_hook</code><span class="sig-paren">(</span><em class="sig-param">hook_config: Dict[str, Any]</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.build_hook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a ClassyHook from a config.</p>
 <p>This assumes a ‘name’ key in the config which is used to determine
 what hook class to instantiate. For instance, a config <cite>{“name”:
@@ -22,9 +26,9 @@ what hook class to instantiate. For instance, a config <cite>{“name”:
 “my_hook” (see <a class="reference internal" href="#classy_vision.hooks.register_hook" title="classy_vision.hooks.register_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_hook()</span></code></a>) and call .from_config on
 it.</p>
 </dd></dl>
-<dl class="py function">
+<dl class="function">
 <dt id="classy_vision.hooks.register_hook">
-<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">register_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.register_hook" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">register_hook</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.register_hook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers a <a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> subclass.</p>
 <p>This decorator allows Classy Vision to instantiate a subclass of
 <a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> from a configuration file, even if the class
@@ -38,14 +42,14 @@ apply this decorator to a ClassyHook subclass, like this:</p>
 <p>To instantiate a hook from a configuration file, see
 <a class="reference internal" href="#classy_vision.hooks.build_hook" title="classy_vision.hooks.build_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_hook()</span></code></a>.</p>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.CheckpointHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">CheckpointHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">input_args</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">phase_types</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Collection<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checkpoint_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.CheckpointHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">CheckpointHook</code><span class="sig-paren">(</span><em class="sig-param">checkpoint_folder: str</em>, <em class="sig-param">input_args: Any = None</em>, <em class="sig-param">phase_types: Optional[Collection[str]] = None</em>, <em class="sig-param">checkpoint_period: int = 1</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.CheckpointHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hook to checkpoint a model’s task.</p>
 <p>Saves the checkpoints in checkpoint_folder.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">input_args</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">phase_types</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Collection<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checkpoint_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">checkpoint_folder: str</em>, <em class="sig-param">input_args: Any = None</em>, <em class="sig-param">phase_types: Optional[Collection[str]] = None</em>, <em class="sig-param">checkpoint_period: int = 1</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of CheckpointHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -61,37 +65,37 @@ not specified, it is set to checkpoint after “train” phases.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checkpoint the task every checkpoint_period phases.</p>
 <p>We do not necessarily checkpoint the task at the end of every phase.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the start of training.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.CheckpointHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.CheckpointHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ClassyHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHook</code><a class="headerlink" href="#classy_vision.hooks.ClassyHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for hooks.</p>
@@ -115,14 +119,18 @@ E.g. -</p>
         <span class="c1"># self.state.my_lambda = lambda x: x^2</span>
 </pre></div>
 </div>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ClassyHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.hooks.ClassyHook.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span> → classy_vision.hooks.classy_hook.ClassyHook<a class="headerlink" href="#classy_vision.hooks.ClassyHook.from_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.get_classy_state">
-<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><a class="headerlink" href="#classy_vision.hooks.ClassyHook.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict[str, Any]<a class="headerlink" href="#classy_vision.hooks.ClassyHook.get_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the state of the ClassyHook.</p>
 <p>The returned state is used for checkpointing.</p>
 <dl class="field-list simple">
@@ -131,39 +139,39 @@ E.g. -</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.name">
-<em class="property">classmethod </em><code class="sig-name descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><a class="headerlink" href="#classy_vision.hooks.ClassyHook.name" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → str<a class="headerlink" href="#classy_vision.hooks.ClassyHook.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the name of the class.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.on_end">
-<em class="property">abstract </em><code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_end" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the end of training.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.on_phase_end">
-<em class="property">abstract </em><code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the end of each phase (epoch).</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.on_phase_start">
-<em class="property">abstract </em><code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the start of each phase.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.on_start">
-<em class="property">abstract </em><code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_start" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the start of training.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.on_step">
-<em class="property">abstract </em><code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_step" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called each time after parameters have been updated by the optimizer.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ClassyHook.set_classy_state">
-<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state_dict: Dict[str, Any]</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ClassyHook.set_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the state of the ClassyHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -174,14 +182,42 @@ E.g. -</p>
 <p>This is used to load the state of the hook from a checkpoint.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ClassyHookFunctions">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHookFunctions</code><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enumeration of all the hook functions in the ClassyHook class.</p>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_end">
+<code class="sig-name descname">on_end</code><em class="property"> = 7</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_forward">
+<code class="sig-name descname">on_forward</code><em class="property"> = 3</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_loss_and_meter">
+<code class="sig-name descname">on_loss_and_meter</code><em class="property"> = 4</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_loss_and_meter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><em class="property"> = 6</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><em class="property"> = 2</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_start">
+<code class="sig-name descname">on_start</code><em class="property"> = 1</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.hooks.ClassyHookFunctions.on_step">
+<code class="sig-name descname">on_step</code><em class="property"> = 5</em><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions.on_step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ExponentialMovingAverageModelHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em>, <em class="sig-param"><span class="n">consider_bn_buffers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ExponentialMovingAverageModelHook</code><span class="sig-paren">(</span><em class="sig-param">decay: float</em>, <em class="sig-param">consider_bn_buffers: bool = True</em>, <em class="sig-param">device: str = 'cpu'</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hook which keeps a track of the exponential moving average (EMA) of the model’s
 parameters and applies the EMA params to the model during the test phases.</p>
 <p>Saving the state in cpu will save gpu memory, but will make training slower since
@@ -191,9 +227,9 @@ the model parameters will need to be moved to cpu before the averaging.</p>
 <p>This hooks stores two additional copies of the model’s parameters, which will
 increase memory usage significantly.</p>
 </div>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">decay</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em>, <em class="sig-param"><span class="n">consider_bn_buffers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">decay: float</em>, <em class="sig-param">consider_bn_buffers: bool = True</em>, <em class="sig-param">device: str = 'cpu'</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of ExponentialMovingAverageModelHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -207,50 +243,50 @@ not updating weights after initialization.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator">
-<code class="sig-name descname">get_model_state_iterator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em><span class="sig-paren">)</span> → Iterable<span class="p">[</span>Tuple<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_model_state_iterator</code><span class="sig-paren">(</span><em class="sig-param">model: torch.nn.modules.module.Module</em><span class="sig-paren">)</span> → Iterable[Tuple[str, Any]]<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an iterator over the model state to apply EMA to.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the end of each phase (epoch).</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the start of each phase.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called at the start of training.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called each time after parameters have been updated by the optimizer.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state">
-<code class="sig-name descname">set_model_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em>, <em class="sig-param"><span class="n">use_ema</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_model_state</code><span class="sig-paren">(</span><em class="sig-param">task</em>, <em class="sig-param">use_ema: bool</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Depending on use_ema, set the appropriate state for the model.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">LossLrMeterLoggingHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_freq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">LossLrMeterLoggingHook</code><span class="sig-paren">(</span><em class="sig-param">log_freq: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs the loss, optimizer LR, and meters. Logs at the end of a phase.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_freq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_freq: Optional[int] = None</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of LossLrMeterLoggingHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -258,44 +294,43 @@ not updating weights after initialization.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log the loss, optimizer LR, and meters for the phase.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.LossLrMeterLoggingHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.LossLrMeterLoggingHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log the LR every log_freq batches, if log_freq is not None.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.TensorboardPlotHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TensorboardPlotHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TensorboardPlotHook</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em>, <em class="sig-param">log_period: int = 10</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hook for writing the losses, learning rates and meters to <cite>tensorboard &lt;https
 ://www.tensorflow.org/tensorboard</cite>&gt;_.</p>
 <p>Global steps are counted in terms of the number of samples processed.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em>, <em class="sig-param">log_period: int = 10</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of TensorboardPlotHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -307,84 +342,88 @@ not updating weights after initialization.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.hooks.tensorboard_plot_hook.TensorboardPlotHook<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.hooks.tensorboard_plot_hook.TensorboardPlotHook<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>The config is expected to include the key
 “summary_writer” with arguments which correspond
 to those listed at &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.
 readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add the losses and learning rates to tensorboard.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize losses and learning_rates.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.TensorboardPlotHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Store the observed learning rates.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ModelComplexityHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelComplexityHook</code><a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs the number of paramaters and forward pass FLOPs and activations of the model.</p>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.hooks.ModelComplexityHook.get_summary">
+<code class="sig-name descname">get_summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.get_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.hooks.ModelComplexityHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelComplexityHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelComplexityHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelComplexityHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure number of parameters, FLOPs and activations.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelComplexityHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ModelTensorboardHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelTensorboardHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelTensorboardHook</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shows the model graph in <cite>TensorBoard &lt;https
 ://www.tensorflow.org/tensorboard</cite>&gt;_.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">tb_writer</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of ModelTensorboardHook.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -396,129 +435,129 @@ readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.8)">typing.Dict</a><span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>typing.Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.hooks.model_tensorboard_hook.ModelTensorboardHook<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: [typing.Dict[str, typing.Any]]</em><span class="sig-paren">)</span> → classy_vision.hooks.model_tensorboard_hook.ModelTensorboardHook<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>The config is expected to include the key
 “summary_writer” with arguments which correspond
 to those listed at &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.
 readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the model on Tensorboard.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ModelTensorboardHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ProfilerHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ProfilerHook</code><a class="headerlink" href="#classy_vision.hooks.ProfilerHook" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Hook to profile a model and to show model runtime information, such as</dt><dd><p>the time breakdown in milliseconds of forward/backward pass.</p>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProfilerHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProfilerHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProfilerHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProfilerHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Profile the forward pass.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProfilerHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProfilerHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.ProgressBarHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ProgressBarHook</code><a class="headerlink" href="#classy_vision.hooks.ProgressBarHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays a progress bar to show progress in processing batches.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor method of ProgressBarHook.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear the progress bar at the end of the phase.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and display a progress bar with 0 progress.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.ProgressBarHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.ProgressBarHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the progress bar with the batch size.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.hooks.VisdomHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">VisdomHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">server</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">env</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">'main'</span></em>, <em class="sig-param"><span class="n">title_suffix</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.VisdomHook" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">VisdomHook</code><span class="sig-paren">(</span><em class="sig-param">server: str</em>, <em class="sig-param">port: str</em>, <em class="sig-param">env: str = 'main'</em>, <em class="sig-param">title_suffix: str = ''</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.VisdomHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots metrics on to <a class="reference external" href="https://github.com/facebookresearch/visdom">Visdom</a>.</p>
 <dl class="simple">
 <dt>Visdom is a flexible tool for creating, organizing, and sharing visualizations</dt><dd><p>of live, rich data. It supports Python.</p>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">server</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">env</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">'main'</span></em>, <em class="sig-param"><span class="n">title_suffix</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">server: str</em>, <em class="sig-param">port: str</em>, <em class="sig-param">env: str = 'main'</em>, <em class="sig-param">title_suffix: str = ''</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -530,32 +569,32 @@ readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the metrics on visdom.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.hooks.VisdomHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> → None<a class="headerlink" href="#classy_vision.hooks.VisdomHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
@@ -599,7 +638,7 @@ readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 </form>
 </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 </div>
 </div>
 <div class="clearer"></div>

@@ -17,22 +17,25 @@
 # In[ ]:
 
 
-! git clone https://github.com/facebookresearch/ClassyVision.git
+get_ipython().system(' git clone https://github.com/facebookresearch/ClassyVision.git')
+
 
 # In this tutorial we'll use [Ray](https://github.com/ray-project/ray) to manage the AWS resources. Install Ray and all its required dependencies with:
 
 # In[ ]:
 
 
-% cd ./ClassyVision/examples/ray
-! pip install -r requirements.txt
+get_ipython().run_line_magic('cd', './ClassyVision/examples/ray')
+get_ipython().system(' pip install -r requirements.txt')
+
 
 # You should also set up your AWS CLI and credentials as described [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration). To make sure everything is working, run on your terminal:
 
 # In[ ]:
 
 
-! aws ec2 describe-instances
+get_ipython().system(' aws ec2 describe-instances')
+
 
 # That should print a JSON file with all your current AWS instances (or empty if you don't have any). 
 
@@ -43,14 +46,16 @@
 # In[ ]:
 
 
-! ray up cluster_config.yml -y
+get_ipython().system(' ray up cluster_config.yml -y')
+
 
 # That will take about 10 minutes, and at the end you should see a message explaining how to connect to the cluster. Assuming everything worked successfully, now tear down the cluster:
 
 # In[ ]:
 
 
-! ray down cluster_config.yml -y
+get_ipython().system(' ray down cluster_config.yml -y')
+
 
 # We will now set up an EFS volume to store our code and datasets. Follow [this tutorial](https://aws.amazon.com/getting-started/tutorials/create-network-file-system/) to setup the EFS volume in your AWS account. 
 # 
@@ -61,7 +66,8 @@
 # In[ ]:
 
 
-! ray up cluster_config.yml
+get_ipython().system(' ray up cluster_config.yml')
+
 
 # ## 3. Create a project
 # 
@@ -70,7 +76,8 @@
 # In[ ]:
 
 
-! ray attach cluster_config.yml
+get_ipython().system(' ray attach cluster_config.yml')
+
 
 # That will give you an SSH session into the head node, which coordinates all the worker nodes in Ray. In our example configuration file, the head node is a CPU-only machine, and the workers all have GPUs.
 # 
@@ -82,6 +89,7 @@
 $ cd efs
 $ classy-project my_project
 
+
 # ## 4. Start training
 # 
 # Classy Vision comes with a launcher analogous to `torch.distributed.launch`, but that launches jobs on multiple machines using Ray. To use it, simply run:
@@ -90,6 +98,7 @@ $ classy-project my_project
 
 
 $ python -m classy_vision.distributed.launch_ray --nnodes=2 --use_env ~/efs/my_project/classy_train.py --config ~/efs/my_project/configs/template_config.json --distributed_backend ddp
+
 
 # Your first time running this you might see logs like `Not enough GPUs available`. That's normal, and it's because the worker nodes are still being set up. The `ray up` command should have printed a command line you can use to follow their progress. But there's no need to do anything, the launcher will wait until the workers are available and execute the command automatically.
 # 

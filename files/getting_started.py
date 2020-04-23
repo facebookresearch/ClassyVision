@@ -21,7 +21,8 @@
 # In[ ]:
 
 
-! pip install classy_vision
+get_ipython().system(' pip install classy_vision')
+
 
 # If you would like to use GPUs for training, make sure your environment has a working version of PyTorch with CUDA:
 
@@ -31,12 +32,14 @@
 import torch
 torch.cuda.is_available()
 
+
 # The cell above should output `True`. Check out [this link](https://pytorch.org/get-started/locally/) for more details on how to install PyTorch. For this tutorial, we will be using [Tensorboard](https://www.tensorflow.org/tensorboard). Install it with the following (on your terminal):
 
 # In[ ]:
 
 
-! pip install tensorboard tensorboardX
+get_ipython().system(' pip install tensorboard tensorboardX')
+
 
 # ## 1. Start a new project
 # 
@@ -45,19 +48,22 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-! classy-project my-project
+get_ipython().system(' classy-project my-project')
+
 
 # In[ ]:
 
 
-%cd my-project
+get_ipython().run_line_magic('cd', 'my-project')
+
 
 # To launch a training run on the current machine, run the following:
 
 # In[ ]:
 
 
-!  ./classy_train.py --config configs/template_config.json
+get_ipython().system('  ./classy_train.py --config configs/template_config.json')
+
 
 # That's it! You've launched your first training run. This trained a small MLP model on a dataset made of random noise, which is not that useful. The `classy-project` utility creates the scaffolding for you project, and you should modify it according to your needs. We'll learn how to customize your runs on the next few tutorials.
 # 
@@ -66,7 +72,8 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-! find . | grep -v \.pyc | sort
+get_ipython().system(' find . | grep -v \\.pyc | sort')
+
 
 # Here's what each folder means:
 # 
@@ -82,7 +89,8 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-! cat configs/template_config.json
+get_ipython().system(' cat configs/template_config.json')
+
 
 # That file can be shared with other researchers whenever you want them to reproduce your experiments. We generate `json` files by default, but `YAML` will be officially supported soon.
 # 
@@ -93,7 +101,8 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-! python -m torch.distributed.launch --use_env --nproc_per_node=2 ./classy_train.py --config configs/template_config.json --distributed_backend ddp
+get_ipython().system(' python -m torch.distributed.launch --use_env --nproc_per_node=2 ./classy_train.py --config configs/template_config.json --distributed_backend ddp')
+
 
 # If you have two GPUs on your current machine, that command will launch one process per GPU and start a [DistributedDataParallel](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html) training run. 
 # 
@@ -104,8 +113,9 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-%load_ext tensorboard
-%tensorboard --logdir .
+get_ipython().run_line_magic('load_ext', 'tensorboard')
+get_ipython().run_line_magic('tensorboard', '--logdir .')
+
 
 # You can also customize the tensorboard output directory by editing `classy_train.py`.
 
@@ -130,6 +140,7 @@ checkpoint_data = load_checkpoint(checkpoint_dir)
 model = ClassyModel.from_checkpoint(checkpoint_data)
 model
 
+
 # That's it! You can now use that model for inference as usual.
 # 
 # ## 5. Resuming from checkpoints
@@ -139,7 +150,8 @@ model
 # In[ ]:
 
 
-! ./classy_train.py --config configs/template_config.json --checkpoint_load_path ./output_<timestamp>/checkpoints
+get_ipython().system(' ./classy_train.py --config configs/template_config.json --checkpoint_load_path ./output_<timestamp>/checkpoints')
+
 
 # ## 6. Interactive development
 # 
@@ -149,6 +161,7 @@ model
 
 
 import classy_vision
+
 
 # In[ ]:
 
@@ -219,16 +232,11 @@ optimizer.set_param_schedulers(
 
 from classy_vision.trainer import LocalTrainer
 
-task = ClassificationTask() \
-        .set_model(model) \
-        .set_dataset(train_dataset, "train") \
-        .set_dataset(test_dataset, "test") \
-        .set_loss(loss) \
-        .set_optimizer(optimizer) \
-        .set_num_epochs(1)
+task = ClassificationTask()         .set_model(model)         .set_dataset(train_dataset, "train")         .set_dataset(test_dataset, "test")         .set_loss(loss)         .set_optimizer(optimizer)         .set_num_epochs(1)
 
 trainer = LocalTrainer()
 trainer.train(task)
+
 
 # That's it! Your model is trained now and ready for inference:
 
@@ -241,6 +249,7 @@ with torch.no_grad():
     y_hat = model(x)
 
 y_hat
+
 
 # ## 7. Training a ResNet 50 on ImageNet
 # 
@@ -316,6 +325,7 @@ config = {
     }
 }
 
+
 # ## 8. Conclusion
 # 
 # In this tutorial, we learned how to start a new project using Classy Vision, how to perform tranining locally and how to do multi-gpu training on a single machine. We also saw how to use Tensorboard to visualize training progress, how to load models from checkpoints and how resume training from a checkpoint file. We also went over how to use the ImageNet dataset to train a ResNet 50. In the next tutorials, we'll look into how to add custom datasets, models and loss functions to Classy Vision so you can adapt it to your needs, and how to launch distributed training on multiple nodes.
@@ -325,6 +335,7 @@ config = {
 # [1] Goyal, Priya, et al. "Accurate, large minibatch sgd: Training imagenet in 1 hour." arXiv preprint arXiv:1706.02677 (2017).
 
 # In[ ]:
+
 
 
 

@@ -12,18 +12,18 @@
 <div class="body" role="main">
 <div class="section" id="module-classy_vision.models">
 <span id="models"></span><h1>Models<a class="headerlink" href="#module-classy_vision.models" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
+<dl class="function">
 <dt id="classy_vision.models.build_model">
-<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.build_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.build_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a ClassyModel from a config.</p>
 <p>This assumes a ‘name’ key in the config which is used to determine what
 model class to instantiate. For instance, a config <cite>{“name”: “my_model”,
 “foo”: “bar”}</cite> will find a class that was registered as “my_model”
 (see <a class="reference internal" href="#classy_vision.models.register_model" title="classy_vision.models.register_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_model()</span></code></a>) and call .from_config on it.</p>
 </dd></dl>
-<dl class="py function">
+<dl class="function">
 <dt id="classy_vision.models.register_model">
-<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">register_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.register_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">register_model</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.register_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers a <a class="reference internal" href="#classy_vision.models.ClassyModel" title="classy_vision.models.ClassyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModel</span></code></a> subclass.</p>
 <p>This decorator allows Classy Vision to instantiate a subclass of
 <a class="reference internal" href="#classy_vision.models.ClassyModel" title="classy_vision.models.ClassyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModel</span></code></a> from a configuration file, even if the class itself is
@@ -37,19 +37,19 @@ a ClassyModel subclass, like this:</p>
 <p>To instantiate a model from a configuration file, see
 <a class="reference internal" href="#classy_vision.models.build_model" title="classy_vision.models.build_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_model()</span></code></a>.</p>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ClassyBlock">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyBlock</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">module</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyBlock</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">module</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is a thin wrapper for head execution, which records the output of
 wrapped module for executing the heads forked from this module.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyBlock.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">module</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">module</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyBlock.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -60,8 +60,12 @@ instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div>
 </dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyBlock.wrapped_module">
+<code class="sig-name descname">wrapped_module</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyBlock.wrapped_module" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ClassyModel">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModel</code><a class="headerlink" href="#classy_vision.models.ClassyModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for models in classy vision.</p>
@@ -85,36 +89,48 @@ and to make their model torchscriptable. This is set to
 <a class="reference internal" href="#classy_vision.models.ClassyModelHeadExecutorWrapper" title="classy_vision.models.ClassyModelHeadExecutorWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModelHeadExecutorWrapper</span></code></a> by default.</p>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyModel.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.attachable_block_names">
 <em class="property">property </em><code class="sig-name descname">attachable_block_names</code><a class="headerlink" href="#classy_vision.models.ClassyModel.attachable_block_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return names of all attachable blocks.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.clear_heads">
+<code class="sig-name descname">clear_heads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.clear_heads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.evaluation_mode">
 <em class="property">property </em><code class="sig-name descname">evaluation_mode</code><a class="headerlink" href="#classy_vision.models.ClassyModel.evaluation_mode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used by video models for averaging over contiguous clips.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.execute_heads">
+<code class="sig-name descname">execute_heads</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict[str, torch.Tensor]<a class="headerlink" href="#classy_vision.models.ClassyModel.execute_heads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.extract_features">
-<code class="sig-name descname">extract_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.extract_features" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">extract_features</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.extract_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract features from the model.</p>
 <p>Derived classes can implement this method to extract the features before
 applying the final fully connected layer.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform computation of blocks in the order define in get_blocks.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.from_checkpoint">
+<em class="property">classmethod </em><code class="sig-name descname">from_checkpoint</code><span class="sig-paren">(</span><em class="sig-param">checkpoint</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.classy_model.ClassyModel<a class="headerlink" href="#classy_vision.models.ClassyModel.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.models.classy_model.ClassyModel<a class="headerlink" href="#classy_vision.models.ClassyModel.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a ClassyModel from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -125,9 +141,9 @@ applying the final fully connected layer.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.from_model">
-<em class="property">classmethod </em><code class="sig-name descname">from_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_shape</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_depth</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_model" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_model</code><span class="sig-paren">(</span><em class="sig-param">model: torch.nn.modules.module.Module</em>, <em class="sig-param">input_shape: Optional[Tuple] = None</em>, <em class="sig-param">output_shape: Optional[Tuple] = None</em>, <em class="sig-param">model_depth: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an <code class="xref py py-class docutils literal notranslate"><span class="pre">nn.Module</span></code> to a <cite>ClassyModel</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -141,9 +157,13 @@ applying the final fully connected layer.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.models.ClassyModel.get_block_outputs">
+<code class="sig-name descname">get_block_outputs</code><span class="sig-paren">(</span><span class="sig-paren">)</span> → Dict[str, torch.Tensor]<a class="headerlink" href="#classy_vision.models.ClassyModel.get_block_outputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.get_classy_state">
-<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">deep_copy</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param">deep_copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the state of the ClassyModel.</p>
 <p>The returned state is used for checkpointing.</p>
 <dl class="simple">
@@ -161,7 +181,7 @@ returned Dict’s state will be tied to the object’s.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.get_heads">
 <code class="sig-name descname">get_heads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_heads" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the heads on the model</p>
@@ -169,9 +189,9 @@ returned Dict’s state will be tied to the object’s.</p>
 <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Module">nn.Modules</a>
 attached to that block.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.get_optimizer_params">
-<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bn_weight_decay</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><em class="sig-param">bn_weight_decay=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns param groups for optimizer.</p>
 <p>Function to return dict of params with “keys” from
 {“regularized_params”, “unregularized_params”}
@@ -188,20 +208,20 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.head_outputs">
 <em class="property">property </em><code class="sig-name descname">head_outputs</code><a class="headerlink" href="#classy_vision.models.ClassyModel.head_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return outputs of all heads in the format of Dict[head_id, output]</p>
 <p>Head outputs are cached during a forward pass.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModel.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.load_head_states">
-<code class="sig-name descname">load_head_states</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.load_head_states" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_head_states</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.load_head_states" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load only the state (weights) of the heads.</p>
 <p>For a trunk-heads model, this function allows the user to
 only update the head state of the model. Useful for attaching
@@ -212,19 +232,19 @@ fine-tuned heads to a pre-trained trunk.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ClassyModel.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.output_shape">
 <em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModel.output_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.set_classy_state">
-<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the state of the ClassyModel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -234,21 +254,21 @@ fine-tuned heads to a pre-trained trunk.</p>
 </dl>
 <p>This is used to load the state of the model from a checkpoint.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModel.set_heads">
-<code class="sig-name descname">set_heads</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">heads</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>classy_vision.heads.classy_head.ClassyHead<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_heads" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_heads</code><span class="sig-paren">(</span><em class="sig-param">heads: Dict[str, List[classy_vision.heads.classy_head.ClassyHead]]</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.set_heads" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attach all the heads to corresponding blocks.</p>
 <p>A head is expected to be a ClassyHead object. For more
 details, see <a class="reference internal" href="heads.html#classy_vision.heads.ClassyHead" title="classy_vision.heads.ClassyHead"><code class="xref py py-class docutils literal notranslate"><span class="pre">classy_vision.heads.ClassyHead</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>heads</strong> (<em>Dict</em>) – <p>a mapping between attachable block name
-and a dictionary of heads attached to that block. For
+and a list of heads attached to that block. For
 example, if you have two different teams that want to
 attach two different heads for downstream classifiers to
 the 15th block, then they would use:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">heads</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"block15"</span><span class="p">:</span>
-    <span class="p">{</span><span class="s2">"team1"</span><span class="p">:</span> <span class="n">classifier_head1</span><span class="p">,</span> <span class="s2">"team2"</span><span class="p">:</span> <span class="n">classifier_head2</span><span class="p">}</span>
+    <span class="p">[</span><span class="n">classifier_head1</span><span class="p">,</span> <span class="n">classifier_head2</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -256,47 +276,63 @@ the 15th block, then they would use:</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py attribute">
+<dl class="attribute">
 <dt id="classy_vision.models.ClassyModel.wrapper_cls">
 <code class="sig-name descname">wrapper_cls</code><a class="headerlink" href="#classy_vision.models.ClassyModel.wrapper_cls" title="Permalink to this definition">¶</a></dt>
 <dd><p>alias of <a class="reference internal" href="#classy_vision.models.ClassyModelHeadExecutorWrapper" title="classy_vision.models.ClassyModelHeadExecutorWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyModelHeadExecutorWrapper</span></code></a></p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ClassyModelEvaluationMode">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelEvaluationMode</code><a class="headerlink" href="#classy_vision.models.ClassyModelEvaluationMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enumeration.</p>
+<dl class="attribute">
+<dt id="classy_vision.models.ClassyModelEvaluationMode.DEFAULT">
+<code class="sig-name descname">DEFAULT</code><em class="property"> = 0</em><a class="headerlink" href="#classy_vision.models.ClassyModelEvaluationMode.DEFAULT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="attribute">
+<dt id="classy_vision.models.ClassyModelEvaluationMode.VIDEO_CLIP_AVERAGING">
+<code class="sig-name descname">VIDEO_CLIP_AVERAGING</code><em class="property"> = 1</em><a class="headerlink" href="#classy_vision.models.ClassyModelEvaluationMode.VIDEO_CLIP_AVERAGING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ClassyModelHeadExecutorWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelHeadExecutorWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classy_model</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelHeadExecutorWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelHeadExecutorWrapper</code><span class="sig-paren">(</span><em class="sig-param">classy_model</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelHeadExecutorWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper which changes the forward to also execute and return head output.</p>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelHeadExecutorWrapper.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelHeadExecutorWrapper.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ClassyModelWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classy_model</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ClassyModelWrapper</code><span class="sig-paren">(</span><em class="sig-param">classy_model</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base ClassyModel wrapper class.</p>
 <p>This class acts as a thin pass through wrapper which lets users modify the behavior
 of ClassyModels, such as changing the return output of the forward() call.
 This wrapper acts as a ClassyModel by itself and the underlying model can be
 accessed by the <cite>classy_model</cite> attribute.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModelWrapper.__call__">
-<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call self as a function.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ClassyModelWrapper.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classy_model</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">classy_model</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.ClassyModelWrapper.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModelWrapper.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.DenseNet">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">DenseNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">num_classes</span></em>, <em class="sig-param"><span class="n">init_planes</span></em>, <em class="sig-param"><span class="n">growth_rate</span></em>, <em class="sig-param"><span class="n">expansion</span></em>, <em class="sig-param"><span class="n">small_input</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">DenseNet</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">num_classes</em>, <em class="sig-param">init_planes</em>, <em class="sig-param">growth_rate</em>, <em class="sig-param">expansion</em>, <em class="sig-param">small_input</em>, <em class="sig-param">final_bn_relu</em>, <em class="sig-param">use_se=False</em>, <em class="sig-param">se_reduction_ratio=16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
 <dt id="classy_vision.models.DenseNet.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">num_classes</span></em>, <em class="sig-param"><span class="n">init_planes</span></em>, <em class="sig-param"><span class="n">growth_rate</span></em>, <em class="sig-param"><span class="n">expansion</span></em>, <em class="sig-param"><span class="n">small_input</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">num_classes</em>, <em class="sig-param">init_planes</em>, <em class="sig-param">growth_rate</em>, <em class="sig-param">expansion</em>, <em class="sig-param">small_input</em>, <em class="sig-param">final_bn_relu</em>, <em class="sig-param">use_se=False</em>, <em class="sig-param">se_reduction_ratio=16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of a standard densely connected network (DenseNet).</p>
 <dl>
 <dt>Contains the following attachable blocks:</dt><dd><dl class="simple">
@@ -324,14 +360,14 @@ stage. Only used if <cite>use_se</cite> is <cite>True</cite>.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform computation of blocks in the order define in get_blocks.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.densenet.DenseNet<a class="headerlink" href="#classy_vision.models.DenseNet.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.models.densenet.DenseNet<a class="headerlink" href="#classy_vision.models.DenseNet.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a DenseNet from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -343,7 +379,7 @@ See <a class="reference internal" href="#classy_vision.models.DenseNet.__init__"
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.get_optimizer_params">
 <code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns param groups for optimizer.</p>
@@ -362,39 +398,96 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.DenseNet.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.DenseNet.output_shape">
 <em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.output_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
-<dt id="classy_vision.models.MLP">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">MLP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dim</span></em>, <em class="sig-param"><span class="n">output_dim</span></em>, <em class="sig-param"><span class="n">hidden_dims</span></em>, <em class="sig-param"><span class="n">dropout</span></em>, <em class="sig-param"><span class="n">first_dropout</span></em>, <em class="sig-param"><span class="n">use_batchnorm</span></em>, <em class="sig-param"><span class="n">first_batchnorm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP" title="Permalink to this definition">¶</a></dt>
-<dd><p>MLP model using ReLU. Useful for testing on CPUs.</p>
-<dl class="py method">
-<dt id="classy_vision.models.MLP.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dim</span></em>, <em class="sig-param"><span class="n">output_dim</span></em>, <em class="sig-param"><span class="n">hidden_dims</span></em>, <em class="sig-param"><span class="n">dropout</span></em>, <em class="sig-param"><span class="n">first_dropout</span></em>, <em class="sig-param"><span class="n">use_batchnorm</span></em>, <em class="sig-param"><span class="n">first_batchnorm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt id="classy_vision.models.EfficientNet">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">EfficientNet</code><span class="sig-paren">(</span><em class="sig-param">num_classes: int, model_params: classy_vision.models.efficientnet.EfficientNetParams, bn_momentum: float, bn_epsilon: float, width_divisor: int, min_width: Optional[int], drop_connect_rate: float, use_se: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.EfficientNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of EfficientNet, <a class="reference external" href="https://arxiv.org/pdf/1905.11946.pdf">https://arxiv.org/pdf/1905.11946.pdf</a>
+.. rubric:: References</p>
+<p><a class="reference external" href="https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet">https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet</a>
+<a class="reference external" href="https://github.com/lukemelas/EfficientNet-PyTorch">https://github.com/lukemelas/EfficientNet-PyTorch</a></p>
+<dl class="simple">
+<dt>NOTE: the original implementation uses the names depth_divisor and min_depth</dt><dd><p>to refer to the number of channels, which is confusing, since the paper
+refers to the channel dimension as width. We use the width_divisor and
+min_width names instead.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">num_classes: int, model_params: classy_vision.models.efficientnet.EfficientNetParams, bn_momentum: float, bn_epsilon: float, width_divisor: int, min_width: Optional[int], drop_connect_rate: float, use_se: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.EfficientNet.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for ClassyModel.</p>
 </dd></dl>
-<dl class="py method">
-<dt id="classy_vision.models.MLP.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.forward" title="Permalink to this definition">¶</a></dt>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.EfficientNet.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform computation of blocks in the order define in get_blocks.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.EfficientNet.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates an EfficientNet from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for an EfficientNet.
+See <a class="reference internal" href="#classy_vision.models.EfficientNet.__init__" title="classy_vision.models.EfficientNet.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code></a> for parameters expected in the config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ResNeXt instance.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.init_weights">
+<code class="sig-name descname">init_weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.EfficientNet.init_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.EfficientNet.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.EfficientNet.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.EfficientNet.output_shape">
+<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.EfficientNet.output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected output tensor shape</p>
+</dd></dl>
+</dd></dl>
+<dl class="class">
+<dt id="classy_vision.models.MLP">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">MLP</code><span class="sig-paren">(</span><em class="sig-param">input_dim</em>, <em class="sig-param">output_dim</em>, <em class="sig-param">hidden_dims</em>, <em class="sig-param">dropout</em>, <em class="sig-param">first_dropout</em>, <em class="sig-param">use_batchnorm</em>, <em class="sig-param">first_batchnorm</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>MLP model using ReLU. Useful for testing on CPUs.</p>
+<dl class="method">
+<dt id="classy_vision.models.MLP.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">input_dim</em>, <em class="sig-param">output_dim</em>, <em class="sig-param">hidden_dims</em>, <em class="sig-param">dropout</em>, <em class="sig-param">first_dropout</em>, <em class="sig-param">use_batchnorm</em>, <em class="sig-param">first_batchnorm</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor for ClassyModel.</p>
+</dd></dl>
+<dl class="method">
+<dt id="classy_vision.models.MLP.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.MLP.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="method">
 <dt id="classy_vision.models.MLP.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.mlp.MLP<a class="headerlink" href="#classy_vision.models.MLP.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.models.mlp.MLP<a class="headerlink" href="#classy_vision.models.MLP.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a MLP from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -406,38 +499,38 @@ See <a class="reference internal" href="#classy_vision.models.MLP.__init__" titl
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.MLP.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.MLP.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.MLP.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.MLP.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.MLP.output_shape">
 <em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.MLP.output_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ResNet">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNet</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>ResNet is a special case of <a class="reference internal" href="#classy_vision.models.ResNeXt" title="classy_vision.models.ResNeXt"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResNeXt</span></code></a>.</p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNet.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNet.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNet.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>See <a class="reference internal" href="#classy_vision.models.ResNeXt.__init__" title="classy_vision.models.ResNeXt.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">ResNeXt.__init__()</span></code></a></p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ResNeXt">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bn_weight_decay</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">init_planes: int = 64</em>, <em class="sig-param">reduction: int = 4</em>, <em class="sig-param">small_input: bool = False</em>, <em class="sig-param">zero_init_bn_residuals: bool = False</em>, <em class="sig-param">base_width_and_cardinality: Union[Tuple</em>, <em class="sig-param">List</em>, <em class="sig-param">None] = None</em>, <em class="sig-param">basic_layer: bool = False</em>, <em class="sig-param">final_bn_relu: bool = True</em>, <em class="sig-param">bn_weight_decay: Optional[bool] = False</em>, <em class="sig-param">use_se: bool = False</em>, <em class="sig-param">se_reduction_ratio: int = 16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
 <dt id="classy_vision.models.ResNeXt.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bn_weight_decay</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">num_blocks</em>, <em class="sig-param">init_planes: int = 64</em>, <em class="sig-param">reduction: int = 4</em>, <em class="sig-param">small_input: bool = False</em>, <em class="sig-param">zero_init_bn_residuals: bool = False</em>, <em class="sig-param">base_width_and_cardinality: Union[Tuple</em>, <em class="sig-param">List</em>, <em class="sig-param">None] = None</em>, <em class="sig-param">basic_layer: bool = False</em>, <em class="sig-param">final_bn_relu: bool = True</em>, <em class="sig-param">bn_weight_decay: Optional[bool] = False</em>, <em class="sig-param">use_se: bool = False</em>, <em class="sig-param">se_reduction_ratio: int = 16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of <a class="reference external" href="https://arxiv.org/pdf/1611.05431.pdf">ResNeXt</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -453,14 +546,14 @@ stage. Only used if <cite>use_se</cite> is <cite>True</cite>.</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform computation of blocks in the order define in get_blocks.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.resnext.ResNeXt<a class="headerlink" href="#classy_vision.models.ResNeXt.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.models.resnext.ResNeXt<a class="headerlink" href="#classy_vision.models.ResNeXt.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a ResNeXt from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -472,9 +565,9 @@ See <a class="reference internal" href="#classy_vision.models.ResNeXt.__init__" 
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.get_classy_state">
-<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">deep_copy</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.get_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_classy_state</code><span class="sig-paren">(</span><em class="sig-param">deep_copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.get_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the state of the ClassyModel.</p>
 <p>The returned state is used for checkpointing.</p>
 <dl class="simple">
@@ -492,7 +585,7 @@ returned Dict’s state will be tied to the object’s.</p>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.get_optimizer_params">
 <code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns param groups for optimizer.</p>
@@ -511,24 +604,24 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ResNeXt.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.output_shape">
 <em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.output_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt.set_classy_state">
-<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.set_classy_state" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_classy_state</code><span class="sig-paren">(</span><em class="sig-param">state</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.set_classy_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the state of the ClassyModel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -539,9 +632,9 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 <p>This is used to load the state of the model from a checkpoint.</p>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.ResNeXt3D">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_key</span></em>, <em class="sig-param"><span class="n">input_planes</span></em>, <em class="sig-param"><span class="n">clip_crop_size</span></em>, <em class="sig-param"><span class="n">skip_transformation_type</span></em>, <em class="sig-param"><span class="n">residual_transformation_type</span></em>, <em class="sig-param"><span class="n">frames_per_clip</span></em>, <em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">stem_name</span></em>, <em class="sig-param"><span class="n">stem_planes</span></em>, <em class="sig-param"><span class="n">stem_temporal_kernel</span></em>, <em class="sig-param"><span class="n">stem_spatial_kernel</span></em>, <em class="sig-param"><span class="n">stem_maxpool</span></em>, <em class="sig-param"><span class="n">stage_planes</span></em>, <em class="sig-param"><span class="n">stage_temporal_kernel_basis</span></em>, <em class="sig-param"><span class="n">temporal_conv_1x1</span></em>, <em class="sig-param"><span class="n">stage_temporal_stride</span></em>, <em class="sig-param"><span class="n">stage_spatial_stride</span></em>, <em class="sig-param"><span class="n">num_groups</span></em>, <em class="sig-param"><span class="n">width_per_group</span></em>, <em class="sig-param"><span class="n">zero_init_residual_transform</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt3D</code><span class="sig-paren">(</span><em class="sig-param">input_key</em>, <em class="sig-param">input_planes</em>, <em class="sig-param">clip_crop_size</em>, <em class="sig-param">skip_transformation_type</em>, <em class="sig-param">residual_transformation_type</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">num_blocks</em>, <em class="sig-param">stem_name</em>, <em class="sig-param">stem_planes</em>, <em class="sig-param">stem_temporal_kernel</em>, <em class="sig-param">stem_spatial_kernel</em>, <em class="sig-param">stem_maxpool</em>, <em class="sig-param">stage_planes</em>, <em class="sig-param">stage_temporal_kernel_basis</em>, <em class="sig-param">temporal_conv_1x1</em>, <em class="sig-param">stage_temporal_stride</em>, <em class="sig-param">stage_spatial_stride</em>, <em class="sig-param">num_groups</em>, <em class="sig-param">width_per_group</em>, <em class="sig-param">zero_init_residual_transform</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Implementation of:</dt><dd><p>1. Conventional <a class="reference external" href="https://arxiv.org/abs/1812.03982">post-activated 3D ResNe(X)t</a>.</p>
 <p>2. <a class="reference external" href="https://arxiv.org/abs/1811.12814">Pre-activated 3D ResNe(X)t</a>.
@@ -549,9 +642,9 @@ The model consists of one stem, a number of stages, and one or multiple
 heads that are attached to different blocks in the stage.</p>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt3D.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_key</span></em>, <em class="sig-param"><span class="n">input_planes</span></em>, <em class="sig-param"><span class="n">clip_crop_size</span></em>, <em class="sig-param"><span class="n">skip_transformation_type</span></em>, <em class="sig-param"><span class="n">residual_transformation_type</span></em>, <em class="sig-param"><span class="n">frames_per_clip</span></em>, <em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">stem_name</span></em>, <em class="sig-param"><span class="n">stem_planes</span></em>, <em class="sig-param"><span class="n">stem_temporal_kernel</span></em>, <em class="sig-param"><span class="n">stem_spatial_kernel</span></em>, <em class="sig-param"><span class="n">stem_maxpool</span></em>, <em class="sig-param"><span class="n">stage_planes</span></em>, <em class="sig-param"><span class="n">stage_temporal_kernel_basis</span></em>, <em class="sig-param"><span class="n">temporal_conv_1x1</span></em>, <em class="sig-param"><span class="n">stage_temporal_stride</span></em>, <em class="sig-param"><span class="n">stage_spatial_stride</span></em>, <em class="sig-param"><span class="n">num_groups</span></em>, <em class="sig-param"><span class="n">width_per_group</span></em>, <em class="sig-param"><span class="n">zero_init_residual_transform</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">input_key</em>, <em class="sig-param">input_planes</em>, <em class="sig-param">clip_crop_size</em>, <em class="sig-param">skip_transformation_type</em>, <em class="sig-param">residual_transformation_type</em>, <em class="sig-param">frames_per_clip</em>, <em class="sig-param">num_blocks</em>, <em class="sig-param">stem_name</em>, <em class="sig-param">stem_planes</em>, <em class="sig-param">stem_temporal_kernel</em>, <em class="sig-param">stem_spatial_kernel</em>, <em class="sig-param">stem_maxpool</em>, <em class="sig-param">stage_planes</em>, <em class="sig-param">stage_temporal_kernel_basis</em>, <em class="sig-param">temporal_conv_1x1</em>, <em class="sig-param">stage_temporal_stride</em>, <em class="sig-param">stage_spatial_stride</em>, <em class="sig-param">num_groups</em>, <em class="sig-param">width_per_group</em>, <em class="sig-param">zero_init_residual_transform</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt3D.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -595,9 +688,9 @@ residual transformation is initialized to zero</p></li>
 </dd>
 </dl>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.ResNeXt3D.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.resnext3d.ResNeXt3D<a class="headerlink" href="#classy_vision.models.ResNeXt3D.from_config" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param">config: Dict[str, Any]</em><span class="sig-paren">)</span> → classy_vision.models.resnext3d.ResNeXt3D<a class="headerlink" href="#classy_vision.models.ResNeXt3D.from_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a ResNeXt3D from a configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -610,18 +703,18 @@ See <a class="reference internal" href="#classy_vision.models.ResNeXt3D.__init__
 </dl>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.models.SqueezeAndExcitationLayer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">SqueezeAndExcitationLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">SqueezeAndExcitationLayer</code><span class="sig-paren">(</span><em class="sig-param">in_planes</em>, <em class="sig-param">reduction_ratio=16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Squeeze and excitation layer, as per <a class="reference external" href="https://arxiv.org/pdf/1709.01507.pdf">https://arxiv.org/pdf/1709.01507.pdf</a></p>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.SqueezeAndExcitationLayer.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">in_planes</em>, <em class="sig-param">reduction_ratio=16</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 </dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.models.SqueezeAndExcitationLayer.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -672,7 +765,7 @@ registered hooks while the latter silently ignores them.</p>
 </form>
 </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 </div>
 </div>
 <div class="clearer"></div>

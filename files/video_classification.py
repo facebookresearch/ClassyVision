@@ -68,6 +68,7 @@ datasets["test"] = build_dataset({
     }    
 })
 
+
 # Note we specify different transforms for training and testing split. For training split, we first randomly select a size from `size_range` [128, 160], and resize the video clip so that its short edge is equal to the random size. After that, we take a random crop of spatial size 112 x 112. We find such data augmentation helps the model generalize better, and use it as the default transform with data augmentation. For testing split, we resize the video clip to have short edge of size 128, and skip the random cropping to use the entire video clip. This is the default transform without data augmentation.
 
 # # 2. Define a model trunk and a head
@@ -92,6 +93,7 @@ model = build_model({
     "num_classes": 101           # the number of classes
 })
 
+
 # We also need to create a model head, which consists of an average pooling layer and a linear layer, by using the `fully_convolutional_linear` head. At test time, the shape (channels, frames, height, width) of input tensor is typically `(3 x 8 x 128 x 173)`. The shape of input tensor to the average pooling layer is `(2048, 1, 8, 10)`. Since we do not use a global average pooling but an average pooling layer of kernel size `(1, 7, 7)`, the pooled feature map has shape `(2048, 1, 2, 5)`. The shape of prediction tensor from the linear layer is `(1, 2, 5, 101)`, which indicates the model computes a 101-D prediction vector densely over a `2 x 5` grid. That's why we name the head as `FullyConvolutionalLinearHead` because we use the linear layer as a `1x1` convolution layer to produce spatially dense predictions. Finally, predictions over the `2 x 5` grid are averaged.
 
 # In[ ]:
@@ -114,6 +116,7 @@ fork_block = "pathway0-stage4-block1"
 heads = defaultdict(dict)
 heads[fork_block][unique_id] = head
 model.set_heads(heads)
+
 
 # # 3. Choose the meters
 # 
@@ -138,6 +141,7 @@ meters = build_meters({
         "clips_per_video_test": 10
     }
 })
+
 
 # # 4. Build a task
 # Great! we have defined the minimal set of components necessary for video classification, including dataset, model, loss function, meters and optimizer. We proceed to define a video classification task, and populate it with all the components.
@@ -177,6 +181,7 @@ task = (
 for phase in ["train", "test"]:
     task.set_dataset(datasets[phase], phase)
 
+
 # # 5. Start training
 # 
 # After creating a task, you can simply pass that to a Trainer to start training. Here we will train on a single node and 
@@ -202,6 +207,7 @@ task = task.set_hooks(hooks)
 
 trainer = LocalTrainer()
 trainer.train(task)
+
 
 # As the training progresses, you should see `LossLrMeterLoggingHook` printing the loss, learning rate and meter metrics. Checkpoints will be available in the folder created above.
 # 

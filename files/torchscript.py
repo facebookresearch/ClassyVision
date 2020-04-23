@@ -34,6 +34,7 @@ config = {
 
 model = build_model(config)
 
+
 # ## 2. Export the model
 # 
 # Now that the model is built/trained, you can export it using `torch.jit.trace`. To check the results, we'll perform inference on the actual model and on the torchscripted model:
@@ -49,12 +50,14 @@ with torch.no_grad():
 
 assert torch.allclose(origin_outs, script_outs)
 
+
 # After verifying the torchscripted model works as expected, you can save it using `torch.jit.save`:
 
 # In[ ]:
 
 
 torch.jit.save(script, "/tmp/resnext_101.pt")
+
 
 # ## 3. Loading a model
 # 
@@ -67,6 +70,7 @@ loaded_model = torch.jit.load("/tmp/resnext_101.pt")
 loaded_outs = loaded_model(input)
 
 assert torch.allclose(loaded_outs, origin_outs)
+
 
 # ## 4. Conclusion
 # 

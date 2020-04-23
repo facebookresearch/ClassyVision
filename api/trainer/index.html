@@ -12,9 +12,9 @@
 <div class="body" role="main">
 <div class="section" id="module-classy_vision.trainer">
 <span id="trainer"></span><h1>Trainer<a class="headerlink" href="#module-classy_vision.trainer" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.trainer.ClassyTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">ClassyTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">ClassyTrainer</code><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for shared training code.</p>
 <p>A trainer is responsible for setting up the environment for
 training, for instance: configuring rendezvous for distributed
@@ -24,28 +24,9 @@ the task to decide how exactly to perform inference, compute loss
 etc. That allows combining tasks with different trainers depending
 on whether you want to train on your current machine, AWS cluster
 etc.</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.ClassyTrainer.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructor for ClassyTrainer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>use_gpu</strong> – If true, then use GPUs for training.
-If None, then check if we have GPUs available, if we do
-then use GPU for training.</p></li>
-<li><p><strong>num_dataloader_workers</strong> – Number of CPU processes doing dataloading
-per GPU. If 0, then dataloading is done on main thread.</p></li>
-<li><p><strong>dataloader_mp_context</strong> – Determines how to launch
-new processes for dataloading. Must be one of “fork”, “forkserver”,
-“spawn”. If None, process launching is inherited from parent.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
+<dl class="method">
 <dt id="classy_vision.trainer.ClassyTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span><span class="p">:</span> <span class="n">classy_vision.tasks.classy_task.ClassyTask</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer.train" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer.train" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs training phases, phases are generated from the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -55,50 +36,34 @@ everything that is needed for training</p>
 </dl>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.trainer.DistributedTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">DistributedTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">DistributedTrainer</code><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Distributed trainer for using multiple training processes</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.DistributedTrainer.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructor for DistributedTrainer.</p>
+<dl class="method">
+<dt id="classy_vision.trainer.DistributedTrainer.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs training phases, phases are generated from the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>use_gpu</strong> – If true, then use GPU 0 for training.
-If None, then check if we have GPUs available, if we do
-then use GPU for training.</p></li>
-<li><p><strong>num_dataloader_workers</strong> – Number of CPU processes doing dataloading
-per GPU. If 0, then dataloading is done on main thread.</p></li>
-<li><p><strong>dataloader_mp_context</strong> – Determines how to launch
-new processes for dataloading. Must be one of “fork”, “forkserver”,
-“spawn”. If None, process launching is inherited from parent.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
+everything that is needed for training</p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
-<dl class="py class">
+<dl class="class">
 <dt id="classy_vision.trainer.LocalTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">LocalTrainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.LocalTrainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">LocalTrainer</code><a class="headerlink" href="#classy_vision.trainer.LocalTrainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trainer to be used if you want want use only a single training process.</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.LocalTrainer.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">use_gpu</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_dataloader_workers</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.LocalTrainer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructor for LocalTrainer.</p>
+<dl class="method">
+<dt id="classy_vision.trainer.LocalTrainer.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.LocalTrainer.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs training phases, phases are generated from the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>use_gpu</strong> – If true, then use GPU 0 for training.
-If None, then check if we have GPUs available, if we do
-then use GPU for training.</p></li>
-<li><p><strong>num_dataloader_workers</strong> – Number of CPU processes doing dataloading
-per GPU. If 0, then dataloading is done on main thread.</p></li>
-<li><p><strong>dataloader_mp_context</strong> – Determines how to launch
-new processes for dataloading. Must be one of “fork”, “forkserver”,
-“spawn”. If None, process launching is inherited from parent.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
+everything that is needed for training</p>
 </dd>
 </dl>
 </dd></dl>
@@ -142,7 +107,7 @@ new processes for dataloading. Must be one of “fork”, “forkserver”,
 </form>
 </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 </div>
 </div>
 <div class="clearer"></div>

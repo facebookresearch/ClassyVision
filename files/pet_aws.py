@@ -18,16 +18,18 @@
 # In[ ]:
 
 
-! git clone https://github.com/pytorch/elastic.git
-! pip install torchelastic
+get_ipython().system(' git clone https://github.com/pytorch/elastic.git')
+get_ipython().system(' pip install torchelastic')
+
 
 # Install the required dependencies for AWS:
 
 # In[ ]:
 
 
-% cd elastic/aws
-! pip install -r requirements.txt
+get_ipython().run_line_magic('cd', 'elastic/aws')
+get_ipython().system(' pip install -r requirements.txt')
+
 
 # Make sure you are familiar with the following AWS resources:
 # 

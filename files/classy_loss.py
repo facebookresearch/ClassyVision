@@ -29,6 +29,7 @@ class MyLoss(ClassyLoss):
     def forward(self, output, target):
         return (output - target).pow(2) * self.alpha
 
+
 # Now we can start using this loss for training. Take a look at our [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial for more details on how to train a model from a Jupyter notebook.
 
 # In[ ]:
@@ -38,6 +39,7 @@ from classy_vision.tasks import ClassificationTask
 
 my_loss = MyLoss(alpha=5)
 my_task = ClassificationTask().set_loss(my_loss)
+
 
 # ## 2. Integrate it with the configuration system
 # 
@@ -65,6 +67,7 @@ class MyLoss(ClassyLoss):
     def forward(self, output, target):
         return (output - target).pow(2).sum() * self.alpha
 
+
 # Now we can start using this loss in our configurations.
 
 # In[ ]:
@@ -84,6 +87,7 @@ assert isinstance(my_loss, MyLoss)
 with torch.no_grad():
     y_hat, target = torch.rand((1, 10)), torch.rand((1, 10))
     print(my_loss(y_hat, target))
+
 
 # Now that your loss is integrated with the configuration system, you can train it using `classy_train.py` as described in the [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial, no further changes are needed! Just make sure the code defining your model is in the `losses` folder of your classy project.
 
