@@ -15,7 +15,7 @@ from PIL import Image
 
 try:
     import visdom
-    from tensorboardX import SummaryWriter
+    from torch.utils.tensorboard import SummaryWriter
 except ImportError:
     pass
 

@@ -14,11 +14,11 @@ from classy_vision.hooks.classy_hook import ClassyHook
 
 
 try:
-    from tensorboardX import SummaryWriter  # noqa F401
+    from torch.utils.tensorboard import SummaryWriter  # noqa F401
 
-    tbx_available = True
+    tb_available = True
 except ImportError:
-    tbx_available = False
+    tb_available = False
 
 
 @register_hook("model_tensorboard")
@@ -43,9 +43,9 @@ class ModelTensorboardHook(ClassyHook):
 
         """
         super().__init__()
-        if not tbx_available:
+        if not tb_available:
             raise RuntimeError(
-                "tensorboardX not installed, cannot use ModelTensorboardHook"
+                "tensorboard not installed, cannot use ModelTensorboardHook"
             )
 
         self.tb_writer = tb_writer
