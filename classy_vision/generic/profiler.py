@@ -355,7 +355,7 @@ def summarize_profiler_info(prof):
     return str
 
 
-class _ComplexityComputer:
+class ComplexityComputer:
     def __init__(self, compute_fn: Callable, count_unique: bool):
         self.compute_fn = compute_fn
         self.count_unique = count_unique
@@ -367,6 +367,10 @@ class _ComplexityComputer:
             return
         self.count += self.compute_fn(layer, x, out)
         self.seen_modules.add(module_name)
+
+    def reset(self):
+        self.count = 0
+        self.seen_modules.clear()
 
 
 def _patched_computation_module(module, complexity_computer, module_name):
@@ -459,7 +463,7 @@ def compute_complexity(
     else:
         input = get_model_dummy_input(model, input_shape, input_key)
 
-    complexity_computer = _ComplexityComputer(compute_fn, compute_unique)
+    complexity_computer = ComplexityComputer(compute_fn, compute_unique)
 
     # measure FLOPs:
     modify_forward(model, complexity_computer, patch_attr=patch_attr)
