@@ -82,6 +82,30 @@ class TestModel2(nn.Module):
         return self.seq_1(x) + self.seq_2(x)
 
 
+class TestModuleWithoutFlops(nn.Module):
+    # this module doesn't have FLOPs defined
+    def forward(self, x):
+        return x
+
+
+class TestModuleWithFlops(nn.Module):
+    # this module does have FLOPs defined
+    _flops = 1234
+
+    def __init__(self):
+        super().__init__()
+        self.mod = TestModuleWithoutFlops()
+        # add a conv module; this shouldn't impact the FLOPs since we define
+        # self.flops()
+        self.conv = nn.Conv2d(3, 3, (2, 2))
+
+    def forward(self, x):
+        return self.conv(x)
+
+    def flops(self, x):
+        return self._flops
+
+
 class TestProfilerFunctions(unittest.TestCase):
     def test_complexity_calculation_resnext(self) -> None:
         model_configs = get_test_model_configs()
@@ -137,3 +161,19 @@ class TestProfilerFunctions(unittest.TestCase):
         self.assertEqual(
             count_params(model), in_channels * out_channels * kernel_h * kernel_w
         )
+
+    def test_flops_calculation(self):
+        # test that a model containing a custom module which doesn't have FLOPs defined
+        # raises an exception
+        model = nn.Sequential(TestModuleWithoutFlops())
+        input_shape = (3, 10, 10)
+        with self.assertRaises(Exception):
+            compute_flops(model, input_shape=input_shape)
+
+        # test that a model containing a custom module does have FLOPs defined works,
+        # even if the module has children which don't define FLOPs
+        model = nn.Sequential(TestModuleWithFlops())
+        input_shape = (3, 10, 10)
+        self.assertEqual(
+            compute_flops(model, input_shape=input_shape), TestModuleWithFlops._flops
+        )  # the conv is applied twice
