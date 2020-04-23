@@ -128,12 +128,12 @@ def configure_hooks(args, config):
 
     if not args.skip_tensorboard:
         try:
-            from tensorboardX import SummaryWriter
+            from torch.utils.tensorboard import SummaryWriter
 
             tb_writer = SummaryWriter(log_dir=Path(base_folder) / "tensorboard")
             hooks.append(TensorboardPlotHook(tb_writer))
         except ImportError:
-            logging.warning("tensorboardX not installed, skipping tensorboard hooks")
+            logging.warning("tensorboard not installed, skipping tensorboard hooks")
 
     args_dict = vars(args)
     args_dict["config"] = config
