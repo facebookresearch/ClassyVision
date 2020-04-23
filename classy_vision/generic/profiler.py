@@ -395,14 +395,29 @@ def _patched_computation_module(module, complexity_computer, module_name):
     return ComputeModule
 
 
-def modify_forward(model, complexity_computer, patch_attr=None):
+def modify_forward(model, complexity_computer, prefix="", patch_attr=None):
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
-    for name, module in model.named_modules():
-        if is_leaf(module) or (patch_attr is not None and hasattr(module, patch_attr)):
-            module.__class__ = _patched_computation_module(
-                module, complexity_computer, name
+    # Recursively update all the modules in the model. A module is patched if it
+    # contains the patch_attr (like the flops() function for FLOPs computation) or it is
+    # a leaf. We stop recursing if we patch a module since that module is supposed
+    # to return the results for all its children as well.
+    # Since this recursion can lead to the same module being patched through different
+    # paths, we make sure we only patch un-patched modules.
+    if hasattr(model, "orig_type"):
+        return model
+    if is_leaf(model) or (patch_attr is not None and hasattr(model, patch_attr)):
+        model.__class__ = _patched_computation_module(
+            model, complexity_computer, prefix
+        )
+    else:
+        for name, child in model.named_children():
+            modify_forward(
+                child,
+                complexity_computer,
+                prefix=f"{prefix}.{name}",
+                patch_attr=patch_attr,
             )
     return model
 
@@ -412,7 +427,8 @@ def restore_forward(model, patch_attr=None):
     Restore original forward in model.
     """
     for module in model.modules():
-        if is_leaf(module) or (patch_attr is not None and hasattr(module, patch_attr)):
+        if hasattr(module, "orig_type"):
+            # module has been patched; un-patch it
             module.__class__ = module.orig_type
     return model
 
