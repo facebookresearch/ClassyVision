@@ -60,6 +60,12 @@ install_dev_dep: &install_dev_dep
       command: |
         pip install .[dev]
 
+pip_list: &pip_list
+  - run:
+      name: Pip list
+      command: |
+        pip list
+
 run_tests: &run_tests
   - run:
       name: Run Tests
@@ -85,18 +91,20 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v3-cpu-dependencies-{{ checksum "requirements.txt" }}
+            - v4-cpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v3-cpu-dependencies-
+            - v4-cpu-dependencies-
 
       - <<: *install_dep
 
       - <<: *install_dev_dep
 
+      - <<: *pip_list
+
       - save_cache:
           paths:
             - ~/venv
-          key: v3-cpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v4-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -130,11 +138,11 @@ jobs:
           working_directory: ~/
           command: |
             # download and install nvidia drivers, cuda, etc
-            wget --quiet --no-clobber -P ~/nvidia-downloads 'https://s3.amazonaws.com/ossci-linux/nvidia_driver/NVIDIA-Linux-x86_64-430.40.run'
+            wget --quiet --no-clobber -P ~/nvidia-downloads 'https://pytorch-ci-utils.s3.us-east-2.amazonaws.com/nvidia-drivers/NVIDIA-Linux-x86_64-440.64.run'
             wget --quiet --no-clobber -P ~/nvidia-downloads 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-ubuntu1604.pin'
             wget --quiet --no-clobber -P ~/nvidia-downloads 'http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1604-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb'
             sudo cp ~/nvidia-downloads/cuda-ubuntu1604.pin /etc/apt/preferences.d/cuda-repository-pin-600
-            time sudo /bin/bash ~/nvidia-downloads/NVIDIA-Linux-x86_64-430.40.run --no-drm -q --ui=none
+            time sudo /bin/bash ~/nvidia-downloads/NVIDIA-Linux-x86_64-440.64.run --no-drm -q --ui=none
             time sudo dpkg -i ~/nvidia-downloads/cuda-repo-ubuntu1604-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
             nvidia-smi
 
@@ -145,11 +153,13 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-gpu-dependencies-{{ checksum "requirements.txt" }}
+            - v2-gpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-gpu-dependencies-
+            - v2-gpu-dependencies-
 
       - <<: *install_dep
+
+      - <<: *pip_list
 
       - run:
           name: Check CUDA Available
@@ -158,7 +168,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v1-gpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v2-gpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
