@@ -139,7 +139,7 @@ class AccuracyMeter(ClassyMeter):
                           (B, 1), integer encoded
         """
         # Convert target to 0/1 encoding if isn't
-        target = maybe_convert_to_one_hot(target, model_output)
+        target, model_output = maybe_convert_to_one_hot(target, model_output)
 
         _, pred = model_output.topk(max(self._topk), dim=1, largest=True, sorted=True)
         for i, k in enumerate(self._topk):
