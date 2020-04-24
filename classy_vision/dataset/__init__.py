@@ -24,7 +24,11 @@ def build_dataset(config, *args, **kwargs):
     dataset class to instantiate. For instance, a config `{"name": "my_dataset",
     "folder": "/data"}` will find a class that was registered as "my_dataset"
     (see :func:`register_dataset`) and call .from_config on it."""
-    return DATASET_REGISTRY[config["name"]].from_config(config, *args, **kwargs)
+    dataset = DATASET_REGISTRY[config["name"]].from_config(config, *args, **kwargs)
+    num_workers = config.get("num_workers")
+    if num_workers is not None:
+        dataset.set_num_workers(num_workers)
+    return dataset
 
 
 def register_dataset(name):

@@ -61,18 +61,16 @@ class FineTuningTask(ClassificationTask):
             # convert all the sub-modules to the eval mode, except the heads
             self.base_model.eval()
             for heads in self.base_model.get_heads().values():
-                for h in heads.values():
+                for h in heads:
                     h.train(phase["train"])
         else:
             self.base_model.train(phase["train"])
 
-    def prepare(
-        self, num_dataloader_workers: int = 0, dataloader_mp_context=None
-    ) -> None:
+    def prepare(self) -> None:
         assert (
             self.pretrained_checkpoint is not None
         ), "Need a pretrained checkpoint for fine tuning"
-        super().prepare(num_dataloader_workers, dataloader_mp_context)
+        super().prepare()
         if self.checkpoint is None:
             # no checkpoint exists, load the model's state from the pretrained
             # checkpoint
@@ -91,7 +89,7 @@ class FineTuningTask(ClassificationTask):
             for param in self.base_model.parameters():
                 param.requires_grad = False
             for heads in self.base_model.get_heads().values():
-                for h in heads.values():
+                for h in heads:
                     for param in h.parameters():
                         param.requires_grad = True
             # re-create ddp model

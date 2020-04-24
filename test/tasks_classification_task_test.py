@@ -65,10 +65,10 @@ class TestClassificationTask(unittest.TestCase):
             dataset = build_dataset(config["dataset"][phase_type])
             task.set_dataset(dataset, phase_type)
 
-        task.prepare(num_dataloader_workers=1)
+        task.prepare()
 
         task = build_task(config)
-        task.prepare(num_dataloader_workers=1)
+        task.prepare()
 
     def test_checkpointing(self):
         """
@@ -173,6 +173,33 @@ class TestClassificationTask(unittest.TestCase):
 
         # train_phase_idx should -1
         self.assertEqual(test_state["train_phase_idx"], -1)
+
+        # Verify task will run
+        trainer = LocalTrainer()
+        trainer.train(test_only_task)
+
+    def test_test_only_task(self):
+        """
+        Tests the task in test mode by running train_steps
+        to make sure the train_steps run as expected on a
+        test_only task
+        """
+        test_config = get_fast_test_task_config()
+        test_config["test_only"] = True
+
+        # delete train dataset
+        del test_config["dataset"]["train"]
+
+        test_only_task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
+
+        test_only_task.prepare()
+        test_state = test_only_task.get_classy_state()
+
+        # We expect that test only state is test, no matter what train state is
+        self.assertFalse(test_state["train"])
+
+        # Num updates should be 0
+        self.assertEqual(test_state["num_updates"], 0)
 
         # Verify task will run
         trainer = LocalTrainer()

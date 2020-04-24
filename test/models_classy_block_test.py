@@ -55,7 +55,7 @@ class TestClassyBlock(unittest.TestCase):
             self.DummyTestModel.wrapper_cls = wrapper_class
             model = self.DummyTestModel()
             head = self.DummyTestHead()
-            model.set_heads({"dummy_block2": {head.unique_id: head}})
+            model.set_heads({"dummy_block2": [head]})
             input = torch.randn(1, 2)
             output = model(input)
             head_output = model.execute_heads()
@@ -66,7 +66,7 @@ class TestClassyBlock(unittest.TestCase):
         self.DummyTestModel.wrapper_cls = ClassyModelHeadExecutorWrapper
         model = self.DummyTestModel()
         head = self.DummyTestHead()
-        model.set_heads({"dummy_block2": {head.unique_id: head}})
+        model.set_heads({"dummy_block2": [head]})
         input = torch.randn(1, 2)
         output = model(input)
         head_output = model.execute_heads()
@@ -79,10 +79,7 @@ class TestClassyBlock(unittest.TestCase):
         model = self.DummyTestModel()
         head1 = self.DummyTestHead()
         head2 = self.DummyTestHead()
-        heads = {
-            "dummy_block": {head1.unique_id: head1},
-            "dummy_block2": {head2.unique_id: head2},
-        }
+        heads = {"dummy_block": [head1], "dummy_block2": [head2]}
         with self.assertRaises(ValueError):
             model.set_heads(heads)
 
@@ -92,13 +89,13 @@ class TestClassyBlock(unittest.TestCase):
     def test_duplicated_block_names(self):
         model = self.DummyTestModelDuplicatedBlockNames()
         head = self.DummyTestHead()
-        heads = {"dummy_block2": {head.unique_id: head}}
+        heads = {"dummy_block2": [head]}
         with self.assertRaises(Exception):
             # there are two modules with the name "dummy_block2"
             # which is not supported
             model.set_heads(heads)
         # can still attach to a module with a unique id
-        heads = {"features": {head.unique_id: head}}
+        heads = {"features": [head]}
         model.set_heads(heads)
 
     def test_set_heads(self):
@@ -107,7 +104,7 @@ class TestClassyBlock(unittest.TestCase):
         self.assertEqual(
             len(model.get_heads()), 0, "heads should be empty before set_heads"
         )
-        model.set_heads({"dummy_block2": {head.unique_id: head}})
+        model.set_heads({"dummy_block2": [head]})
         input = torch.randn(1, 2)
         model(input)
         head_outputs = model.execute_heads()
@@ -119,4 +116,4 @@ class TestClassyBlock(unittest.TestCase):
 
         # try a non-existing module
         with self.assertRaises(Exception):
-            model.set_heads({"unknown_block": {head.unique_id: head}})
+            model.set_heads({"unknown_block": [head]})

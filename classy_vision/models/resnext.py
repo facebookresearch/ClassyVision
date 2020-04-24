@@ -16,7 +16,7 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch.nn as nn
-from classy_vision.generic.util import is_pos_int
+from classy_vision.generic.util import is_pos_int, is_pos_int_tuple
 
 from . import register_model
 from .classy_model import ClassyModel
@@ -68,7 +68,9 @@ class GenericLayer(nn.Module):
 
         # assertions on inputs:
         assert is_pos_int(in_planes) and is_pos_int(out_planes)
-        assert is_pos_int(stride) and is_pos_int(reduction)
+        assert (is_pos_int(stride) or is_pos_int_tuple(stride)) and is_pos_int(
+            reduction
+        )
 
         # set object fields:
         super(GenericLayer, self).__init__()
@@ -82,7 +84,7 @@ class GenericLayer(nn.Module):
 
         # define down-sampling layer (if direct residual impossible):
         self.downsample = None
-        if stride != 1 or in_planes != out_planes:
+        if (stride != 1 and stride != (1, 1)) or in_planes != out_planes:
             self.downsample = nn.Sequential(
                 conv1x1(in_planes, out_planes, stride=stride),
                 nn.BatchNorm2d(out_planes),
@@ -138,7 +140,9 @@ class BasicLayer(GenericLayer):
 
         # assertions on inputs:
         assert is_pos_int(in_planes) and is_pos_int(out_planes)
-        assert is_pos_int(stride) and is_pos_int(reduction)
+        assert (is_pos_int(stride) or is_pos_int_tuple(stride)) and is_pos_int(
+            reduction
+        )
 
         # define convolutional block:
         convolutional_block = nn.Sequential(
@@ -181,7 +185,9 @@ class BottleneckLayer(GenericLayer):
 
         # assertions on inputs:
         assert is_pos_int(in_planes) and is_pos_int(out_planes)
-        assert is_pos_int(stride) and is_pos_int(reduction)
+        assert (is_pos_int(stride) or is_pos_int_tuple(stride)) and is_pos_int(
+            reduction
+        )
 
         # define convolutional layers:
         bottleneck_planes = int(math.ceil(out_planes / reduction))
@@ -339,6 +345,9 @@ class ResNeXt(ClassyModel):
         self._num_classes = out_planes
 
         # initialize weights:
+        self._initialize_weights(zero_init_bn_residuals)
+
+    def _initialize_weights(self, zero_init_bn_residuals):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")

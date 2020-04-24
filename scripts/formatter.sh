@@ -43,7 +43,7 @@ then
     fi
 
     # run isort
-    cmd="isort -o classy_vision -o torchelastic -o visdom -o tensorboardX \
+    cmd="isort -o classy_vision -o torchelastic -o visdom \
     -o progressbar $CHANGED_FILES"
     echo "Running command \"$cmd\""
     ($cmd)

@@ -7,6 +7,7 @@
 import collections.abc as abc
 import logging
 import operator
+from typing import Callable
 
 import torch
 import torch.nn as nn
@@ -183,8 +184,12 @@ def _layer_flops(layer, x, _):
     elif layer_type in ["AdaptiveAvgPool2d"]:
         in_h = x.size()[2]
         in_w = x.size()[3]
-        out_h = layer.output_size[0]
-        out_w = layer.output_size[1]
+        if isinstance(layer.output_size, int):
+            out_h, out_w = layer.output_size, layer.output_size
+        elif len(layer.output_size) == 1:
+            out_h, out_w = layer.output_size[0], layer.output_size[0]
+        else:
+            out_h, out_w = layer.output_size
         if out_h > in_h or out_w > in_w:
             raise NotImplementedError()
         batchsize_per_replica = x.size()[0]
@@ -295,6 +300,10 @@ def _layer_flops(layer, x, _):
         for dim_size in x.size():
             flops *= dim_size
         return flops
+
+    elif layer_type == "Identity":
+        return 0
+
     elif hasattr(layer, "flops"):
         # If the module already defines a method to compute flops with the signature
         # below, we use it to compute flops
@@ -312,8 +321,16 @@ def _layer_activations(layer, x, out):
     """
     Computes the number of activations produced by a single layer.
 
-    Activations are counted only for convolutional layers.
+    Activations are counted only for convolutional layers. To override this behavior, a
+    layer can define a method to compute activations with the signature below, which
+    will be used to compute the activations instead.
+
+    Class MyModule(nn.Module):
+        def activations(self, x, out):
+            ...
     """
+    if hasattr(layer, "activations"):
+        return layer.activations(x, out)
     return out.numel() if isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)) else 0
 
 
@@ -338,11 +355,29 @@ def summarize_profiler_info(prof):
     return str
 
 
-def _patched_computation_module(module, compute_list, compute_fn):
+class ComplexityComputer:
+    def __init__(self, compute_fn: Callable, count_unique: bool):
+        self.compute_fn = compute_fn
+        self.count_unique = count_unique
+        self.count = 0
+        self.seen_modules = set()
+
+    def compute(self, layer, x, out, module_name):
+        if self.count_unique and module_name in self.seen_modules:
+            return
+        self.count += self.compute_fn(layer, x, out)
+        self.seen_modules.add(module_name)
+
+    def reset(self):
+        self.count = 0
+        self.seen_modules.clear()
+
+
+def _patched_computation_module(module, complexity_computer, module_name):
     """
     Patch the module to compute a module's parameters, like FLOPs.
 
-    Calls compute_fn and appends the results to compute_list.
+    Calls compute_fn and passes the results to the complexity computer.
     """
     ty = type(module)
     typestring = module.__repr__()
@@ -355,7 +390,7 @@ def _patched_computation_module(module, compute_list, compute_fn):
 
         def forward(self, *args, **kwargs):
             out = self._original_forward(*args, **kwargs)
-            compute_list.append(compute_fn(self, args[0], out))
+            complexity_computer.compute(self, args[0], out, module_name)
             return out
 
         def __repr__(self):
@@ -364,37 +399,61 @@ def _patched_computation_module(module, compute_list, compute_fn):
     return ComputeModule
 
 
-def modify_forward(model, compute_list, compute_fn):
+def modify_forward(model, complexity_computer, prefix="", patch_attr=None):
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
-    if is_leaf(model) or hasattr(model, "flops"):
-        model.__class__ = _patched_computation_module(model, compute_list, compute_fn)
-
+    # Recursively update all the modules in the model. A module is patched if it
+    # contains the patch_attr (like the flops() function for FLOPs computation) or it is
+    # a leaf. We stop recursing if we patch a module since that module is supposed
+    # to return the results for all its children as well.
+    # Since this recursion can lead to the same module being patched through different
+    # paths, we make sure we only patch un-patched modules.
+    if hasattr(model, "orig_type"):
+        return model
+    if is_leaf(model) or (patch_attr is not None and hasattr(model, patch_attr)):
+        model.__class__ = _patched_computation_module(
+            model, complexity_computer, prefix
+        )
     else:
-        for child in model.children():
-            modify_forward(child, compute_list, compute_fn)
-
+        for name, child in model.named_children():
+            modify_forward(
+                child,
+                complexity_computer,
+                prefix=f"{prefix}.{name}",
+                patch_attr=patch_attr,
+            )
     return model
 
 
-def restore_forward(model):
+def restore_forward(model, patch_attr=None):
     """
-    Restore original forward in model:
+    Restore original forward in model.
     """
-    if is_leaf(model) or hasattr(model, "flops"):
-        model.__class__ = model.orig_type
-
-    else:
-        for child in model.children():
-            restore_forward(child)
-
+    for module in model.modules():
+        if hasattr(module, "orig_type"):
+            # module has been patched; un-patch it
+            module.__class__ = module.orig_type
     return model
 
 
-def compute_complexity(model, compute_fn, input_shape, input_key=None):
+def compute_complexity(
+    model,
+    compute_fn,
+    input_shape,
+    input_key=None,
+    patch_attr=None,
+    compute_unique=False,
+):
     """
     Compute the complexity of a forward pass.
+
+    Args:
+        compute_unique: If True, the compexity for a given module is only calculated
+            once. Otherwise, it is counted every time the module is called.
+
+    TODO(@mannatsingh): We have some assumptions about only modules which are leaves
+        or have patch_attr defined. This should be fixed and generalized if possible.
     """
     # assertions, input, and upvalue in which we will perform the count:
     assert isinstance(model, nn.Module)
@@ -404,10 +463,10 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     else:
         input = get_model_dummy_input(model, input_shape, input_key)
 
-    compute_list = []
+    complexity_computer = ComplexityComputer(compute_fn, compute_unique)
 
     # measure FLOPs:
-    modify_forward(model, compute_list, compute_fn)
+    modify_forward(model, complexity_computer, patch_attr=patch_attr)
     try:
         # compute complexity in eval mode
         with eval_model(model), torch.no_grad():
@@ -415,23 +474,27 @@ def compute_complexity(model, compute_fn, input_shape, input_key=None):
     except NotImplementedError as err:
         raise err
     finally:
-        restore_forward(model)
+        restore_forward(model, patch_attr=patch_attr)
 
-    return sum(compute_list)
+    return complexity_computer.count
 
 
 def compute_flops(model, input_shape=(3, 224, 224), input_key=None):
     """
     Compute the number of FLOPs needed for a forward pass.
     """
-    return compute_complexity(model, _layer_flops, input_shape, input_key)
+    return compute_complexity(
+        model, _layer_flops, input_shape, input_key, patch_attr="flops"
+    )
 
 
 def compute_activations(model, input_shape=(3, 224, 224), input_key=None):
     """
     Compute the number of activations created in a forward pass.
     """
-    return compute_complexity(model, _layer_activations, input_shape, input_key)
+    return compute_complexity(
+        model, _layer_activations, input_shape, input_key, patch_attr="activations"
+    )
 
 
 def count_params(model):
@@ -439,15 +502,4 @@ def count_params(model):
     Count the number of parameters in a model.
     """
     assert isinstance(model, nn.Module)
-    count = 0
-    for child in model.children():
-        if is_leaf(child):
-            if hasattr(child, "_mask"):  # for masked modules (like LGC)
-                count += child._mask.long().sum().item()
-                # FIXME: BatchNorm parameters in LGC are not counted.
-            else:  # for regular modules
-                for p in child.parameters():
-                    count += p.nelement()
-        else:
-            count += count_params(child)
-    return count
+    return sum((parameter.nelement() for parameter in model.parameters()))

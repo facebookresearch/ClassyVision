@@ -57,7 +57,6 @@ class TestDistributedTrainer(unittest.TestCase):
             --use_env \
             {self.path}/../classy_train.py \
             --config={self.config_files[config_key]} \
-            --num_workers=4 \
             --log_freq=100 \
             --distributed_backend=ddp
             """
@@ -79,7 +78,6 @@ class TestDistributedTrainer(unittest.TestCase):
         --use_env \
         {self.path}/../classy_train.py \
         --config={self.config_files["sync_bn_config"]} \
-        --num_workers=4 \
         --log_freq=100 \
         --distributed_backend=ddp
         """

@@ -6,8 +6,10 @@
 
 import copy
 import enum
+import json
 import logging
 import math
+import multiprocessing as mp
 import time
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
@@ -148,6 +150,7 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
+        self.dataloader_mp_context = 'spawn'
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -201,6 +204,16 @@ class ClassificationTask(ClassyTask):
         self.datasets[phase_type] = dataset
         if phase_type == "train":
             self.train_phases_per_epoch = getattr(dataset, "phases_per_epoch", 1)
+        return self
+
+    def set_dataloader_mp_context(self, dataloader_mp_context: str):
+        """Set the multiprocessing context used by the dataloader.
+
+        The context can be either 'spawn', 'fork' or 'forkserver'. See
+        https://docs.python.org/3/library/multiprocessing.html#multiprocessing.get_context
+        for more details."""
+
+        self.dataloader_mp_context = dataloader_mp_context
         return self
 
     def set_optimizer(self, optimizer: ClassyOptimizer):
@@ -353,17 +366,19 @@ class ClassificationTask(ClassyTask):
             A ClassificationTask instance.
         """
         optimizer_config = config["optimizer"]
+        test_only = config.get("test_only", False)
 
         # TODO Make distinction between epochs and phases in optimizer clear
-        train_phases_per_epoch = config["dataset"]["train"].get("phases_per_epoch", 1)
+        train_phases_per_epoch = (
+            1 if test_only else config["dataset"]["train"].get("phases_per_epoch", 1)
+        )
         optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
 
         datasets = {}
-        phase_types = ["train", "test"]
+        phase_types = ["train", "test"] if not test_only else ["test"]
         for phase_type in phase_types:
             datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
-        test_only = config.get("test_only", False)
         amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
         model = build_model(config["model"])
@@ -412,6 +427,10 @@ class ClassificationTask(ClassyTask):
 
         for phase_type in phase_types:
             task.set_dataset(datasets[phase_type], phase_type)
+
+        # NOTE: this is a private member and only meant to be used for
+        # logging/debugging purposes. See __repr__ implementation
+        task._config = config
 
         return task
 
@@ -496,90 +515,44 @@ class ClassificationTask(ClassyTask):
 
         return [{"train": False} for _ in range(self.num_epochs)]
 
-    def build_dataloader(
-        self,
-        phase_type,
-        num_workers,
-        pin_memory,
-        multiprocessing_context=None,
-        **kwargs,
-    ):
+    def build_dataloader(self, phase_type, pin_memory, **kwargs):
         """Buildss a dataloader iterable for a particular phase type.
 
         Args:
             phase_type: "train" or "test" iterable
-            num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See `PyTorch dataloader
-                documentation <https://pytorch.org/docs/stable/
-                data.html#torch.utils.data.DataLoader>`_ for more details on
-                ``num_workers`` and the usage
-                of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
                 documentation for details on ``pin_memory``.
-            multiprocessing_context: Determines how processes are spawned.
-                Value must be one of None, "spawn", "fork", "forkserver".
-                If None, then context is inherited from parent process
-
         Returns:
             Returns a iterable over the dataset
         """
-        return self.datasets[phase_type].iterator(
-            num_workers=num_workers,
-            pin_memory=pin_memory,
-            multiprocessing_context=multiprocessing_context,
-            **kwargs,
-        )
+        return self.datasets[phase_type].iterator(pin_memory=pin_memory, **kwargs)
 
-    def build_dataloaders(
-        self, num_workers, pin_memory, multiprocessing_context=None, **kwargs
-    ):
+    def build_dataloaders(self, pin_memory, **kwargs):
         """Build a dataloader for each phase type
 
         Args:
-            num_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process. See `PyTorch dataloader
-                documentation <https://pytorch.org/docs/stable/
-                data.html#torch.utils.data.DataLoader>`_
-                for more details on num_workers and the usage
-                of python multiprocessing in dataloaders
             pin_memory: if true pin memory on GPU. See PyTorch dataloader
                 documentation for details on pin_memory.
-            multiprocessing_context: Determines how processes are spawned.
-                Value must be one of None, "spawn", "fork", "forkserver".
-                If None, then context is inherited from parent process
-
         Returns:
             Returns an iterable over the dataset associated with each phase_type
         """
         return {
             phase_type: self.build_dataloader(
-                phase_type,
-                num_workers=num_workers,
-                pin_memory=pin_memory,
-                multiprocessing_context=multiprocessing_context,
-                **kwargs,
+                phase_type, pin_memory=pin_memory, **kwargs
             )
             for phase_type in self.datasets.keys()
         }
 
-    def prepare(self, num_dataloader_workers=0, dataloader_mp_context=None):
-        """Prepares task for training, populates all derived attributes
-
-        Args:
-            num_dataloader_workers: Number of dataloading processes. If 0,
-                dataloading is done on main process
-            dataloader_mp_context: Determines how processes are spawned.
-                Value must be one of None, "spawn", "fork", "forkserver".
-                If None, then context is inherited from parent process
-        """
+    def prepare(self):
+        """Prepares task for training, populates all derived attributes """
 
         pin_memory = self.use_gpu and torch.cuda.device_count() > 1
 
         self.phases = self._build_phases()
+        self.train = False if self.test_only else self.train
         self.dataloaders = self.build_dataloaders(
-            num_workers=num_dataloader_workers,
             pin_memory=pin_memory,
-            multiprocessing_context=dataloader_mp_context,
+            multiprocessing_context=mp.get_context(self.dataloader_mp_context),
         )
 
         if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
@@ -854,7 +827,7 @@ class ClassificationTask(ClassyTask):
         resets counters, shuffles dataset, rebuilds iterators, and
         sets the train / test state for phase.
         """
-        logging.info("Advancing phase")
+        logging.debug("Advancing phase")
         # Reset meters for next phase / epoch
         for meter in self.meters:
             meter.reset()
@@ -893,7 +866,7 @@ class ClassificationTask(ClassyTask):
         if phase_type is None:
             phase_type = self.phase_type
 
-        logging.info("Recreating data loader for new phase")
+        logging.debug("Recreating data loader for new phase")
         num_workers = 0
         if hasattr(self.dataloaders[phase_type], "num_workers"):
             num_workers = self.dataloaders[phase_type].num_workers
@@ -979,10 +952,10 @@ class ClassificationTask(ClassyTask):
     def on_phase_end(self):
         self.log_phase_end("train")
 
-        logging.info("Syncing meters on phase end...")
+        logging.debug("Syncing meters on phase end...")
         for meter in self.meters:
             meter.sync_state()
-        logging.info("...meters synced")
+        logging.debug("...meters synced")
         barrier()
 
         for hook in self.hooks:
@@ -1016,3 +989,10 @@ class ClassificationTask(ClassyTask):
                 "im_per_sec": im_per_sec,
             }
         )
+
+    def __repr__(self):
+        if hasattr(self, "_config"):
+            config = json.dumps(self._config, indent=4)
+            return f"{super().__repr__()} initialized with config:\n{config}"
+
+        return super().__repr__()
