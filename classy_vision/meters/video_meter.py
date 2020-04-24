@@ -76,9 +76,6 @@ class VideoMeter(ClassyMeter):
         self.reset()
         self.meter.set_classy_state(state["meter_state"])
 
-    def __repr__(self):
-        return repr({"name": self.name, "value": self.value})
-
     def update(self, model_output, target, is_train, **kwargs):
         """Updates any internal state of meter with new model output and target.
 

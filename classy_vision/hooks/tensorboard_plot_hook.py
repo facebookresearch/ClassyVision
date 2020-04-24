@@ -14,11 +14,11 @@ from classy_vision.hooks.classy_hook import ClassyHook
 
 
 try:
-    from tensorboardX import SummaryWriter  # noqa F401
+    from torch.utils.tensorboard import SummaryWriter  # noqa F401
 
-    tbx_available = True
+    tb_available = True
 except ImportError:
-    tbx_available = False
+    tb_available = False
 
 
 log = logging.getLogger()
@@ -45,9 +45,9 @@ class TensorboardPlotHook(ClassyHook):
             SummaryWriter>`_ instance
         """
         super().__init__()
-        if not tbx_available:
+        if not tb_available:
             raise RuntimeError(
-                "tensorboardX not installed, cannot use TensorboardPlotHook"
+                "tensorboard not installed, cannot use TensorboardPlotHook"
             )
         assert isinstance(log_period, int), "log_period must be an int"
 

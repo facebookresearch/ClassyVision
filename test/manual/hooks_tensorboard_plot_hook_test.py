@@ -18,7 +18,7 @@ from classy_vision.hooks import TensorboardPlotHook
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 class TestTensorboardPlotHook(HookTestBase):
