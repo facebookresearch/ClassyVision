@@ -33,7 +33,6 @@ class TensorboardPlotHook(ClassyHook):
     Global steps are counted in terms of the number of samples processed.
     """
 
-    on_start = ClassyHook._noop
     on_end = ClassyHook._noop
 
     def __init__(self, tb_writer, log_period: int = 10) -> None:
@@ -68,6 +67,9 @@ class TensorboardPlotHook(ClassyHook):
         tb_writer = SummaryWriter(**config["summary_writer"])
         log_period = config.get("log_period", 10)
         return cls(tb_writer=tb_writer, log_period=log_period)
+
+    def on_start(self, task) -> None:
+        self.tb_writer.add_text("Task", f"{task}")
 
     def on_phase_start(self, task) -> None:
         """Initialize losses and learning_rates."""
