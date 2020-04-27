@@ -8,6 +8,7 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
+import torch
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -81,6 +82,9 @@ class TensorboardPlotHook(ClassyHook):
         if not is_master():
             return
 
+        if torch.cuda.is_available():
+            torch.cuda.reset_max_memory_allocated()
+
         # log the parameters before training starts
         if task.train and task.train_phase_idx == 0:
             for name, parameter in task.base_model.named_parameters():
@@ -139,6 +143,13 @@ class TensorboardPlotHook(ClassyHook):
                 self.tb_writer.add_histogram(
                     f"Parameters/{name}", parameter, global_step=phase_type_idx
                 )
+
+        if torch.cuda.is_available() and task.train:
+            self.tb_writer.add_scalar(
+                "Memory/peak_allocated",
+                torch.cuda.max_memory_allocated(),
+                global_step=phase_type_idx,
+            )
 
         loss_avg = sum(task.losses) / (batches * task.get_batchsize_per_replica())
 
