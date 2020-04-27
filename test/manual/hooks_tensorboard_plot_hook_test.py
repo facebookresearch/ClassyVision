@@ -154,6 +154,9 @@ class TestTensorboardPlotHook(HookTestBase):
             ) -> None:
                 return
 
+            def add_text(self, *args, **kwargs):
+                pass
+
             def flush(self):
                 return
 
