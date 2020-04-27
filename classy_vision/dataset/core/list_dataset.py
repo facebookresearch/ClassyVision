@@ -14,7 +14,7 @@ class ListDataset:
     You can use it without metadata if you set metadata parameter to None
     """
 
-    def __init__(self, files, metadata, loader=default_loader):
+    def __init__(self, files, metadata=None, loader=default_loader):
         """
         metadata (List[Dict[Type]] or List[Type], Optional):
             metadata to be added to each sample.

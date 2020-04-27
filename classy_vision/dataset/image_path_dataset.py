@@ -7,54 +7,54 @@
 import os.path
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import torch
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
+from torchvision import datasets, transforms
 
-from .classy_dataset import ClassyDataset
+from . import ClassyDataset, register_dataset
 from .core import ListDataset
-from .transforms import build_transforms
-from .transforms.classy_transform import ClassyTransform
-from .transforms.util import TupleToMapTransform
+from .transforms import ClassyTransform, TupleToMapTransform, build_transforms
 
 
-def _load_dataset(image_paths, targets):
-    if targets is None:
-        targets = [torch.tensor([]) for _ in image_paths]
-    if isinstance(image_paths, str):
-        assert os.path.isdir(
-            image_paths
-        ), "Expect image_paths to be a dir when it is a string"
-        dataset = datasets.ImageFolder(image_paths)
-        preproc_transform = TupleToMapTransform(list_of_map_keys=["input", "target"])
-    else:
-        dataset = ListDataset(image_paths, targets)
-        preproc_transform = None
-    return dataset, preproc_transform
+def _is_torchvision_imagefolder(image_folder):
+    with os.scandir(image_folder) as folder_iter:
+        try:
+            dir_entry = next(folder_iter)
+            return dir_entry.is_dir()
+        except StopIteration:
+            raise OSError(f"Image folder {image_folder} is empty")
 
 
+def _get_image_paths(image_folder):
+    return [f"{image_folder}/{file}" for file in os.listdir(image_folder)]
+
+
+def _load_dataset(image_folder, image_files):
+    if image_folder is not None:
+        if _is_torchvision_imagefolder(image_folder):
+            return (
+                datasets.ImageFolder(image_folder),
+                TupleToMapTransform(list_of_map_keys=["input", "target"]),
+            )
+        else:
+            image_files = _get_image_paths(image_folder)
+    return ListDataset(image_files, metadata=None), None
+
+
+@register_dataset("image_path")
 class ImagePathDataset(ClassyDataset):
-    """Dataset which reads images from a local filesystem. Implements ClassyDataset.
-
-    The image paths provided can be:
-        - A single directory location, in which case the data is expected to be
-            arranged in a format similar to :class:`torchvision.datasets.ImageFolder`.
-            The targets will be inferred from the directory structure.
-        - A list of paths, in which case the list will contain the paths to all the
-            images. In this situation, the targets can be specified by the targets
-            argument.
-    """
+    """Dataset which reads images from a local filesystem. Implements ClassyDataset."""
 
     def __init__(
         self,
         batchsize_per_replica: int,
         shuffle: bool,
-        transform: Optional[Union[ClassyTransform, Callable]],
-        num_samples: Optional[int],
-        image_paths: Union[str, List[str]],
-        targets: Optional[List[Any]] = None,
+        transform: Optional[Union[ClassyTransform, Callable]] = None,
+        num_samples: Optional[int] = None,
+        image_folder: Optional[str] = None,
+        image_files: Optional[List[str]] = None,
     ):
         """Constructor for ImagePathDataset.
+
+        Only one of image_folder or image_files should be passed to specify the images.
 
         Args:
             batchsize_per_replica: Positive integer indicating batch size for each
@@ -63,20 +63,36 @@ class ImagePathDataset(ClassyDataset):
             transform: Transform to be applied to each sample
             num_samples: When set, this restricts the number of samples provided by
                 the dataset
-            image_paths: A directory or a list of file paths where images can be found.
-            targets: If a list of file paths is specified, this argument can
-                be used to specify a target for each path (must be same length
-                as list of file paths). If no targets are needed or image_paths is
-                a directory, then targets should be None.
+            image_folder: A directory with one of the following structures -
+                - A directory containing sub-directories with images for each target,
+                    which is the format expected by
+                    :class:`torchvision.datasets.ImageFolder` -
+
+                    dog/xxx.png
+                    dog/xxy.png
+                    cat/123.png
+                    cat/nsdf3.png
+
+                    In this case, the targets are inferred from the sub-directories.
+                - A directory containing images -
+
+                    123.png
+                    xyz.png
+
+                    In this case, the targets are not returned (useful for inference).
+            image_files: A list of image files -
+
+                [
+                    "123.png",
+                    "dog/xyz.png",
+                    "/home/cat/aaa.png"
+                ]
+
+                In this case, the targets are not returned (useful for inference).
         """
-        # TODO(@mannatsingh): we should be able to call build_dataset() to create
-        # datasets from this class.
-        assert image_paths is not None, "image_paths needs to be provided"
-        assert targets is None or isinstance(image_paths, list), (
-            "targets cannot be specified when image_paths is a directory containing "
-            "the targets in the directory structure"
-        )
-        dataset, preproc_transform = _load_dataset(image_paths, targets)
+        if (image_folder is None) == (image_files is None):
+            raise ValueError("One of image_folder and image_files should be provided")
+        dataset, preproc_transform = _load_dataset(image_folder, image_files)
         super().__init__(
             dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
@@ -87,25 +103,15 @@ class ImagePathDataset(ClassyDataset):
             self.transform = transforms.Compose([preproc_transform, self.transform])
 
     @classmethod
-    def from_config(
-        cls,
-        config: Dict[str, Any],
-        image_paths: Union[str, List[str]],
-        targets: Optional[List[Any]] = None,
-    ):
+    def from_config(cls, config: Dict[str, Any]):
         """Instantiates ImagePathDataset from a config.
-
-        Because image_paths / targets can be arbitrarily long, we
-        allow passing in the image paths and targets from python in
-        addition to the configuration parameter.
 
         Args:
             config: A configuration for ImagePathDataset.
                 See :func:`__init__` for parameters expected in the config.
-            image_paths: Directory or list of image paths.
-                See :func:`__init__` for more details
-            targets: Optional list of targets for dataset.
-                See :func:`__init__` for more details
+
+        Returns:
+            An ImagePathDataset instance.
         """
         (
             transform_config,
@@ -120,6 +126,6 @@ class ImagePathDataset(ClassyDataset):
             shuffle,
             transform,
             num_samples,
-            image_paths,
-            targets=targets,
+            image_folder=config.get("image_folder"),
+            image_files=config.get("image_files"),
         )
