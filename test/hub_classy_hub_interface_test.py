@@ -37,7 +37,7 @@ class TestClassyHubInterface(unittest.TestCase):
 
     def _test_predict_and_extract_features(self, hub_interface: ClassyHubInterface):
         dataset = hub_interface.create_image_dataset(
-            [self.image_path], phase_type="test"
+            image_files=[self.image_path], phase_type="test"
         )
         data_iterator = hub_interface.get_data_iterator(dataset)
         input = next(data_iterator)
@@ -76,7 +76,7 @@ class TestClassyHubInterface(unittest.TestCase):
         task.datasets[phase_type].transform = test_transform
         hub_interface = ClassyHubInterface.from_task(task)
         dataset = hub_interface.create_image_dataset(
-            [self.image_path], phase_type=phase_type
+            image_files=[self.image_path], phase_type=phase_type
         )
         self.assertIsInstance(dataset.transform, TestTransform)
 
