@@ -216,13 +216,16 @@ class ClassyVideoDataset(ClassyDataset):
 
         """
         filedir = os.path.dirname(filepath)
-        if not os.path.exists(filedir):
+        if len(filedir) > 0:
+            # When filepath is an absoluate path or relative path with directory,
+            # we get meaningful directory
             try:
-                os.mkdirs(filedir)
+                os.makedirs(filedir, exist_ok=True)
+                logging.info(f"Save metadata to file: {filedir}")
             except Exception as err:
                 logging.warn(f"Fail to create folder: {filedir}")
                 raise err
-        logging.info(f"Save metadata to file: {filedir}")
+
         try:
             torch.save(metadata, filepath)
         except ValueError:
