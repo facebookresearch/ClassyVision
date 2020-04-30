@@ -10,64 +10,8 @@
 <div class="documentwrapper">
 <div class="bodywrapper">
 <div class="body" role="main">
-<div class="section" id="module-classy_vision.trainer">
-<span id="trainer"></span><h1>Trainer<a class="headerlink" href="#module-classy_vision.trainer" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="classy_vision.trainer.ClassyTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">ClassyTrainer</code><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for shared training code.</p>
-<p>A trainer is responsible for setting up the environment for
-training, for instance: configuring rendezvous for distributed
-training, deciding what GPU to use and so on. Trainers also
-control the outer portion of the training loop, but delegate to
-the task to decide how exactly to perform inference, compute loss
-etc. That allows combining tasks with different trainers depending
-on whether you want to train on your current machine, AWS cluster
-etc.</p>
-<dl class="method">
-<dt id="classy_vision.trainer.ClassyTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task: classy_vision.tasks.classy_task.ClassyTask</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-<dl class="class">
-<dt id="classy_vision.trainer.DistributedTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">DistributedTrainer</code><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Distributed trainer for using multiple training processes</p>
-<dl class="method">
-<dt id="classy_vision.trainer.DistributedTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-<dl class="class">
-<dt id="classy_vision.trainer.LocalTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">LocalTrainer</code><a class="headerlink" href="#classy_vision.trainer.LocalTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trainer to be used if you want want use only a single training process.</p>
-<dl class="method">
-<dt id="classy_vision.trainer.LocalTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.LocalTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
+<div class="section" id="trainer">
+<h1>Trainer<a class="headerlink" href="#trainer" title="Permalink to this headline">¶</a></h1>
 </div>
 </div>
 </div>

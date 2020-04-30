@@ -113,8 +113,8 @@ head = build_head({
 # In Classy Vision, the head can be attached to any residual block in the trunk. 
 # Here we attach the head to the last block as in the standard ResNet model
 fork_block = "pathway0-stage4-block1"
-heads = defaultdict(dict)
-heads[fork_block][unique_id] = head
+heads = defaultdict(list)
+heads[fork_block].append(head)
 model.set_heads(heads)
 
 

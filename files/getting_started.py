@@ -38,7 +38,7 @@ torch.cuda.is_available()
 # In[ ]:
 
 
-get_ipython().system(' pip install tensorboard tensorboardX')
+get_ipython().system(' pip install tensorboard')
 
 
 # ## 1. Start a new project
@@ -255,7 +255,7 @@ y_hat
 # 
 # We have looked at training models using synthetic data so far. A more typical workflow involves training a model on a real world dataset like [ImageNet](http://image-net.org/), which we will cover in this section.
 # 
-# To be able to train using ImageNet, first download the dataset archives from http://image-net.org/. Then, extract the data to a format expected by [`torchvision.datasets.ImageFolder`](https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder) inside subdirectories for the individual splits (`train` and `val`). We can then pass the root path containing these archives to the [`ImageNetDataset`](https://classyvision.ai/api/dataset.html#classy_vision.dataset.ImageNetDataset).
+# To be able to train using ImageNet, first download the dataset archives from http://image-net.org/. Then, extract the data to a format expected by [`torchvision.datasets.ImageFolder`](https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder) inside subdirectories for the individual splits (`train` and `val`). We can then pass the root path containing these archives to the [`ImagePathDataset`](https://classyvision.ai/api/dataset.html#classy_vision.dataset.ImagePathDataset).
 # 
 # The following configuration can be used to train a ResNet 50 on ImageNet to `76.4%` top-1 accuracy in 90 epochs. The optimizer configuration uses SGD with momentum, gradual learning rate warm up for the first 5 epochs and 1/10 learning rate drops at epochs 30, 60 and 80. The learning rate is calculated for a setup with 32 GPUs and can be scaled based on the overall batch size [1].
 
@@ -270,20 +270,46 @@ config = {
     },
     "dataset": {
         "train": {
-            "name": "classy_imagenet",
-            "split": "train",
+            "name": "image_path",
             "batchsize_per_replica": 32,
             "num_samples": None,
             "use_shuffle": True,
-            "root": "/path/to/imagenet/"  # replace with path to the extracted dataset
+            "transforms": [{
+                "name": "apply_transform_to_key",
+                "transforms": [
+                    {"name": "RandomResizedCrop", "size": 224},
+                    {"name": "RandomHorizontalFlip"},
+                    {"name": "ToTensor"},
+                    {
+                        "name": "Normalize",
+                        "mean": [0.485, 0.456, 0.406],
+                        "std": [0.229, 0.224, 0.225]
+                    }
+                ],
+                "key": "input"
+            }],
+            "image_folder": "/tmp/imagenet/train"  # replace with path to the extracted dataset
         },
         "test": {
-            "name": "classy_imagenet",
-            "split": "val",
+            "name": "image_path",
             "batchsize_per_replica": 32,
             "num_samples": None,
             "use_shuffle": False,
-            "root": "/path/to/imagenet/"  # replace with path to the extracted dataset
+            "transforms": [{
+                "name": "apply_transform_to_key",
+                "transforms": [
+                    {"name": "Resize", "size": 256},
+                    {"name": "CenterCrop", "size": 224},
+                    {"name": "ToTensor"},
+                    {
+                        "name": "Normalize",
+                        "mean": [0.485, 0.456, 0.406],
+                        "std": [0.229, 0.224, 0.225]
+                    }
+                ],
+                "key": "input"
+            }],
+            "image_folder": "/tmp/imagenet/val"  # replace with path to the extracted dataset
         }
     },
     "meters": {

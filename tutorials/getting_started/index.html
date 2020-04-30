@@ -129,7 +129,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> pip install tensorboard tensorboardX
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> pip install tensorboard
 </pre></div>
 </div>
 </div>
@@ -292,8 +292,8 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.generic.util</span> <span class="kn">import</span> <span class="n">load_checkpoint</span>
-<span class="kn">from</span> <span class="nn">classy_vision.models</span> <span class="kn">import</span> <span class="n">ClassyModel</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.generic.util</span> <span class="k">import</span> <span class="n">load_checkpoint</span>
+<span class="kn">from</span> <span class="nn">classy_vision.models</span> <span class="k">import</span> <span class="n">ClassyModel</span>
 
 <span class="c1"># This is important: importing models here will register your custom models with Classy Vision</span>
 <span class="c1"># so that it can instantiate them appropriately from the checkpoint file</span>
@@ -352,11 +352,11 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">datasets.my_dataset</span> <span class="kn">import</span> <span class="n">MyDataset</span>
-<span class="kn">from</span> <span class="nn">models.my_model</span> <span class="kn">import</span> <span class="n">MyModel</span>
-<span class="kn">from</span> <span class="nn">losses.my_loss</span> <span class="kn">import</span> <span class="n">MyLoss</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">GenericImageTransform</span>
-<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">datasets.my_dataset</span> <span class="k">import</span> <span class="n">MyDataset</span>
+<span class="kn">from</span> <span class="nn">models.my_model</span> <span class="k">import</span> <span class="n">MyModel</span>
+<span class="kn">from</span> <span class="nn">losses.my_loss</span> <span class="k">import</span> <span class="n">MyLoss</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">GenericImageTransform</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="k">import</span> <span class="n">transforms</span>
 
 <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">MyDataset</span><span class="p">(</span>
     <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
@@ -409,9 +409,9 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="kn">import</span> <span class="n">ClassificationTask</span>
-<span class="kn">from</span> <span class="nn">classy_vision.optim</span> <span class="kn">import</span> <span class="n">SGD</span>
-<span class="kn">from</span> <span class="nn">classy_vision.optim.param_scheduler</span> <span class="kn">import</span> <span class="n">LinearParamScheduler</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="k">import</span> <span class="n">ClassificationTask</span>
+<span class="kn">from</span> <span class="nn">classy_vision.optim</span> <span class="k">import</span> <span class="n">SGD</span>
+<span class="kn">from</span> <span class="nn">classy_vision.optim.param_scheduler</span> <span class="k">import</span> <span class="n">LinearParamScheduler</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
 <span class="n">loss</span> <span class="o">=</span> <span class="n">MyLoss</span><span class="p">()</span>
@@ -421,7 +421,7 @@
     <span class="p">{</span><span class="s2">"lr"</span><span class="p">:</span> <span class="n">LinearParamScheduler</span><span class="p">(</span><span class="n">start_lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mf">0.009</span><span class="p">)}</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">classy_vision.trainer</span> <span class="kn">import</span> <span class="n">LocalTrainer</span>
+<span class="kn">from</span> <span class="nn">classy_vision.trainer</span> <span class="k">import</span> <span class="n">LocalTrainer</span>
 
 <span class="n">task</span> <span class="o">=</span> <span class="n">ClassificationTask</span><span class="p">()</span> \
         <span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> \
@@ -465,7 +465,7 @@
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="7.-Training-a-ResNet-50-on-ImageNet">7. Training a ResNet 50 on ImageNet<a class="anchor-link" href="#7.-Training-a-ResNet-50-on-ImageNet">¶</a></h2><p>We have looked at training models using synthetic data so far. A more typical workflow involves training a model on a real world dataset like <a href="http://image-net.org/">ImageNet</a>, which we will cover in this section.</p>
-<p>To be able to train using ImageNet, first download the dataset archives from <a href="http://image-net.org/">http://image-net.org/</a>. Then, extract the data to a format expected by <a href="https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder"><code>torchvision.datasets.ImageFolder</code></a> inside subdirectories for the individual splits (<code>train</code> and <code>val</code>). We can then pass the root path containing these archives to the <a href="https://classyvision.ai/api/dataset.html#classy_vision.dataset.ImageNetDataset"><code>ImageNetDataset</code></a>.</p>
+<p>To be able to train using ImageNet, first download the dataset archives from <a href="http://image-net.org/">http://image-net.org/</a>. Then, extract the data to a format expected by <a href="https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder"><code>torchvision.datasets.ImageFolder</code></a> inside subdirectories for the individual splits (<code>train</code> and <code>val</code>). We can then pass the root path containing these archives to the <a href="https://classyvision.ai/api/dataset.html#classy_vision.dataset.ImagePathDataset"><code>ImagePathDataset</code></a>.</p>
 <p>The following configuration can be used to train a ResNet 50 on ImageNet to <code>76.4%</code> top-1 accuracy in 90 epochs. The optimizer configuration uses SGD with momentum, gradual learning rate warm up for the first 5 epochs and 1/10 learning rate drops at epochs 30, 60 and 80. The learning rate is calculated for a setup with 32 GPUs and can be scaled based on the overall batch size [1].</p>
 </div>
 </div>
@@ -483,20 +483,46 @@
     <span class="p">},</span>
     <span class="s2">"dataset"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"train"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"classy_imagenet"</span><span class="p">,</span>
-            <span class="s2">"split"</span><span class="p">:</span> <span class="s2">"train"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"image_path"</span><span class="p">,</span>
             <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
             <span class="s2">"num_samples"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">"use_shuffle"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">"root"</span><span class="p">:</span> <span class="s2">"/path/to/imagenet/"</span>  <span class="c1"># replace with path to the extracted dataset</span>
+            <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[{</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"apply_transform_to_key"</span><span class="p">,</span>
+                <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"RandomResizedCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"RandomHorizontalFlip"</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ToTensor"</span><span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span>
+                        <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span>
+                        <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"input"</span>
+            <span class="p">}],</span>
+            <span class="s2">"image_folder"</span><span class="p">:</span> <span class="s2">"/tmp/imagenet/train"</span>  <span class="c1"># replace with path to the extracted dataset</span>
         <span class="p">},</span>
         <span class="s2">"test"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"classy_imagenet"</span><span class="p">,</span>
-            <span class="s2">"split"</span><span class="p">:</span> <span class="s2">"val"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"image_path"</span><span class="p">,</span>
             <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
             <span class="s2">"num_samples"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">"use_shuffle"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">"root"</span><span class="p">:</span> <span class="s2">"/path/to/imagenet/"</span>  <span class="c1"># replace with path to the extracted dataset</span>
+            <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[{</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"apply_transform_to_key"</span><span class="p">,</span>
+                <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Resize"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">256</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ToTensor"</span><span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span>
+                        <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span>
+                        <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"input"</span>
+            <span class="p">}],</span>
+            <span class="s2">"image_folder"</span><span class="p">:</span> <span class="s2">"/tmp/imagenet/val"</span>  <span class="c1"># replace with path to the extracted dataset</span>
         <span class="p">}</span>
     <span class="p">},</span>
     <span class="s2">"meters"</span><span class="p">:</span> <span class="p">{</span>

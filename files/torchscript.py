@@ -34,6 +34,9 @@ config = {
 
 model = build_model(config)
 
+# set the model in eval mode after training to use for inference
+model.eval()
+
 
 # ## 2. Export the model
 # 

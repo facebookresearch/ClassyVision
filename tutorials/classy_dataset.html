@@ -101,16 +101,16 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="k">class</span> <span class="nc">MyDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">100</span>
         
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> \
             <span class="s2">"Provided index </span><span class="si">{}</span><span class="s2"> must be in range [0, </span><span class="si">{}</span><span class="s2">)."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
 </pre></div>
 </div>
@@ -129,10 +129,10 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">ClassyDataset</span>
 
 <span class="k">class</span> <span class="nc">MyClassyDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">MyDataset</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
 </pre></div>
@@ -159,7 +159,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="kn">import</span> <span class="n">ClassificationTask</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="k">import</span> <span class="n">ClassificationTask</span>
 
 <span class="n">my_dataset</span> <span class="o">=</span> <span class="n">MyClassyDataset</span><span class="p">(</span>
     <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
@@ -199,12 +199,12 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">build_transforms</span>
 
 <span class="nd">@register_dataset</span><span class="p">(</span><span class="s2">"my_dataset"</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">MyClassyDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">MyDataset</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
         
@@ -234,7 +234,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">build_dataset</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{</span>
@@ -266,7 +266,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">build_dataset</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{</span>
@@ -332,9 +332,9 @@
 <div class="inner_cell">
 <div class="input_area">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torchvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="kn">import</span> <span class="n">SyntheticImageDataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">build_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="k">import</span> <span class="n">SyntheticImageDataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">build_transforms</span>
 
 <span class="c1"># Declarative approach</span>
 
@@ -392,9 +392,9 @@
 <div class="inner_cell">
 <div class="input_area">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torchvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="kn">import</span> <span class="n">SyntheticImageDataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span><span class="p">,</span> <span class="n">ApplyTransformToKey</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">build_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="k">import</span> <span class="n">SyntheticImageDataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">build_transforms</span><span class="p">,</span> <span class="n">ApplyTransformToKey</span>
 
 <span class="c1"># Declarative approach</span>
 
@@ -443,7 +443,7 @@
 <div class="input_area">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Note that this cell won't work until we fix the synthetic dataset from_config function</span>
 
-<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">build_dataset</span>
 
 <span class="c1"># Configuration approach</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
@@ -493,9 +493,9 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">torchvision.transforms</span> <span class="kn">import</span> <span class="n">Compose</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms.util</span> <span class="kn">import</span> <span class="n">GenericImageTransform</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">torchvision.transforms</span> <span class="k">import</span> <span class="n">Compose</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">build_transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms.util</span> <span class="k">import</span> <span class="n">GenericImageTransform</span>
 
 <span class="c1"># Declarative</span>
 <span class="n">image_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
@@ -553,14 +553,14 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
-<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">ClassyTransform</span><span class="p">,</span> <span class="n">build_transforms</span>
-<span class="kn">from</span> <span class="nn">torchvision.datasets.imagenet</span> <span class="kn">import</span> <span class="n">ImageNet</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="k">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="k">import</span> <span class="n">ClassyTransform</span><span class="p">,</span> <span class="n">build_transforms</span>
+<span class="kn">from</span> <span class="nn">torchvision.datasets.imagenet</span> <span class="k">import</span> <span class="n">ImageNet</span>
         
         
 <span class="nd">@register_dataset</span><span class="p">(</span><span class="s2">"example_imagenet"</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">ExampleImageNetDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">split</span><span class="p">,</span>
         <span class="n">batchsize_per_replica</span><span class="p">,</span>
