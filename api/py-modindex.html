@@ -10,65 +10,75 @@
 <div class="documentwrapper">
 <div class="bodywrapper">
 <div class="body" role="main">
-<div class="section" id="module-classy_vision.trainer">
-<span id="trainer"></span><h1>Trainer<a class="headerlink" href="#module-classy_vision.trainer" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="classy_vision.trainer.ClassyTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">ClassyTrainer</code><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for shared training code.</p>
-<p>A trainer is responsible for setting up the environment for
-training, for instance: configuring rendezvous for distributed
-training, deciding what GPU to use and so on. Trainers also
-control the outer portion of the training loop, but delegate to
-the task to decide how exactly to perform inference, compute loss
-etc. That allows combining tasks with different trainers depending
-on whether you want to train on your current machine, AWS cluster
-etc.</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.ClassyTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span><span class="p">:</span> <span class="n">classy_vision.tasks.classy_task.ClassyTask</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.ClassyTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.trainer.DistributedTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">DistributedTrainer</code><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Distributed trainer for using multiple training processes</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.DistributedTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.DistributedTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.trainer.LocalTrainer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.trainer.</code><code class="sig-name descname">LocalTrainer</code><a class="headerlink" href="#classy_vision.trainer.LocalTrainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trainer to be used if you want want use only a single training process.</p>
-<dl class="py method">
-<dt id="classy_vision.trainer.LocalTrainer.train">
-<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.trainer.LocalTrainer.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs training phases, phases are generated from the config.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task</strong> – Task to be used in training. It should contain
-everything that is needed for training</p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
+<h1>Python Module Index</h1>
+<div class="modindex-jumpbox">
+<a href="#cap-c"><strong>c</strong></a>
 </div>
+<table class="indextable modindextable">
+<tr class="pcap"><td></td><td> </td><td></td></tr>
+<tr class="cap" id="cap-c"><td></td><td>
+<strong>c</strong></td><td></td></tr>
+<tr>
+<td><img alt="-" class="toggler" id="toggle-1" src="_static/minus.png" style="display: none"/></td>
+<td>
+<code class="xref">classy_vision</code></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="dataset.html#module-classy_vision.dataset"><code class="xref">classy_vision.dataset</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="transforms.html#module-0"><code class="xref">classy_vision.dataset.transforms</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="heads.html#module-classy_vision.heads"><code class="xref">classy_vision.heads</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="hooks.html#module-classy_vision.hooks"><code class="xref">classy_vision.hooks</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="losses.html#module-classy_vision.losses"><code class="xref">classy_vision.losses</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="meters.html#module-classy_vision.meters"><code class="xref">classy_vision.meters</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="models.html#module-classy_vision.models"><code class="xref">classy_vision.models</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="optim.html#module-classy_vision.optim"><code class="xref">classy_vision.optim</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="param_scheduler.html#module-classy_vision.optim.param_scheduler"><code class="xref">classy_vision.optim.param_scheduler</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="tasks.html#module-classy_vision.tasks"><code class="xref">classy_vision.tasks</code></a></td><td>
+<em></em></td></tr>
+<tr class="cg-1">
+<td></td>
+<td>   
+       <a href="trainer.html#module-classy_vision.trainer"><code class="xref">classy_vision.trainer</code></a></td><td>
+<em></em></td></tr>
+</table>
 </div>
 </div>
 </div>
@@ -76,7 +86,7 @@ everything that is needed for training</p>
 <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="index.html">Classy Vision</a></h1>
 <h3>Navigation</h3>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heads.html">Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">Hooks</a></li>
@@ -86,15 +96,13 @@ everything that is needed for training</p>
 <li class="toctree-l1"><a class="reference internal" href="optim.html">Optimizers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="param_scheduler.html">Param Schedulers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transforms.html">Transforms</a></li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
 <li><a href="index.html">Documentation overview</a><ul>
-<li>Previous: <a href="tasks.html" title="previous chapter">Tasks</a></li>
-<li>Next: <a href="transforms.html" title="next chapter">Transforms</a></li>
 </ul></li>
 </ul>
 </div>

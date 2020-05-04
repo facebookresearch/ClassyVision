@@ -10,16 +10,254 @@
 <div class="documentwrapper">
 <div class="bodywrapper">
 <div class="body" role="main">
-<div class="section" id="transforms">
-<h1>Transforms<a class="headerlink" href="#transforms" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-classy_vision.dataset.transforms">
+<span id="transforms"></span><h1>Transforms<a class="headerlink" href="#module-classy_vision.dataset.transforms" title="Permalink to this headline">¶</a></h1>
 <p>Classy Vision is able to work directly with <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html">torchvision transforms</a>, so it ships with
 very few built-in transforms. However, during research it’s common to
-experiment with new transforms. The <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code> class allows users to
+experiment with new transforms. The <a class="reference internal" href="#classy_vision.dataset.transforms.ClassyTransform" title="classy_vision.dataset.transforms.ClassyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code></a> class allows users to
 express their transforms in a common format and define them in a configuration
 file.</p>
-<p>Like other Classy Vision abstractions, <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code> is accompanied by a
-<code class="xref py py-func docutils literal notranslate"><span class="pre">register_transform()</span></code> decorator and <code class="xref py py-func docutils literal notranslate"><span class="pre">build_transform()</span></code> function for integration
+<p>Like other Classy Vision abstractions, <a class="reference internal" href="#classy_vision.dataset.transforms.ClassyTransform" title="classy_vision.dataset.transforms.ClassyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code></a> is accompanied by a
+<a class="reference internal" href="#classy_vision.dataset.transforms.register_transform" title="classy_vision.dataset.transforms.register_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_transform()</span></code></a> decorator and <a class="reference internal" href="#classy_vision.dataset.transforms.build_transform" title="classy_vision.dataset.transforms.build_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_transform()</span></code></a> function for integration
 with the config system.</p>
+<span class="target" id="module-0"></span><dl class="py class">
+<dt id="classy_vision.dataset.transforms.ClassyTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">ClassyTransform</code><a class="headerlink" href="#classy_vision.dataset.transforms.ClassyTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a data transform abstraction.</p>
+<p>Data transform is most often needed to pre-process input data (e.g. image, video)
+before sending it to a model. But it can also be used for other purposes.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ClassyTransform.__call__">
+<em class="property">abstract </em><code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ClassyTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The interface <cite>__call__</cite> is used to transform the input data. It should contain
+the actual implementation of data transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> – input image data</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.ImagenetAugmentTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">ImagenetAugmentTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">crop_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">224</span></em>, <em class="sig-param"><span class="n">mean</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.485, 0.456, 0.406]</span></em>, <em class="sig-param"><span class="n">std</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.229, 0.224, 0.225]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetAugmentTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default image transform with data augmentation.</p>
+<p>It is often useful for training models on Imagenet. It sequentially resizes
+the image into a random scale, takes a random spatial cropping, randomly flips
+the image horizontally, transforms PIL image data into a torch.Tensor and
+normalizes the pixel values by mean subtraction and standard deviation division.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ImagenetAugmentTransform.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetAugmentTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callable function which applies the tranform to the input image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> – input image that will undergo the transform</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ImagenetAugmentTransform.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">crop_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">224</span></em>, <em class="sig-param"><span class="n">mean</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.485, 0.456, 0.406]</span></em>, <em class="sig-param"><span class="n">std</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.229, 0.224, 0.225]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetAugmentTransform.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of ImagenetAugmentTransform class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crop_size</strong> – expected output size per dimension after random cropping</p></li>
+<li><p><strong>mean</strong> – a 3-tuple denoting the pixel RGB mean</p></li>
+<li><p><strong>std</strong> – a 3-tuple denoting the pixel RGB standard deviation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.ImagenetNoAugmentTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">ImagenetNoAugmentTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">resize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">256</span></em>, <em class="sig-param"><span class="n">crop_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">224</span></em>, <em class="sig-param"><span class="n">mean</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.485, 0.456, 0.406]</span></em>, <em class="sig-param"><span class="n">std</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.229, 0.224, 0.225]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetNoAugmentTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default image transform without data augmentation.</p>
+<p>It is often useful for testing models on Imagenet. It sequentially resizes
+the image, takes a central  cropping, transforms PIL image data into a
+torch.Tensor and normalizes the pixel values by mean subtraction and standard
+deviation division.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ImagenetNoAugmentTransform.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetNoAugmentTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callable function which applies the tranform to the input image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> – input image that will undergo the transform</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ImagenetNoAugmentTransform.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">resize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">256</span></em>, <em class="sig-param"><span class="n">crop_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">224</span></em>, <em class="sig-param"><span class="n">mean</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.485, 0.456, 0.406]</span></em>, <em class="sig-param"><span class="n">std</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.229, 0.224, 0.225]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ImagenetNoAugmentTransform.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of ImagenetNoAugmentTransform class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resize</strong> – expected image size per dimension after resizing</p></li>
+<li><p><strong>crop_size</strong> – expected size for a dimension of central cropping</p></li>
+<li><p><strong>mean</strong> – a 3-tuple denoting the pixel RGB mean</p></li>
+<li><p><strong>std</strong> – a 3-tuple denoting the pixel RGB standard deviation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.GenericImageTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">GenericImageTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.GenericImageTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default transform for images used in the classification task</p>
+<p>This transform does several things. First, it expects a tuple or
+list input (torchvision datasets supply tuples / lists). Second,
+it applies a user-provided image transforms to the first entry in
+the tuple (again, matching the torchvision tuple format). Third,
+it transforms the tuple to a dict sample with entries “input” and
+“target”.</p>
+<p>The defaults are for the standard imagenet augmentations</p>
+<p>This is just a convenience wrapper to cover the common
+use-case. You can get the same behavior by composing <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html">torchvision
+transforms</a>
++ <a class="reference internal" href="#classy_vision.dataset.transforms.ApplyTransformToKey" title="classy_vision.dataset.transforms.ApplyTransformToKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplyTransformToKey</span></code></a> + <a class="reference internal" href="#classy_vision.dataset.transforms.TupleToMapTransform" title="classy_vision.dataset.transforms.TupleToMapTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">TupleToMapTransform</span></code></a>.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.GenericImageTransform.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.GenericImageTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applied transform to sample</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample</strong> – A tuple with length &gt;= 2. The first entry should
+be the image data, the second entry should be the
+target data.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.GenericImageTransform.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">split</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.GenericImageTransform.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor for GenericImageTransfrom
+Only one of the two arguments (<em>transform</em>, <em>split</em>) should be specified.
+:param transform: A callable or ClassyTransform to be applied to the image only
+:param split: ‘train’ or ‘test’</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.ApplyTransformToKey">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">ApplyTransformToKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">key</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'input'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.ApplyTransformToKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializable class that applies a transform to a key specified field in samples.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ApplyTransformToKey.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> → Union<span class="p">[</span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#classy_vision.dataset.transforms.ApplyTransformToKey.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates sample by applying a transform to the value at the specified key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample</strong> – input sample which will be transformed</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.ApplyTransformToKey.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">key</span><span class="p">:</span> <span class="n">Union<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'input'</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a><a class="headerlink" href="#classy_vision.dataset.transforms.ApplyTransformToKey.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of ApplyTransformToKey class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transform</strong> – a callable function that takes sample data of type dict as input</p></li>
+<li><p><strong>key</strong> – the key in sample whose corresponding value will undergo
+the transform</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.TupleToMapTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">TupleToMapTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_of_map_keys</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.TupleToMapTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>A transform which maps image data from tuple to dict.</p>
+<p>This transform has a list of keys (key1, key2, …),
+takes a sample of the form (data1, data2, …) and
+returns a sample of the form {key1: data1, key2: data2, …}</p>
+<p>It is useful for mapping output from datasets like the <a class="reference external" href="https://github.com/pytorch/vision/blob/master/torchvision/datasets/folder.py#L177">PyTorch
+ImageFolder</a> dataset (tuple) to dict with named data fields.</p>
+<p>If sample is already a dict with the required keys, pass sample through.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.TupleToMapTransform.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.TupleToMapTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform sample from type tuple to type dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sample</strong> – input sample which will be transformed</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.TupleToMapTransform.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_of_map_keys</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.TupleToMapTransform.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of TupleToMapTransform class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_of_map_keys</strong> – a list of dict keys that in order will be mapped
+to items in the input data sample list</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.dataset.transforms.LightingTransform">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">LightingTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alphastd</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">eigval</span><span class="o">=</span><span class="default_value">[0.2175, 0.0188, 0.0045]</span></em>, <em class="sig-param"><span class="n">eigvec</span><span class="o">=</span><span class="default_value">[[- 144.7125, 183.396, 102.2295], [- 148.104, - 1.1475, - 207.57], [- 148.818, - 177.174, 107.1765]]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.LightingTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lighting noise(AlexNet - style PCA - based noise).
+This trick was originally used in <a class="reference external" href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf">AlexNet paper</a></p>
+<p>The eigen values and eigen vectors, are taken from caffe2 <a class="reference external" href="https://github.com/pytorch/pytorch/blob/master/caffe2/image/image_input_op.h#L265">ImageInputOp.h</a>.</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.LightingTransform.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.LightingTransform.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>img: (C x H x W) Tensor with values in range [0.0, 1.0]</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.dataset.transforms.LightingTransform.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alphastd</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">eigval</span><span class="o">=</span><span class="default_value">[0.2175, 0.0188, 0.0045]</span></em>, <em class="sig-param"><span class="n">eigvec</span><span class="o">=</span><span class="default_value">[[- 144.7125, 183.396, 102.2295], [- 148.104, - 1.1475, - 207.57], [- 148.818, - 177.174, 107.1765]]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.LightingTransform.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt id="classy_vision.dataset.transforms.register_transform">
+<code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">register_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.transforms.register_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a <a class="reference internal" href="#classy_vision.dataset.transforms.ClassyTransform" title="classy_vision.dataset.transforms.ClassyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code></a> subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of
+<a class="reference internal" href="#classy_vision.dataset.transforms.ClassyTransform" title="classy_vision.dataset.transforms.ClassyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code></a> from a configuration file, even if the class itself is not
+part of the Classy Vision framework. To use it, apply this decorator to a
+ClassyTransform subclass like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_transform</span><span class="p">(</span><span class="s2">"my_transform"</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MyTransform</span><span class="p">(</span><span class="n">ClassyTransform</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>To instantiate a transform from a configuration file, see
+<a class="reference internal" href="#classy_vision.dataset.transforms.build_transform" title="classy_vision.dataset.transforms.build_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_transform()</span></code></a>.</p>
+</dd></dl>
+<dl class="py function">
+<dt id="classy_vision.dataset.transforms.build_transform">
+<code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">build_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transform_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → Callable<a class="headerlink" href="#classy_vision.dataset.transforms.build_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a <a class="reference internal" href="#classy_vision.dataset.transforms.ClassyTransform" title="classy_vision.dataset.transforms.ClassyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyTransform</span></code></a> from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine what
+transform class to instantiate. For instance, a config <cite>{“name”:
+“my_transform”, “foo”: “bar”}</cite> will find a class that was registered as
+“my_transform” (see <a class="reference internal" href="#classy_vision.dataset.transforms.register_transform" title="classy_vision.dataset.transforms.register_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_transform()</span></code></a>) and call .from_config on
+it.</p>
+<p>In addition to transforms registered with <a class="reference internal" href="#classy_vision.dataset.transforms.register_transform" title="classy_vision.dataset.transforms.register_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_transform()</span></code></a>, we
+also support instantiating transforms available in the
+<a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html">torchvision.transforms</a> module. Any keys in the config will get expanded
+to parameters of the transform constructor. For instance, the following
+call will instantiate a <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.CenterCrop" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.transforms.CenterCrop</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">build_transform</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+<dl class="py function">
+<dt id="classy_vision.dataset.transforms.build_transforms">
+<code class="sig-prename descclassname">classy_vision.dataset.transforms.</code><code class="sig-name descname">build_transforms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">transforms_config</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> → Callable<a class="headerlink" href="#classy_vision.dataset.transforms.build_transforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a transform from the list of transform configurations.</p>
+</dd></dl>
 </div>
 </div>
 </div>
@@ -58,7 +296,7 @@ with the config system.</p>
 </form>
 </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 </div>
 </div>
 <div class="clearer"></div>
