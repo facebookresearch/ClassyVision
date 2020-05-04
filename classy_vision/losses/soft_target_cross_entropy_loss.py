@@ -7,7 +7,6 @@
 
 from typing import Any, Dict
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from classy_vision.generic.util import convert_to_one_hot
@@ -34,7 +33,7 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
             raise NotImplementedError(
                 'reduction type "{}" not implemented'.format(self._reduction)
             )
-        self._eps = np.finfo(np.float32).eps
+        self._eps = torch.finfo(torch.float32).eps
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "SoftTargetCrossEntropyLoss":
