@@ -31,19 +31,22 @@ class FineTuningTask(ClassificationTask):
         """
         task = super().from_config(config)
 
-        pretrained_checkpoint = load_checkpoint(config.get("pretrained_checkpoint"))
-
-        if pretrained_checkpoint is not None:
-            task.set_pretrained_checkpoint(pretrained_checkpoint)
+        pretrained_checkpoint_path = config.get("pretrained_checkpoint")
+        if pretrained_checkpoint_path:
+            task.set_pretrained_checkpoint(pretrained_checkpoint_path)
 
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
         return task
 
-    def set_pretrained_checkpoint(self, checkpoint: Dict[str, Any]) -> "FineTuningTask":
-        assert (
-            "classy_state_dict" in checkpoint
-        ), "Checkpoint does not contain classy_state_dict"
+    def set_pretrained_checkpoint(self, checkpoint_path: str) -> "FineTuningTask":
+        checkpoint = load_checkpoint(checkpoint_path)
+        self.pretrained_checkpoint = checkpoint
+        return self
+
+    def _set_pretrained_checkpoint_dict(
+        self, checkpoint: Dict[str, Any]
+    ) -> "FineTuningTask":
         self.pretrained_checkpoint = checkpoint
         return self
 

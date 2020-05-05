@@ -25,6 +25,7 @@ from classy_vision.generic.distributed_util import (
 )
 from classy_vision.generic.util import (
     copy_model_to_gpu,
+    load_checkpoint,
     recursive_copy_to_gpu,
     update_classy_state,
 )
@@ -150,7 +151,7 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
-        self.dataloader_mp_context = 'spawn'
+        self.dataloader_mp_context = "spawn"
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -161,16 +162,25 @@ class ClassificationTask(ClassyTask):
 
         return self
 
-    def set_checkpoint(self, checkpoint):
+    def set_checkpoint(self, checkpoint_path: str):
         """Sets checkpoint on task.
+
+        Args:
+            checkpoint_path: The path to load the checkpoint from. Can be a file or a
+            directory. See :func:`load_checkpoint` for more information.
+        """
+        checkpoint = load_checkpoint(checkpoint_path)
+        self.checkpoint = checkpoint
+        return self
+
+    def _set_checkpoint_dict(self, checkpoint: Dict[str, Any]):
+        """Sets the checkpoint dict in the task. Only used for testing.
 
         Args:
             checkpoint: A serializable dict representing current task state
         """
-        assert (
-            checkpoint is None or "classy_state_dict" in checkpoint
-        ), "Checkpoint does not contain classy_state_dict"
         self.checkpoint = checkpoint
+        return self
 
     def set_num_epochs(self, num_epochs: Union[int, float]):
         """Set number of epochs to be run.
@@ -581,9 +591,7 @@ class ClassificationTask(ClassyTask):
             )
 
         classy_state_dict = (
-            None
-            if self.checkpoint is None
-            else self.checkpoint.get("classy_state_dict")
+            None if self.checkpoint is None else self.checkpoint["classy_state_dict"]
         )
 
         if classy_state_dict is not None:
