@@ -68,12 +68,12 @@ class TestFineTuningTask(unittest.TestCase):
         # test: prepare should succeed if a pre-trained checkpoint is provided in the
         # config
         fine_tuning_config = self._get_fine_tuning_config(pretrained_checkpoint=True)
+        fine_tuning_task = build_task(fine_tuning_config)
         with mock.patch(
-            "classy_vision.tasks.fine_tuning_task.load_checkpoint",
+            "classy_vision.tasks.fine_tuning_task.load_and_broadcast_checkpoint",
             return_value=checkpoint,
         ):
-            fine_tuning_task = build_task(fine_tuning_config)
-        fine_tuning_task.prepare()
+            fine_tuning_task.prepare()
 
         # test: a fine tuning task with incompatible heads with a manually set
         # pre-trained checkpoint should fail to prepare if the heads are not reset
@@ -98,19 +98,22 @@ class TestFineTuningTask(unittest.TestCase):
             head_num_classes=10, pretrained_checkpoint=True
         )
 
+        fine_tuning_task = build_task(fine_tuning_config)
         with mock.patch(
-            "classy_vision.tasks.fine_tuning_task.load_checkpoint",
+            "classy_vision.tasks.fine_tuning_task.load_and_broadcast_checkpoint",
             return_value=copy.deepcopy(checkpoint),
-        ):
-            fine_tuning_task = build_task(fine_tuning_config)
-        with self.assertRaises(Exception):
+        ) and self.assertRaises(Exception):
             fine_tuning_task.prepare()
 
         # test: a fine tuning task with incompatible heads with the pre-trained
         # checkpoint provided in the config should succeed to prepare if the heads are
         # reset
         fine_tuning_task.set_reset_heads(True)
-        fine_tuning_task.prepare()
+        with mock.patch(
+            "classy_vision.tasks.fine_tuning_task.load_and_broadcast_checkpoint",
+            return_value=copy.deepcopy(checkpoint),
+        ):
+            fine_tuning_task.prepare()
 
     def test_train(self):
         pre_train_config = self._get_pre_train_config(head_num_classes=100)

@@ -106,28 +106,6 @@ class TestClassificationTask(unittest.TestCase):
             task_2.train_step()
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
-    def test_checkpoint_from_config(self):
-        config = get_fast_test_task_config()
-        task = build_task(config).set_hooks(
-            [CheckpointHook(self.base_dir, {}, phase_types=["train"])]
-        )
-        trainer = LocalTrainer()
-        trainer.train(task)
-
-        task_2 = build_task(config)
-
-        # set task_2's state as task's final train checkpoint
-        task_2.set_checkpoint(self.base_dir)
-        task_2.prepare()
-
-        # create a task by passing the checkpoint in the config
-        config["checkpoint"] = self.base_dir
-        task_3 = build_task(config)
-        task_3.prepare()
-
-        # task_2 and task_3 should have the same state
-        self._compare_states(task_2.get_classy_state(), task_3.get_classy_state())
-
     def test_final_train_checkpoint(self):
         """Test that a train phase checkpoint with a where of 1.0 can be loaded"""
 
