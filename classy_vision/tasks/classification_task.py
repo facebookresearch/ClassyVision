@@ -25,7 +25,7 @@ from classy_vision.generic.distributed_util import (
 )
 from classy_vision.generic.util import (
     copy_model_to_gpu,
-    load_checkpoint,
+    load_and_broadcast_checkpoint,
     recursive_copy_to_gpu,
     update_classy_state,
 )
@@ -131,7 +131,8 @@ class ClassificationTask(ClassyTask):
         self.test_only = False
         self.base_model = None
         self.optimizer = None
-        self.checkpoint = None
+        self.checkpoint_dict = None
+        self.checkpoint_path = None
         self.phases = []
         self.hooks = []
         self.train = True
@@ -169,17 +170,16 @@ class ClassificationTask(ClassyTask):
             checkpoint_path: The path to load the checkpoint from. Can be a file or a
             directory. See :func:`load_checkpoint` for more information.
         """
-        checkpoint = load_checkpoint(checkpoint_path)
-        self.checkpoint = checkpoint
+        self.checkpoint_path = checkpoint_path
         return self
 
-    def _set_checkpoint_dict(self, checkpoint: Dict[str, Any]):
+    def _set_checkpoint_dict(self, checkpoint_dict: Dict[str, Any]):
         """Sets the checkpoint dict in the task. Only used for testing.
 
         Args:
-            checkpoint: A serializable dict representing current task state
+            checkpoint_dict: A serializable dict representing current task state
         """
-        self.checkpoint = checkpoint
+        self.checkpoint_dict = checkpoint_dict
         return self
 
     def set_num_epochs(self, num_epochs: Union[int, float]):
@@ -590,8 +590,13 @@ class ClassificationTask(ClassyTask):
                 self.base_model, self.optimizer.optimizer, **self.amp_args
             )
 
+        if self.checkpoint_path:
+            self.checkpoint_dict = load_and_broadcast_checkpoint(self.checkpoint_path)
+
         classy_state_dict = (
-            None if self.checkpoint is None else self.checkpoint["classy_state_dict"]
+            None
+            if self.checkpoint_dict is None
+            else self.checkpoint_dict["classy_state_dict"]
         )
 
         if classy_state_dict is not None:

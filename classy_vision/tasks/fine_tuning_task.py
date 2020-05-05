@@ -6,7 +6,10 @@
 
 from typing import Any, Dict
 
-from classy_vision.generic.util import load_checkpoint, update_classy_model
+from classy_vision.generic.util import (
+    load_and_broadcast_checkpoint,
+    update_classy_model,
+)
 from classy_vision.tasks import ClassificationTask, register_task
 
 
@@ -14,7 +17,8 @@ from classy_vision.tasks import ClassificationTask, register_task
 class FineTuningTask(ClassificationTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pretrained_checkpoint = None
+        self.pretrained_checkpoint_dict = None
+        self.pretrained_checkpoint_path = None
         self.reset_heads = False
         self.freeze_trunk = False
 
@@ -40,14 +44,13 @@ class FineTuningTask(ClassificationTask):
         return task
 
     def set_pretrained_checkpoint(self, checkpoint_path: str) -> "FineTuningTask":
-        checkpoint = load_checkpoint(checkpoint_path)
-        self.pretrained_checkpoint = checkpoint
+        self.pretrained_checkpoint_path = checkpoint_path
         return self
 
     def _set_pretrained_checkpoint_dict(
-        self, checkpoint: Dict[str, Any]
+        self, checkpoint_dict: Dict[str, Any]
     ) -> "FineTuningTask":
-        self.pretrained_checkpoint = checkpoint
+        self.pretrained_checkpoint_dict = checkpoint_dict
         return self
 
     def set_reset_heads(self, reset_heads: bool) -> "FineTuningTask":
@@ -70,16 +73,23 @@ class FineTuningTask(ClassificationTask):
             self.base_model.train(phase["train"])
 
     def prepare(self) -> None:
-        assert (
-            self.pretrained_checkpoint is not None
-        ), "Need a pretrained checkpoint for fine tuning"
         super().prepare()
-        if self.checkpoint is None:
+        if self.checkpoint_dict is None:
             # no checkpoint exists, load the model's state from the pretrained
             # checkpoint
+
+            if self.pretrained_checkpoint_path:
+                self.pretrained_checkpoint_dict = load_and_broadcast_checkpoint(
+                    self.pretrained_checkpoint_path
+                )
+
+            assert (
+                self.pretrained_checkpoint_dict is not None
+            ), "Need a pretrained checkpoint for fine tuning"
+
             state_load_success = update_classy_model(
                 self.base_model,
-                self.pretrained_checkpoint["classy_state_dict"]["base_model"],
+                self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
                 self.reset_heads,
             )
             assert (
