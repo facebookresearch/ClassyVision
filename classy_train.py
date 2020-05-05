@@ -78,17 +78,16 @@ def main(args, config):
     task = build_task(config)
 
     # Load checkpoint, if available.
-    checkpoint = load_checkpoint(args.checkpoint_load_path)
-    task.set_checkpoint(checkpoint)
+    if args.checkpoint_load_path:
+        task.set_checkpoint(args.checkpoint_load_path)
 
     # Load a checkpoint contraining a pre-trained model. This is how we
     # implement fine-tuning of existing models.
-    pretrained_checkpoint = load_checkpoint(args.pretrained_checkpoint_path)
-    if pretrained_checkpoint is not None:
+    if args.pretrained_checkpoint_path:
         assert isinstance(
             task, FineTuningTask
         ), "Can only use a pretrained checkpoint for fine tuning tasks"
-        task.set_pretrained_checkpoint(pretrained_checkpoint)
+        task.set_pretrained_checkpoint(args.pretrained_checkpoint_path)
 
     # Configure hooks to do tensorboard logging, checkpoints and so on
     task.set_hooks(configure_hooks(args, config))

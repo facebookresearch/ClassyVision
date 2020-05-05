@@ -12,7 +12,7 @@ from test.generic.utils import compare_model_state, compare_samples, compare_sta
 
 import torch
 from classy_vision.dataset import build_dataset
-from classy_vision.generic.util import get_checkpoint_dict, load_checkpoint
+from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
@@ -89,7 +89,7 @@ class TestClassificationTask(unittest.TestCase):
             task.advance_phase()
 
             # set task's state as task_2's checkpoint
-            task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
+            task_2._set_checkpoint_dict(get_checkpoint_dict(task, {}, deep_copy=True))
             task_2.prepare()
 
             # task 2 should have the same state
@@ -106,6 +106,28 @@ class TestClassificationTask(unittest.TestCase):
             task_2.train_step()
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
+    def test_checkpoint_from_config(self):
+        config = get_fast_test_task_config()
+        task = build_task(config).set_hooks(
+            [CheckpointHook(self.base_dir, {}, phase_types=["train"])]
+        )
+        trainer = LocalTrainer()
+        trainer.train(task)
+
+        task_2 = build_task(config)
+
+        # set task_2's state as task's final train checkpoint
+        task_2.set_checkpoint(self.base_dir)
+        task_2.prepare()
+
+        # create a task by passing the checkpoint in the config
+        config["checkpoint"] = self.base_dir
+        task_3 = build_task(config)
+        task_3.prepare()
+
+        # task_2 and task_3 should have the same state
+        self._compare_states(task_2.get_classy_state(), task_3.get_classy_state())
+
     def test_final_train_checkpoint(self):
         """Test that a train phase checkpoint with a where of 1.0 can be loaded"""
 
@@ -120,16 +142,13 @@ class TestClassificationTask(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # load the final train checkpoint
-        checkpoint = load_checkpoint(self.base_dir)
-
         # make sure fetching the where raises an exception, which means that
         # where is >= 1.0
         with self.assertRaises(Exception):
             task.where
 
         # set task_2's state as task's final train checkpoint
-        task_2.set_checkpoint(checkpoint)
+        task_2.set_checkpoint(self.base_dir)
         task_2.prepare()
 
         # we should be able to train the task
@@ -156,7 +175,7 @@ class TestClassificationTask(unittest.TestCase):
         trainer.train(train_task)
 
         # set task's state as task_2's checkpoint
-        test_only_task.set_checkpoint(
+        test_only_task._set_checkpoint_dict(
             get_checkpoint_dict(train_task, {}, deep_copy=True)
         )
         test_only_task.prepare()
@@ -216,7 +235,7 @@ class TestClassificationTask(unittest.TestCase):
             task.prepare()
 
             # set task's state as task_2's checkpoint
-            task_2.set_checkpoint(get_checkpoint_dict(task, {}, deep_copy=True))
+            task_2._set_checkpoint_dict(get_checkpoint_dict(task, {}, deep_copy=True))
 
             # we should be able to run the trainer using state from a different device
             trainer = LocalTrainer()
