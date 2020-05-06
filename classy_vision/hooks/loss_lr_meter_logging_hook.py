@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from classy_vision.generic.distributed_util import get_rank
 from classy_vision.hooks import register_hook
@@ -47,7 +47,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             # do not explicitly state this since it is possible for a
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
-            self._log_loss_meters(task, prefix="Synced meters: ")
+            self._log_loss_meters(task, prefix="Synced meters: ", log_batches=True)
 
     def on_step(self, task) -> None:
         """
@@ -59,7 +59,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         if batches and batches % self.log_freq == 0:
             self._log_loss_meters(task, prefix="Approximate meters: ")
 
-    def _log_loss_meters(self, task, prefix="") -> None:
+    def _log_loss_meters(self, task, prefix="", log_batches=False) -> None:
         """
         Compute and log the loss and meters.
         """
@@ -71,8 +71,11 @@ class LossLrMeterLoggingHook(ClassyHook):
         # Loss for the phase
         loss = sum(task.losses) / (batches * task.get_batchsize_per_replica())
         phase_pct = batches / task.num_batches_per_phase
-
-        logging.info(
+        msg = (
             f"{prefix}[{get_rank()}] {phase_type} phase {phase_type_idx} "
             f"({phase_pct*100:.2f}% done), loss: {loss:.4f}, meters: {task.meters}"
         )
+        if log_batches:
+            msg += f", processed batches: {batches}"
+
+        logging.info(msg)
