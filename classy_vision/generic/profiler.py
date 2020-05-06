@@ -20,6 +20,16 @@ from classy_vision.generic.util import (
 from torch.cuda import cudart
 
 
+class ClassyProfilerError(Exception):
+    pass
+
+
+class ClassyProfilerNotImplementedError(ClassyProfilerError):
+    def __init__(self, module):
+        self.module = module
+        super().__init__(f"Profiling not implemented for module: {self.module}")
+
+
 def profile(
     model,
     batchsize_per_replica=32,
@@ -32,7 +42,7 @@ def profile(
     """
     # assertions:
     if use_nvprof:
-        raise NotImplementedError
+        raise ClassyProfilerError("Profiling not supported with nvprof")
         # FIXME (mannatsingh): in case of use_nvprof, exit() is called at the end
         # and we do not return a profile.
         assert is_on_gpu(model), "can only nvprof model that lives on GPU"
@@ -191,7 +201,7 @@ def _layer_flops(layer, x, _):
         else:
             out_h, out_w = layer.output_size
         if out_h > in_h or out_w > in_w:
-            raise NotImplementedError()
+            raise ClassyProfilerNotImplementedError(layer)
         batchsize_per_replica = x.size()[0]
         num_channels = x.size()[1]
         kh = in_h - out_h + 1
@@ -283,7 +293,7 @@ def _layer_flops(layer, x, _):
         out_h = layer.output_size[1]
         out_w = layer.output_size[2]
         if out_t > in_t or out_h > in_h or out_w > in_w:
-            raise NotImplementedError()
+            raise ClassyProfilerNotImplementedError(layer)
         batchsize_per_replica = x.size()[0]
         num_channels = x.size()[1]
         kt = in_t - out_t + 1
@@ -314,7 +324,7 @@ def _layer_flops(layer, x, _):
         return layer.flops(x)
 
     # not implemented:
-    raise NotImplementedError("FLOPs not implemented for %s layer" % layer_type)
+    raise ClassyProfilerNotImplementedError(layer)
 
 
 def _layer_activations(layer, x, out):
@@ -471,8 +481,6 @@ def compute_complexity(
         # compute complexity in eval mode
         with eval_model(model), torch.no_grad():
             model.forward(input)
-    except NotImplementedError as err:
-        raise err
     finally:
         restore_forward(model, patch_attr=patch_attr)
 
