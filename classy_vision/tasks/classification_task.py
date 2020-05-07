@@ -375,14 +375,18 @@ class ClassificationTask(ClassyTask):
         Returns:
             A ClassificationTask instance.
         """
-        optimizer_config = config["optimizer"]
         test_only = config.get("test_only", False)
+        if not test_only:
+            # TODO Make distinction between epochs and phases in optimizer clear
+            train_phases_per_epoch = config["dataset"]["train"].get(
+                "phases_per_epoch", 1
+            )
 
-        # TODO Make distinction between epochs and phases in optimizer clear
-        train_phases_per_epoch = (
-            1 if test_only else config["dataset"]["train"].get("phases_per_epoch", 1)
-        )
-        optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
+            optimizer_config = config["optimizer"]
+            optimizer_config["num_epochs"] = (
+                config["num_epochs"] * train_phases_per_epoch
+            )
+            optimizer = build_optimizer(optimizer_config)
 
         datasets = {}
         phase_types = ["train", "test"] if not test_only else ["test"]
@@ -406,8 +410,6 @@ class ClassificationTask(ClassyTask):
         if hooks_config is not None:
             hooks = build_hooks(hooks_config)
 
-        optimizer = build_optimizer(optimizer_config)
-
         task = (
             cls()
             .set_num_epochs(config["num_epochs"])
@@ -415,7 +417,6 @@ class ClassificationTask(ClassyTask):
             .set_loss(loss)
             .set_test_only(test_only)
             .set_model(model)
-            .set_optimizer(optimizer)
             .set_meters(meters)
             .set_amp_args(amp_args)
             .set_mixup_transform(mixup_transform)
@@ -430,6 +431,9 @@ class ClassificationTask(ClassyTask):
             )
             .set_hooks(hooks)
         )
+
+        if not test_only:
+            task.set_optimizer(optimizer)
 
         use_gpu = config.get("use_gpu")
         if use_gpu is not None:
@@ -577,18 +581,25 @@ class ClassificationTask(ClassyTask):
             self.loss.cpu()
             self.base_model.cpu()
 
-        # initialize the pytorch optimizer now since the model has been moved to
-        # the appropriate device
-        self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
+        if self.optimizer is not None:
+            # initialize the pytorch optimizer now since the model has been moved to
+            # the appropriate device
+            self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
 
         if self.amp_args is not None:
             # Initialize apex.amp. This updates the model and the PyTorch optimizer (
-            # which is wrapped by the ClassyOptimizer in self.optimizer).
+            # if training, which is wrapped by the ClassyOptimizer in self.optimizer).
             # Please note this must happen before loading the checkpoint, cause
             # there's amp state to be restored.
-            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                self.base_model, self.optimizer.optimizer, **self.amp_args
-            )
+
+            if self.optimizer is None:
+                self.base_model = apex.amp.initialize(
+                    self.base_model, optimizers=None, **self.amp_args
+                )
+            else:
+                self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                    self.base_model, self.optimizer.optimizer, **self.amp_args
+                )
 
         if self.checkpoint_path:
             self.checkpoint_dict = load_and_broadcast_checkpoint(self.checkpoint_path)
@@ -667,11 +678,15 @@ class ClassificationTask(ClassyTask):
         Args:
             deep_copy: If true, does a deep copy of state before returning.
         """
+        optimizer_state = {}
+        if self.optimizer is not None:
+            optimizer_state = self.optimizer.get_classy_state()
+
         classy_state_dict = {
             "train": self.train,
             "base_model": self.base_model.get_classy_state(),
             "meters": [meter.get_classy_state() for meter in self.meters],
-            "optimizer": self.optimizer.get_classy_state(),
+            "optimizer": optimizer_state,
             "phase_idx": self.phase_idx,
             "train_phase_idx": self.train_phase_idx,
             "num_updates": self.num_updates,
@@ -704,7 +719,8 @@ class ClassificationTask(ClassyTask):
                 meter.set_classy_state(meter_state)
 
         self.base_model.set_classy_state(state["base_model"])
-        self.optimizer.set_classy_state(state["optimizer"])
+        if self.optimizer is not None:
+            self.optimizer.set_classy_state(state["optimizer"])
         if state.get("loss") and isinstance(self.loss, ClassyLoss):
             self.loss.set_classy_state(state["loss"])
 
