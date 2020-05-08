@@ -5,9 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Dict
 
 from classy_vision.generic.profiler import (
+    ClassyProfilerNotImplementedError,
     compute_activations,
     compute_flops,
     count_params,
@@ -51,12 +51,8 @@ class ModelComplexityHook(ClassyHook):
                         "FLOPs for forward pass: %d MFLOPs"
                         % (float(self.num_flops) / 1e6)
                     )
-            except NotImplementedError:
-                logging.warning(
-                    "Model contains unsupported modules, "
-                    "could not compute FLOPs for model forward pass."
-                )
-                logging.debug("Exception:", exc_info=True)
+            except ClassyProfilerNotImplementedError as e:
+                logging.warning(f"Could not compute FLOPs for model forward pass: {e}")
             try:
                 self.num_activations = compute_activations(
                     task.base_model,
@@ -66,13 +62,13 @@ class ModelComplexityHook(ClassyHook):
                     else None,
                 )
                 logging.info(f"Number of activations in model: {self.num_activations}")
-            except NotImplementedError:
-                logging.info(
-                    "Model does not implement input_shape. Skipping "
-                    "activation calculation."
+            except ClassyProfilerNotImplementedError as e:
+                logging.warning(
+                    f"Could not compute activations for model forward pass: {e}"
                 )
         except Exception:
-            logging.exception("Unexpected failure estimating model complexity.")
+            logging.info("Skipping complexity calculation: Unexpected error")
+            logging.debug("Error trace for complexity calculation:", exc_info=True)
 
     def get_summary(self):
         return {
