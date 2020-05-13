@@ -63,12 +63,11 @@ def all_reduce_mean(tensor):
     Wrapper over torch.distributed.all_reduce for performing mean reduction
     of tensor over all processes.
     """
-    if is_distributed_training_run():
-        tensor, orig_device = convert_to_distributed_tensor(tensor)
-        torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
-        tensor = tensor / torch.distributed.get_world_size()
-        tensor = convert_to_normal_tensor(tensor, orig_device)
-    return tensor
+    return all_reduce_op(
+        tensor,
+        torch.distributed.ReduceOp.SUM,
+        lambda t: t / torch.distributed.get_world_size(),
+    )
 
 
 def all_reduce_sum(tensor):
@@ -77,9 +76,29 @@ def all_reduce_sum(tensor):
     reduction of tensor over all processes in both distributed /
     non-distributed scenarios.
     """
+    return all_reduce_op(tensor, torch.distributed.ReduceOp.SUM)
+
+
+def all_reduce_min(tensor):
+    """
+    Wrapper over torch.distributed.all_reduce for performing min
+    reduction of tensor over all processes in both distributed /
+    non-distributed scenarios.
+    """
+    return all_reduce_op(tensor, torch.distributed.ReduceOp.MIN)
+
+
+def all_reduce_op(tensor, op, after_op_func=None):
+    """
+    Wrapper over torch.distributed.all_reduce for performing
+    reduction of tensor over all processes in both distributed /
+    non-distributed scenarios.
+    """
     if is_distributed_training_run():
         tensor, orig_device = convert_to_distributed_tensor(tensor)
-        torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
+        torch.distributed.all_reduce(tensor, op)
+        if after_op_func is not None:
+            tensor = after_op_func(tensor)
         tensor = convert_to_normal_tensor(tensor, orig_device)
     return tensor
 
