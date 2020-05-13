@@ -69,6 +69,10 @@ For more details / tutorials see the documentation section below.
 
 Please see our [tutorials](https://classyvision.ai/tutorials/) to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](https://classyvision.ai/api/).
 
+## News
+
+Please check out our [News](NEWS.md) section for news and updates about Classy Vision.
+
 ## Join the Classy Vision community
 * Website: https://classyvision.ai
 * [Stack overflow](https://stackoverflow.com/questions/tagged/classy-vision)
