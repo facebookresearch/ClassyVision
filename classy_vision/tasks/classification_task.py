@@ -153,6 +153,7 @@ class ClassificationTask(ClassyTask):
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
         self.dataloader_mp_context = "spawn"
+        self._train_only = True
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -214,6 +215,8 @@ class ClassificationTask(ClassyTask):
         self.datasets[phase_type] = dataset
         if phase_type == "train":
             self.train_phases_per_epoch = getattr(dataset, "phases_per_epoch", 1)
+        else:
+            self._train_only = False
         return self
 
     def set_dataloader_mp_context(self, dataloader_mp_context: str):
@@ -389,9 +392,10 @@ class ClassificationTask(ClassyTask):
             optimizer = build_optimizer(optimizer_config)
 
         datasets = {}
-        phase_types = ["train", "test"] if not test_only else ["test"]
+        phase_types = ["train", "test"]
         for phase_type in phase_types:
-            datasets[phase_type] = build_dataset(config["dataset"][phase_type])
+            if phase_type in config["dataset"]:
+                datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
@@ -439,7 +443,7 @@ class ClassificationTask(ClassyTask):
         if use_gpu is not None:
             task.set_use_gpu(use_gpu)
 
-        for phase_type in phase_types:
+        for phase_type in datasets:
             task.set_dataset(datasets[phase_type], phase_type)
 
         # NOTE: this is a private member and only meant to be used for
@@ -508,15 +512,23 @@ class ClassificationTask(ClassyTask):
           optimizer: optimizer settings
         }
 
-        If this is a test only run, then only test phases will be
-        generated, if this is a training run, then x phases = x train
-        phases + x test phases, interleaved.
+        - If this is a test only run, then only test phases will be
+        generated
+        - If this is a training run with both train and test datasets, then x phases =
+          x train phases + x test phases, interleaved. If test_phase_period > 1, test
+          phases are only added after test_phase_period train phases. The last phase is
+          always a test phase.
+        - If this is a training run with only a train dataset, then x phases = x train
+          phases.
         """
         if not self.test_only:
             phases = [
                 {"train": True}
                 for _ in range(math.ceil(self.train_phases_per_epoch * self.num_epochs))
             ]
+
+            if self._train_only:
+                return phases
 
             final_phases = []
             for i, phase in enumerate(phases):
