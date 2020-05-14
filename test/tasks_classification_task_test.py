@@ -202,6 +202,22 @@ class TestClassificationTask(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(test_only_task)
 
+    def test_train_only_task(self):
+        """
+        Tests that the task runs when only a train dataset is specified.
+        """
+        test_config = get_fast_test_task_config()
+
+        # delete the test dataset from the config
+        del test_config["dataset"]["test"]
+
+        task = build_task(test_config).set_hooks([LossLrMeterLoggingHook()])
+        task.prepare()
+
+        # verify the the task can still be trained
+        trainer = LocalTrainer()
+        trainer.train(task)
+
     @unittest.skipUnless(torch.cuda.is_available(), "This test needs a gpu to run")
     def test_checkpointing_different_device(self):
         config = get_fast_test_task_config()
