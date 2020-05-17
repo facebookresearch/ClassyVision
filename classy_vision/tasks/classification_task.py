@@ -25,6 +25,7 @@ from classy_vision.generic.distributed_util import (
 )
 from classy_vision.generic.util import (
     copy_model_to_gpu,
+    load_and_broadcast_checkpoint,
     recursive_copy_to_gpu,
     update_classy_state,
 )
@@ -130,7 +131,8 @@ class ClassificationTask(ClassyTask):
         self.test_only = False
         self.base_model = None
         self.optimizer = None
-        self.checkpoint = None
+        self.checkpoint_dict = None
+        self.checkpoint_path = None
         self.phases = []
         self.hooks = []
         self.train = True
@@ -150,7 +152,8 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
-        self.dataloader_mp_context = 'spawn'
+        self.dataloader_mp_context = "spawn"
+        self._train_only = True
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -161,16 +164,24 @@ class ClassificationTask(ClassyTask):
 
         return self
 
-    def set_checkpoint(self, checkpoint):
+    def set_checkpoint(self, checkpoint_path: str):
         """Sets checkpoint on task.
 
         Args:
-            checkpoint: A serializable dict representing current task state
+            checkpoint_path: The path to load the checkpoint from. Can be a file or a
+            directory. See :func:`load_checkpoint` for more information.
         """
-        assert (
-            checkpoint is None or "classy_state_dict" in checkpoint
-        ), "Checkpoint does not contain classy_state_dict"
-        self.checkpoint = checkpoint
+        self.checkpoint_path = checkpoint_path
+        return self
+
+    def _set_checkpoint_dict(self, checkpoint_dict: Dict[str, Any]):
+        """Sets the checkpoint dict in the task. Only used for testing.
+
+        Args:
+            checkpoint_dict: A serializable dict representing current task state
+        """
+        self.checkpoint_dict = checkpoint_dict
+        return self
 
     def set_num_epochs(self, num_epochs: Union[int, float]):
         """Set number of epochs to be run.
@@ -204,6 +215,8 @@ class ClassificationTask(ClassyTask):
         self.datasets[phase_type] = dataset
         if phase_type == "train":
             self.train_phases_per_epoch = getattr(dataset, "phases_per_epoch", 1)
+        else:
+            self._train_only = False
         return self
 
     def set_dataloader_mp_context(self, dataloader_mp_context: str):
@@ -365,19 +378,24 @@ class ClassificationTask(ClassyTask):
         Returns:
             A ClassificationTask instance.
         """
-        optimizer_config = config["optimizer"]
         test_only = config.get("test_only", False)
+        if not test_only:
+            # TODO Make distinction between epochs and phases in optimizer clear
+            train_phases_per_epoch = config["dataset"]["train"].get(
+                "phases_per_epoch", 1
+            )
 
-        # TODO Make distinction between epochs and phases in optimizer clear
-        train_phases_per_epoch = (
-            1 if test_only else config["dataset"]["train"].get("phases_per_epoch", 1)
-        )
-        optimizer_config["num_epochs"] = config["num_epochs"] * train_phases_per_epoch
+            optimizer_config = config["optimizer"]
+            optimizer_config["num_epochs"] = (
+                config["num_epochs"] * train_phases_per_epoch
+            )
+            optimizer = build_optimizer(optimizer_config)
 
         datasets = {}
-        phase_types = ["train", "test"] if not test_only else ["test"]
+        phase_types = ["train", "test"]
         for phase_type in phase_types:
-            datasets[phase_type] = build_dataset(config["dataset"][phase_type])
+            if phase_type in config["dataset"]:
+                datasets[phase_type] = build_dataset(config["dataset"][phase_type])
         loss = build_loss(config["loss"])
         amp_args = config.get("amp_args")
         meters = build_meters(config.get("meters", {}))
@@ -396,8 +414,6 @@ class ClassificationTask(ClassyTask):
         if hooks_config is not None:
             hooks = build_hooks(hooks_config)
 
-        optimizer = build_optimizer(optimizer_config)
-
         task = (
             cls()
             .set_num_epochs(config["num_epochs"])
@@ -405,7 +421,6 @@ class ClassificationTask(ClassyTask):
             .set_loss(loss)
             .set_test_only(test_only)
             .set_model(model)
-            .set_optimizer(optimizer)
             .set_meters(meters)
             .set_amp_args(amp_args)
             .set_mixup_transform(mixup_transform)
@@ -421,11 +436,14 @@ class ClassificationTask(ClassyTask):
             .set_hooks(hooks)
         )
 
+        if not test_only:
+            task.set_optimizer(optimizer)
+
         use_gpu = config.get("use_gpu")
         if use_gpu is not None:
             task.set_use_gpu(use_gpu)
 
-        for phase_type in phase_types:
+        for phase_type in datasets:
             task.set_dataset(datasets[phase_type], phase_type)
 
         # NOTE: this is a private member and only meant to be used for
@@ -494,15 +512,23 @@ class ClassificationTask(ClassyTask):
           optimizer: optimizer settings
         }
 
-        If this is a test only run, then only test phases will be
-        generated, if this is a training run, then x phases = x train
-        phases + x test phases, interleaved.
+        - If this is a test only run, then only test phases will be
+        generated
+        - If this is a training run with both train and test datasets, then x phases =
+          x train phases + x test phases, interleaved. If test_phase_period > 1, test
+          phases are only added after test_phase_period train phases. The last phase is
+          always a test phase.
+        - If this is a training run with only a train dataset, then x phases = x train
+          phases.
         """
         if not self.test_only:
             phases = [
                 {"train": True}
                 for _ in range(math.ceil(self.train_phases_per_epoch * self.num_epochs))
             ]
+
+            if self._train_only:
+                return phases
 
             final_phases = []
             for i, phase in enumerate(phases):
@@ -567,23 +593,33 @@ class ClassificationTask(ClassyTask):
             self.loss.cpu()
             self.base_model.cpu()
 
-        # initialize the pytorch optimizer now since the model has been moved to
-        # the appropriate device
-        self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
+        if self.optimizer is not None:
+            # initialize the pytorch optimizer now since the model has been moved to
+            # the appropriate device
+            self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
 
         if self.amp_args is not None:
             # Initialize apex.amp. This updates the model and the PyTorch optimizer (
-            # which is wrapped by the ClassyOptimizer in self.optimizer).
+            # if training, which is wrapped by the ClassyOptimizer in self.optimizer).
             # Please note this must happen before loading the checkpoint, cause
             # there's amp state to be restored.
-            self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                self.base_model, self.optimizer.optimizer, **self.amp_args
-            )
+
+            if self.optimizer is None:
+                self.base_model = apex.amp.initialize(
+                    self.base_model, optimizers=None, **self.amp_args
+                )
+            else:
+                self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                    self.base_model, self.optimizer.optimizer, **self.amp_args
+                )
+
+        if self.checkpoint_path:
+            self.checkpoint_dict = load_and_broadcast_checkpoint(self.checkpoint_path)
 
         classy_state_dict = (
             None
-            if self.checkpoint is None
-            else self.checkpoint.get("classy_state_dict")
+            if self.checkpoint_dict is None
+            else self.checkpoint_dict["classy_state_dict"]
         )
 
         if classy_state_dict is not None:
@@ -654,11 +690,15 @@ class ClassificationTask(ClassyTask):
         Args:
             deep_copy: If true, does a deep copy of state before returning.
         """
+        optimizer_state = {}
+        if self.optimizer is not None:
+            optimizer_state = self.optimizer.get_classy_state()
+
         classy_state_dict = {
             "train": self.train,
             "base_model": self.base_model.get_classy_state(),
             "meters": [meter.get_classy_state() for meter in self.meters],
-            "optimizer": self.optimizer.get_classy_state(),
+            "optimizer": optimizer_state,
             "phase_idx": self.phase_idx,
             "train_phase_idx": self.train_phase_idx,
             "num_updates": self.num_updates,
@@ -691,7 +731,8 @@ class ClassificationTask(ClassyTask):
                 meter.set_classy_state(meter_state)
 
         self.base_model.set_classy_state(state["base_model"])
-        self.optimizer.set_classy_state(state["optimizer"])
+        if self.optimizer is not None:
+            self.optimizer.set_classy_state(state["optimizer"])
         if state.get("loss") and isinstance(self.loss, ClassyLoss):
             self.loss.set_classy_state(state["loss"])
 

@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import io
+
 import torch
 
 
@@ -61,12 +63,11 @@ def all_reduce_mean(tensor):
     Wrapper over torch.distributed.all_reduce for performing mean reduction
     of tensor over all processes.
     """
-    if is_distributed_training_run():
-        tensor, orig_device = convert_to_distributed_tensor(tensor)
-        torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
-        tensor = tensor / torch.distributed.get_world_size()
-        tensor = convert_to_normal_tensor(tensor, orig_device)
-    return tensor
+    return all_reduce_op(
+        tensor,
+        torch.distributed.ReduceOp.SUM,
+        lambda t: t / torch.distributed.get_world_size(),
+    )
 
 
 def all_reduce_sum(tensor):
@@ -75,9 +76,29 @@ def all_reduce_sum(tensor):
     reduction of tensor over all processes in both distributed /
     non-distributed scenarios.
     """
+    return all_reduce_op(tensor, torch.distributed.ReduceOp.SUM)
+
+
+def all_reduce_min(tensor):
+    """
+    Wrapper over torch.distributed.all_reduce for performing min
+    reduction of tensor over all processes in both distributed /
+    non-distributed scenarios.
+    """
+    return all_reduce_op(tensor, torch.distributed.ReduceOp.MIN)
+
+
+def all_reduce_op(tensor, op, after_op_func=None):
+    """
+    Wrapper over torch.distributed.all_reduce for performing
+    reduction of tensor over all processes in both distributed /
+    non-distributed scenarios.
+    """
     if is_distributed_training_run():
         tensor, orig_device = convert_to_distributed_tensor(tensor)
-        torch.distributed.all_reduce(tensor, torch.distributed.ReduceOp.SUM)
+        torch.distributed.all_reduce(tensor, op)
+        if after_op_func is not None:
+            tensor = after_op_func(tensor)
         tensor = convert_to_normal_tensor(tensor, orig_device)
     return tensor
 
@@ -112,6 +133,18 @@ def gather_from_all(tensor):
     gathered_tensors = gather_tensors_from_all(tensor)
     gathered_tensor = torch.cat(gathered_tensors, 0)
     return gathered_tensor
+
+
+def broadcast(tensor, src=0):
+    """
+    Wrapper over torch.distributed.broadcast for broadcasting a tensor from the source
+    to all processes in both distributed / non-distributed scenarios.
+    """
+    if is_distributed_training_run():
+        tensor, orig_device = convert_to_distributed_tensor(tensor)
+        torch.distributed.broadcast(tensor, src)
+        tensor = convert_to_normal_tensor(tensor, orig_device)
+    return tensor
 
 
 def barrier():
@@ -184,3 +217,22 @@ def init_distributed_data_parallel_model(
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=find_unused_parameters,
         )
+
+
+def broadcast_object(obj):
+    if is_master():
+        buffer = io.BytesIO()
+        torch.save(obj, buffer)
+        data = bytearray(buffer.getbuffer())
+        length_tensor = torch.LongTensor([len(data)])
+        length_tensor = broadcast(length_tensor)
+        data_tensor = torch.ByteTensor(data)
+        data_tensor = broadcast(data_tensor)
+    else:
+        length_tensor = torch.LongTensor([0])
+        length_tensor = broadcast(length_tensor)
+        data_tensor = torch.empty([length_tensor.item()], dtype=torch.uint8)
+        data_tensor = broadcast(data_tensor)
+        buffer = io.BytesIO(data_tensor.numpy())
+        obj = torch.load(buffer)
+    return obj

@@ -8,7 +8,6 @@ import copy
 import os
 import shutil
 import tempfile
-import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from test.generic.hook_test_utils import HookTestBase
 
@@ -173,7 +172,7 @@ class TestCheckpointHook(HookTestBase):
             task = build_task(config)
 
             # set the checkpoint
-            task.set_checkpoint(checkpoint)
+            task._set_checkpoint_dict(checkpoint)
 
             task.set_use_gpu(use_gpu)
 

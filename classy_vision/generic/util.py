@@ -18,6 +18,7 @@ from typing import Dict, Optional
 import numpy as np
 import torch
 import torch.nn as nn
+from classy_vision.generic.distributed_util import broadcast_object, is_master
 from fvcore.common.file_io import PathManager
 from torch._six import container_abcs
 
@@ -446,6 +447,23 @@ def get_checkpoint_dict(task, input_args, deep_copy=False):
         "input_args": input_args,
         "classy_state_dict": task.get_classy_state(deep_copy=deep_copy),
     }
+
+
+def load_and_broadcast_checkpoint(
+    checkpoint_path: str, device: torch.device = CPU_DEVICE
+) -> Optional[Dict]:
+    """Loads a checkpoint on master and broadcasts it to all replicas.
+
+    This is a collective operation which needs to be run in sync on all replicas.
+
+    See :func:`load_checkpoint` for the arguments.
+    """
+    if is_master():
+        checkpoint = load_checkpoint(checkpoint_path, device)
+    else:
+        checkpoint = None
+    logging.info(f"Broadcasting checkpoint loaded from {checkpoint_path}")
+    return broadcast_object(checkpoint)
 
 
 def load_checkpoint(

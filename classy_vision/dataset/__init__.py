@@ -73,7 +73,6 @@ import_all_modules(FILE_ROOT, "classy_vision.dataset")
 
 from .classy_cifar import CIFARDataset  # isort:skip
 from .classy_hmdb51 import HMDB51Dataset  # isort:skip
-from .classy_imagenet import ImageNetDataset  # isort:skip
 from .classy_kinetics400 import Kinetics400Dataset  # isort:skip
 from .classy_synthetic_image import SyntheticImageDataset  # isort:skip
 from .classy_synthetic_image_streaming import (  # isort:skip
@@ -95,7 +94,6 @@ __all__ = [
     "DataloaderSkipNoneWrapper",
     "DataloaderWrapper",
     "HMDB51Dataset",
-    "ImageNetDataset",
     "ImagePathDataset",
     "Kinetics400Dataset",
     "SyntheticImageDataset",
