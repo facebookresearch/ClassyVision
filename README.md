@@ -14,6 +14,10 @@
 
 Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
 
+## News
+
+Please check out our [News](NEWS.md) section for news and updates about Classy Vision.
+
 ## Installation
 
 #### Installation Requirements
@@ -68,10 +72,6 @@ For more details / tutorials see the documentation section below.
 ## Documentation
 
 Please see our [tutorials](https://classyvision.ai/tutorials/) to learn how to get started on Classy Vision and customize your training runs. Full documentation is available [here](https://classyvision.ai/api/).
-
-## News
-
-Please check out our [News](NEWS.md) section for news and updates about Classy Vision.
 
 ## Join the Classy Vision community
 * Website: https://classyvision.ai
