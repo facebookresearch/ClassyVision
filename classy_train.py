@@ -111,7 +111,6 @@ def main(args, config):
     logging.info("Training successful!")
     logging.info(f'Results of this training run are available at: "{output_folder}"')
 
-
 def configure_hooks(args, config):
     hooks = [LossLrMeterLoggingHook(args.log_freq), ModelComplexityHook()]
 
