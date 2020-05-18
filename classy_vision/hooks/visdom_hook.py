@@ -9,7 +9,6 @@ import logging
 from typing import Any, Dict
 
 from classy_vision.generic.distributed_util import is_master
-from classy_vision.generic.util import flatten_dict
 from classy_vision.generic.visualize import plot_learning_curves
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -21,6 +20,21 @@ try:
     visdom_available = True
 except ImportError:
     visdom_available = False
+
+
+def flatten_dict(value_dict, prefix="", sep="_"):
+    """
+    Flattens nested dict into (key, val) dict. Used for flattening meters
+    structure, so that they can be visualized.
+    """
+    items = []
+    for k, v in value_dict.items():
+        key = prefix + sep + k if prefix else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten_dict(value_dict=v, prefix=key, sep=sep).items())
+        else:
+            items.append((key, v))
+    return dict(items)
 
 
 @register_hook("visdom")
