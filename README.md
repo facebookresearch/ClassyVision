@@ -12,11 +12,7 @@
 * Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
 * Elastic training. We have also added experimental integration with [PyTorch Elastic](https://github.com/pytorch/elastic), which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
 
-Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
-
-## News
-
-Please check out our [News](NEWS.md) section for news and updates about Classy Vision.
+Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases. See the [news page](NEWS.md) for the latest additions & updates.
 
 ## Installation
 
