@@ -169,35 +169,34 @@ def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
     if curr_depth >= max_depth:
         raise ValueError("Depth of value object is too deep")
 
-    try:
+    if hasattr(value, 'cuda'):
         return value.cuda(non_blocking=non_blocking)
-    except AttributeError:
-        if isinstance(value, container_abcs.Sequence):
-            gpu_val = []
-            for val in value:
-                gpu_val.append(
-                    recursive_copy_to_gpu(
-                        val,
-                        non_blocking=non_blocking,
-                        max_depth=max_depth,
-                        curr_depth=curr_depth + 1,
-                    )
-                )
-
-            return gpu_val if isinstance(value, list) else tuple(gpu_val)
-        elif isinstance(value, container_abcs.Mapping):
-            gpu_val = {}
-            for key, val in value.items():
-                gpu_val[key] = recursive_copy_to_gpu(
+    elif isinstance(value, list) or isinstance(value, tuple):
+        gpu_val = []
+        for val in value:
+            gpu_val.append(
+                recursive_copy_to_gpu(
                     val,
                     non_blocking=non_blocking,
                     max_depth=max_depth,
                     curr_depth=curr_depth + 1,
                 )
+            )
 
-            return gpu_val
+        return gpu_val if isinstance(value, list) else tuple(gpu_val)
+    elif isinstance(value, container_abcs.Mapping):
+        gpu_val = {}
+        for key, val in value.items():
+            gpu_val[key] = recursive_copy_to_gpu(
+                val,
+                non_blocking=non_blocking,
+                max_depth=max_depth,
+                curr_depth=curr_depth + 1,
+            )
 
-        raise AttributeError("Value must have .cuda attr or be a Seq / Map iterable")
+        return gpu_val
+
+    return value
 
 
 @contextlib.contextmanager

@@ -764,11 +764,9 @@ class ClassificationTask(ClassyTask):
             + "'target' keys"
         )
 
-        # Copy sample to GPU
         target = sample["target"]
         if self.use_gpu:
-            for key, value in sample.items():
-                sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
+            sample = recursive_copy_to_gpu(sample, non_blocking=True)
 
         with torch.no_grad():
             output = self.model(sample["input"])
@@ -809,8 +807,7 @@ class ClassificationTask(ClassyTask):
         # Copy sample to GPU
         target = sample["target"]
         if self.use_gpu:
-            for key, value in sample.items():
-                sample[key] = recursive_copy_to_gpu(value, non_blocking=True)
+            sample = recursive_copy_to_gpu(sample, non_blocking=True)
 
         if self.mixup_transform is not None:
             sample = self.mixup_transform(sample)
