@@ -87,7 +87,7 @@ def _get_batchsize_per_replica(x):
     return x.size()[0]
 
 
-def _layer_flops(layer, x, _):
+def _layer_flops(layer, x, y, verbose=False):
     """
     Computes the number of FLOPs required for a single layer.
 
@@ -106,6 +106,8 @@ def _layer_flops(layer, x, _):
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
     batchsize_per_replica = _get_batchsize_per_replica(x)
+
+    flops = None
     # 1D convolution:
     if layer_type in ["Conv1d"]:
         # x shape is N x C x W
@@ -114,7 +116,7 @@ def _layer_flops(layer, x, _):
             / layer.stride[0]
             + 1
         )
-        return (
+        flops = (
             batchsize_per_replica
             * layer.in_channels
             * layer.out_channels
@@ -134,7 +136,7 @@ def _layer_flops(layer, x, _):
             / layer.stride[1]
             + 1
         )
-        return (
+        flops = (
             batchsize_per_replica
             * layer.in_channels
             * layer.out_channels
@@ -167,11 +169,11 @@ def _layer_flops(layer, x, _):
             * out_w
             / layer.condense_factor
         )
-        return count1 + count2
+        flops = count1 + count2
 
     # non-linearities:
     elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax"]:
-        return x.numel()
+        flops = x.numel()
 
     # 2D pooling layers:
     elif layer_type in ["AvgPool2d", "MaxPool2d"]:
@@ -186,7 +188,7 @@ def _layer_flops(layer, x, _):
         out_w = 1 + int(
             (in_w + 2 * layer.padding - layer.kernel_size[1]) / layer.stride
         )
-        return x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
+        flops = x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
 
     # adaptive avg pool2d
     # This is approximate and works only for downsampling without padding
@@ -207,13 +209,13 @@ def _layer_flops(layer, x, _):
         kh = in_h - out_h + 1
         kw = in_w - out_w + 1
         kernel_ops = kh * kw
-        return batchsize_per_replica * num_channels * out_h * out_w * kernel_ops
+        flops = batchsize_per_replica * num_channels * out_h * out_w * kernel_ops
 
     # linear layer:
     elif layer_type in ["Linear"]:
         weight_ops = layer.weight.numel()
         bias_ops = layer.bias.numel() if layer.bias is not None else 0
-        return x.size()[0] * (weight_ops + bias_ops)
+        flops = x.size()[0] * (weight_ops + bias_ops)
 
     # batch normalization / layer normalization:
     elif layer_type in [
@@ -223,7 +225,7 @@ def _layer_flops(layer, x, _):
         "SyncBatchNorm",
         "LayerNorm",
     ]:
-        return 2 * x.numel()
+        flops = 2 * x.numel()
 
     # 3D convolution
     elif layer_type in ["Conv3d"]:
@@ -242,7 +244,7 @@ def _layer_flops(layer, x, _):
             // layer.stride[2]
             + 1
         )
-        return (
+        flops = (
             batchsize_per_replica
             * layer.in_channels
             * layer.out_channels
@@ -280,7 +282,7 @@ def _layer_flops(layer, x, _):
         out_w = 1 + int(
             (in_w + 2 * layer.padding[2] - layer.kernel_size[2]) / layer.stride[2]
         )
-        return batchsize_per_replica * x.size()[1] * out_t * out_h * out_w * kernel_ops
+        flops = batchsize_per_replica * x.size()[1] * out_t * out_h * out_w * kernel_ops
 
     # adaptive avg pool3d
     # This is approximate and works only for downsampling without padding
@@ -300,7 +302,9 @@ def _layer_flops(layer, x, _):
         kh = in_h - out_h + 1
         kw = in_w - out_w + 1
         kernel_ops = kt * kh * kw
-        return batchsize_per_replica * num_channels * out_t * out_w * out_h * kernel_ops
+        flops = (
+            batchsize_per_replica * num_channels * out_t * out_w * out_h * kernel_ops
+        )
 
     # dropout layer
     elif layer_type in ["Dropout"]:
@@ -309,10 +313,9 @@ def _layer_flops(layer, x, _):
         flops = 1
         for dim_size in x.size():
             flops *= dim_size
-        return flops
 
     elif layer_type == "Identity":
-        return 0
+        flops = 0
 
     elif hasattr(layer, "flops"):
         # If the module already defines a method to compute flops with the signature
@@ -321,13 +324,25 @@ def _layer_flops(layer, x, _):
         #   Class MyModule(nn.Module):
         #     def flops(self, x):
         #       ...
-        return layer.flops(x)
+        flops = layer.flops(x)
 
-    # not implemented:
-    raise ClassyProfilerNotImplementedError(layer)
+    if flops is not None:
+        if verbose:
+            message = [
+                f"module type: {typestr}",
+                f"input size: {list(x.size())}",
+                f"output size: {list(y.size())}",
+                f"params(M): {count_params(layer) / 1e6}",
+                f"flops(M): {int(flops) / 1e6}",
+            ]
+            logging.info("\t".join(message))
+        return flops
+    else:
+        # not implemented:
+        raise ClassyProfilerNotImplementedError(layer)
 
 
-def _layer_activations(layer, x, out):
+def _layer_activations(layer, x, out, verbose=False):
     """
     Computes the number of activations produced by a single layer.
 
@@ -339,9 +354,16 @@ def _layer_activations(layer, x, out):
         def activations(self, x, out):
             ...
     """
+    typestr = layer.__repr__()
+    activations = None
     if hasattr(layer, "activations"):
-        return layer.activations(x, out)
-    return out.numel() if isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)) else 0
+        activations = layer.activations(x, out)
+    elif isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+        activations = out.numel()
+    if verbose and activations is not None:
+        message = [f"module: {typestr}", f"activations: {activations}"]
+        logging.info("\t".join(message))
+    return activations if activations is not None else 0
 
 
 def summarize_profiler_info(prof):
@@ -366,16 +388,19 @@ def summarize_profiler_info(prof):
 
 
 class ComplexityComputer:
-    def __init__(self, compute_fn: Callable, count_unique: bool):
+    def __init__(self, compute_fn: Callable, count_unique: bool, verbose: bool = False):
         self.compute_fn = compute_fn
         self.count_unique = count_unique
+        self.verbose = verbose
         self.count = 0
         self.seen_modules = set()
 
     def compute(self, layer, x, out, module_name):
         if self.count_unique and module_name in self.seen_modules:
             return
-        self.count += self.compute_fn(layer, x, out)
+        if self.verbose:
+            logging.info(f"module name: {module_name}")
+        self.count += self.compute_fn(layer, x, out, self.verbose)
         self.seen_modules.add(module_name)
 
     def reset(self):
