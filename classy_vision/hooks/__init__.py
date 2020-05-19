@@ -84,6 +84,7 @@ def build_hook(hook_config: Dict[str, Any]):
 import_all_modules(FILE_ROOT, "classy_vision.hooks")
 
 from .checkpoint_hook import CheckpointHook  # isort:skip
+from .torchscript_hook import TorchscriptHook  # isort:skip
 from .exponential_moving_average_model_hook import (  # isort:skip
     ExponentialMovingAverageModelHook,
 )
@@ -106,6 +107,7 @@ __all__ = [
     "ExponentialMovingAverageModelHook",
     "LossLrMeterLoggingHook",
     "TensorboardPlotHook",
+    "TorchscriptHook",
     "ModelComplexityHook",
     "ModelTensorboardHook",
     "ProfilerHook",
