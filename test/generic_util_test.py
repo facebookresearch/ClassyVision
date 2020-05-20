@@ -278,20 +278,17 @@ class TestUtilMethods(unittest.TestCase):
                 self.assertTrue(gpu_value[0].is_cuda)
                 self.assertTrue(gpu_value[1].is_cuda)
 
-        invalid_gpu_copy_values = [1234, True, 1.0]
-        for value in invalid_gpu_copy_values:
-            with self.assertRaises(AttributeError):
-                gpu_value = util.recursive_copy_to_gpu(value)
-
         invalid_gpu_copy_depth = [
             ((((tensor_a, tensor_b), tensor_b), tensor_b), tensor_b),
             {"tensor_map_a": {"tensor_map_b": {"tensor_map_c": {"tensor": tensor_a}}}},
             [[[[tensor_a, tensor_b], tensor_b], tensor_b], tensor_b],
-            "abcd",  # Strings are sequences, includeing single char strings
         ]
         for value in invalid_gpu_copy_depth:
             with self.assertRaises(ValueError):
                 gpu_value = util.recursive_copy_to_gpu(value, max_depth=3)
+
+        value = {"a": "b"}
+        self.assertEqual(value, util.recursive_copy_to_gpu(value))
 
     _json_config_file = ROOT / "generic_util_json_blob_test.json"
 
