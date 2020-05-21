@@ -11,7 +11,7 @@ import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_list
 
 from . import register_model
-from .classy_model import ClassyModel, ClassyModelEvaluationMode
+from .classy_model import ClassyModel
 from .resnext3d_stage import ResStage
 from .resnext3d_stem import R2Plus1DStem, ResNeXt3DStem
 
@@ -289,10 +289,6 @@ class ResNeXt3DBase(ClassyModel):
     @property
     def model_depth(self):
         return sum(self.num_blocks)
-
-    @property
-    def evaluation_mode(self):
-        return ClassyModelEvaluationMode.VIDEO_CLIP_AVERAGING
 
     @property
     def input_key(self):

@@ -16,11 +16,6 @@ from classy_vision.heads.classy_head import ClassyHead
 from .classy_block import ClassyBlock
 
 
-class ClassyModelEvaluationMode(Enum):
-    DEFAULT = 0
-    VIDEO_CLIP_AVERAGING = 1
-
-
 class _ClassyModelMeta(type):
     """Metaclass to return a ClassyModel instance wrapped by a ClassyModelWrapper."""
 
@@ -474,14 +469,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         """If implemented, returns number of layers in model
         """
         raise NotImplementedError
-
-    @property
-    def evaluation_mode(self):
-        """Used by video models for averaging over contiguous clips.
-        """
-        # TODO: Remove this once we have a video task, this logic should
-        # live in a video specific task
-        return ClassyModelEvaluationMode.DEFAULT
 
 
 class _ClassyModelAdapter(ClassyModel):
