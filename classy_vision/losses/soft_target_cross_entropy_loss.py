@@ -71,9 +71,10 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
                 output.shape[0] == target.shape[0]
             ), "SoftTargetCrossEntropyLoss requires output and target to have same batch size"
             target = convert_to_one_hot(target.view(-1, 1), output.shape[1])
-        assert (
-            output.shape == target.shape
-        ), "SoftTargetCrossEntropyLoss requires output and target to be same"
+        assert output.shape == target.shape, (
+            "SoftTargetCrossEntropyLoss requires output and target to be same "
+            f"shape: {output.shape} != {target.shape}"
+        )
         valid_mask = target != self._ignore_index
         valid_targets = target.float() * valid_mask.float()
         if self._normalize_targets == "count_based":

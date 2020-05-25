@@ -87,7 +87,6 @@ import_all_modules(FILE_ROOT, "classy_vision.models")
 
 from .classy_block import ClassyBlock  # isort:skip
 from .classy_model import (  # isort:skip
-    ClassyModelEvaluationMode,  # isort:skip
     ClassyModelWrapper,  # isort:skip
     ClassyModelHeadExecutorWrapper,  # isort:skip
 )  # isort:skip
@@ -105,7 +104,6 @@ __all__ = [
     "register_model",
     "ClassyBlock",
     "ClassyModel",
-    "ClassyModelEvaluationMode",
     "ClassyModelHeadExecutorWrapper",
     "ClassyModelWrapper",
     "DenseNet",
