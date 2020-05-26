@@ -31,7 +31,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(
-        self, decay: float, consider_bn_buffers: bool = True, device: str = "cpu"
+        self, decay: float, consider_bn_buffers: bool = True, device: str = "gpu"
     ) -> None:
         """The constructor method of ExponentialMovingAverageModelHook.
 
@@ -64,10 +64,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
                 (f"{module_name}_buffer_{name}", buffer)
                 for module_name, module in model.named_modules()
                 for name, buffer in module.named_buffers()
-                if isinstance(
-                    module,
-                    (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm),
-                )
+                if isinstance(module, nn.modules.batchnorm._BatchNorm)
             )
             iterable = itertools.chain(iterable, buffers_iterable)
         return iterable
