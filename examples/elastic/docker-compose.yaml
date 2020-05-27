@@ -1,0 +1,26 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  etcd-server:
+    image: 'bitnami/etcd:latest'
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-server:2379
+      - ETCD_ENABLE_V2=1
+    ports:
+      - 2379:2379
+      - 2380:2380
+    networks:
+      - app-tier
+  example:
+    image: 'torchelastic/examples:0.2.0'
+    shm_size: 2g
+    volumes:
+      - ~/ClassyVision/examples/elastic/my_project:/workspace/my_project
+    command: --nnode=1 --nproc_per_node=2 --rdzv_endpoint=etcd-server /workspace/my_project/classy_train.py --config /workspace/my_project/configs/template_config.json --distributed_backend ddp
+    networks:
+      - app-tier
