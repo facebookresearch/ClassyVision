@@ -143,7 +143,7 @@ class ClassificationTask(ClassyTask):
         self.data_iterator = None
         self.losses = []
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
-            BroadcastBuffersMode.DISABLED
+            BroadcastBuffersMode.BEFORE_EVAL
         )
         self.amp_args = None
         self.mixup_transform = None
@@ -258,7 +258,7 @@ class ClassificationTask(ClassyTask):
 
     def set_distributed_options(
         self,
-        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.DISABLED,
+        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.BEFORE_EVAL,
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
         find_unused_parameters: bool = True,
     ):
@@ -426,7 +426,7 @@ class ClassificationTask(ClassyTask):
             .set_mixup_transform(mixup_transform)
             .set_distributed_options(
                 broadcast_buffers_mode=BroadcastBuffersMode[
-                    config.get("broadcast_buffers", "disabled").upper()
+                    config.get("broadcast_buffers", "before_eval").upper()
                 ],
                 batch_norm_sync_mode=BatchNormSyncMode[
                     config.get("batch_norm_sync_mode", "disabled").upper()
