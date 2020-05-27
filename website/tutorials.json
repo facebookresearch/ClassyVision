@@ -23,7 +23,7 @@
       "title": "Fine Tuning a model"
      },{
       "id": "pet_aws",
-      "title": "Elastic training on AWS"
+      "title": "Elastic training"
      },{
       "id": "torchscript",
       "title": "Productionizing models"
