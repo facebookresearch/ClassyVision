@@ -807,7 +807,7 @@ class ClassificationTask(ClassyTask):
         # Copy sample to GPU
         target = sample["target"]
         if self.use_gpu:
-            sample = recursive_copy_to_gpu(sample, non_blocking=True)
+            sample = recursive_copy_to_gpu(sample, non_blocking=True, max_depth=4)
 
         if self.mixup_transform is not None:
             sample = self.mixup_transform(sample)
