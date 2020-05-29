@@ -142,7 +142,7 @@ def copy_model_to_gpu(model, loss=None):
         return model
 
 
-def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
+def recursive_copy_to_gpu(value, non_blocking=True):
     """
     Recursively searches lists, tuples, dicts and copies tensors to GPU if
     possible. Non-tensor values are passed as-is in the result.
@@ -150,33 +150,18 @@ def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
     the same object, then after this call, there will be two different objects
     referenced on the GPU.
     """
-    if curr_depth >= max_depth:
-        raise ValueError("Depth of value object is too deep")
-
     if hasattr(value, "cuda"):
         return value.cuda(non_blocking=non_blocking)
     elif isinstance(value, list) or isinstance(value, tuple):
         gpu_val = []
         for val in value:
-            gpu_val.append(
-                recursive_copy_to_gpu(
-                    val,
-                    non_blocking=non_blocking,
-                    max_depth=max_depth,
-                    curr_depth=curr_depth + 1,
-                )
-            )
+            gpu_val.append(recursive_copy_to_gpu(val, non_blocking=non_blocking))
 
         return gpu_val if isinstance(value, list) else tuple(gpu_val)
     elif isinstance(value, container_abcs.Mapping):
         gpu_val = {}
         for key, val in value.items():
-            gpu_val[key] = recursive_copy_to_gpu(
-                val,
-                non_blocking=non_blocking,
-                max_depth=max_depth,
-                curr_depth=curr_depth + 1,
-            )
+            gpu_val[key] = recursive_copy_to_gpu(val, non_blocking=non_blocking)
 
         return gpu_val
 

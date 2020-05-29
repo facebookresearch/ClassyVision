@@ -71,15 +71,6 @@ class TestUtilMethods(unittest.TestCase):
                 self.assertTrue(gpu_value[0].is_cuda)
                 self.assertTrue(gpu_value[1].is_cuda)
 
-        invalid_gpu_copy_depth = [
-            ((((tensor_a, tensor_b), tensor_b), tensor_b), tensor_b),
-            {"tensor_map_a": {"tensor_map_b": {"tensor_map_c": {"tensor": tensor_a}}}},
-            [[[[tensor_a, tensor_b], tensor_b], tensor_b], tensor_b],
-        ]
-        for value in invalid_gpu_copy_depth:
-            with self.assertRaises(ValueError):
-                gpu_value = util.recursive_copy_to_gpu(value, max_depth=3)
-
         value = {"a": "b"}
         self.assertEqual(value, util.recursive_copy_to_gpu(value))
 
