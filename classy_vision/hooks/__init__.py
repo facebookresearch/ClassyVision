@@ -85,6 +85,7 @@ import_all_modules(FILE_ROOT, "classy_vision.hooks")
 
 from .checkpoint_hook import CheckpointHook  # isort:skip
 from .torchscript_hook import TorchscriptHook  # isort:skip
+from .output_csv_hook import OutputCSVHook  # isort:skip
 from .exponential_moving_average_model_hook import (  # isort:skip
     ExponentialMovingAverageModelHook,
 )
@@ -106,6 +107,7 @@ __all__ = [
     "ClassyHookFunctions",
     "ExponentialMovingAverageModelHook",
     "LossLrMeterLoggingHook",
+    "OutputCSVHook",
     "TensorboardPlotHook",
     "TorchscriptHook",
     "ModelComplexityHook",
