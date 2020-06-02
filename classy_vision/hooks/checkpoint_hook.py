@@ -81,8 +81,7 @@ class CheckpointHook(ClassyHook):
         )
 
         # make copy of checkpoint that won't be overwritten:
-        if checkpoint_file:
-            PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
+        PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
     def on_start(self, task) -> None:
         if not is_master() or getattr(task, "test_only", False):
