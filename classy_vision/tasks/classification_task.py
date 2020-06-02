@@ -774,10 +774,11 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
-
-            self.losses.append(loss * target.size(0))
+            loss = all_reduce_mean(loss)
 
             self.check_inf_nan(loss)
+
+            self.losses.append(loss.data.cpu().item() * target.size(0))
 
             self.update_meters(output, sample)
 
@@ -787,7 +788,7 @@ class ClassificationTask(ClassyTask):
         )
 
     def check_inf_nan(self, loss):
-        if torch.isinf(loss) or torch.isnan(loss):
+        if loss == float("inf") or loss == float("-inf") or loss != loss:
             raise FloatingPointError(f"Loss is infinity or NaN: {loss}")
 
     def train_step(self):
@@ -818,8 +819,9 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
+            loss = all_reduce_mean(loss)
 
-            self.losses.append(loss * target.size(0))
+            self.losses.append(loss.data.cpu().item() * target.size(0))
 
             self.update_meters(output, sample)
 
@@ -855,16 +857,6 @@ class ClassificationTask(ClassyTask):
         # Update meters
         for meter in self.meters:
             meter.update(model_output, target, is_train=self.train)
-
-    def synchronize_losses(self):
-        """Average the losses across the different nodes"""
-
-        # Average losses across nodes
-        losses_tensor = torch.stack(self.losses)
-        synchronized_losses_tensor = all_reduce_mean(losses_tensor)
-        self.losses = [
-            loss.data.cpu().item() for loss in synchronized_losses_tensor.unbind()
-        ]
 
     def advance_phase(self):
         """Performs bookkeeping / task updates between phases
@@ -997,10 +989,6 @@ class ClassificationTask(ClassyTask):
 
     def on_phase_end(self):
         self.log_phase_end("train")
-
-        logging.debug("Syncing losses on phase end...")
-        self.synchronize_losses()
-        logging.debug("...losses synced")
 
         logging.debug("Syncing meters on phase end...")
         for meter in self.meters:
