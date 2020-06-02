@@ -301,8 +301,8 @@ def update_classy_state(task, state_dict):
 
 def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
     """
-    Saves a state variable to the specified checkpoint folder. Returns filename
-    of checkpoint if successful, and False otherwise.
+    Saves a state variable to the specified checkpoint folder. Returns the filename
+    of the checkpoint if successful. Raises an exception otherwise.
     """
 
     # make sure that we have a checkpoint folder:
@@ -310,11 +310,8 @@ def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
         try:
             PathManager.mkdirs(checkpoint_folder)
         except BaseException:
-            logging.warning(
-                "Could not create folder %s." % checkpoint_folder, exc_info=True
-            )
-    if not PathManager.isdir(checkpoint_folder):
-        return False
+            logging.warning("Could not create folder %s." % checkpoint_folder)
+            raise
 
     # write checkpoint atomically:
     try:
@@ -324,9 +321,9 @@ def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
         return full_filename
     except BaseException:
         logging.warning(
-            "Did not write checkpoint to %s." % checkpoint_folder, exc_info=True
+            "Unable to write checkpoint to %s." % checkpoint_folder, exc_info=True
         )
-        return False
+        raise
 
 
 def flatten_dict(value_dict, prefix="", sep="_"):
