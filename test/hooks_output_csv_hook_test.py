@@ -23,7 +23,8 @@ def parse_csv(file_path):
     num_rows = 0
     with open(file_path, "r", newline="") as csvfile:
         reader = csv.DictReader(csvfile, delimiter="\t")
-        for _ in reader:
+        for row in reader:
+            print(row)
             num_rows += 1
 
     return num_rows
@@ -64,4 +65,5 @@ class TestCSVHook(HookTestBase):
             trainer = LocalTrainer()
             trainer.train(task)
 
+            # test
             self.assertEqual(parse_csv(csv_hook.output_path), 10)
