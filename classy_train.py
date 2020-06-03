@@ -90,7 +90,7 @@ def main(args, config):
         task.set_pretrained_checkpoint(args.pretrained_checkpoint_path)
 
     # Configure hooks to do tensorboard logging, checkpoints and so on
-    task.set_hooks(configure_hooks(args, config))
+    task.set_hooks(configure_hooks(args, config) + task.hooks)
 
     # LocalTrainer is used for a single node. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.

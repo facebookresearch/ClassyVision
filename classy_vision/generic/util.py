@@ -253,6 +253,16 @@ def load_checkpoint(
     return checkpoint
 
 
+def get_checkpoint_name(phase_idx):
+    return "model_phase-{phase}_end.torch".format(phase=phase_idx)
+
+
+def parse_checkpoint_name(checkpoint) -> int:
+    """Return phase index after parsing checkpoint name
+    """
+    return int(checkpoint[len("model_phase-") : checkpoint.find("_end.torch")])
+
+
 def update_classy_model(model, model_state_dict, reset_heads):
     """
     Updates the model with the provided model state dictionary.
