@@ -51,10 +51,10 @@ class TestCSVHook(HookTestBase):
         )
 
     def test_train(self) -> None:
-        folder = f"{self.base_dir}/train_test/"
-        os.makedirs(folder)
-
         for use_gpu in {False, torch.cuda.is_available()}:
+            folder = f"{self.base_dir}/train_test/{use_gpu}"
+            os.makedirs(folder)
+
             task = build_task(get_fast_test_task_config(head_num_classes=2))
 
             csv_hook = OutputCSVHook(folder)
