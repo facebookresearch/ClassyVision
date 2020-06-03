@@ -12,22 +12,21 @@
 
 # We want to train for 4 epochs.
 
-# In[ ]:
+# In[1]:
 
 
 num_epochs = 4
 
-
 # We will be using synthetic train and test datasets for this example. The transforms used are from torchvision and are applied to the input value in the sample (rather than the target).
 
-# In[1]:
+# In[2]:
 
 
 from classy_vision.dataset import SyntheticImageDataset
 
 train_dataset = SyntheticImageDataset.from_config({
     "batchsize_per_replica": 32,
-    "num_samples": 2000,
+    "num_samples": 200,
     "crop_size": 224,
     "class_ratio": 0.5,
     "seed": 0,
@@ -58,10 +57,9 @@ test_dataset = SyntheticImageDataset.from_config({
     }]
 })
 
-
 # Let us create a ResNet 50 model now.
 
-# In[ ]:
+# In[3]:
 
 
 from classy_vision.models import ResNet
@@ -72,40 +70,36 @@ model = ResNet.from_config({
     "zero_init_bn_residuals": True
 })
 
-
 # Now, we will create a head with 1000 classes.
 
-# In[ ]:
+# In[4]:
 
 
 from classy_vision.heads import FullyConnectedHead
 
 head = FullyConnectedHead(unique_id="default_head", num_classes=1000, in_plane=2048)
 
-
 # Let us attach the head to the final block of the model.
 # 
 # For ResNet 50, we want to attach to the `3`rd block in the `4`th layer (based on `[3, 4, 6, 3]`). The blocks use 0 indexing, so this maps to `"block3-2"`.
 
-# In[ ]:
+# In[5]:
 
 
 model.set_heads({"block3-2": [head]})
 
-
 # We can use a cross entropy loss from Pytorch.
 
-# In[ ]:
+# In[6]:
 
 
 from torch.nn.modules.loss import CrossEntropyLoss
 
 loss = CrossEntropyLoss()
 
-
 # For the optimizer, we will be using SGD.
 
-# In[ ]:
+# In[7]:
 
 
 from classy_vision.optim import build_optimizer
@@ -119,20 +113,18 @@ optimizer = build_optimizer({
     "num_epochs": num_epochs
 })
 
-
 # We want to track the top-1 and top-5 accuracies of the model.
 
-# In[ ]:
+# In[8]:
 
 
 from classy_vision.meters import AccuracyMeter
 
 meters = [AccuracyMeter(topk=[1, 5])]
 
-
 # Let's create a directory to save the checkpoints.
 
-# In[ ]:
+# In[9]:
 
 
 import os
@@ -141,10 +133,9 @@ import time
 pretrain_checkpoint_dir = f"/tmp/checkpoint_{time.time()}"
 os.mkdir(pretrain_checkpoint_dir)
 
-
 # Add `LossLrMeterLoggingHook` to monitor the loss and `CheckpointHook` to save the checkpoints.
 
-# In[ ]:
+# In[10]:
 
 
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook, ProgressBarHook
@@ -154,10 +145,9 @@ hooks = [
     CheckpointHook(pretrain_checkpoint_dir, input_args={})
 ]
 
-
 # We have all the components ready to setup our pre-training task which trains for 4 epochs.
 
-# In[ ]:
+# In[11]:
 
 
 from classy_vision.tasks import ClassificationTask
@@ -174,50 +164,36 @@ pretrain_task = (
     .set_dataset(test_dataset, "test")
 )
 
-
 # Let us train using a local trainer instance.
 
-# In[ ]:
+# In[12]:
 
 
 from classy_vision.trainer import LocalTrainer
 
 trainer = LocalTrainer()
 
-
 # Now, we can start training!
 
-# In[ ]:
+# In[13]:
 
 
 trainer.train(pretrain_task)
-
-
-# Training is done! Let us now load the saved checkpoint, we will use this later for fine tuning.
-
-# In[ ]:
-
-
-from classy_vision.generic.util import load_checkpoint
-
-pretrained_checkpoint = load_checkpoint(pretrain_checkpoint_dir)
-
 
 # ## 2. Fine-tuning the model
 
 # The original model was trained for 1000 classes. Let's fine-tune it for a problem with only 2 classes. To keep things fast we'll run a single epoch:
 
-# In[ ]:
+# In[14]:
 
 
 num_epochs = 1
-
 
 # We can re-use the same synthetic datasets as before.
 
 # Let us again create a ResNet 50 model.
 
-# In[ ]:
+# In[15]:
 
 
 from classy_vision.models import ResNet
@@ -228,28 +204,25 @@ model = ResNet.from_config({
     "zero_init_bn_residuals": True
 })
 
-
 # For fine tuning, we will create a head with just 2 classes
 
-# In[ ]:
+# In[16]:
 
 
 from classy_vision.heads import FullyConnectedHead
 
 head = FullyConnectedHead(unique_id="default_head", num_classes=2, in_plane=2048)
 
-
 # Let us attach the head to the final block of the model, like before.
 
-# In[ ]:
+# In[17]:
 
 
 model.set_heads({"block3-2": [head]})
 
-
 # For the optimizer, we will be using RMSProp this time.
 
-# In[ ]:
+# In[18]:
 
 
 from classy_vision.optim import build_optimizer
@@ -265,20 +238,18 @@ optimizer = build_optimizer({
     "num_epochs": num_epochs
 })
 
-
 # We want to track the top-1 accuracy of the model.
 
-# In[ ]:
+# In[19]:
 
 
 from classy_vision.meters import AccuracyMeter
 
 meters = [AccuracyMeter(topk=[1])]
 
-
 # We will create a new directory to save the checkpoints for our fine tuning run.
 
-# In[ ]:
+# In[20]:
 
 
 import os
@@ -287,10 +258,9 @@ import time
 fine_tuning_checkpoint_dir = f"/tmp/checkpoint_{time.time()}"
 os.mkdir(fine_tuning_checkpoint_dir)
 
-
 # Hooks are also the same as before.
 
-# In[ ]:
+# In[21]:
 
 
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
@@ -300,10 +270,9 @@ hooks = [
     CheckpointHook(fine_tuning_checkpoint_dir, input_args={})
 ]
 
-
 # Now we can setup our fine tuning task.
 
-# In[ ]:
+# In[22]:
 
 
 from classy_vision.tasks import FineTuningTask
@@ -320,40 +289,35 @@ fine_tuning_task = (
     .set_dataset(test_dataset, "test")
 )
 
-
 # Since this is a fine tuning task, there are some other configurations which need to be done.
 
 # We don't want to re-train the trunk, so we will be freezing it. This is optional.
 
-# In[ ]:
+# In[23]:
 
 
 fine_tuning_task.set_freeze_trunk(True)
 
-
 # We want to start training the heads from scratch, so we will be resetting them. This is required in this example since the pre-trained heads are not compatible with the heads in fine tuning (they have different number of classes). Otherwise, this is also optional.
 
-# In[ ]:
+# In[24]:
 
 
 fine_tuning_task.set_reset_heads(True)
 
+# We need to give our task the path to our pre-trained checkpoint, which it'll need to start fine-tuning on.
 
-# We need to give our task the pre-trained checkpoint, which it'll need to start pre-training on.
-
-# In[ ]:
+# In[25]:
 
 
-fine_tuning_task.set_pretrained_checkpoint(pretrained_checkpoint)
-
+fine_tuning_task.set_pretrained_checkpoint(pretrain_checkpoint_dir)
 
 # Let us fine tune!
 
-# In[ ]:
+# In[26]:
 
 
 trainer.train(fine_tuning_task)
-
 
 # # 3. Conclusion
 # 

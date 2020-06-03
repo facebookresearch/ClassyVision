@@ -432,13 +432,14 @@ See <a class="reference internal" href="#classy_vision.tasks.ClassificationTask.
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.set_checkpoint">
-<code class="sig-name descname">set_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_checkpoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_path</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets checkpoint on task.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint</strong> – A serializable dict representing current task state</p>
+<dd class="field-odd"><p><strong>checkpoint_path</strong> – The path to load the checkpoint from. Can be a file or a</p>
 </dd>
 </dl>
+<p>:param directory. See <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code> for more information.:</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.set_classy_state">
@@ -473,7 +474,7 @@ for more details.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.set_distributed_options">
-<code class="sig-name descname">set_distributed_options</code><span class="sig-paren">(</span><em class="sig-param">broadcast_buffers_mode: classy_vision.tasks.classification_task.BroadcastBuffersMode = &lt;BroadcastBuffersMode.DISABLED: 1&gt;</em>, <em class="sig-param">batch_norm_sync_mode: classy_vision.tasks.classification_task.BatchNormSyncMode = &lt;BatchNormSyncMode.DISABLED: 1&gt;</em>, <em class="sig-param">find_unused_parameters: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_distributed_options" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_distributed_options</code><span class="sig-paren">(</span><em class="sig-param">broadcast_buffers_mode: classy_vision.tasks.classification_task.BroadcastBuffersMode = &lt;BroadcastBuffersMode.BEFORE_EVAL: 3&gt;</em>, <em class="sig-param">batch_norm_sync_mode: classy_vision.tasks.classification_task.BatchNormSyncMode = &lt;BatchNormSyncMode.DISABLED: 1&gt;</em>, <em class="sig-param">find_unused_parameters: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_distributed_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set distributed options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
