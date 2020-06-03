@@ -774,7 +774,6 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
-            loss = all_reduce_mean(loss)
 
             self.check_inf_nan(loss)
 
@@ -819,7 +818,6 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
-            loss = all_reduce_mean(loss)
 
             self.losses.append(loss.data.cpu().item() * target.size(0))
 
@@ -857,6 +855,14 @@ class ClassificationTask(ClassyTask):
         # Update meters
         for meter in self.meters:
             meter.update(model_output, target, is_train=self.train)
+
+    def synchronize_losses(self):
+        """Average the losses across the different replicas"""
+
+        # Average losses across nodes
+        losses_tensor = torch.tensor(self.losses)
+        synchronized_losses_tensor = all_reduce_mean(losses_tensor)
+        self.losses = synchronized_losses_tensor.tolist()
 
     def advance_phase(self):
         """Performs bookkeeping / task updates between phases
@@ -989,6 +995,10 @@ class ClassificationTask(ClassyTask):
 
     def on_phase_end(self):
         self.log_phase_end("train")
+
+        logging.debug("Syncing losses on phase end...")
+        self.synchronize_losses()
+        logging.debug("...losses synced")
 
         logging.debug("Syncing meters on phase end...")
         for meter in self.meters:
