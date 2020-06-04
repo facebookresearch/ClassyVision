@@ -430,6 +430,22 @@ class ClassificationTask(ClassyTask):
         if hooks_config is not None:
             hooks = build_hooks(hooks_config)
 
+        distributed_config = config.get("distributed", {})
+        distributed_options = {
+            "broadcast_buffers_mode": BroadcastBuffersMode[
+                distributed_config.get("broadcast_buffers", "before_eval").upper()
+            ],
+            "batch_norm_sync_mode": BatchNormSyncMode[
+                distributed_config.get("batch_norm_sync_mode", "disabled").upper()
+            ],
+            "batch_norm_sync_group_size": distributed_config.get(
+                "batch_norm_sync_group_size", 0
+            ),
+            "find_unused_parameters": distributed_config.get(
+                "find_unused_parameters", True
+            ),
+        }
+
         task = (
             cls()
             .set_num_epochs(config["num_epochs"])
@@ -440,16 +456,7 @@ class ClassificationTask(ClassyTask):
             .set_meters(meters)
             .set_amp_args(amp_args)
             .set_mixup_transform(mixup_transform)
-            .set_distributed_options(
-                broadcast_buffers_mode=BroadcastBuffersMode[
-                    config.get("broadcast_buffers", "before_eval").upper()
-                ],
-                batch_norm_sync_mode=BatchNormSyncMode[
-                    config.get("batch_norm_sync_mode", "disabled").upper()
-                ],
-                batch_norm_sync_group_size=config.get("batch_norm_sync_group_size", 0),
-                find_unused_parameters=config.get("find_unused_parameters", True),
-            )
+            .set_distributed_options(**distributed_options)
             .set_hooks(hooks)
         )
 
