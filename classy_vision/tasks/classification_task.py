@@ -260,6 +260,7 @@ class ClassificationTask(ClassyTask):
         self,
         broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.BEFORE_EVAL,
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
+        batch_norm_sync_group_size: int = 0,
         find_unused_parameters: bool = True,
     ):
         """Set distributed options.
@@ -269,6 +270,10 @@ class ClassificationTask(ClassyTask):
                 :class:`BroadcastBuffersMode` for options.
             batch_norm_sync_mode: Batch normalization synchronization mode. See
                 :class:`BatchNormSyncMode` for options.
+            batch_norm_sync_group_size: Group size to use for synchronized batch norm.
+                0 means that the stats are synchronized across all replicas. For
+                efficient synchronization, set it to the number of GPUs in a node (
+                usually 8).
             find_unused_parameters: See
                 :class:`torch.nn.parallel.DistributedDataParallel` for information.
 
@@ -278,14 +283,25 @@ class ClassificationTask(ClassyTask):
         """
         self.broadcast_buffers_mode = broadcast_buffers_mode
 
+        if batch_norm_sync_group_size > 0:
+            if not batch_norm_sync_mode == BatchNormSyncMode.APEX:
+                # this should ideally work with PyTorch Sync BN as well, but it
+                # fails while initializing DDP for some reason.
+                raise ValueError(
+                    "batch_norm_sync_group_size can be > 0 only when "
+                    "Apex Synchronized Batch Normalization is being used."
+                )
+        self.batch_norm_sync_group_size = batch_norm_sync_group_size
+
         if batch_norm_sync_mode == BatchNormSyncMode.DISABLED:
             logging.info("Synchronized Batch Normalization is disabled")
         else:
             if batch_norm_sync_mode == BatchNormSyncMode.APEX and not apex_available:
                 raise RuntimeError("apex is not installed")
-            logging.info(
-                f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
-            )
+            msg = f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
+            if self.batch_norm_sync_group_size > 0:
+                msg += f" and group size {batch_norm_sync_group_size}"
+            logging.info(msg)
         self.batch_norm_sync_mode = batch_norm_sync_mode
 
         self.find_unused_parameters = find_unused_parameters
@@ -431,6 +447,7 @@ class ClassificationTask(ClassyTask):
                 batch_norm_sync_mode=BatchNormSyncMode[
                     config.get("batch_norm_sync_mode", "disabled").upper()
                 ],
+                batch_norm_sync_group_size=config.get("batch_norm_sync_group_size", 0),
                 find_unused_parameters=config.get("find_unused_parameters", True),
             )
             .set_hooks(hooks)
@@ -584,7 +601,12 @@ class ClassificationTask(ClassyTask):
         if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
             self.base_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.base_model)
         elif self.batch_norm_sync_mode == BatchNormSyncMode.APEX:
-            self.base_model = apex.parallel.convert_syncbn_model(self.base_model)
+            sync_bn_process_group = apex.parallel.create_syncbn_process_group(
+                self.batch_norm_sync_group_size
+            )
+            self.base_model = apex.parallel.convert_syncbn_model(
+                self.base_model, process_group=sync_bn_process_group
+            )
 
         # move the model and loss to the right device
         if self.use_gpu:
