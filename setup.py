@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, find_packages, setup
 
 
 if __name__ == "__main__":
@@ -44,7 +44,8 @@ if __name__ == "__main__":
         },
         license="MIT License",
         python_requires=">=3.6",
-        packages=find_packages(exclude=("tests",)),
+        packages=find_packages(exclude=("tests",))
+        + find_namespace_packages(include=["hydra_plugins.*"]),
         install_requires=reqs.strip().split("\n"),
         extras_require={
             "dev": [

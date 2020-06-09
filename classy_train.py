@@ -63,6 +63,7 @@ from torchvision import set_image_backend, set_video_backend
 
 try:
     import hydra
+    import omegaconf
 
     hydra_available = True
 except ImportError:
@@ -154,11 +155,11 @@ def configure_hooks(args, config):
 
 if hydra_available:
 
-    @hydra.main(config_path="hydra_configs/args.yaml")
+    @hydra.main(config_path="hydra_configs", config_name="args")
     def hydra_main(cfg):
         args = cfg
         check_generic_args(cfg)
-        config = cfg.config.to_container()
+        config = omegaconf.OmegaConf.to_container(cfg.config)
         main(args, config)
 
 

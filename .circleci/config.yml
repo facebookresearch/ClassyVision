@@ -51,6 +51,7 @@ install_dep: &install_dep
         which python
         which pip
         pip install --upgrade pip
+        pip install --upgrade --progress-bar off setuptools
         pip install --progress-bar off -r requirements.txt
         pip list
 
