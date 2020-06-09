@@ -146,6 +146,10 @@ class ClassificationMeterTest(unittest.TestCase):
                     msg="{0} meter value mismatch!".format(key),
                 )
 
+    def _validate_meter_inputs(self, meter, model_outputs, targets):
+        for i in range(len(model_outputs)):
+            meter.validate(model_outputs[i].size(), targets[i].size())
+
     def meter_update_and_reset_test(
         self, meter, model_outputs, targets, expected_value, **kwargs
     ):
@@ -158,8 +162,7 @@ class ClassificationMeterTest(unittest.TestCase):
             model_outputs = [model_outputs]
             targets = [targets]
 
-        for i in range(len(model_outputs)):
-            meter.validate(model_outputs[i].size(), targets[i].size())
+        self._validate_meter_inputs(meter, model_outputs, targets)
 
         self._apply_updates_and_test_meter(
             meter, model_outputs, targets, expected_value, **kwargs
