@@ -1,3 +1,4 @@
+# @package _global_
 config:
   model:
     name: resnet

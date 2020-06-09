@@ -1,3 +1,4 @@
+# @package _global_
 config:
   loss:
     name: label_smoothing_cross_entropy

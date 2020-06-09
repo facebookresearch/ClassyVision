@@ -62,6 +62,11 @@ config:
     accuracy:
       topk: [1]
 defaults:
-  - task: classification_task
+  - config: null
+  - dataset: null
+  - loss: null
+  - meters: null
+  - model: null
   - optimizer: sgd
   - param_scheduler: step
+  - task: classification_task
