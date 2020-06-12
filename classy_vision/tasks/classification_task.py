@@ -566,7 +566,7 @@ class ClassificationTask(ClassyTask):
         return [{"train": False} for _ in range(self.num_epochs)]
 
     def build_dataloader(self, phase_type, pin_memory, **kwargs):
-        """Buildss a dataloader iterable for a particular phase type.
+        """Builds a dataloader iterable for a particular phase type.
 
         Args:
             phase_type: "train" or "test" iterable
@@ -575,7 +575,9 @@ class ClassificationTask(ClassyTask):
         Returns:
             Returns a iterable over the dataset
         """
-        return self.datasets[phase_type].iterator(pin_memory=pin_memory, **kwargs)
+        return self.datasets[phase_type].iterator(
+            pin_memory=pin_memory, phase_type=phase_type, **kwargs
+        )
 
     def build_dataloaders(self, pin_memory, **kwargs):
         """Build a dataloader for each phase type
@@ -601,6 +603,7 @@ class ClassificationTask(ClassyTask):
         self.phases = self._build_phases()
         self.train = False if self.test_only else self.train
         self.dataloaders = self.build_dataloaders(
+            current_phase_id=0,
             pin_memory=pin_memory,
             multiprocessing_context=mp.get_context(self.dataloader_mp_context),
         )
