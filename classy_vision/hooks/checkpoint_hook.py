@@ -5,10 +5,14 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Collection, Dict, Optional
+from typing import Any, Collection, Dict, Optional  # noqa
 
 from classy_vision.generic.distributed_util import is_master
-from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
+from classy_vision.generic.util import (
+    get_checkpoint_dict,
+    get_checkpoint_name,
+    save_checkpoint,
+)
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 from fvcore.common.file_io import PathManager
@@ -104,5 +108,5 @@ class CheckpointHook(ClassyHook):
         if self.phase_counter % self.checkpoint_period != 0:
             return
 
-        checkpoint_name = "model_phase-{phase}_end.torch".format(phase=task.phase_idx)
+        checkpoint_name = get_checkpoint_name(task.phase_idx)
         self._save_checkpoint(task, checkpoint_name)
