@@ -70,6 +70,21 @@ def profile(
                 return profiler
 
 
+def get_input_shape(x):
+    """
+    Some layer may take tuple/list/dict/list[dict] as input in forward function. We
+    recursively query tensor shape.
+    """
+    if isinstance(x, (list, tuple)):
+        assert len(x) > 0, "input x of tuple/list type must have at least one element"
+        return [get_input_shape(xi) for xi in x]
+    elif isinstance(x, dict):
+        return {k: get_input_shape(v) for k, v in x.items()}
+    else:
+        assert isinstance(x, torch.Tensor), "input x is expected to be a torch tensor"
+        return x.size()
+
+
 def _get_batchsize_per_replica(x):
     """
     Some layer may take tuple/list/dict/list[dict] as input in forward function. We
@@ -331,7 +346,7 @@ def _layer_flops(layer, x, y):
 
     message = [
         f"module type: {typestr}",
-        f"input size: {list(x.size())}",
+        f"input size: {get_input_shape(x)}",
         f"output size: {list(y.size())}",
         f"params(M): {count_params(layer) / 1e6}",
         f"flops(M): {int(flops) / 1e6}",
