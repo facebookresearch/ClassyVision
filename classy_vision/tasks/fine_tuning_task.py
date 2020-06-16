@@ -17,6 +17,13 @@ from classy_vision.tasks import ClassificationTask, register_task
 class FineTuningTask(ClassificationTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.init_finetuning_fields()
+
+    def init_finetuning_fields(self):
+        # Abstract out initialization in a separate function
+        # so that child class who does not have a chance to invoke
+        # FineTuningTask.__init__(...) can still explicitly call this function
+        # to initialize the fields
         self.pretrained_checkpoint_dict = None
         self.pretrained_checkpoint_path = None
         self.reset_heads = False
