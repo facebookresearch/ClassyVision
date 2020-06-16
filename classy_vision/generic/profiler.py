@@ -162,86 +162,6 @@ def _layer_flops(layer, x, y):
             / layer.groups
         )
 
-    # learned group convolution:
-    elif layer_type in ["LearnedGroupConv"]:
-        conv = layer.conv
-        out_h = int(
-            (x.size()[2] + 2 * conv.padding[0] - conv.kernel_size[0]) / conv.stride[0]
-            + 1
-        )
-        out_w = int(
-            (x.size()[3] + 2 * conv.padding[1] - conv.kernel_size[1]) / conv.stride[1]
-            + 1
-        )
-        count1 = _layer_flops(layer.relu, x) + _layer_flops(layer.norm, x)
-        count2 = (
-            batchsize_per_replica
-            * conv.in_channels
-            * conv.out_channels
-            * conv.kernel_size[0]
-            * conv.kernel_size[1]
-            * out_h
-            * out_w
-            / layer.condense_factor
-        )
-        flops = count1 + count2
-
-    # non-linearities:
-    elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax"]:
-        flops = x.numel()
-
-    # 2D pooling layers:
-    elif layer_type in ["AvgPool2d", "MaxPool2d"]:
-        in_h = x.size()[2]
-        in_w = x.size()[3]
-        if isinstance(layer.kernel_size, int):
-            layer.kernel_size = (layer.kernel_size, layer.kernel_size)
-        kernel_ops = layer.kernel_size[0] * layer.kernel_size[1]
-        out_h = 1 + int(
-            (in_h + 2 * layer.padding - layer.kernel_size[0]) / layer.stride
-        )
-        out_w = 1 + int(
-            (in_w + 2 * layer.padding - layer.kernel_size[1]) / layer.stride
-        )
-        flops = x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
-
-    # adaptive avg pool2d
-    # This is approximate and works only for downsampling without padding
-    # based on aten/src/ATen/native/AdaptiveAveragePooling.cpp
-    elif layer_type in ["AdaptiveAvgPool2d"]:
-        in_h = x.size()[2]
-        in_w = x.size()[3]
-        if isinstance(layer.output_size, int):
-            out_h, out_w = layer.output_size, layer.output_size
-        elif len(layer.output_size) == 1:
-            out_h, out_w = layer.output_size[0], layer.output_size[0]
-        else:
-            out_h, out_w = layer.output_size
-        if out_h > in_h or out_w > in_w:
-            raise ClassyProfilerNotImplementedError(layer)
-        batchsize_per_replica = x.size()[0]
-        num_channels = x.size()[1]
-        kh = in_h - out_h + 1
-        kw = in_w - out_w + 1
-        kernel_ops = kh * kw
-        flops = batchsize_per_replica * num_channels * out_h * out_w * kernel_ops
-
-    # linear layer:
-    elif layer_type in ["Linear"]:
-        weight_ops = layer.weight.numel()
-        bias_ops = layer.bias.numel() if layer.bias is not None else 0
-        flops = x.size()[0] * (weight_ops + bias_ops)
-
-    # batch normalization / layer normalization:
-    elif layer_type in [
-        "BatchNorm1d",
-        "BatchNorm2d",
-        "BatchNorm3d",
-        "SyncBatchNorm",
-        "LayerNorm",
-    ]:
-        flops = 2 * x.numel()
-
     # 3D convolution
     elif layer_type in ["Conv3d"]:
         out_t = int(
@@ -272,62 +192,77 @@ def _layer_flops(layer, x, y):
             / layer.groups
         )
 
-    # 3D pooling layers
-    elif layer_type in ["AvgPool3d", "MaxPool3d"]:
-        in_t = x.size()[2]
-        in_h = x.size()[3]
-        in_w = x.size()[4]
-        if isinstance(layer.kernel_size, int):
-            layer.kernel_size = (
-                layer.kernel_size,
-                layer.kernel_size,
-                layer.kernel_size,
-            )
-        if isinstance(layer.padding, int):
-            layer.padding = (layer.padding, layer.padding, layer.padding)
-        if isinstance(layer.stride, int):
-            layer.stride = (layer.stride, layer.stride, layer.stride)
-        kernel_ops = layer.kernel_size[0] * layer.kernel_size[1] * layer.kernel_size[2]
-        out_t = 1 + int(
-            (in_t + 2 * layer.padding[0] - layer.kernel_size[0]) / layer.stride[0]
+    # learned group convolution:
+    elif layer_type in ["LearnedGroupConv"]:
+        conv = layer.conv
+        out_h = int(
+            (x.size()[2] + 2 * conv.padding[0] - conv.kernel_size[0]) / conv.stride[0]
+            + 1
         )
-        out_h = 1 + int(
-            (in_h + 2 * layer.padding[1] - layer.kernel_size[1]) / layer.stride[1]
+        out_w = int(
+            (x.size()[3] + 2 * conv.padding[1] - conv.kernel_size[1]) / conv.stride[1]
+            + 1
         )
-        out_w = 1 + int(
-            (in_w + 2 * layer.padding[2] - layer.kernel_size[2]) / layer.stride[2]
+        count1 = _layer_flops(layer.relu, x) + _layer_flops(layer.norm, x)
+        count2 = (
+            batchsize_per_replica
+            * conv.in_channels
+            * conv.out_channels
+            * conv.kernel_size[0]
+            * conv.kernel_size[1]
+            * out_h
+            * out_w
+            / layer.condense_factor
         )
-        flops = batchsize_per_replica * x.size()[1] * out_t * out_h * out_w * kernel_ops
+        flops = count1 + count2
 
-    # adaptive avg pool3d
-    # This is approximate and works only for downsampling without padding
-    # based on aten/src/ATen/native/AdaptiveAveragePooling3d.cpp
-    elif layer_type in ["AdaptiveAvgPool3d"]:
-        in_t = x.size()[2]
-        in_h = x.size()[3]
-        in_w = x.size()[4]
-        out_t = layer.output_size[0]
-        out_h = layer.output_size[1]
-        out_w = layer.output_size[2]
-        if out_t > in_t or out_h > in_h or out_w > in_w:
-            raise ClassyProfilerNotImplementedError(layer)
-        batchsize_per_replica = x.size()[0]
-        num_channels = x.size()[1]
-        kt = in_t - out_t + 1
-        kh = in_h - out_h + 1
-        kw = in_w - out_w + 1
-        kernel_ops = kt * kh * kw
-        flops = (
-            batchsize_per_replica * num_channels * out_t * out_w * out_h * kernel_ops
+    # non-linearities are not considered in MAC counting
+    elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax"]:
+        flops = 0
+
+    elif layer_type in [
+        "MaxPool1d",
+        "MaxPool2d",
+        "MaxPool3d",
+        "AdaptiveMaxPool1d",
+        "AdaptiveMaxPool2d",
+        "AdaptiveMaxPool3d",
+    ]:
+        flops = 0
+
+    elif layer_type in ["AvgPool1d", "AvgPool2d", "AvgPool3d"]:
+        kernel_ops = 1
+        flops = kernel_ops * y.numel()
+
+    elif layer_type in ["AdaptiveAvgPool1d", "AdaptiveAvgPool2d", "AdaptiveAvgPool3d"]:
+        assert isinstance(layer.output_size, (list, tuple))
+        kernel = torch.Tensor(list(x.shape[2:])) // torch.Tensor(
+            [list(layer.output_size)]
         )
+        total_add = torch.prod(kernel)
+        total_div = 1
+        kernel_ops = total_add + total_div
+        flops = kernel_ops * y.numel()
+
+    # linear layer:
+    elif layer_type in ["Linear"]:
+        weight_ops = layer.weight.numel()
+        bias_ops = layer.bias.numel() if layer.bias is not None else 0
+        flops = x.size()[0] * (weight_ops + bias_ops)
+
+    # batch normalization / layer normalization:
+    elif layer_type in [
+        "BatchNorm1d",
+        "BatchNorm2d",
+        "BatchNorm3d",
+        "SyncBatchNorm",
+        "LayerNorm",
+    ]:
+        flops = 2 * x.numel()
 
     # dropout layer
     elif layer_type in ["Dropout"]:
-        # At test time, we do not drop values but scale the feature map by the
-        # dropout ratio
-        flops = 1
-        for dim_size in x.size():
-            flops *= dim_size
+        flops = 0
 
     elif layer_type == "Identity":
         flops = 0
