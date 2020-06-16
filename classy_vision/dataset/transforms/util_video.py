@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 import torchvision.transforms._transforms_video as transforms_video
 
 from . import ClassyTransform, build_transforms, register_transform
-from .util import ApplyTransformToKey, ImagenetConstants
+from .util import ApplyTransformToKey, ImagenetConstants, TupleToMapTransform
 
 
 class VideoConstants:
@@ -141,44 +141,6 @@ class VideoClipResize(ClassyTransform):
         return clip
 
 
-@register_transform("video_tuple_to_map_transform")
-class VideoTupleToMapTransform(ClassyTransform):
-    """A video transform which maps video data from tuple to dict.
-
-    It takes a sample of the form (video, audio, target) and returns a sample of
-    the form {"input": {"video" video, "audio": audio}, "target": target}. If
-    the sample is a map with these keys already present, it will pass the sample
-    through.
-
-    It's particularly useful for remapping torchvision samples which are
-    tuples of the form (video, audio, target).
-    """
-
-    def __call__(self, sample):
-        """Callable function which applies the tranform to the input sample data.
-
-        Args:
-            sample: input sample data that will undergo the transform
-
-        """
-        # If sample is a map and already has input / target keys, pass through
-        if isinstance(sample, dict):
-            assert "input" in sample and "target" in sample, (
-                "Input to tuple to map transform must be a tuple of length 3 "
-                "or a dict with keys 'input' and 'target'"
-            )
-            assert (
-                "video" in sample["input"] and "audio" in sample["input"]
-            ), "Input data must include video / audio fields"
-            return sample
-
-        # Should be a tuple (or other sequential) of length 3, transform to map
-        assert len(sample) == 3, "Sequential must be length 3 for conversion"
-        video, audio, target = sample
-        output_sample = {"input": {"video": video, "audio": audio}, "target": target}
-        return output_sample
-
-
 @register_transform("video_default_augment")
 class VideoDefaultAugmentTransform(ClassyTransform):
     """This is the default video transform with data augmentation which is useful for
@@ -300,51 +262,8 @@ class DummyAudioTransform(ClassyTransform):
         return torch.zeros(0, 1, dtype=torch.float)
 
 
-class ClassyVideoGenericTransform(object):
-    """This is a generic video transform which includes both video transform
-    and audio transform.
-    """
-
-    def __init__(
-        self,
-        config: Optional[Dict[str, List[Dict[str, Any]]]] = None,
-        split: str = "train",
-    ):
-        """The constructor method of ClassyVideoGenericTransform class.
-
-        Args:
-            config: If provided, it is a dict where key is the data modality, and
-                value is a dict specifying the transform config
-            split: the split of the data to which the transform will be applied
-        """
-        self.transforms = {
-            "video": VideoDefaultAugmentTransform()
-            if split == "train"
-            else VideoDefaultNoAugmentTransform(),
-            "audio": DummyAudioTransform(),
-        }
-        if config is not None:
-            for mode, modal_config in config.items():
-                assert mode in ["video", "audio"], (
-                    "unknown video data modality %s" % mode
-                )
-                self.transforms[mode] = build_transforms(modal_config)
-
-    def __call__(self, video: Dict):
-        """Callable function which applies the tranform to the input video data.
-
-        Args:
-            video: input video data that will undergo the transform
-
-        """
-        assert isinstance(video, dict), "video data is expected be a dict"
-        for mode, modal_data in video.items():
-            if mode in self.transforms:
-                video[mode] = self.transforms[mode](modal_data)
-        return video
-
-
-DEFAULT_KEY_MAP = VideoTupleToMapTransform()
+# Maps (video, audio, target) tuple to {'input': (video, audio), 'target': target}
+DEFAULT_KEY_MAP = TupleToMapTransform(["input", "input", "target"])
 
 
 def build_video_field_transform_default(
@@ -366,12 +285,36 @@ def build_video_field_transform_default(
         split: the split of the data to which the transform will be applied
         key: the key in data sample of type dict whose corresponding value will
             undergo the transform
-        key_map_transform: If provided, it is a transform which maps sample of type
-            tuple to sample of type dict. See default value VideoTupleToMapTransform()
-            as an example
-
     """
-    transform = ApplyTransformToKey(ClassyVideoGenericTransform(config, split), key=key)
+    if config is None and split is None:
+        raise ValueError("No transform config provided with no defaults")
+
+    transforms_for_type = {
+        "video": VideoDefaultAugmentTransform()
+        if split == "train"
+        else VideoDefaultNoAugmentTransform(),
+        "audio": DummyAudioTransform(),
+    }
+
+    if config is not None:
+        transforms_for_type.update(
+            {
+                mode: build_transforms(modal_config)
+                for mode, modal_config in config.items()
+            }
+        )
+
+    transform = transforms.Compose(
+        [
+            ApplyTransformToKey(default_transform, key=mode)
+            for mode, default_transform in transforms_for_type.items()
+        ]
+    )
+
+    transform = ApplyTransformToKey(
+        transforms.Compose([TupleToMapTransform(["video", "audio"]), transform]),
+        key=key,
+    )
     if key_map_transform is None:
         return transform
 
