@@ -91,7 +91,10 @@ class ExponentialMovingAverageModelHook(ClassyHook):
 
     def on_phase_start(self, task) -> None:
         # restore the right state depending on the phase type
-        self.set_model_state(task, use_ema=not task.train)
+        use_ema = (
+            (not task.train and task.ema) if hasattr(task, "ema") else not task.train
+        )
+        self.set_model_state(task, use_ema=use_ema)
 
     def on_phase_end(self, task) -> None:
         if task.train:
