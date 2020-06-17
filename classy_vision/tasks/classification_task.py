@@ -738,6 +738,13 @@ class ClassificationTask(ClassyTask):
             "hooks": {hook.name(): hook.get_classy_state() for hook in self.hooks},
             "loss": {},
         }
+        if "train" in self.datasets and self._is_checkpointable_dataset(
+            self.datasets["train"]
+        ):
+            classy_state_dict["train_dataset_iterator"] = self.datasets[
+                "train"
+            ].get_classy_state()
+
         if isinstance(self.loss, ClassyLoss):
             classy_state_dict["loss"] = self.loss.get_classy_state()
         if self.amp_args is not None:
@@ -778,12 +785,24 @@ class ClassificationTask(ClassyTask):
                 hook.set_classy_state(state["hooks"][hook.name()])
             else:
                 logging.warn(f"No state found for hook: {hook.name()}")
+
+        if "train" in self.datasets and self._is_checkpointable_dataset(
+            self.datasets["train"]
+        ):
+            self.datasets["train"].set_classy_state(state.get("train_dataset_iterator"))
+
         # TODO (mannatsingh): Figure out how to set the state of the dataloaders
         # Re-build dataloader & re-create iterator.
         self._recreate_data_loader_from_dataset()
         self.create_data_iterator()
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
+
+    @staticmethod
+    def _is_checkpointable_dataset(dataset):
+        return hasattr(dataset, "get_classy_state") and hasattr(
+            dataset, "set_classy_state"
+        )
 
     def eval_step(self):
         self.last_batch = None
