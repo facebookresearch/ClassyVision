@@ -6,7 +6,6 @@
 
 import logging
 import os
-from typing import Optional
 
 import torch
 from classy_vision.generic.distributed_util import (
@@ -19,8 +18,11 @@ from classy_vision.generic.distributed_util import (
 from .classy_trainer import ClassyTrainer
 
 
-def _init_env_vars():
+def _init_env_vars(use_gpu: bool):
     """Function sets up default environment variables for distributed training.
+
+    Args:
+        use_gpu: If true, set NCCL environment for GPUs
     """
     if "WORLD_SIZE" not in os.environ or "RANK" not in os.environ:
         os.environ["WORLD_SIZE"] = "1"
@@ -30,6 +32,13 @@ def _init_env_vars():
     if "MASTER_ADDR" not in os.environ or "MASTER_PORT" not in os.environ:
         os.environ["MASTER_ADDR"] = "localhost"
         os.environ["MASTER_PORT"] = "29500"
+
+    if use_gpu:
+        # From https://github.com/pytorch/elastic/blob/4175e9ec3ac346b89dab13eeca00e8f00b6daa8f/examples/imagenet/main.py#L156  # noqa B950
+        # when using NCCL, on failures, surviving nodes will deadlock on NCCL ops
+        # because NCCL uses a spin-lock on the device. Set this env var to enable a
+        # watchdog thread that will destroy stale NCCL communicators
+        os.environ["NCCL_BLOCKING_WAIT"] = "1"
 
 
 def _init_distributed(use_gpu: bool):
@@ -57,7 +66,7 @@ class DistributedTrainer(ClassyTrainer):
     """
 
     def train(self, task):
-        _init_env_vars()
+        _init_env_vars(task.use_gpu)
         _init_distributed(task.use_gpu)
         logging.info(
             f"Done setting up distributed process_group with rank {get_rank()}"

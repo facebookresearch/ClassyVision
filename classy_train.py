@@ -96,7 +96,7 @@ def main(args, config):
     # set the final hooks of the task.
     task.set_hooks(configure_hooks(args, config) + task.hooks)
 
-    # LocalTrainer is used for a single node. DistributedTrainer will setup
+    # LocalTrainer is used for a single replica. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.
     trainer_class = {"none": LocalTrainer, "ddp": DistributedTrainer}[
         args.distributed_backend
