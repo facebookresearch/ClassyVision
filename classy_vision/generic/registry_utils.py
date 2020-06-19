@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 
-def import_all_modules(root, base_module):
+def import_all_modules(root: str, base_module: str) -> None:
     for file in os.listdir(root):
         if file.endswith((".py", ".pyc")) and not file.startswith("_"):
             module = file[: file.find(".py")]
@@ -20,7 +20,7 @@ def import_all_modules(root, base_module):
                 importlib.import_module(module_name)
 
 
-def import_all_packages_from_directory(root):
+def import_all_packages_from_directory(root: str) -> None:
     """Automatically imports all packages under the root directory.
 
     For instance, if your directories look like:
