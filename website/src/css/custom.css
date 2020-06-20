@@ -1,0 +1,26 @@
+:root {
+  --ifm-color-primary: #f29837;
+  --ifm-color-primary-dark: #f08a1b;
+  --ifm-color-primary-darker: #ed820f;
+  --ifm-color-primary-darkest: #c36b0d;
+  --ifm-color-primary-light: #f4a653;
+  --ifm-color-primary-lighter: #f5ae61;
+  --ifm-color-primary-lightest: #f7c38b;
+  --ifm-hero-text-color: #ffffff;
+  --ifm-font-color-base-inverse: rgb(40,29,29);
+  --ifm-footer-color: #c25725;
+  --ifm-footer-padding-vertical: -10px;
+  --ifm-navbar-background-color: rgb(40, 29, 29);
+  --ifm-footer-color:rgb(40, 29, 29);
+  --ifm-footer-background-color:rgb(40, 29, 29);
+  --ifm-navbar-link-color:rgb(190, 186, 186);
+  --ifm-link-color:#c25725;
+  --ifm-menu-color:#c25725;
+  --ifm-menu-color-background-active:#c25725;
+  --ifm-footer-color:#5e5e5e;
+}
+
+.footer {
+  height: 110px;
+  width: 100%;
+}
