@@ -50,10 +50,10 @@ echo "--------------------------------------------"
 echo "Parsing Sphinx docs and moving to Docusaurus"
 echo "--------------------------------------------"
 cd ..
-mkdir -p "website/pages/api/"
+mkdir -p "website/src/pages/api/"
 
 cwd=$(pwd)
-python scripts/parse_sphinx.py -i "${cwd}/sphinx/build/html/" -o "${cwd}/website/pages/api/"
+python scripts/parse_sphinx.py -i "${cwd}/sphinx/build/html/" -o "${cwd}/website/src/pages/api/"
 
 SPHINX_JS_DIR='sphinx/build/html/_static/'
 DOCUSAURUS_JS_DIR='website/static/js/'
