@@ -13,7 +13,7 @@ from classy_vision.generic.profiler import (
     compute_activations,
     compute_flops,
     count_params,
-    get_input_shape,
+    get_shape,
 )
 from classy_vision.models import build_model
 
@@ -181,15 +181,15 @@ class TestProfilerFunctions(unittest.TestCase):
 
 
 class TestHelperFunctions(unittest.TestCase):
-    def test_get_input_shape(self) -> None:
+    def test_get_shape(self) -> None:
         list_x = [torch.zeros(2, 4), torch.zeros(3, 3)]
-        shapes = get_input_shape(list_x)
+        shapes = get_shape(list_x)
         expected_shapes = [torch.zeros(2, 4).size(), torch.zeros(3, 3).size()]
         for shape, expected in zip(shapes, expected_shapes):
             self.assertEqual(shape, expected)
 
         dict_x = {"x1": torch.zeros(2, 4), "x2": torch.zeros(3, 3)}
-        shapes = get_input_shape(dict_x)
+        shapes = get_shape(dict_x)
         expected_shapes = {
             "x1": torch.zeros(2, 4).size(),
             "x2": torch.zeros(3, 3).size(),
@@ -201,7 +201,7 @@ class TestHelperFunctions(unittest.TestCase):
             {"x1": torch.zeros(2, 4), "x2": torch.zeros(3, 3)},
             {"x1": torch.zeros(3, 4), "x2": torch.zeros(4, 5)},
         ]
-        shapes = get_input_shape(list_dict_x)
+        shapes = get_shape(list_dict_x)
         expected_shapes = [
             {"x1": torch.zeros(2, 4).size(), "x2": torch.zeros(3, 3).size()},
             {"x1": torch.zeros(3, 4).size(), "x2": torch.zeros(4, 5).size()},

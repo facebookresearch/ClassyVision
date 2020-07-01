@@ -70,18 +70,18 @@ def profile(
                 return profiler
 
 
-def get_input_shape(x: Union[Tuple, List, Dict]) -> Union[Tuple, List, Dict]:
+def get_shape(x: Union[Tuple, List, Dict]) -> Union[Tuple, List, Dict]:
     """
-    Some layer may take tuple/list/dict/list[dict] as input in forward function. We
-    recursively query tensor shape.
+    Some layer may take/generate tuple/list/dict/list[dict] as input/output in forward function.
+    We recursively query tensor shape.
     """
     if isinstance(x, (list, tuple)):
-        assert len(x) > 0, "input x of tuple/list type must have at least one element"
-        return [get_input_shape(xi) for xi in x]
+        assert len(x) > 0, "x of tuple/list type must have at least one element"
+        return [get_shape(xi) for xi in x]
     elif isinstance(x, dict):
-        return {k: get_input_shape(v) for k, v in x.items()}
+        return {k: get_shape(v) for k, v in x.items()}
     else:
-        assert isinstance(x, torch.Tensor), "input x is expected to be a torch tensor"
+        assert isinstance(x, torch.Tensor), "x is expected to be a torch tensor"
         return x.size()
 
 
@@ -346,8 +346,8 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
 
     message = [
         f"module type: {typestr}",
-        f"input size: {get_input_shape(x)}",
-        f"output size: {list(y.size())}",
+        f"input size: {get_shape(x)}",
+        f"output size: {get_shape(y)}",
         f"params(M): {count_params(layer) / 1e6}",
         f"flops(M): {int(flops) / 1e6}",
     ]
