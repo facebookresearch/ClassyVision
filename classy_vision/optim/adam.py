@@ -29,10 +29,9 @@ class Adam(ClassyOptimizer):
         self.parameters.weight_decay = weight_decay
         self.parameters.amsgrad = amsgrad
 
-    def init_pytorch_optimizer(self, model, **kwargs) -> None:
-        super().init_pytorch_optimizer(model, **kwargs)
+    def prepare(self, param_groups) -> None:
         self.optimizer = torch.optim.Adam(
-            self.param_groups_override,
+            param_groups,
             lr=self.parameters.lr,
             betas=self.parameters.betas,
             eps=self.parameters.eps,

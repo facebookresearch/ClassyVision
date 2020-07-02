@@ -11,6 +11,7 @@ import logging
 import math
 import multiprocessing as mp
 import time
+from itertools import chain
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
@@ -27,6 +28,7 @@ from classy_vision.generic.util import (
     copy_model_to_gpu,
     load_and_broadcast_checkpoint,
     recursive_copy_to_gpu,
+    split_batchnorm_params,
     update_classy_state,
 )
 from classy_vision.hooks import build_hooks
@@ -153,6 +155,7 @@ class ClassificationTask(ClassyTask):
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
         self.dataloader_mp_context = "spawn"
+        self.bn_weight_decay = False
         self._train_only = True
 
     def set_use_gpu(self, use_gpu: bool):
@@ -343,6 +346,12 @@ class ClassificationTask(ClassyTask):
         self.test_only = test_only
         return self
 
+    def set_bn_weight_decay(self, bn_weight_decay: bool):
+        assert type(bn_weight_decay) == bool
+
+        self.bn_weight_decay = bn_weight_decay
+        return self
+
     def set_amp_args(self, amp_args: Optional[Dict[str, Any]]):
         """Disable / enable apex.amp and set the automatic mixed precision parameters.
 
@@ -458,6 +467,7 @@ class ClassificationTask(ClassyTask):
             .set_mixup_transform(mixup_transform)
             .set_distributed_options(**distributed_options)
             .set_hooks(hooks)
+            .set_bn_weight_decay(config.get("bn_weight_decay", False))
         )
 
         if not test_only:
@@ -595,6 +605,30 @@ class ClassificationTask(ClassyTask):
             for phase_type in self.datasets.keys()
         }
 
+    def prepare_optimizer(self, optimizer, model, loss=None):
+        if not self.bn_weight_decay:
+            bn_params, params = split_batchnorm_params(model)
+            if loss is not None:
+                bn_params_loss, params_loss = split_batchnorm_params(loss)
+                bn_params = bn_params + bn_params_loss
+                params = params + params_loss
+
+            frozen_param_groups = (
+                {"params": bn_params, "weight_decay": 0} if len(bn_params) > 0 else None
+            )
+            param_groups = {"params": params}
+        else:
+            frozen_param_groups = None
+            params = model.parameters()
+            if loss is not None:
+                params = chain(params, loss.parameters())
+
+            param_groups = {"params": list(params)}
+
+        self.optimizer.set_param_groups(
+            param_groups=param_groups, frozen_param_groups=frozen_param_groups
+        )
+
     def prepare(self):
         """Prepares task for training, populates all derived attributes """
 
@@ -626,9 +660,9 @@ class ClassificationTask(ClassyTask):
             self.base_model.cpu()
 
         if self.optimizer is not None:
-            # initialize the pytorch optimizer now since the model has been moved to
-            # the appropriate device
-            self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
+            self.prepare_optimizer(
+                optimizer=self.optimizer, model=self.base_model, loss=self.loss
+            )
 
         if self.amp_args is not None:
             # Initialize apex.amp. This updates the model and the PyTorch optimizer (

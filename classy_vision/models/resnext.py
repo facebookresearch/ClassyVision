@@ -268,7 +268,6 @@ class ResNeXt(ClassyModel):
         base_width_and_cardinality: Optional[Union[Tuple, List]] = None,
         basic_layer: bool = False,
         final_bn_relu: bool = True,
-        bn_weight_decay: Optional[bool] = False,
         use_se: bool = False,
         se_reduction_ratio: int = 16,
     ):
@@ -291,7 +290,6 @@ class ResNeXt(ClassyModel):
         assert all(is_pos_int(n) for n in num_blocks)
         assert is_pos_int(init_planes) and is_pos_int(reduction)
         assert type(small_input) == bool
-        assert type(bn_weight_decay) == bool
         assert (
             type(zero_init_bn_residuals) == bool
         ), "zero_init_bn_residuals must be a boolean, set to true if gamma of last\
@@ -303,12 +301,6 @@ class ResNeXt(ClassyModel):
             and is_pos_int(base_width_and_cardinality[1])
         )
         assert isinstance(use_se, bool), "use_se has to be a boolean"
-
-        # Chooses whether to apply weight decay to batch norm
-        # parameters. This improves results in some situations,
-        # e.g. ResNeXt models trained / evaluated using the Imagenet
-        # dataset, but can cause worse performance in other scenarios
-        self.bn_weight_decay = bn_weight_decay
 
         # initial convolutional block:
         self.num_blocks = num_blocks
@@ -424,7 +416,6 @@ class ResNeXt(ClassyModel):
             "basic_layer": basic_layer,
             "final_bn_relu": config.get("final_bn_relu", True),
             "zero_init_bn_residuals": config.get("zero_init_bn_residuals", False),
-            "bn_weight_decay": config.get("bn_weight_decay", False),
             "use_se": config.get("use_se", False),
             "se_reduction_ratio": config.get("se_reduction_ratio", 16),
         }
@@ -440,9 +431,6 @@ class ResNeXt(ClassyModel):
         out = self.blocks(out)
 
         return out
-
-    def get_optimizer_params(self):
-        return super().get_optimizer_params(bn_weight_decay=self.bn_weight_decay)
 
     @property
     def input_shape(self):
@@ -583,7 +571,6 @@ class ResNeXt50(_ResNeXt):
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
-            bn_weight_decay=True,
             **kwargs,
         )
 
@@ -596,7 +583,6 @@ class ResNeXt101(_ResNeXt):
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
-            bn_weight_decay=True,
             **kwargs,
         )
 
@@ -609,6 +595,5 @@ class ResNeXt152(_ResNeXt):
             basic_layer=False,
             zero_init_bn_residuals=True,
             base_width_and_cardinality=(4, 32),
-            bn_weight_decay=True,
             **kwargs,
         )

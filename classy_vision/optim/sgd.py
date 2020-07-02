@@ -31,10 +31,9 @@ class SGD(ClassyOptimizer):
         self.parameters.use_larc = use_larc
         self.larc_config = larc_config
 
-    def init_pytorch_optimizer(self, model, **kwargs):
-        super().init_pytorch_optimizer(model, **kwargs)
+    def prepare(self, param_groups):
         self.optimizer = torch.optim.SGD(
-            self.param_groups_override,
+            param_groups,
             lr=self.parameters.lr,
             nesterov=self.parameters.nesterov,
             momentum=self.parameters.momentum,
