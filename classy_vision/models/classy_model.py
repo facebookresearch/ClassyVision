@@ -406,52 +406,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         self._head_outputs = outputs
         return outputs
 
-    def get_optimizer_params(self, bn_weight_decay=False):
-        """Returns param groups for optimizer.
-
-        Function to return dict of params with "keys" from
-        {"regularized_params", "unregularized_params"}
-        to "values" a list of `pytorch Params <https://pytorch.org/docs/
-        stable/nn.html#torch.nn.Parameter>`_.
-
-        "weight_decay" provided as part of optimizer is only used
-        for "regularized_params". For "unregularized_params", weight_decay is set
-        to 0.0
-
-        This implementation sets `BatchNorm's <https://pytorch.org/docs/
-        stable/nn.html#normalization-layers>`_ all trainable params to be
-        unregularized_params if ``bn_weight_decay`` is False.
-
-        Override this function for any custom behavior.
-
-        Args:
-            bn_weight_decay (bool): Apply weight decay to bn params if true
-        """
-        unregularized_params = []
-        regularized_params = []
-        for module in self.modules():
-            # If module has children (i.e. internal node of constructed DAG) then
-            # only add direct parameters() to the list of params, else go over
-            # children node to find if they are BatchNorm or have "bias".
-            if list(module.children()) != []:
-                for params in module.parameters(recurse=False):
-                    if params.requires_grad:
-                        regularized_params.append(params)
-            elif not bn_weight_decay and isinstance(
-                module, nn.modules.batchnorm._BatchNorm
-            ):
-                for params in module.parameters():
-                    if params.requires_grad:
-                        unregularized_params.append(params)
-            else:
-                for params in module.parameters():
-                    if params.requires_grad:
-                        regularized_params.append(params)
-        return {
-            "regularized_params": regularized_params,
-            "unregularized_params": unregularized_params,
-        }
-
     @property
     def input_shape(self):
         """If implemented, returns expected input tensor shape
