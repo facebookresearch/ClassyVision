@@ -69,28 +69,21 @@ class TestCheckpointHook(HookTestBase):
         )
 
     def test_failure(self) -> None:
-        try:
-            PathManager.register_handler(TestPathHandler())
-            # make sure that TestPathHandler is being used
-            self.assertTrue(PathManager.exists("test://foo"))
+        self.assertFalse(PathManager.exists("test://foo"))
+        PathManager.register_handler(TestPathHandler())
+        # make sure that TestPathHandler is being used
+        self.assertTrue(PathManager.exists("test://foo"))
 
-            checkpoint_folder = "test://root"
+        checkpoint_folder = "test://root"
 
-            checkpoint_hook = CheckpointHook(
-                checkpoint_folder, {}, phase_types=["train"]
-            )
-            config = get_test_task_config()
-            task = build_task(config)
-            task.prepare()
+        checkpoint_hook = CheckpointHook(checkpoint_folder, {}, phase_types=["train"])
+        config = get_test_task_config()
+        task = build_task(config)
+        task.prepare()
 
-            # we should raise an exception while trying to save the checkpoint
-            with self.assertRaises(TestException):
-                checkpoint_hook.on_phase_end(task)
-        finally:
-            # force a reload of the module to reset the PathManager
-            importlib.reload(file_io)
-            # make sure that TestPathHandler is not being used
-            self.assertFalse(PathManager.exists("test://foo"))
+        # we should raise an exception while trying to save the checkpoint
+        with self.assertRaises(TestException):
+            checkpoint_hook.on_phase_end(task)
 
     def test_state_checkpointing(self) -> None:
         """
