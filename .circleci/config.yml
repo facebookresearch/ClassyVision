@@ -160,6 +160,8 @@ jobs:
 
       - <<: *install_dep
 
+      - <<: *install_dev_dep
+
       - <<: *pip_list
 
       - run:
