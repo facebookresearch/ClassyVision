@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import shutil
 import tempfile
 import unittest
@@ -69,6 +70,30 @@ class TestClassificationTask(unittest.TestCase):
 
         task = build_task(config)
         task.prepare()
+
+    def test_synchronize_losses_non_distributed(self):
+        """
+        Tests that synchronize losses has no side effects in a non-distributed setting.
+        """
+        test_config = get_fast_test_task_config()
+        task = build_task(test_config)
+        task.prepare()
+
+        old_losses = copy.deepcopy(task.losses)
+        task.synchronize_losses()
+        self.assertEqual(old_losses, task.losses)
+
+    def test_synchronize_losses_when_losses_empty(self):
+        config = get_fast_test_task_config()
+        task = build_task(config)
+        task.prepare()
+
+        task.set_use_gpu(torch.cuda.is_available())
+
+        # Losses should be empty when creating task
+        self.assertEqual(len(task.losses), 0)
+
+        task.synchronize_losses()
 
     def test_checkpointing(self):
         """

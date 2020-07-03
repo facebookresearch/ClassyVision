@@ -11,6 +11,7 @@ import logging
 import math
 import multiprocessing as mp
 import time
+from itertools import chain
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
@@ -27,6 +28,7 @@ from classy_vision.generic.util import (
     copy_model_to_gpu,
     load_and_broadcast_checkpoint,
     recursive_copy_to_gpu,
+    split_batchnorm_params,
     update_classy_state,
 )
 from classy_vision.hooks import build_hooks
@@ -143,7 +145,7 @@ class ClassificationTask(ClassyTask):
         self.data_iterator = None
         self.losses = []
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
-            BroadcastBuffersMode.DISABLED
+            BroadcastBuffersMode.BEFORE_EVAL
         )
         self.amp_args = None
         self.mixup_transform = None
@@ -153,6 +155,7 @@ class ClassificationTask(ClassyTask):
         self.find_unused_parameters = True
         self.use_gpu = torch.cuda.is_available()
         self.dataloader_mp_context = "spawn"
+        self.bn_weight_decay = False
         self._train_only = True
 
     def set_use_gpu(self, use_gpu: bool):
@@ -258,8 +261,9 @@ class ClassificationTask(ClassyTask):
 
     def set_distributed_options(
         self,
-        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.DISABLED,
+        broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.BEFORE_EVAL,
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
+        batch_norm_sync_group_size: int = 0,
         find_unused_parameters: bool = True,
     ):
         """Set distributed options.
@@ -269,6 +273,10 @@ class ClassificationTask(ClassyTask):
                 :class:`BroadcastBuffersMode` for options.
             batch_norm_sync_mode: Batch normalization synchronization mode. See
                 :class:`BatchNormSyncMode` for options.
+            batch_norm_sync_group_size: Group size to use for synchronized batch norm.
+                0 means that the stats are synchronized across all replicas. For
+                efficient synchronization, set it to the number of GPUs in a node (
+                usually 8).
             find_unused_parameters: See
                 :class:`torch.nn.parallel.DistributedDataParallel` for information.
 
@@ -278,14 +286,25 @@ class ClassificationTask(ClassyTask):
         """
         self.broadcast_buffers_mode = broadcast_buffers_mode
 
+        if batch_norm_sync_group_size > 0:
+            if not batch_norm_sync_mode == BatchNormSyncMode.APEX:
+                # this should ideally work with PyTorch Sync BN as well, but it
+                # fails while initializing DDP for some reason.
+                raise ValueError(
+                    "batch_norm_sync_group_size can be > 0 only when "
+                    "Apex Synchronized Batch Normalization is being used."
+                )
+        self.batch_norm_sync_group_size = batch_norm_sync_group_size
+
         if batch_norm_sync_mode == BatchNormSyncMode.DISABLED:
             logging.info("Synchronized Batch Normalization is disabled")
         else:
             if batch_norm_sync_mode == BatchNormSyncMode.APEX and not apex_available:
                 raise RuntimeError("apex is not installed")
-            logging.info(
-                f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
-            )
+            msg = f"Using Synchronized Batch Normalization using {batch_norm_sync_mode}"
+            if self.batch_norm_sync_group_size > 0:
+                msg += f" and group size {batch_norm_sync_group_size}"
+            logging.info(msg)
         self.batch_norm_sync_mode = batch_norm_sync_mode
 
         self.find_unused_parameters = find_unused_parameters
@@ -325,6 +344,12 @@ class ClassificationTask(ClassyTask):
             test_only: If true, only test phases will be run
         """
         self.test_only = test_only
+        return self
+
+    def set_bn_weight_decay(self, bn_weight_decay: bool):
+        assert type(bn_weight_decay) == bool
+
+        self.bn_weight_decay = bn_weight_decay
         return self
 
     def set_amp_args(self, amp_args: Optional[Dict[str, Any]]):
@@ -414,6 +439,22 @@ class ClassificationTask(ClassyTask):
         if hooks_config is not None:
             hooks = build_hooks(hooks_config)
 
+        distributed_config = config.get("distributed", {})
+        distributed_options = {
+            "broadcast_buffers_mode": BroadcastBuffersMode[
+                distributed_config.get("broadcast_buffers", "before_eval").upper()
+            ],
+            "batch_norm_sync_mode": BatchNormSyncMode[
+                distributed_config.get("batch_norm_sync_mode", "disabled").upper()
+            ],
+            "batch_norm_sync_group_size": distributed_config.get(
+                "batch_norm_sync_group_size", 0
+            ),
+            "find_unused_parameters": distributed_config.get(
+                "find_unused_parameters", True
+            ),
+        }
+
         task = (
             cls()
             .set_num_epochs(config["num_epochs"])
@@ -424,16 +465,9 @@ class ClassificationTask(ClassyTask):
             .set_meters(meters)
             .set_amp_args(amp_args)
             .set_mixup_transform(mixup_transform)
-            .set_distributed_options(
-                broadcast_buffers_mode=BroadcastBuffersMode[
-                    config.get("broadcast_buffers", "disabled").upper()
-                ],
-                batch_norm_sync_mode=BatchNormSyncMode[
-                    config.get("batch_norm_sync_mode", "disabled").upper()
-                ],
-                find_unused_parameters=config.get("find_unused_parameters", True),
-            )
+            .set_distributed_options(**distributed_options)
             .set_hooks(hooks)
+            .set_bn_weight_decay(config.get("bn_weight_decay", False))
         )
 
         if not test_only:
@@ -542,7 +576,7 @@ class ClassificationTask(ClassyTask):
         return [{"train": False} for _ in range(self.num_epochs)]
 
     def build_dataloader(self, phase_type, pin_memory, **kwargs):
-        """Buildss a dataloader iterable for a particular phase type.
+        """Builds a dataloader iterable for a particular phase type.
 
         Args:
             phase_type: "train" or "test" iterable
@@ -551,7 +585,9 @@ class ClassificationTask(ClassyTask):
         Returns:
             Returns a iterable over the dataset
         """
-        return self.datasets[phase_type].iterator(pin_memory=pin_memory, **kwargs)
+        return self.datasets[phase_type].iterator(
+            pin_memory=pin_memory, phase_type=phase_type, **kwargs
+        )
 
     def build_dataloaders(self, pin_memory, **kwargs):
         """Build a dataloader for each phase type
@@ -569,6 +605,30 @@ class ClassificationTask(ClassyTask):
             for phase_type in self.datasets.keys()
         }
 
+    def prepare_optimizer(self, optimizer, model, loss=None):
+        if not self.bn_weight_decay:
+            bn_params, params = split_batchnorm_params(model)
+            if loss is not None:
+                bn_params_loss, params_loss = split_batchnorm_params(loss)
+                bn_params = bn_params + bn_params_loss
+                params = params + params_loss
+
+            frozen_param_groups = (
+                {"params": bn_params, "weight_decay": 0} if len(bn_params) > 0 else None
+            )
+            param_groups = {"params": params}
+        else:
+            frozen_param_groups = None
+            params = model.parameters()
+            if loss is not None:
+                params = chain(params, loss.parameters())
+
+            param_groups = {"params": list(params)}
+
+        self.optimizer.set_param_groups(
+            param_groups=param_groups, frozen_param_groups=frozen_param_groups
+        )
+
     def prepare(self):
         """Prepares task for training, populates all derived attributes """
 
@@ -577,6 +637,7 @@ class ClassificationTask(ClassyTask):
         self.phases = self._build_phases()
         self.train = False if self.test_only else self.train
         self.dataloaders = self.build_dataloaders(
+            current_phase_id=0,
             pin_memory=pin_memory,
             multiprocessing_context=mp.get_context(self.dataloader_mp_context),
         )
@@ -584,7 +645,12 @@ class ClassificationTask(ClassyTask):
         if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
             self.base_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.base_model)
         elif self.batch_norm_sync_mode == BatchNormSyncMode.APEX:
-            self.base_model = apex.parallel.convert_syncbn_model(self.base_model)
+            sync_bn_process_group = apex.parallel.create_syncbn_process_group(
+                self.batch_norm_sync_group_size
+            )
+            self.base_model = apex.parallel.convert_syncbn_model(
+                self.base_model, process_group=sync_bn_process_group
+            )
 
         # move the model and loss to the right device
         if self.use_gpu:
@@ -594,9 +660,9 @@ class ClassificationTask(ClassyTask):
             self.base_model.cpu()
 
         if self.optimizer is not None:
-            # initialize the pytorch optimizer now since the model has been moved to
-            # the appropriate device
-            self.optimizer.init_pytorch_optimizer(self.base_model, loss=self.loss)
+            self.prepare_optimizer(
+                optimizer=self.optimizer, model=self.base_model, loss=self.loss
+            )
 
         if self.amp_args is not None:
             # Initialize apex.amp. This updates the model and the PyTorch optimizer (
@@ -706,6 +772,13 @@ class ClassificationTask(ClassyTask):
             "hooks": {hook.name(): hook.get_classy_state() for hook in self.hooks},
             "loss": {},
         }
+        if "train" in self.datasets and self._is_checkpointable_dataset(
+            self.datasets["train"]
+        ):
+            classy_state_dict["train_dataset_iterator"] = self.datasets[
+                "train"
+            ].get_classy_state()
+
         if isinstance(self.loss, ClassyLoss):
             classy_state_dict["loss"] = self.loss.get_classy_state()
         if self.amp_args is not None:
@@ -746,12 +819,24 @@ class ClassificationTask(ClassyTask):
                 hook.set_classy_state(state["hooks"][hook.name()])
             else:
                 logging.warn(f"No state found for hook: {hook.name()}")
+
+        if "train" in self.datasets and self._is_checkpointable_dataset(
+            self.datasets["train"]
+        ):
+            self.datasets["train"].set_classy_state(state.get("train_dataset_iterator"))
+
         # TODO (mannatsingh): Figure out how to set the state of the dataloaders
         # Re-build dataloader & re-create iterator.
         self._recreate_data_loader_from_dataset()
         self.create_data_iterator()
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
+
+    @staticmethod
+    def _is_checkpointable_dataset(dataset):
+        return hasattr(dataset, "get_classy_state") and hasattr(
+            dataset, "set_classy_state"
+        )
 
     def eval_step(self):
         self.last_batch = None
@@ -774,7 +859,6 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
-            loss = all_reduce_mean(loss)
 
             self.check_inf_nan(loss)
 
@@ -819,7 +903,6 @@ class ClassificationTask(ClassyTask):
             local_loss = self.compute_loss(output, sample)
 
             loss = local_loss.detach().clone()
-            loss = all_reduce_mean(loss)
 
             self.losses.append(loss.data.cpu().item() * target.size(0))
 
@@ -857,6 +940,14 @@ class ClassificationTask(ClassyTask):
         # Update meters
         for meter in self.meters:
             meter.update(model_output, target, is_train=self.train)
+
+    def synchronize_losses(self):
+        """Average the losses across the different replicas"""
+
+        # Average losses across nodes
+        losses_tensor = torch.tensor(self.losses)
+        synchronized_losses_tensor = all_reduce_mean(losses_tensor)
+        self.losses = synchronized_losses_tensor.tolist()
 
     def advance_phase(self):
         """Performs bookkeeping / task updates between phases
@@ -989,6 +1080,10 @@ class ClassificationTask(ClassyTask):
 
     def on_phase_end(self):
         self.log_phase_end("train")
+
+        logging.debug("Syncing losses on phase end...")
+        self.synchronize_losses()
+        logging.debug("...losses synced")
 
         logging.debug("Syncing meters on phase end...")
         for meter in self.meters:

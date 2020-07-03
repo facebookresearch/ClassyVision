@@ -7,7 +7,7 @@
 import collections.abc as abc
 import logging
 import operator
-from typing import Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -25,17 +25,17 @@ class ClassyProfilerError(Exception):
 
 
 class ClassyProfilerNotImplementedError(ClassyProfilerError):
-    def __init__(self, module):
+    def __init__(self, module: nn.Module):
         self.module = module
         super().__init__(f"Profiling not implemented for module: {self.module}")
 
 
 def profile(
-    model,
-    batchsize_per_replica=32,
-    input_shape=(3, 224, 224),
-    use_nvprof=False,
-    input_key=None,
+    model: nn.Module,
+    batchsize_per_replica: int = 32,
+    input_shape: Tuple[int] = (3, 224, 224),
+    use_nvprof: bool = False,
+    input_key: Optional[Union[str, List[str]]] = None,
 ):
     """
     Performs CPU or GPU profiling of the specified model on the specified input.
@@ -70,7 +70,22 @@ def profile(
                 return profiler
 
 
-def _get_batchsize_per_replica(x):
+def get_shape(x: Union[Tuple, List, Dict]) -> Union[Tuple, List, Dict]:
+    """
+    Some layer may take/generate tuple/list/dict/list[dict] as input/output in forward function.
+    We recursively query tensor shape.
+    """
+    if isinstance(x, (list, tuple)):
+        assert len(x) > 0, "x of tuple/list type must have at least one element"
+        return [get_shape(xi) for xi in x]
+    elif isinstance(x, dict):
+        return {k: get_shape(v) for k, v in x.items()}
+    else:
+        assert isinstance(x, torch.Tensor), "x is expected to be a torch tensor"
+        return x.size()
+
+
+def _get_batchsize_per_replica(x: Union[Tuple, List, Dict]) -> int:
     """
     Some layer may take tuple/list/dict/list[dict] as input in forward function. We
     recursively dive into the tuple/list until we meet a tensor and infer the batch size
@@ -87,7 +102,7 @@ def _get_batchsize_per_replica(x):
     return x.size()[0]
 
 
-def _layer_flops(layer, x, y):
+def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
     """
     Computes the number of FLOPs required for a single layer.
 
@@ -331,8 +346,8 @@ def _layer_flops(layer, x, y):
 
     message = [
         f"module type: {typestr}",
-        f"input size: {list(x.size())}",
-        f"output size: {list(y.size())}",
+        f"input size: {get_shape(x)}",
+        f"output size: {get_shape(y)}",
         f"params(M): {count_params(layer) / 1e6}",
         f"flops(M): {int(flops) / 1e6}",
     ]
@@ -340,7 +355,7 @@ def _layer_flops(layer, x, y):
     return flops
 
 
-def _layer_activations(layer, x, out):
+def _layer_activations(layer: nn.Module, x: Any, out: Any) -> int:
     """
     Computes the number of activations produced by a single layer.
 
@@ -365,7 +380,7 @@ def _layer_activations(layer, x, out):
     return activations
 
 
-def summarize_profiler_info(prof):
+def summarize_profiler_info(prof: torch.autograd.profiler.profile) -> str:
     """
     Summarizes the statistics in the specified profiler.
     """
@@ -393,7 +408,7 @@ class ComplexityComputer:
         self.count = 0
         self.seen_modules = set()
 
-    def compute(self, layer, x, out, module_name):
+    def compute(self, layer: nn.Module, x: Any, out: Any, module_name: str):
         if self.count_unique and module_name in self.seen_modules:
             return
         logging.debug(f"module name: {module_name}")
@@ -405,7 +420,9 @@ class ComplexityComputer:
         self.seen_modules.clear()
 
 
-def _patched_computation_module(module, complexity_computer, module_name):
+def _patched_computation_module(
+    module: nn.Module, complexity_computer: ComplexityComputer, module_name: str
+):
     """
     Patch the module to compute a module's parameters, like FLOPs.
 
@@ -431,7 +448,12 @@ def _patched_computation_module(module, complexity_computer, module_name):
     return ComputeModule
 
 
-def modify_forward(model, complexity_computer, prefix="", patch_attr=None):
+def modify_forward(
+    model: nn.Module,
+    complexity_computer: ComplexityComputer,
+    prefix: str = "",
+    patch_attr: str = None,
+) -> nn.Module:
     """
     Modify forward pass to measure a module's parameters, like FLOPs.
     """
@@ -458,7 +480,7 @@ def modify_forward(model, complexity_computer, prefix="", patch_attr=None):
     return model
 
 
-def restore_forward(model, patch_attr=None):
+def restore_forward(model: nn.Module, patch_attr: str = None) -> nn.Module:
     """
     Restore original forward in model.
     """
@@ -470,13 +492,13 @@ def restore_forward(model, patch_attr=None):
 
 
 def compute_complexity(
-    model,
-    compute_fn,
-    input_shape,
-    input_key=None,
-    patch_attr=None,
-    compute_unique=False,
-):
+    model: nn.Module,
+    compute_fn: Callable,
+    input_shape: Tuple[int],
+    input_key: Optional[Union[str, List[str]]] = None,
+    patch_attr: str = None,
+    compute_unique: bool = False,
+) -> int:
     """
     Compute the complexity of a forward pass.
 
@@ -509,7 +531,11 @@ def compute_complexity(
     return complexity_computer.count
 
 
-def compute_flops(model, input_shape=(3, 224, 224), input_key=None):
+def compute_flops(
+    model: nn.Module,
+    input_shape: Tuple[int] = (3, 224, 224),
+    input_key: Optional[Union[str, List[str]]] = None,
+) -> int:
     """
     Compute the number of FLOPs needed for a forward pass.
     """
@@ -518,7 +544,11 @@ def compute_flops(model, input_shape=(3, 224, 224), input_key=None):
     )
 
 
-def compute_activations(model, input_shape=(3, 224, 224), input_key=None):
+def compute_activations(
+    model: nn.Module,
+    input_shape: Tuple[int] = (3, 224, 224),
+    input_key: Optional[Union[str, List[str]]] = None,
+) -> int:
     """
     Compute the number of activations created in a forward pass.
     """
@@ -527,7 +557,7 @@ def compute_activations(model, input_shape=(3, 224, 224), input_key=None):
     )
 
 
-def count_params(model):
+def count_params(model: nn.Module) -> int:
     """
     Count the number of parameters in a model.
     """

@@ -63,6 +63,8 @@ class FineTuningTask(ClassificationTask):
 
     def _set_model_train_mode(self):
         phase = self.phases[self.phase_idx]
+        self.loss.train(phase["train"])
+
         if self.freeze_trunk:
             # convert all the sub-modules to the eval mode, except the heads
             self.base_model.eval()

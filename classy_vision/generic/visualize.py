@@ -5,11 +5,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import math
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
 import torch.nn.modules as nn
 from classy_vision.generic.util import get_model_dummy_input, is_pos_int
+from classy_vision.models import ClassyModel
 from PIL import Image
 
 
@@ -31,14 +33,14 @@ REGRESSION_LOSSES = (nn.L1Loss, nn.SmoothL1Loss, nn.MSELoss)
 
 
 # connection to visdom:
-def visdom_connect(server=None, port=None):
+def visdom_connect(server: Optional[str] = None, port: Optional[int] = None) -> None:
     """Connects to a visdom server if not currently connected."""
     if not visdom_connected():
         vis.append(visdom.Visdom(server=server, port=port))
 
 
 # check if we are connected to visdom:
-def visdom_connected():
+def visdom_connected() -> bool:
     """Returns True if the client is connected to a visdom server."""
     return (
         len(vis) > 0
@@ -48,7 +50,13 @@ def visdom_connected():
 
 
 # function that plots learning curve:
-def plot_learning_curves(curves, visdom_server=None, env=None, win=None, title=""):
+def plot_learning_curves(
+    curves: Dict[str, List],
+    visdom_server: Optional["visdom.Visdom"] = None,
+    env: Optional[str] = None,
+    win: Optional[str] = None,
+    title: str = "",
+) -> Any:
     """Plots the specified dict of learning curves in visdom. Optionally, the
     environment, window handle, and title for the visdom plot can be specified.
     """
@@ -77,7 +85,13 @@ def plot_learning_curves(curves, visdom_server=None, env=None, win=None, title="
 
 
 # function that plots loss functions:
-def plot_losses(losses, visdom_server=None, env=None, win=None, title=""):
+def plot_losses(
+    losses: Union[nn.Module, List[nn.Module]],
+    visdom_server: Optional["visdom.Visdom"] = None,
+    env: Optional[str] = None,
+    win: Optional[str] = None,
+    title: str = "",
+) -> Any:
     """Constructs a plot of specified losses as function of y * f(x). The losses
     are a list of nn.Module losses. Optionally, the environment, window handle,
     and title for the visdom plot can be specified.
@@ -126,8 +140,13 @@ def plot_losses(losses, visdom_server=None, env=None, win=None, title=""):
 
 
 def plot_model(
-    model, size=(3, 224, 224), input_key=None, writer=None, folder="", train=True
-):
+    model: ClassyModel,
+    size: Tuple[int, ...] = (3, 224, 224),
+    input_key: Optional[Union[str, List[str]]] = None,
+    writer: Optional["SummaryWriter"] = None,
+    folder: str = "",
+    train: bool = True,
+) -> None:
     """Visualizes a model in TensorBoard.
 
     The TensorBoard writer can be either specified directly via `writer` or can
@@ -155,8 +174,15 @@ def plot_model(
 
 # function that produces an image map:
 def image_map(
-    mapcoord, dataset, mapsize=5000, imsize=32, unnormalize=None, snap_to_grid=False
-):
+    mapcoord: Union[np.ndarray, torch.Tensor],
+    dataset: Union[
+        torch.utils.data.dataloader.DataLoader, torch.utils.data.dataset.Dataset
+    ],
+    mapsize: int = 5000,
+    imsize: int = 32,
+    unnormalize: Optional[Callable] = None,
+    snap_to_grid: bool = False,
+) -> torch.ByteTensor:
     """Constructs a 2D map of images.
 
     The 2D coordinates for each of the images are specified in `mapcoord`, the
@@ -184,7 +210,7 @@ def image_map(
     mapim = torch.ByteTensor(3, mapsize, mapsize).fill_(background)
 
     # normalize map coordinates:
-    mapc = mapcoord.add(-mapcoord.min())
+    mapc = mapcoord.add(-(mapcoord.min()))
     mapc.div_(mapc.max())
 
     # loop over images:

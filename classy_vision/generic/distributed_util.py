@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import io
+from typing import Any, Callable, List, Tuple
 
 import torch
 
@@ -16,7 +17,7 @@ _cuda_device_index: int = 0
 _CPU_DEVICE_INDEX = -1
 
 
-def convert_to_distributed_tensor(tensor):
+def convert_to_distributed_tensor(tensor: torch.Tensor) -> Tuple[torch.Tensor, str]:
     """
     For some backends, such as NCCL, communication only works if the
     tensor is on the GPU. This helper function converts to the correct
@@ -32,7 +33,7 @@ def convert_to_distributed_tensor(tensor):
     return (tensor, orig_device)
 
 
-def convert_to_normal_tensor(tensor, orig_device):
+def convert_to_normal_tensor(tensor: torch.Tensor, orig_device: str) -> torch.Tensor:
     """
     For some backends, such as NCCL, communication only works if the
     tensor is on the GPU. This converts the tensor back to original device.
@@ -42,7 +43,7 @@ def convert_to_normal_tensor(tensor, orig_device):
     return tensor
 
 
-def is_distributed_training_run():
+def is_distributed_training_run() -> bool:
     return (
         torch.distributed.is_available()
         and torch.distributed.is_initialized()
@@ -50,7 +51,7 @@ def is_distributed_training_run():
     )
 
 
-def is_master():
+def is_master() -> bool:
     """
     Returns True if this is rank 0 of a distributed training job OR if it is
     a single trainer job. Otherwise False.
@@ -58,7 +59,7 @@ def is_master():
     return get_rank() == 0
 
 
-def all_reduce_mean(tensor):
+def all_reduce_mean(tensor: torch.Tensor) -> torch.Tensor:
     """
     Wrapper over torch.distributed.all_reduce for performing mean reduction
     of tensor over all processes.
@@ -70,7 +71,7 @@ def all_reduce_mean(tensor):
     )
 
 
-def all_reduce_sum(tensor):
+def all_reduce_sum(tensor: torch.Tensor) -> torch.Tensor:
     """
     Wrapper over torch.distributed.all_reduce for performing sum
     reduction of tensor over all processes in both distributed /
@@ -79,7 +80,7 @@ def all_reduce_sum(tensor):
     return all_reduce_op(tensor, torch.distributed.ReduceOp.SUM)
 
 
-def all_reduce_min(tensor):
+def all_reduce_min(tensor: torch.Tensor) -> torch.Tensor:
     """
     Wrapper over torch.distributed.all_reduce for performing min
     reduction of tensor over all processes in both distributed /
@@ -88,7 +89,11 @@ def all_reduce_min(tensor):
     return all_reduce_op(tensor, torch.distributed.ReduceOp.MIN)
 
 
-def all_reduce_op(tensor, op, after_op_func=None):
+def all_reduce_op(
+    tensor: torch.Tensor,
+    op: torch.distributed.ReduceOp,
+    after_op_func: Callable[[torch.Tensor], torch.Tensor] = None,
+) -> torch.Tensor:
     """
     Wrapper over torch.distributed.all_reduce for performing
     reduction of tensor over all processes in both distributed /
@@ -103,7 +108,7 @@ def all_reduce_op(tensor, op, after_op_func=None):
     return tensor
 
 
-def gather_tensors_from_all(tensor):
+def gather_tensors_from_all(tensor: torch.Tensor) -> List[torch.Tensor]:
     """
     Wrapper over torch.distributed.all_gather for performing
     'gather' of 'tensor' over all processes in both distributed /
@@ -129,13 +134,13 @@ def gather_tensors_from_all(tensor):
     return gathered_tensors
 
 
-def gather_from_all(tensor):
+def gather_from_all(tensor: torch.Tensor) -> torch.Tensor:
     gathered_tensors = gather_tensors_from_all(tensor)
     gathered_tensor = torch.cat(gathered_tensors, 0)
     return gathered_tensor
 
 
-def broadcast(tensor, src=0):
+def broadcast(tensor: torch.Tensor, src: int = 0) -> torch.Tensor:
     """
     Wrapper over torch.distributed.broadcast for broadcasting a tensor from the source
     to all processes in both distributed / non-distributed scenarios.
@@ -147,7 +152,7 @@ def broadcast(tensor, src=0):
     return tensor
 
 
-def barrier():
+def barrier() -> None:
     """
     Wrapper over torch.distributed.barrier, returns without waiting
     if the distributed process group is not initialized instead of throwing error.
@@ -157,7 +162,7 @@ def barrier():
     torch.distributed.barrier()
 
 
-def get_world_size():
+def get_world_size() -> int:
     """
     Simple wrapper for correctly getting worldsize in both distributed
     / non-distributed settings
@@ -169,7 +174,7 @@ def get_world_size():
     )
 
 
-def get_rank():
+def get_rank() -> int:
     """
     Simple wrapper for correctly getting rank in both distributed
     / non-distributed settings
@@ -181,13 +186,13 @@ def get_rank():
     )
 
 
-def set_cuda_device_index(idx: int):
+def set_cuda_device_index(idx: int) -> None:
     global _cuda_device_index
     _cuda_device_index = idx
     torch.cuda.set_device(_cuda_device_index)
 
 
-def set_cpu_device():
+def set_cpu_device() -> None:
     global _cuda_device_index
     _cuda_device_index = _CPU_DEVICE_INDEX
 
@@ -197,8 +202,10 @@ def get_cuda_device_index() -> int:
 
 
 def init_distributed_data_parallel_model(
-    model, broadcast_buffers=False, find_unused_parameters=True
-):
+    model: torch.nn.Module,
+    broadcast_buffers: bool = False,
+    find_unused_parameters: bool = True,
+) -> torch.nn.parallel.DistributedDataParallel:
     global _cuda_device_index
 
     if _cuda_device_index == _CPU_DEVICE_INDEX:
@@ -219,7 +226,7 @@ def init_distributed_data_parallel_model(
         )
 
 
-def broadcast_object(obj):
+def broadcast_object(obj: Any) -> Any:
     if is_master():
         buffer = io.BytesIO()
         torch.save(obj, buffer)

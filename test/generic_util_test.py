@@ -20,6 +20,7 @@ from classy_vision.generic.util import (
     CHECKPOINT_FILE,
     load_checkpoint,
     save_checkpoint,
+    split_batchnorm_params,
     update_classy_model,
     update_classy_state,
 )
@@ -70,15 +71,6 @@ class TestUtilMethods(unittest.TestCase):
                 self.assertEqual(len(gpu_value), 2)
                 self.assertTrue(gpu_value[0].is_cuda)
                 self.assertTrue(gpu_value[1].is_cuda)
-
-        invalid_gpu_copy_depth = [
-            ((((tensor_a, tensor_b), tensor_b), tensor_b), tensor_b),
-            {"tensor_map_a": {"tensor_map_b": {"tensor_map_c": {"tensor": tensor_a}}}},
-            [[[[tensor_a, tensor_b], tensor_b], tensor_b], tensor_b],
-        ]
-        for value in invalid_gpu_copy_depth:
-            with self.assertRaises(ValueError):
-                gpu_value = util.recursive_copy_to_gpu(value, max_depth=3)
 
         value = {"a": "b"}
         self.assertEqual(value, util.recursive_copy_to_gpu(value))
@@ -177,6 +169,29 @@ class TestUtilMethods(unittest.TestCase):
             if module.training != expected_mode:
                 return False
         return True
+
+    def test_split_batchnorm_params(self):
+        class MyModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.lin = nn.Linear(2, 3, bias=False)
+                self.relu = nn.ReLU()
+                self.bn = nn.BatchNorm1d(3)
+
+            def forward(self, x):
+                return self.bn(self.relu(self.lin(x)))
+
+        torch.manual_seed(1)
+        model = MyModel()
+
+        bn_params, lin_params = split_batchnorm_params(model)
+
+        self.assertEquals(len(bn_params), 2)
+        self.assertEquals(len(lin_params), 1)
+
+        self.assertTrue(torch.allclose(bn_params[0], model.bn.weight))
+        self.assertTrue(torch.allclose(bn_params[1], model.bn.bias))
+        self.assertTrue(torch.allclose(lin_params[0], model.lin.weight))
 
     def test_train_model_eval_model(self):
         class TestModel(nn.Module):

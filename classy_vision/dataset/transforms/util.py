@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
+import collections
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torchvision.transforms as transforms
@@ -257,6 +258,7 @@ class TupleToMapTransform(ClassyTransform):
     This transform has a list of keys (key1, key2, ...),
     takes a sample of the form (data1, data2, ...) and
     returns a sample of the form {key1: data1, key2: data2, ...}
+    If duplicate keys are used, the corresponding values are merged into a list.
 
     It is useful for mapping output from datasets like the `PyTorch
     ImageFolder <https://github.com/pytorch/vision/blob/master/torchvision/
@@ -297,9 +299,14 @@ class TupleToMapTransform(ClassyTransform):
             "Provided sample tuple must have same number of keys "
             "as provided to transform"
         )
-        output_sample = {}
+        output_sample = collections.defaultdict(list)
         for idx, s in enumerate(sample):
-            output_sample[self._map_keys[idx]] = s
+            output_sample[self._map_keys[idx]].append(s)
+
+        # Unwrap list if only one item in dict.
+        for k, v in output_sample.items():
+            if len(v) == 1:
+                output_sample[k] = v[0]
 
         return output_sample
 

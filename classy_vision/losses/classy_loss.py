@@ -43,17 +43,6 @@ class ClassyLoss(nn.Module):
         """
         raise NotImplementedError
 
-    def get_optimizer_params(self, bn_weight_decay=False):
-        """Gets optimizer params.
-
-        The default implementation is very simple. Most losses have no learned
-        parameters, so this is rarely needed.
-        """
-        params = [
-            param for param in self.parameters(recurse=True) if param.requires_grad
-        ]
-        return {"regularized_params": params, "unregularized_params": []}
-
     def get_classy_state(self) -> Dict[str, Any]:
         """Get the state of the ClassyLoss.
 
@@ -79,6 +68,4 @@ class ClassyLoss(nn.Module):
 
     def has_learned_parameters(self) -> bool:
         """Does this loss have learned parameters?"""
-        return any(
-            len(params) > 0 for (_, params) in self.get_optimizer_params().items()
-        )
+        return any(param.requires_grad for param in self.parameters(recurse=True))

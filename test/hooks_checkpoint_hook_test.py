@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import importlib
 import os
 import shutil
 import tempfile
@@ -16,6 +17,28 @@ from classy_vision.generic.util import load_checkpoint
 from classy_vision.hooks import CheckpointHook
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
+from fvcore.common import file_io
+from fvcore.common.file_io import PathHandler, PathManager
+
+
+class TestException(Exception):
+    pass
+
+
+class TestPathHandler(PathHandler):
+    PREFIX = "test://"
+
+    def _get_supported_prefixes(self):
+        return [self.PREFIX]
+
+    def _exists(self, *args, **kwargs):
+        return True
+
+    def _isdir(self, *args, **kwargs):
+        return True
+
+    def _open(self, *args, **kwargs):
+        raise TestException()
 
 
 class TestCheckpointHook(HookTestBase):
@@ -44,6 +67,30 @@ class TestCheckpointHook(HookTestBase):
             hook_registry_name="checkpoint",
             invalid_configs=[invalid_config],
         )
+
+    def test_failure(self) -> None:
+        try:
+            PathManager.register_handler(TestPathHandler())
+            # make sure that TestPathHandler is being used
+            self.assertTrue(PathManager.exists("test://foo"))
+
+            checkpoint_folder = "test://root"
+
+            checkpoint_hook = CheckpointHook(
+                checkpoint_folder, {}, phase_types=["train"]
+            )
+            config = get_test_task_config()
+            task = build_task(config)
+            task.prepare()
+
+            # we should raise an exception while trying to save the checkpoint
+            with self.assertRaises(TestException):
+                checkpoint_hook.on_phase_end(task)
+        finally:
+            # force a reload of the module to reset the PathManager
+            importlib.reload(file_io)
+            # make sure that TestPathHandler is not being used
+            self.assertFalse(PathManager.exists("test://foo"))
 
     def test_state_checkpointing(self) -> None:
         """

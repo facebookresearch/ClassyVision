@@ -18,9 +18,9 @@ class SampleType(Enum):
     LIST = "list"
 
 
-def _get_typed_sample(input, target, sample_type):
+def _get_typed_sample(input, target, id, sample_type):
     if sample_type == SampleType.DICT:
-        return {"input": input, "target": target}
+        return {"input": input, "target": target, "id": id}
     elif sample_type == SampleType.TUPLE:
         return (input, target)
     elif sample_type == SampleType.LIST:
@@ -57,7 +57,7 @@ class RandomImageDataset:
                 ).astype(np.uint8)
             )
             target = np.random.randint(self.num_classes)
-            return _get_typed_sample(input, target, self.sample_type)
+            return _get_typed_sample(input, target, idx, self.sample_type)
 
     def __len__(self):
         return self.num_samples
@@ -82,7 +82,7 @@ class RandomImageBinaryClassDataset:
             image[:, :, 2] = np.random.random([self.crop_size, self.crop_size])
             input = Image.fromarray((image * 255).astype(np.uint8))
             target = class_id
-            return _get_typed_sample(input, target, self.sample_type)
+            return _get_typed_sample(input, target, idx, self.sample_type)
 
     def __len__(self):
         return self.num_samples

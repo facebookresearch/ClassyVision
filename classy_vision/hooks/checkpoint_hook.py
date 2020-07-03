@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Collection, Dict, Optional
+from typing import Any, Collection, Dict, Optional  # noqa
 
 from classy_vision.generic.distributed_util import is_master
 from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
@@ -67,6 +67,10 @@ class CheckpointHook(ClassyHook):
         self.checkpoint_period: int = checkpoint_period
         self.phase_counter: int = 0
 
+    @classmethod
+    def get_checkpoint_name(cls, phase_idx):
+        return "model_phase-{phase}_end.torch".format(phase=phase_idx)
+
     def _save_checkpoint(self, task, filename):
         if getattr(task, "test_only", False):
             return
@@ -81,8 +85,7 @@ class CheckpointHook(ClassyHook):
         )
 
         # make copy of checkpoint that won't be overwritten:
-        if checkpoint_file:
-            PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
+        PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
     def on_start(self, task) -> None:
         if not is_master() or getattr(task, "test_only", False):
@@ -105,5 +108,5 @@ class CheckpointHook(ClassyHook):
         if self.phase_counter % self.checkpoint_period != 0:
             return
 
-        checkpoint_name = "model_phase-{phase}_end.torch".format(phase=task.phase_idx)
+        checkpoint_name = CheckpointHook.get_checkpoint_name(task.phase_idx)
         self._save_checkpoint(task, checkpoint_name)

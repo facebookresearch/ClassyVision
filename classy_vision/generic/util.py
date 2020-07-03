@@ -13,7 +13,7 @@ import os
 import sys
 import traceback
 from functools import partial
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -28,35 +28,35 @@ CHECKPOINT_FILE = "checkpoint.torch"
 CPU_DEVICE = torch.device("cpu")
 
 
-def is_pos_int(number):
+def is_pos_int(number: int) -> bool:
     """
     Returns True if a number is a positive integer.
     """
     return type(number) == int and number >= 0
 
 
-def is_pos_float(number):
+def is_pos_float(number: float) -> bool:
     """
     Returns True if a number is a positive float.
     """
     return type(number) == float and number >= 0.0
 
 
-def is_pos_int_list(l):
+def is_pos_int_list(l: List) -> bool:
     """
     Returns True if a list contains positive integers
     """
     return type(l) == list and all(is_pos_int(n) for n in l)
 
 
-def is_pos_int_tuple(t):
+def is_pos_int_tuple(t: Tuple) -> bool:
     """
     Returns True if a tuple contains positive integers
     """
     return type(t) == tuple and all(is_pos_int(n) for n in t)
 
 
-def is_long_tensor(tensor):
+def is_long_tensor(tensor: torch.Tensor) -> bool:
     """
     Returns True if a tensor is a long tensor.
     """
@@ -66,7 +66,7 @@ def is_long_tensor(tensor):
         return False
 
 
-def is_float_tensor(tensor):
+def is_float_tensor(tensor: torch.Tensor) -> bool:
     """
     Returns True if a tensor is a float tensor.
     """
@@ -76,7 +76,7 @@ def is_float_tensor(tensor):
         return False
 
 
-def is_double_tensor(tensor):
+def is_double_tensor(tensor: torch.Tensor) -> bool:
     """
     Returns True if a tensor is a double tensor.
     """
@@ -86,7 +86,7 @@ def is_double_tensor(tensor):
         return False
 
 
-def is_leaf(module):
+def is_leaf(module: nn.Module) -> bool:
     """
     Returns True if module is leaf in the graph.
     """
@@ -94,7 +94,7 @@ def is_leaf(module):
     return len([c for c in module.children()]) == 0 or hasattr(module, "_mask")
 
 
-def is_on_gpu(model):
+def is_on_gpu(model: torch.nn.Module) -> bool:
     """
     Returns True if all parameters of a model live on the GPU.
     """
@@ -108,7 +108,7 @@ def is_on_gpu(model):
     return has_params and on_gpu
 
 
-def is_not_none(sample):
+def is_not_none(sample: Any) -> bool:
     """
     Returns True if sample is not None and constituents are not none.
     """
@@ -142,7 +142,7 @@ def copy_model_to_gpu(model, loss=None):
         return model
 
 
-def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
+def recursive_copy_to_gpu(value: Any, non_blocking: Dict = True) -> Any:
     """
     Recursively searches lists, tuples, dicts and copies tensors to GPU if
     possible. Non-tensor values are passed as-is in the result.
@@ -150,33 +150,18 @@ def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
     the same object, then after this call, there will be two different objects
     referenced on the GPU.
     """
-    if curr_depth >= max_depth:
-        raise ValueError("Depth of value object is too deep")
-
     if hasattr(value, "cuda"):
         return value.cuda(non_blocking=non_blocking)
     elif isinstance(value, list) or isinstance(value, tuple):
         gpu_val = []
         for val in value:
-            gpu_val.append(
-                recursive_copy_to_gpu(
-                    val,
-                    non_blocking=non_blocking,
-                    max_depth=max_depth,
-                    curr_depth=curr_depth + 1,
-                )
-            )
+            gpu_val.append(recursive_copy_to_gpu(val, non_blocking=non_blocking))
 
         return gpu_val if isinstance(value, list) else tuple(gpu_val)
     elif isinstance(value, container_abcs.Mapping):
         gpu_val = {}
         for key, val in value.items():
-            gpu_val[key] = recursive_copy_to_gpu(
-                val,
-                non_blocking=non_blocking,
-                max_depth=max_depth,
-                curr_depth=curr_depth + 1,
-            )
+            gpu_val[key] = recursive_copy_to_gpu(val, non_blocking=non_blocking)
 
         return gpu_val
 
@@ -184,7 +169,7 @@ def recursive_copy_to_gpu(value, non_blocking=True, max_depth=3, curr_depth=0):
 
 
 @contextlib.contextmanager
-def numpy_seed(seed, *addl_seeds):
+def numpy_seed(seed: Optional[int], *addl_seeds: int) -> None:
     """Context manager which seeds the NumPy PRNG with the specified seed and
     restores the state afterward"""
     if seed is None:
@@ -200,7 +185,9 @@ def numpy_seed(seed, *addl_seeds):
         np.random.set_state(state)
 
 
-def get_checkpoint_dict(task, input_args, deep_copy=False):
+def get_checkpoint_dict(
+    task, input_args: Optional[Dict], deep_copy: bool = False
+) -> Dict[str, Any]:
     assert input_args is None or isinstance(
         input_args, dict
     ), f"Unexpected input_args of type: {type(input_args)}"
@@ -268,7 +255,7 @@ def load_checkpoint(
     return checkpoint
 
 
-def update_classy_model(model, model_state_dict, reset_heads):
+def update_classy_model(model, model_state_dict: Dict, reset_heads: bool) -> bool:
     """
     Updates the model with the provided model state dictionary.
 
@@ -293,7 +280,7 @@ def update_classy_model(model, model_state_dict, reset_heads):
     return False
 
 
-def update_classy_state(task, state_dict):
+def update_classy_state(task, state_dict: Dict) -> bool:
     """
     Updates the task with the provided task dictionary.
 
@@ -316,8 +303,8 @@ def update_classy_state(task, state_dict):
 
 def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
     """
-    Saves a state variable to the specified checkpoint folder. Returns filename
-    of checkpoint if successful, and False otherwise.
+    Saves a state variable to the specified checkpoint folder. Returns the filename
+    of the checkpoint if successful. Raises an exception otherwise.
     """
 
     # make sure that we have a checkpoint folder:
@@ -325,11 +312,8 @@ def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
         try:
             PathManager.mkdirs(checkpoint_folder)
         except BaseException:
-            logging.warning(
-                "Could not create folder %s." % checkpoint_folder, exc_info=True
-            )
-    if not PathManager.isdir(checkpoint_folder):
-        return False
+            logging.warning("Could not create folder %s." % checkpoint_folder)
+            raise
 
     # write checkpoint atomically:
     try:
@@ -339,12 +323,12 @@ def save_checkpoint(checkpoint_folder, state, checkpoint_file=CHECKPOINT_FILE):
         return full_filename
     except BaseException:
         logging.warning(
-            "Did not write checkpoint to %s." % checkpoint_folder, exc_info=True
+            "Unable to write checkpoint to %s." % checkpoint_folder, exc_info=True
         )
-        return False
+        raise
 
 
-def flatten_dict(value_dict, prefix="", sep="_"):
+def flatten_dict(value_dict: Dict, prefix="", sep="_") -> Dict:
     """
     Flattens nested dict into (key, val) dict. Used for flattening meters
     structure, so that they can be visualized.
@@ -376,7 +360,7 @@ def load_json(json_path):
 
 
 @contextlib.contextmanager
-def torch_seed(seed):
+def torch_seed(seed: Optional[int]):
     """Context manager which seeds the PyTorch PRNG with the specified seed and
     restores the state afterward. Setting seed to None is equivalent to running
     the code without the context manager."""
@@ -391,7 +375,7 @@ def torch_seed(seed):
         torch.set_rng_state(state)
 
 
-def convert_to_one_hot(targets, classes):
+def convert_to_one_hot(targets: torch.Tensor, classes) -> torch.Tensor:
     """
     This function converts target class indices to one-hot vectors,
     given the number of classes.
@@ -407,7 +391,9 @@ def convert_to_one_hot(targets, classes):
     return one_hot_targets
 
 
-def maybe_convert_to_one_hot(target, model_output):
+def maybe_convert_to_one_hot(
+    target: torch.Tensor, model_output: torch.Tensor
+) -> torch.Tensor:
     """
     This function infers whether target is integer or 0/1 encoded
     and converts it to 0/1 encoding if necessary.
@@ -436,8 +422,12 @@ def maybe_convert_to_one_hot(target, model_output):
 
 
 def get_model_dummy_input(
-    model, input_shape, input_key, batchsize=1, non_blocking=False
-):
+    model,
+    input_shape: Any,
+    input_key: Union[str, List[str]],
+    batchsize: int = 1,
+    non_blocking: bool = False,
+) -> Any:
 
     # input_shape with type dict of dict
     # e.g. {"key_1": {"key_1_1": [2, 3], "key_1_2": [4, 5, 6], "key_1_3": []}
@@ -465,6 +455,33 @@ def get_model_dummy_input(
         if input_key:
             input = {input_key: input}
     return input
+
+
+def split_batchnorm_params(model: nn.Module):
+    """Finds the set of BatchNorm parameters in the model.
+
+    Recursively traverses all parameters in the given model and returns a tuple
+    of lists: the first element is the set of batchnorm parameters, the second
+    list contains all other parameters of the model."""
+    batchnorm_params = []
+    other_params = []
+    for module in model.modules():
+        # If module has children (i.e. internal node of constructed DAG) then
+        # only add direct parameters() to the list of params, else go over
+        # children node to find if they are BatchNorm or have "bias".
+        if list(module.children()) != []:
+            for params in module.parameters(recurse=False):
+                if params.requires_grad:
+                    other_params.append(params)
+        elif isinstance(module, nn.modules.batchnorm._BatchNorm):
+            for params in module.parameters():
+                if params.requires_grad:
+                    batchnorm_params.append(params)
+        else:
+            for params in module.parameters():
+                if params.requires_grad:
+                    other_params.append(params)
+    return batchnorm_params, other_params
 
 
 @contextlib.contextmanager

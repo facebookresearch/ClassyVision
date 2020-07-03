@@ -63,6 +63,7 @@ from torchvision import set_image_backend, set_video_backend
 
 try:
     import hydra
+    import omegaconf
 
     hydra_available = True
 except ImportError:
@@ -89,10 +90,13 @@ def main(args, config):
         ), "Can only use a pretrained checkpoint for fine tuning tasks"
         task.set_pretrained_checkpoint(args.pretrained_checkpoint_path)
 
-    # Configure hooks to do tensorboard logging, checkpoints and so on
-    task.set_hooks(configure_hooks(args, config))
+    # Configure hooks to do tensorboard logging, checkpoints and so on.
+    # `configure_hooks` adds default hooks, while extra hooks can be specified
+    # in config file and stored in `task.hooks`. Here, we merge them when we
+    # set the final hooks of the task.
+    task.set_hooks(configure_hooks(args, config) + task.hooks)
 
-    # LocalTrainer is used for a single node. DistributedTrainer will setup
+    # LocalTrainer is used for a single replica. DistributedTrainer will setup
     # training to use PyTorch's DistributedDataParallel.
     trainer_class = {"none": LocalTrainer, "ddp": DistributedTrainer}[
         args.distributed_backend
@@ -154,11 +158,11 @@ def configure_hooks(args, config):
 
 if hydra_available:
 
-    @hydra.main(config_path="hydra_configs/args.yaml")
+    @hydra.main(config_path="hydra_configs", config_name="args")
     def hydra_main(cfg):
         args = cfg
         check_generic_args(cfg)
-        config = cfg.config.to_container()
+        config = omegaconf.OmegaConf.to_container(cfg.config)
         main(args, config)
 
 

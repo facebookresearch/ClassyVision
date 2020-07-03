@@ -275,10 +275,6 @@ class DenseNet(ClassyModel):
 
         return out
 
-    def get_optimizer_params(self):
-        # use weight decay on BatchNorm for DenseNets
-        return super().get_optimizer_params(bn_weight_decay=True)
-
     @property
     def input_shape(self):
         if self.small_input:

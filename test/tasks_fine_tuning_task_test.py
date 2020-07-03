@@ -8,16 +8,45 @@ import copy
 import unittest
 from test.generic.config_utils import get_fast_test_task_config
 from test.generic.utils import compare_model_state
+from typing import Any, Dict
 from unittest import mock
 
+import torch
+import torch.nn as nn
 from classy_vision.generic.util import get_checkpoint_dict
+from classy_vision.losses import ClassyLoss, register_loss
 from classy_vision.tasks import FineTuningTask, build_task
 from classy_vision.trainer import LocalTrainer
+from torch.nn.modules.loss import CrossEntropyLoss
+
+
+@register_loss("batchnorm_cross_entropy_loss")
+class BatchNormCrossEntropyLoss(ClassyLoss):
+    """A special loss containing a BatchNorm module
+    """
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.bn = nn.BatchNorm1d(num_classes)
+        self.fc = nn.Linear(num_classes, num_classes)
+        self.xent = CrossEntropyLoss()
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "BatchNormCrossEntropyLoss":
+        assert "num_classes" in config
+        return cls(config["num_classes"])
+
+    def forward(self, x, target):
+        return self.xent(self.fc(self.bn(x)), target)
 
 
 class TestFineTuningTask(unittest.TestCase):
     def _compare_model_state(self, state_1, state_2, check_heads=True):
         return compare_model_state(self, state_1, state_2, check_heads=check_heads)
+
+    def _compare_state_dict(self, state_1, state_2, check_heads=True):
+        for k in state_1.keys():
+            self.assertTrue(torch.allclose(state_1[k].cpu(), state_2[k].cpu()))
 
     def _get_fine_tuning_config(
         self, head_num_classes=100, pretrained_checkpoint=False
@@ -62,6 +91,7 @@ class TestFineTuningTask(unittest.TestCase):
             fine_tuning_task.prepare()
 
         # test: prepare should succeed after pre-trained checkpoint is set
+        fine_tuning_task = build_task(fine_tuning_config)
         fine_tuning_task._set_pretrained_checkpoint_dict(checkpoint)
         fine_tuning_task.prepare()
 
@@ -86,6 +116,7 @@ class TestFineTuningTask(unittest.TestCase):
 
         # test: a fine tuning task with incompatible heads with a manually set
         # pre-trained checkpoint should succeed to prepare if the heads are reset
+        fine_tuning_task = build_task(fine_tuning_config)
         fine_tuning_task._set_pretrained_checkpoint_dict(
             copy.deepcopy(checkpoint)
         ).set_reset_heads(True)
@@ -108,6 +139,7 @@ class TestFineTuningTask(unittest.TestCase):
         # test: a fine tuning task with incompatible heads with the pre-trained
         # checkpoint provided in the config should succeed to prepare if the heads are
         # reset
+        fine_tuning_task = build_task(fine_tuning_config)
         fine_tuning_task.set_reset_heads(True)
         with mock.patch(
             "classy_vision.tasks.fine_tuning_task.load_and_broadcast_checkpoint",
@@ -164,3 +196,34 @@ class TestFineTuningTask(unittest.TestCase):
 
                 accuracy = fine_tuning_task.meters[0].value["top_1"]
                 self.assertAlmostEqual(accuracy, 1.0)
+
+    def test_train_parametric_loss(self):
+        heads_num_classes = 100
+        pre_train_config = self._get_pre_train_config(
+            head_num_classes=heads_num_classes
+        )
+        pre_train_config["loss"] = {
+            "name": "batchnorm_cross_entropy_loss",
+            "num_classes": heads_num_classes,
+        }
+        pre_train_task = build_task(pre_train_config)
+        trainer = LocalTrainer()
+        trainer.train(pre_train_task)
+        checkpoint = get_checkpoint_dict(pre_train_task, {})
+
+        fine_tuning_config = self._get_fine_tuning_config(
+            head_num_classes=heads_num_classes
+        )
+        fine_tuning_config["loss"] = {
+            "name": "batchnorm_cross_entropy_loss",
+            "num_classes": heads_num_classes,
+        }
+
+        fine_tuning_task = build_task(fine_tuning_config)
+        fine_tuning_task._set_pretrained_checkpoint_dict(copy.deepcopy(checkpoint))
+        # run in test mode to compare the loss state. Since we have a BatchNorm module in
+        # the loss, its moving mean/std should be unchanged when we run in test-only mode
+        fine_tuning_task.set_test_only(True)
+        loss_state = copy.deepcopy(fine_tuning_task.loss.get_classy_state())
+        trainer.train(fine_tuning_task)
+        self._compare_state_dict(loss_state, fine_tuning_task.loss.get_classy_state())
