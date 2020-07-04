@@ -93,6 +93,7 @@ from .classy_model import (  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .efficientnet import EfficientNet  # isort:skip
 from .mlp import MLP  # isort:skip
+from .regnet import RegNet  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D  # isort:skip
@@ -109,6 +110,7 @@ __all__ = [
     "DenseNet",
     "EfficientNet",
     "MLP",
+    "RegNet",
     "ResNet",
     "ResNeXt",
     "ResNeXt3D",
