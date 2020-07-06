@@ -14,6 +14,15 @@ from classy_vision.hooks.classy_hook import ClassyHook
 from fvcore.common.file_io import PathManager
 
 
+gfs_prefix_list = {
+    "/mnt/gfsdataswarm",
+    "/mnt/gfsdataswarm-global",
+    "/mnt/vol",
+    "/mnt/shared",
+    "/mnt/homedir",
+}
+
+
 @register_hook("checkpoint")
 class CheckpointHook(ClassyHook):
     """
@@ -77,6 +86,13 @@ class CheckpointHook(ClassyHook):
         assert PathManager.exists(
             self.checkpoint_folder
         ), "Checkpoint folder '{}' deleted unexpectedly".format(self.checkpoint_folder)
+
+        for prefix in gfs_prefix_list:
+            if self.checkpoint_folder.startswith(prefix):
+                logging.warning(
+                    "GFS is deprecating... please save checkpoint to manifold!"
+                )
+                break
 
         # save checkpoint:
         logging.info("Saving checkpoint to '{}'...".format(self.checkpoint_folder))
