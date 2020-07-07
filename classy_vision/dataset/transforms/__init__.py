@@ -51,6 +51,10 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
     if name in TRANSFORM_REGISTRY:
         return TRANSFORM_REGISTRY[name].from_config(transform_args)
     # the name should be available in torchvision.transforms
+    # if users specify the torchvision transform name in snake case,
+    # we need to convert it to title case.
+    if not (hasattr(transforms, name) or hasattr(transforms_video, name)):
+        name = name.title().replace("_", "")
     assert hasattr(transforms, name) or hasattr(transforms_video, name), (
         f"{name} isn't a registered tranform"
         ", nor is it available in torchvision.transforms"
@@ -89,6 +93,12 @@ def register_transform(name: str):
     def register_transform_cls(cls: Callable[..., Callable]):
         if name in TRANSFORM_REGISTRY:
             raise ValueError("Cannot register duplicate transform ({})".format(name))
+        if hasattr(transforms, name) or hasattr(transforms_video, name):
+            raise ValueError(
+                "{} has existed in torchvision.transforms, Please change the name!".format(
+                    name
+                )
+            )
         TRANSFORM_REGISTRY[name] = cls
         return cls
 
