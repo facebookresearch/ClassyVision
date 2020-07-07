@@ -213,8 +213,12 @@ class BottleneckTransform(nn.Sequential):
         )
 
         if se_ratio:
-            w_se = int(round(width_in * se_ratio))
-            self.se = SqueezeAndExcitationLayer(in_planes=w_b, reduction_ratio=w_se)
+            # The SE reduction ratio is defined with respect to the
+            # beginning of the block
+            width_se_out = int(round(se_ratio * width_in))
+            self.se = SqueezeAndExcitationLayer(
+                in_planes=w_b, reduction_ratio=None, reduced_planes=width_se_out
+            )
 
         self.c = nn.Conv2d(w_b, width_out, 1, stride=1, padding=0, bias=False)
         self.final_bn = nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum)
