@@ -58,8 +58,8 @@ class ResNeXt3DBase(ClassyModel):
             stem_maxpool,
         )
 
-    @classmethod
-    def _parse_config(cls, config):
+    @staticmethod
+    def _parse_config(config):
         ret_config = {}
         required_args = [
             "input_planes",
