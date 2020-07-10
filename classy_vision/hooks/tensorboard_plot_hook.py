@@ -6,10 +6,11 @@
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from itertools import accumulate
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
-from classy_vision.generic.distributed_util import is_master
+from classy_vision.generic.distributed_util import all_reduce_max, is_master
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
@@ -42,20 +43,24 @@ class TensorboardPlotHook(ClassyHook):
         Args:
             tb_writer: `Tensorboard SummaryWriter <https://tensorboardx.
             readthedocs.io/en/latest/tensorboard.html#tensorboardX.
-            SummaryWriter>`_ instance
+            SummaryWriter>`_ instance or None (only on non-master replicas)
         """
         super().__init__()
         if not tb_available:
-            raise RuntimeError(
+            raise ModuleNotFoundError(
                 "tensorboard not installed, cannot use TensorboardPlotHook"
             )
-        assert isinstance(log_period, int), "log_period must be an int"
-
+        if not isinstance(log_period, int):
+            raise TypeError("log_period must be an int")
         self.tb_writer = tb_writer
         self.learning_rates: Optional[List[float]] = None
         self.wall_times: Optional[List[float]] = None
-        self.num_updates: Optional[List[int]] = None
+        self.sample_fetch_times: Optional[List[float]] = None
         self.log_period = log_period
+        # need to maintain the step count at the end of every phase
+        # and the cumulative sample fetch time for checkpointing
+        self.state.step_count = {"train": 0, "test": 0}
+        self.state.cum_sample_fetch_time = {"train": 0, "test": 0}
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "TensorboardPlotHook":
@@ -70,14 +75,14 @@ class TensorboardPlotHook(ClassyHook):
         return cls(tb_writer=tb_writer, log_period=log_period)
 
     def on_start(self, task) -> None:
-        self.tb_writer.add_text("Task", f"{task}")
+        if is_master():
+            self.tb_writer.add_text("Task", f"{task}")
 
     def on_phase_start(self, task) -> None:
         """Initialize losses and learning_rates."""
         self.learning_rates = []
         self.wall_times = []
-        self.num_updates = []
-        self.step_idx = 0
+        self.sample_fetch_times = []
 
         if not is_master():
             return
@@ -94,22 +99,28 @@ class TensorboardPlotHook(ClassyHook):
 
     def on_step(self, task) -> None:
         """Store the observed learning rates."""
-        if self.learning_rates is None:
-            logging.warning("learning_rates is not initialized")
-            return
+        self.state.step_count[task.phase_type] += 1
+        self.wall_times.append(time.time())
+        if "sample_fetch_time" in task.last_batch.step_data:
+            self.sample_fetch_times.append(
+                task.last_batch.step_data["sample_fetch_time"]
+            )
+        if task.train:
+            self.learning_rates.append(task.optimizer.parameters.lr)
 
-        if not task.train:
-            # Only need to log the average loss during the test phase
-            return
+    def _get_cum_sample_fetch_times(self, phase_type) -> Tuple[List[float], ...]:
+        if not self.sample_fetch_times:
+            return None
 
-        if self.step_idx % self.log_period == 0:
-            learning_rate_val = task.optimizer.parameters.lr
-
-            self.learning_rates.append(learning_rate_val)
-            self.wall_times.append(time.time())
-            self.num_updates.append(task.num_updates)
-
-        self.step_idx += 1
+        sample_fetch_times = torch.Tensor(self.sample_fetch_times)
+        max_sample_fetch_times = all_reduce_max(sample_fetch_times).tolist()
+        cum_sample_fetch_times = list(
+            accumulate(
+                [self.state.cum_sample_fetch_time[phase_type]] + max_sample_fetch_times
+            )
+        )[1:]
+        self.state.cum_sample_fetch_time[phase_type] = cum_sample_fetch_times[-1]
+        return cum_sample_fetch_times
 
     def on_phase_end(self, task) -> None:
         """Add the losses and learning rates to tensorboard."""
@@ -117,28 +128,37 @@ class TensorboardPlotHook(ClassyHook):
             logging.warning("learning_rates is not initialized")
             return
 
+        phase_type = task.phase_type
+        cum_sample_fetch_times = self._get_cum_sample_fetch_times(phase_type)
+
         batches = len(task.losses)
         if batches == 0 or not is_master():
             return
 
-        phase_type = task.phase_type
         phase_type_idx = task.train_phase_idx if task.train else task.eval_phase_idx
 
         logging.info(f"Plotting to Tensorboard for {phase_type} phase {phase_type_idx}")
 
-        phase_type = task.phase_type
-        learning_rate_key = f"Learning Rate/{phase_type}"
+        for i in range(0, len(self.wall_times), self.log_period):
+            global_step = (
+                i + self.state.step_count[phase_type] - len(self.wall_times) + 1
+            )
+            if cum_sample_fetch_times:
+                self.tb_writer.add_scalar(
+                    f"Speed/{phase_type}/cumulative_sample_fetch_time",
+                    cum_sample_fetch_times[i],
+                    global_step=global_step,
+                    walltime=self.wall_times[i],
+                )
+            if task.train:
+                self.tb_writer.add_scalar(
+                    "Learning Rate/train",
+                    self.learning_rates[i],
+                    global_step=global_step,
+                    walltime=self.wall_times[i],
+                )
 
         if task.train:
-            for learning_rate, global_step, wall_time in zip(
-                self.learning_rates, self.num_updates, self.wall_times
-            ):
-                self.tb_writer.add_scalar(
-                    learning_rate_key,
-                    learning_rate,
-                    global_step=global_step,
-                    walltime=wall_time,
-                )
             for name, parameter in task.base_model.named_parameters():
                 self.tb_writer.add_histogram(
                     f"Parameters/{name}", parameter, global_step=phase_type_idx
@@ -189,4 +209,4 @@ class TensorboardPlotHook(ClassyHook):
 
         # flush so that the plots aren't lost if training crashes soon after
         self.tb_writer.flush()
-        logging.info(f"Done plotting to Tensorboard")
+        logging.info("Done plotting to Tensorboard")
