@@ -25,6 +25,7 @@ from classy_vision.generic.distributed_util import (
     is_distributed_training_run,
 )
 from classy_vision.generic.util import (
+    Timer,
     copy_model_to_gpu,
     load_and_broadcast_checkpoint,
     recursive_copy_to_gpu,
@@ -73,6 +74,7 @@ class LastBatchInfo(NamedTuple):
     output: torch.Tensor
     target: torch.Tensor
     sample: Dict[str, Any]
+    step_data: Dict[str, Any]
 
 
 @register_task("classification_task")
@@ -842,7 +844,8 @@ class ClassificationTask(ClassyTask):
         self.last_batch = None
 
         # Process next sample
-        sample = next(self.get_data_iterator())
+        with Timer() as timer:
+            sample = next(self.get_data_iterator())
 
         assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
@@ -868,7 +871,11 @@ class ClassificationTask(ClassyTask):
 
         # Move some data to the task so hooks get a chance to access it
         self.last_batch = LastBatchInfo(
-            loss=loss, output=output, target=target, sample=sample
+            loss=loss,
+            output=output,
+            target=target,
+            sample=sample,
+            step_data={"sample_fetch_time": timer.elapsed_time},
         )
 
     def check_inf_nan(self, loss):
@@ -881,7 +888,8 @@ class ClassificationTask(ClassyTask):
         self.last_batch = None
 
         # Process next sample
-        sample = next(self.get_data_iterator())
+        with Timer() as timer:
+            sample = next(self.get_data_iterator())
 
         assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
@@ -927,7 +935,11 @@ class ClassificationTask(ClassyTask):
 
         # Move some data to the task so hooks get a chance to access it
         self.last_batch = LastBatchInfo(
-            loss=loss, output=output, target=target, sample=sample
+            loss=loss,
+            output=output,
+            target=target,
+            sample=sample,
+            step_data={"sample_fetch_time": timer.elapsed_time},
         )
 
     def compute_loss(self, model_output, sample):

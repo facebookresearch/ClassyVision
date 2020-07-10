@@ -5,10 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
-import logging
 import shutil
 import tempfile
-import unittest
 import unittest.mock as mock
 from itertools import product
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
@@ -17,6 +15,7 @@ from test.generic.hook_test_utils import HookTestBase
 from classy_vision.hooks import TensorboardPlotHook
 from classy_vision.optim.param_scheduler import UpdateInterval
 from classy_vision.tasks import build_task
+from classy_vision.tasks.classification_task import LastBatchInfo
 from classy_vision.trainer import LocalTrainer
 from torch.utils.tensorboard import SummaryWriter
 
@@ -66,6 +65,7 @@ class TestTensorboardPlotHook(HookTestBase):
             task.train = train
 
             losses = [1.23, 4.45, 12.3, 3.4]
+            sample_fetch_times = [1.1, 2.2, 3.3, 2.2]
 
             summary_writer = SummaryWriter(self.base_dir)
             # create a spy on top of summary_writer
@@ -74,36 +74,20 @@ class TestTensorboardPlotHook(HookTestBase):
             # create a loss lr tensorboard hook
             tensorboard_plot_hook = TensorboardPlotHook(summary_writer)
 
-            # test that the hook logs a warning and doesn't write anything to
-            # the writer if on_phase_start() is not called for initialization
-            # before on_step() is called.
-            with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_step(task)
-
-            self.assertTrue(
-                len(log_watcher.records) == 1
-                and log_watcher.records[0].levelno == logging.WARN
-                and "learning_rates is not initialized" in log_watcher.output[0]
-            )
-
-            # test that the hook logs a warning and doesn't write anything to
-            # the writer if on_phase_start() is not called for initialization
-            # if on_phase_end() is called.
-            with self.assertLogs() as log_watcher:
-                tensorboard_plot_hook.on_phase_end(task)
-
-            self.assertTrue(
-                len(log_watcher.records) == 1
-                and log_watcher.records[0].levelno == logging.WARN
-                and "learning_rates is not initialized" in log_watcher.output[0]
-            )
-            summary_writer.add_scalar.reset_mock()
-
             # run the hook in the correct order
             tensorboard_plot_hook.on_phase_start(task)
 
-            for loss in losses:
+            # test tasks which do not pass the sample_fetch_times as well
+            disable_sample_fetch_times = phase_idx == 0
+
+            for loss, sample_fetch_time in zip(losses, sample_fetch_times):
                 task.losses.append(loss)
+                step_data = (
+                    {}
+                    if disable_sample_fetch_times
+                    else {"sample_fetch_time": sample_fetch_time}
+                )
+                task.last_batch = LastBatchInfo(None, None, None, None, step_data)
                 tensorboard_plot_hook.on_step(task)
 
             tensorboard_plot_hook.on_phase_end(task)
@@ -128,6 +112,13 @@ class TestTensorboardPlotHook(HookTestBase):
                         summary_writer.add_scalar.assert_any_call(
                             meter_key, mock.ANY, global_step=mock.ANY
                         )
+                if step_data:
+                    summary_writer.add_scalar.assert_any_call(
+                        f"Speed/{phase_type}/cumulative_sample_fetch_time",
+                        mock.ANY,
+                        global_step=mock.ANY,
+                        walltime=mock.ANY,
+                    )
             else:
                 # add_scalar() shouldn't be called since is_master() is False
                 summary_writer.add_scalar.assert_not_called()

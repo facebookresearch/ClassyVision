@@ -27,6 +27,12 @@ class ModelComplexityHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.num_flops = None
+        self.num_activations = None
+        self.num_parameters = None
+
     def on_start(self, task) -> None:
         """Measure number of parameters, FLOPs and activations."""
         self.num_flops = 0

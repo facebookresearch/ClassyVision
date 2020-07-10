@@ -89,6 +89,15 @@ def all_reduce_min(tensor: torch.Tensor) -> torch.Tensor:
     return all_reduce_op(tensor, torch.distributed.ReduceOp.MIN)
 
 
+def all_reduce_max(tensor: torch.Tensor) -> torch.Tensor:
+    """
+    Wrapper over torch.distributed.all_reduce for performing min
+    reduction of tensor over all processes in both distributed /
+    non-distributed scenarios.
+    """
+    return all_reduce_op(tensor, torch.distributed.ReduceOp.MAX)
+
+
 def all_reduce_op(
     tensor: torch.Tensor,
     op: torch.distributed.ReduceOp,
