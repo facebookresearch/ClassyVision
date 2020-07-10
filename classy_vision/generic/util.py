@@ -8,10 +8,8 @@ import collections
 import contextlib
 import json
 import logging
-import math
 import os
-import sys
-import traceback
+import time
 from functools import partial
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -475,6 +473,29 @@ def split_batchnorm_params(model: nn.Module):
                 if params.requires_grad:
                     other_params.append(params)
     return batchnorm_params, other_params
+
+
+class Timer:
+    """Timer context manager to get the elapsed time for a code block.
+
+    Example:
+        .. code-block:: python
+
+            with Timer() as timer:
+                do_something()
+            elapsed_time = timer.elapsed_time
+    """
+
+    def __init__(self):
+        self.start = 0
+        self.elapsed_time = 0
+
+    def __enter__(self):
+        self.start = time.perf_counter()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.elapsed_time = time.perf_counter() - self.start
 
 
 @contextlib.contextmanager

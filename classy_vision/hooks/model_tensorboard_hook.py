@@ -39,15 +39,13 @@ class ModelTensorboardHook(ClassyHook):
         Args:
             tb_writer: `Tensorboard SummaryWriter <https://tensorboardx.
             readthedocs.io/en/latest/tensorboard.html#tensorboardX.
-            SummaryWriter>`_ instance
-
+            SummaryWriter>`_ instance or None (only on non-master replicas)
         """
         super().__init__()
         if not tb_available:
-            raise RuntimeError(
+            raise ModuleNotFoundError(
                 "tensorboard not installed, cannot use ModelTensorboardHook"
             )
-
         self.tb_writer = tb_writer
 
     @classmethod

@@ -18,6 +18,7 @@ import torch
 import torch.nn as nn
 from classy_vision.generic.util import (
     CHECKPOINT_FILE,
+    Timer,
     load_checkpoint,
     save_checkpoint,
     split_batchnorm_params,
@@ -224,6 +225,19 @@ class TestUtilMethods(unittest.TestCase):
                 # the modes should be different inside the context manager
                 self.assertFalse(self._compare_model_train_mode(orig_model, test_model))
             self.assertTrue(self._compare_model_train_mode(orig_model, test_model))
+
+    @mock.patch("time.perf_counter")
+    def test_timer(self, mock_perf_counter: mock.MagicMock):
+        def test_func(a, b=2):
+            return a + b
+
+        start_time = 10
+        end_time = 12
+        mock_perf_counter.side_effect = [start_time, end_time]
+
+        with Timer() as timer:
+            test_func(1, b=3)
+        self.assertAlmostEqual(timer.elapsed_time, end_time - start_time)
 
 
 class TestUpdateStateFunctions(unittest.TestCase):
