@@ -412,12 +412,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         raise NotImplementedError
 
     @property
-    def output_shape(self):
-        """If implemented, returns expected output tensor shape
-        """
-        raise NotImplementedError
-
-    @property
     def model_depth(self):
         """If implemented, returns number of layers in model
         """
