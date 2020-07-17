@@ -711,3 +711,36 @@ class RegNetX32gf(_RegNet):
                 **kwargs,
             )
         )
+
+
+# -----------------------------------------------------------------------------------
+# The following models were not part of the original publication,
+# (https://arxiv.org/abs/2003.13678v1), but are larger versions of the
+# published models, obtained in the same manner.
+
+
+@register_model("regnet_y_64gf")
+class RegNetY64gf(_RegNet):
+    def __init__(self, **kwargs):
+        # Output size: 2976 feature maps
+        super().__init__(
+            RegNetParams(depth=20, w_0=368, w_a=102.79, w_m=2.05, group_w=496, **kwargs)
+        )
+
+
+@register_model("regnet_y_128gf")
+class RegNetY128gf(_RegNet):
+    def __init__(self, **kwargs):
+        # Output size: 7392 feature maps
+        super().__init__(
+            RegNetParams(depth=27, w_0=456, w_a=160.83, w_m=2.52, group_w=264, **kwargs)
+        )
+
+
+@register_model("regnet_y_256gf")
+class RegNetY256gf(_RegNet):
+    def __init__(self, **kwargs):
+        # Output size: 5088 feature maps
+        super().__init__(
+            RegNetParams(depth=27, w_0=640, w_a=124.47, w_m=2.04, group_w=848, **kwargs)
+        )
