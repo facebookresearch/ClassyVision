@@ -25,7 +25,25 @@ class TestHook(ClassyHook):
 
     @classmethod
     def from_config(cls, config):
-        return TestHook(**config)
+        return cls(**config)
+
+
+@register_hook("test_hook_new")
+class TestHookNew(ClassyHook):
+    on_start = ClassyHook._noop
+    on_phase_start = ClassyHook._noop
+    on_step = ClassyHook._noop
+    on_phase_end = ClassyHook._noop
+    on_end = ClassyHook._noop
+
+    def __init__(self, b, c):
+        super().__init__()
+        self.state.b = b
+        self.state.c = c
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 
 
 class TestClassyHook(unittest.TestCase):
@@ -53,3 +71,12 @@ class TestClassyHook(unittest.TestCase):
         test_hook.set_classy_state(state_dict)
         self.assertEqual(test_hook.state.a, a)
         self.assertEqual(test_hook.state.b, b)
+
+        # make sure we're able to load old checkpoints
+        b_new = {1: 2}
+        c_new = "hello"
+        test_hook_new = TestHookNew(b_new, c_new)
+        test_hook_new.set_classy_state(state_dict)
+        self.assertEqual(test_hook_new.state.a, a)
+        self.assertEqual(test_hook_new.state.b, b)
+        self.assertEqual(test_hook_new.state.c, c_new)
