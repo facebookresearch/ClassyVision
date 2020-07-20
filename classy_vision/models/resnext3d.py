@@ -216,9 +216,9 @@ class ResNeXt3DBase(ClassyModel):
                 assert all(
                     weight_src.size(d) == weight_tgt.size(d)
                     for d in range(weight_src.dim())
-                ), (
-                    "the shapes of source and target weight mismatch: %s Vs %s"
-                    % (str(weight_src.size()), str(weight_tgt.size()))
+                ), "the shapes of source and target weight mismatch: %s Vs %s" % (
+                    str(weight_src.size()),
+                    str(weight_tgt.size()),
                 )
 
             current_state[name] = weight_src.clone()
@@ -281,10 +281,6 @@ class ResNeXt3DBase(ClassyModel):
             self.clip_crop_size,
             self.clip_crop_size,
         )
-
-    @property
-    def output_shape(self):
-        return (1, None)
 
     @property
     def model_depth(self):

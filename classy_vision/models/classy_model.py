@@ -174,7 +174,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         cls,
         model: nn.Module,
         input_shape: Optional[Tuple] = None,
-        output_shape: Optional[Tuple] = None,
         model_depth: Optional[int] = None,
     ):
         """Converts an :class:`nn.Module` to a `ClassyModel`.
@@ -187,10 +186,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
             A ClassyModel instance.
         """
         return _ClassyModelAdapter(
-            model,
-            input_shape=input_shape,
-            output_shape=output_shape,
-            model_depth=model_depth,
+            model, input_shape=input_shape, model_depth=model_depth
         )
 
     @classmethod
@@ -412,12 +408,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         raise NotImplementedError
 
     @property
-    def output_shape(self):
-        """If implemented, returns expected output tensor shape
-        """
-        raise NotImplementedError
-
-    @property
     def model_depth(self):
         """If implemented, returns number of layers in model
         """
@@ -437,13 +427,11 @@ class _ClassyModelAdapter(ClassyModel):
         self,
         model: nn.Module,
         input_shape: Optional[Tuple] = None,
-        output_shape: Optional[Tuple] = None,
         model_depth: Optional[int] = None,
     ):
         super().__init__()
         self.model = model
         self._input_shape = input_shape
-        self._output_shape = output_shape
         self._model_depth = model_depth
 
     def forward(self, x):
@@ -459,12 +447,6 @@ class _ClassyModelAdapter(ClassyModel):
         if self._input_shape is not None:
             return self._input_shape
         return super().input_shape
-
-    @property
-    def output_shape(self):
-        if self._output_shape is not None:
-            return self._output_shape
-        return super().output_shape
 
     @property
     def model_depth(self):
