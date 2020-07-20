@@ -48,10 +48,6 @@ class MyTestModel2(ClassyModel):
         return (1, 2, 3)
 
     @property
-    def output_shape(self):
-        return (4, 5, 6)
-
-    @property
     def model_depth(self):
         return 1
 
@@ -220,16 +216,11 @@ class TestClassyModelAdapter(unittest.TestCase):
         model = TestModel()
         num_classes = 5
         input_shape = (10,)
-        output_shape = (num_classes,)
         model_depth = 1
         classy_model = ClassyModel.from_model(
-            model,
-            input_shape=input_shape,
-            output_shape=output_shape,
-            model_depth=model_depth,
+            model, input_shape=input_shape, model_depth=model_depth
         )
         self.assertEqual(classy_model.input_shape, input_shape)
-        self.assertEqual(classy_model.output_shape, output_shape)
         self.assertEqual(classy_model.model_depth, model_depth)
 
     def test_train_step(self):
