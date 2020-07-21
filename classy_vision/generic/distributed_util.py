@@ -8,6 +8,7 @@ import io
 from typing import Any, Callable, List, Tuple
 
 import torch
+import torch.distributed as dist
 
 
 # Default to GPU 0
@@ -251,4 +252,25 @@ def broadcast_object(obj: Any) -> Any:
         data_tensor = broadcast(data_tensor)
         buffer = io.BytesIO(data_tensor.numpy())
         obj = torch.load(buffer)
+    return obj
+
+
+def send_object(obj: Any, dst: int, group=dist.group.WORLD) -> None:
+    buffer = io.BytesIO()
+    torch.save(obj, buffer)
+    data = bytearray(buffer.getbuffer())
+    length_tensor = torch.LongTensor([len(data)])
+    dist.send(length_tensor, dst=dst, group=group)
+
+    data_tensor = torch.ByteTensor(data)
+    dist.send(data_tensor, dst=dst, group=group)
+
+
+def receive_object(src: int, group=dist.group.WORLD) -> Any:
+    length_tensor = torch.LongTensor([0])
+    dist.recv(length_tensor, src=src, group=group)
+    data_tensor = torch.empty([length_tensor.item()], dtype=torch.uint8)
+    dist.recv(data_tensor, src=src, group=group)
+    buffer = io.BytesIO(data_tensor.numpy())
+    obj = torch.load(buffer)
     return obj
