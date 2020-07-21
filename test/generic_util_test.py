@@ -46,16 +46,16 @@ def get_mock_tensor(mock_class):
 
 
 class TestUtilMethods(unittest.TestCase):
-    def test_recursive_copy_to_gpu(self):
+    def test_recursive_copy_to_device(self):
         tensor_a = get_mock_tensor()
         tensor_b = get_mock_tensor()
 
         valid_gpu_copy_value = tensor_a
-        gpu_value = util.recursive_copy_to_gpu(valid_gpu_copy_value)
+        gpu_value = util.recursive_copy_to_device(valid_gpu_copy_value)
         self.assertTrue(gpu_value.is_cuda)
 
         valid_recursive_copy_value = [[tensor_a]]
-        gpu_value = util.recursive_copy_to_gpu(valid_recursive_copy_value)
+        gpu_value = util.recursive_copy_to_device(valid_recursive_copy_value)
         self.assertTrue(gpu_value[0][0].is_cuda)
 
         valid_gpu_copy_collections = [
@@ -64,7 +64,7 @@ class TestUtilMethods(unittest.TestCase):
             {"tensor_a": tensor_a, "tensor_b": tensor_b},
         ]
         for value in valid_gpu_copy_collections:
-            gpu_value = util.recursive_copy_to_gpu(value)
+            gpu_value = util.recursive_copy_to_device(value)
             if isinstance(value, dict):
                 self.assertTrue(gpu_value["tensor_a"].is_cuda)
                 self.assertTrue(gpu_value["tensor_b"].is_cuda)
@@ -74,7 +74,7 @@ class TestUtilMethods(unittest.TestCase):
                 self.assertTrue(gpu_value[1].is_cuda)
 
         value = {"a": "b"}
-        self.assertEqual(value, util.recursive_copy_to_gpu(value))
+        self.assertEqual(value, util.recursive_copy_to_device(value))
 
     _json_config_file = ROOT / "generic_util_json_blob_test.json"
 

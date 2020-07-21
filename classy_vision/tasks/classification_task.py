@@ -28,13 +28,13 @@ from classy_vision.generic.util import (
     Timer,
     copy_model_to_gpu,
     load_and_broadcast_checkpoint,
-    recursive_copy_to_gpu,
+    recursive_copy_to_device,
     split_batchnorm_params,
     update_classy_state,
 )
-from classy_vision.hooks import build_hooks
+from classy_vision.hooks import ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
-from classy_vision.meters import build_meters
+from classy_vision.meters import ClassyMeter, build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
 from torch.distributed import broadcast
@@ -313,7 +313,7 @@ class ClassificationTask(ClassyTask):
 
         return self
 
-    def set_hooks(self, hooks: List["ClassyHook"]):
+    def set_hooks(self, hooks: List[ClassyHook]):
         """Set hooks for task
 
         Args:
@@ -373,7 +373,7 @@ class ClassificationTask(ClassyTask):
         self.amp_args = amp_args
 
         if amp_args is None:
-            logging.info(f"AMP disabled")
+            logging.info("AMP disabled")
         else:
             if not apex_available:
                 raise RuntimeError("apex is not installed, cannot enable amp")
@@ -389,9 +389,9 @@ class ClassificationTask(ClassyTask):
         """
         self.mixup_transform = mixup_transform
         if mixup_transform is None:
-            logging.info(f"mixup disabled")
+            logging.info("mixup disabled")
         else:
-            logging.info(f"mixup enabled")
+            logging.info("mixup enabled")
         return self
 
     @classmethod
@@ -854,7 +854,7 @@ class ClassificationTask(ClassyTask):
 
         target = sample["target"]
         if self.use_gpu:
-            sample = recursive_copy_to_gpu(sample, non_blocking=True)
+            sample = recursive_copy_to_device(sample, non_blocking=True)
 
         with torch.no_grad():
             output = self.model(sample["input"])
@@ -899,7 +899,7 @@ class ClassificationTask(ClassyTask):
         # Copy sample to GPU
         target = sample["target"]
         if self.use_gpu:
-            sample = recursive_copy_to_gpu(sample, non_blocking=True)
+            sample = recursive_copy_to_device(sample, non_blocking=True)
 
         if self.mixup_transform is not None:
             sample = self.mixup_transform(sample)

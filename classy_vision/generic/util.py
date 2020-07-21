@@ -24,6 +24,7 @@ from torch._six import container_abcs
 # constants:
 CHECKPOINT_FILE = "checkpoint.torch"
 CPU_DEVICE = torch.device("cpu")
+GPU_DEVICE = torch.device("cuda")
 
 
 def is_pos_int(number: int) -> bool:
@@ -89,7 +90,7 @@ def is_leaf(module: nn.Module) -> bool:
     Returns True if module is leaf in the graph.
     """
     assert isinstance(module, nn.Module), "module should be nn.Module"
-    return len([c for c in module.children()]) == 0 or hasattr(module, "_mask")
+    return len(list(module.children())) == 0 or hasattr(module, "_mask")
 
 
 def is_on_gpu(model: torch.nn.Module) -> bool:
@@ -140,28 +141,35 @@ def copy_model_to_gpu(model, loss=None):
         return model
 
 
-def recursive_copy_to_gpu(value: Any, non_blocking: Dict = True) -> Any:
+def recursive_copy_to_device(
+    value: Any, non_blocking: bool = True, device: torch.device = GPU_DEVICE
+) -> Any:
     """
-    Recursively searches lists, tuples, dicts and copies tensors to GPU if
+    Recursively searches lists, tuples, dicts and copies tensors to device if
     possible. Non-tensor values are passed as-is in the result.
+
     Note:  These are all copies, so if there are two objects that reference
     the same object, then after this call, there will be two different objects
-    referenced on the GPU.
+    referenced on the device.
     """
-    if hasattr(value, "cuda"):
-        return value.cuda(non_blocking=non_blocking)
+    if isinstance(value, torch.Tensor):
+        return value.to(device, non_blocking=non_blocking)
     elif isinstance(value, list) or isinstance(value, tuple):
-        gpu_val = []
+        device_val = []
         for val in value:
-            gpu_val.append(recursive_copy_to_gpu(val, non_blocking=non_blocking))
+            device_val.append(
+                recursive_copy_to_device(val, non_blocking=non_blocking, device=device)
+            )
 
-        return gpu_val if isinstance(value, list) else tuple(gpu_val)
+        return device_val if isinstance(value, list) else tuple(device_val)
     elif isinstance(value, container_abcs.Mapping):
-        gpu_val = {}
+        device_val = {}
         for key, val in value.items():
-            gpu_val[key] = recursive_copy_to_gpu(val, non_blocking=non_blocking)
+            device_val[key] = recursive_copy_to_device(
+                val, non_blocking=non_blocking, device=device
+            )
 
-        return gpu_val
+        return device_val
 
     return value
 

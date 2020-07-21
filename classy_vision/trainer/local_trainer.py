@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Optional
 
 from classy_vision.generic.distributed_util import set_cpu_device, set_cuda_device_index
 
