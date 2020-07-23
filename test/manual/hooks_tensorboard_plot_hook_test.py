@@ -43,17 +43,17 @@ class TestTensorboardPlotHook(HookTestBase):
             invalid_configs=[invalid_config],
         )
 
-    @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_master")
-    def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
+    @mock.patch("classy_vision.hooks.tensorboard_plot_hook.is_leader")
+    def test_writer(self, mock_is_leader_func: mock.MagicMock) -> None:
         """
         Tests that the tensorboard writer writes the correct scalars to SummaryWriter
-        iff is_master() is True.
+        iff is_leader() is True.
         """
         for phase_idx, master in product([0, 1, 2], [True, False]):
             train, phase_type = (
                 (True, "train") if phase_idx % 2 == 0 else (False, "test")
             )
-            mock_is_master_func.return_value = master
+            mock_is_leader_func.return_value = master
 
             # set up the task and state
             config = get_test_task_config()
@@ -120,7 +120,7 @@ class TestTensorboardPlotHook(HookTestBase):
                         walltime=mock.ANY,
                     )
             else:
-                # add_scalar() shouldn't be called since is_master() is False
+                # add_scalar() shouldn't be called since is_leader() is False
                 summary_writer.add_scalar.assert_not_called()
             summary_writer.add_scalar.reset_mock()
 

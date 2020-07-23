@@ -7,7 +7,7 @@
 import logging
 from typing import Any, Dict
 
-from classy_vision.generic.distributed_util import is_master
+from classy_vision.generic.distributed_util import is_leader
 from classy_vision.generic.visualize import plot_model
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -63,7 +63,7 @@ class ModelTensorboardHook(ClassyHook):
         """
         Plot the model on Tensorboard.
         """
-        if is_master():
+        if is_leader():
             try:
                 # Show model in tensorboard:
                 logging.info("Showing model graph in TensorBoard...")

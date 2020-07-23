@@ -7,7 +7,7 @@
 import logging
 
 import torch
-from classy_vision.generic.distributed_util import is_master
+from classy_vision.generic.distributed_util import is_leader
 from classy_vision.generic.util import eval_model, get_model_dummy_input
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -69,7 +69,7 @@ class TorchscriptHook(ClassyHook):
             torch.jit.save(torchscript, f)
 
     def on_start(self, task) -> None:
-        if not is_master() or getattr(task, "test_only", False):
+        if not is_leader() or getattr(task, "test_only", False):
             return
         if not PathManager.exists(self.torchscript_folder):
             err_msg = "Torchscript folder '{}' does not exist.".format(
@@ -80,6 +80,6 @@ class TorchscriptHook(ClassyHook):
     def on_end(self, task) -> None:
         """Save model into torchscript by the end of training.
         """
-        if not is_master() or getattr(task, "test_only", False):
+        if not is_leader() or getattr(task, "test_only", False):
             return
         self.save_torchscript(task)

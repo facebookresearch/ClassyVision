@@ -7,7 +7,7 @@
 import logging
 from typing import Any, Collection, Dict, Optional  # noqa
 
-from classy_vision.generic.distributed_util import is_master
+from classy_vision.generic.distributed_util import is_leader
 from classy_vision.generic.util import get_checkpoint_dict, save_checkpoint
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -104,7 +104,7 @@ class CheckpointHook(ClassyHook):
         PathManager.copy(checkpoint_file, f"{self.checkpoint_folder}/{filename}")
 
     def on_start(self, task) -> None:
-        if not is_master() or getattr(task, "test_only", False):
+        if not is_leader() or getattr(task, "test_only", False):
             return
         if not PathManager.exists(self.checkpoint_folder):
             err_msg = "Checkpoint folder '{}' does not exist.".format(
@@ -117,7 +117,7 @@ class CheckpointHook(ClassyHook):
 
         We do not necessarily checkpoint the task at the end of every phase.
         """
-        if not is_master() or task.phase_type not in self.phase_types:
+        if not is_leader() or task.phase_type not in self.phase_types:
             return
 
         self.phase_counter += 1

@@ -28,11 +28,11 @@ class TestModelTensorboardHook(HookTestBase):
             hook_kwargs={"tb_writer": SummaryWriter()},
         )
 
-    @mock.patch("classy_vision.hooks.model_tensorboard_hook.is_master")
-    def test_writer(self, mock_is_master_func: mock.MagicMock) -> None:
+    @mock.patch("classy_vision.hooks.model_tensorboard_hook.is_leader")
+    def test_writer(self, mock_is_leader_func: mock.MagicMock) -> None:
         """
         Tests that the tensorboard writer calls SummaryWriter with the model
-        iff is_master() is True.
+        iff is_leader() is True.
         """
         mock_summary_writer = mock.create_autospec(SummaryWriter, instance=True)
 
@@ -40,7 +40,7 @@ class TestModelTensorboardHook(HookTestBase):
         task.prepare()
 
         for master in [False, True]:
-            mock_is_master_func.return_value = master
+            mock_is_leader_func.return_value = master
             model_configs = get_test_model_configs()
 
             for model_config in model_configs:
@@ -60,6 +60,6 @@ class TestModelTensorboardHook(HookTestBase):
                         mock_summary_writer.add_graph.call_args[0][0], model
                     )
                 else:
-                    # add_graph shouldn't be called since is_master() is False
+                    # add_graph shouldn't be called since is_leader() is False
                     mock_summary_writer.add_graph.assert_not_called()
                 mock_summary_writer.reset_mock()

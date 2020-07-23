@@ -51,7 +51,7 @@ def is_distributed_training_run() -> bool:
     )
 
 
-def is_master() -> bool:
+def is_leader() -> bool:
     """
     Returns True if this is rank 0 of a distributed training job OR if it is
     a single trainer job. Otherwise False.
@@ -236,7 +236,7 @@ def init_distributed_data_parallel_model(
 
 
 def broadcast_object(obj: Any) -> Any:
-    if is_master():
+    if is_leader():
         buffer = io.BytesIO()
         torch.save(obj, buffer)
         data = bytearray(buffer.getbuffer())
