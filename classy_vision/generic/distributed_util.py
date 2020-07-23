@@ -15,6 +15,7 @@ _cuda_device_index: int = 0
 
 # Setting _cuda_device_index to -1 internally implies that we should use CPU
 _CPU_DEVICE_INDEX = -1
+_MASTER_RANK = 0
 
 
 def convert_to_distributed_tensor(tensor: torch.Tensor) -> Tuple[torch.Tensor, str]:
@@ -56,7 +57,7 @@ def is_master() -> bool:
     Returns True if this is rank 0 of a distributed training job OR if it is
     a single trainer job. Otherwise False.
     """
-    return get_rank() == 0
+    return get_rank() == _MASTER_RANK
 
 
 def all_reduce_mean(tensor: torch.Tensor) -> torch.Tensor:
@@ -235,20 +236,24 @@ def init_distributed_data_parallel_model(
         )
 
 
-def broadcast_object(obj: Any) -> Any:
-    if is_master():
+def broadcast_object(obj: Any, src: int = _MASTER_RANK) -> Any:
+    # Either broadcast from master to the fleet (default),
+    # or use the src setting as the original rank
+    if get_rank() == src:
+        # Emit data
         buffer = io.BytesIO()
         torch.save(obj, buffer)
         data = bytearray(buffer.getbuffer())
         length_tensor = torch.LongTensor([len(data)])
-        length_tensor = broadcast(length_tensor)
+        length_tensor = broadcast(length_tensor, src=src)
         data_tensor = torch.ByteTensor(data)
-        data_tensor = broadcast(data_tensor)
+        data_tensor = broadcast(data_tensor, src=src)
     else:
+        # Fetch from the source
         length_tensor = torch.LongTensor([0])
-        length_tensor = broadcast(length_tensor)
+        length_tensor = broadcast(length_tensor, src=src)
         data_tensor = torch.empty([length_tensor.item()], dtype=torch.uint8)
-        data_tensor = broadcast(data_tensor)
+        data_tensor = broadcast(data_tensor, src=src)
         buffer = io.BytesIO(data_tensor.numpy())
         obj = torch.load(buffer)
     return obj
