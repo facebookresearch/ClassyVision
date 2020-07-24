@@ -1,6 +1,15 @@
 <p align="center"><img width="70%" src="website/static/img/cv-logo.png" /></p>
-
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE) [![CircleCI](https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8)](https://circleci.com/gh/facebookresearch/ClassyVision) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md)
+<p align="center">
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
+ </a>
+ <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
+  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
+ </a>
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+ </a>
+</p>
 
 --------------------------------------------------------------------------------
 
