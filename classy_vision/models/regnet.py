@@ -55,6 +55,7 @@ class BasicTransform(nn.Sequential):
         )
 
         self.final_bn = nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum)
+        self.depth = 2
 
 
 class ResStemCifar(nn.Sequential):
@@ -145,6 +146,8 @@ class VanillaBlock(nn.Sequential):
             nn.ReLU(inplace=relu_inplace),
         )
 
+        self.depth = 2
+
 
 class ResBasicBlock(nn.Module):
     """Residual basic block: x + F(x), F = basic transform."""
@@ -171,6 +174,10 @@ class ResBasicBlock(nn.Module):
             width_in, width_out, stride, bn_epsilon, bn_momentum, relu_inplace
         )
         self.relu = nn.ReLU(relu_inplace)
+
+        # The projection and transform happen in parallel,
+        # and ReLU is not counted with respect to depth
+        self.depth = self.f.depth
 
     def forward(self, x):
         if self.proj_block:
@@ -222,6 +229,7 @@ class BottleneckTransform(nn.Sequential):
 
         self.c = nn.Conv2d(w_b, width_out, 1, stride=1, padding=0, bias=False)
         self.final_bn = nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum)
+        self.depth = 3 if not se_ratio else 4
 
 
 class ResBottleneckBlock(nn.Module):
@@ -261,6 +269,10 @@ class ResBottleneckBlock(nn.Module):
         )
         self.relu = nn.ReLU(relu_inplace)
 
+        # The projection and transform happen in parallel,
+        # and ReLU is not counted with respect to depth
+        self.depth = self.f.depth
+
     def forward(self, x, *args):
         if self.proj_block:
             x = self.bn(self.proj(x)) + self.f(x)
@@ -285,21 +297,23 @@ class AnyStage(nn.Sequential):
         stage_index: int = 0,
     ):
         super().__init__()
+        self.stage_depth = 0
+
         for i in range(depth):
-            self.add_module(
-                f"block{stage_index}-{i}",
-                block_constructor(
-                    width_in if i == 0 else width_out,
-                    width_out,
-                    stride if i == 0 else 1,
-                    params.bn_epsilon,
-                    params.bn_momentum,
-                    params.relu_in_place,
-                    bot_mul,
-                    group_width,
-                    params.se_ratio,
-                ),
+            block = block_constructor(
+                width_in if i == 0 else width_out,
+                width_out,
+                stride if i == 0 else 1,
+                params.bn_epsilon,
+                params.bn_momentum,
+                params.relu_in_place,
+                bot_mul,
+                group_width,
+                params.se_ratio,
             )
+
+            self.stage_depth += block.depth
+            self.add_module(f"block{stage_index}-{i}", block)
 
 
 # Now to the RegNet specific part
@@ -442,6 +456,8 @@ class RegNet(ClassyModel):
 
         current_width = params.stem_width
 
+        self.trunk_depth = 0
+
         blocks = []
         for i, (width_out, stride, depth, bot_mul, group_width) in enumerate(
             params.get_expanded_params()
@@ -462,6 +478,9 @@ class RegNet(ClassyModel):
                     ),
                 )
             )
+
+            self.trunk_depth += blocks[-1][1].stage_depth
+
             current_width = width_out
 
         self.trunk_output = nn.Sequential(OrderedDict(blocks))
@@ -524,11 +543,14 @@ class RegNet(ClassyModel):
 
     @property
     def model_depth(self):
-        return self.stem.depth + self.depth
+        return self.stem.depth + self.trunk_depth
 
 
 # Register some "classic" RegNets
 class _RegNet(RegNet):
+    def __init__(self, params: RegNetParams):
+        super().__init__(params)
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "RegNet":
         config = copy.deepcopy(config)
