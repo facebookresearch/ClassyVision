@@ -8,7 +8,7 @@ import collections
 import logging
 from typing import Any, Dict
 
-from classy_vision.generic.distributed_util import is_master
+from classy_vision.generic.distributed_util import is_primary
 from classy_vision.generic.util import flatten_dict
 from classy_vision.generic.visualize import plot_learning_curves
 from classy_vision.hooks import register_hook
@@ -108,7 +108,7 @@ class VisdomHook(ClassyHook):
         )
         title += self.title_suffix
 
-        if not task.train and is_master():
+        if not task.train and is_primary():
             logging.info("Plotting learning curves to visdom")
             plot_learning_curves(
                 metrics, visdom_server=self.visdom, env=self.env, win=title, title=title

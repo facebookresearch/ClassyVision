@@ -24,9 +24,9 @@ class TestProgressBarHook(HookTestBase):
         )
 
     @mock.patch("classy_vision.hooks.progress_bar_hook.progressbar")
-    @mock.patch("classy_vision.hooks.progress_bar_hook.is_master")
+    @mock.patch("classy_vision.hooks.progress_bar_hook.is_primary")
     def test_progress_bar(
-        self, mock_is_master: mock.MagicMock, mock_progressbar_pkg: mock.MagicMock
+        self, mock_is_primary: mock.MagicMock, mock_progressbar_pkg: mock.MagicMock
     ) -> None:
         """
         Tests that the progress bar is created, updated and destroyed correctly.
@@ -34,7 +34,7 @@ class TestProgressBarHook(HookTestBase):
         mock_progress_bar = mock.create_autospec(progressbar.ProgressBar, instance=True)
         mock_progressbar_pkg.ProgressBar.return_value = mock_progress_bar
 
-        mock_is_master.return_value = True
+        mock_is_primary.return_value = True
 
         task = get_test_classy_task()
         task.prepare()
@@ -84,14 +84,14 @@ class TestProgressBarHook(HookTestBase):
             )
         mock_progressbar_pkg.ProgressBar.assert_not_called()
 
-        # check that a progress bar is not created if is_master() returns False
-        mock_is_master.return_value = False
+        # check that a progress bar is not created if is_primary() returns False
+        mock_is_primary.return_value = False
         progress_bar_hook = ProgressBarHook()
         try:
             progress_bar_hook.on_phase_start(task)
             progress_bar_hook.on_step(task)
             progress_bar_hook.on_phase_end(task)
         except Exception as e:
-            self.fail("Received Exception when is_master() is False: {}".format(e))
+            self.fail("Received Exception when is_primary() is False: {}".format(e))
         self.assertIsNone(progress_bar_hook.progress_bar)
         mock_progressbar_pkg.ProgressBar.assert_not_called()

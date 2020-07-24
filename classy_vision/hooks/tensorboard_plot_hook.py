@@ -10,7 +10,7 @@ from itertools import accumulate
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
-from classy_vision.generic.distributed_util import all_reduce_max, is_master
+from classy_vision.generic.distributed_util import all_reduce_max, is_primary
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
@@ -75,7 +75,7 @@ class TensorboardPlotHook(ClassyHook):
         return cls(tb_writer=tb_writer, log_period=log_period)
 
     def on_start(self, task) -> None:
-        if is_master():
+        if is_primary():
             self.tb_writer.add_text("Task", f"{task}")
 
     def on_phase_start(self, task) -> None:
@@ -84,7 +84,7 @@ class TensorboardPlotHook(ClassyHook):
         self.wall_times = []
         self.sample_fetch_times = []
 
-        if not is_master():
+        if not is_primary():
             return
 
         if torch.cuda.is_available():
@@ -132,7 +132,7 @@ class TensorboardPlotHook(ClassyHook):
         cum_sample_fetch_times = self._get_cum_sample_fetch_times(phase_type)
 
         batches = len(task.losses)
-        if batches == 0 or not is_master():
+        if batches == 0 or not is_primary():
             return
 
         phase_type_idx = task.train_phase_idx if task.train else task.eval_phase_idx

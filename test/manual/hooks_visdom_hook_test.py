@@ -31,10 +31,10 @@ class TestVisdomHook(HookTestBase):
             config=config, hook_type=VisdomHook, hook_registry_name="visdom"
         )
 
-    @mock.patch("classy_vision.hooks.visdom_hook.is_master")
+    @mock.patch("classy_vision.hooks.visdom_hook.is_primary")
     @mock.patch("classy_vision.hooks.visdom_hook.Visdom", autospec=True)
     def test_visdom(
-        self, mock_visdom_cls: mock.MagicMock, mock_is_master: mock.MagicMock
+        self, mock_visdom_cls: mock.MagicMock, mock_is_primary: mock.MagicMock
     ) -> None:
         """
         Tests that visdom is populated with plots.
@@ -58,7 +58,7 @@ class TestVisdomHook(HookTestBase):
         visdom_port = 8097
 
         for master, visdom_conn in product([False, True], [False, True]):
-            mock_is_master.return_value = master
+            mock_is_primary.return_value = master
             mock_visdom.check_connection.return_value = visdom_conn
 
             # create a visdom hook

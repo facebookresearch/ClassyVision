@@ -15,7 +15,7 @@ _cuda_device_index: int = 0
 
 # Setting _cuda_device_index to -1 internally implies that we should use CPU
 _CPU_DEVICE_INDEX = -1
-_MASTER_RANK = 0
+_PRIMARY_RANK = 0
 
 
 def convert_to_distributed_tensor(tensor: torch.Tensor) -> Tuple[torch.Tensor, str]:
@@ -52,12 +52,12 @@ def is_distributed_training_run() -> bool:
     )
 
 
-def is_master() -> bool:
+def is_primary() -> bool:
     """
     Returns True if this is rank 0 of a distributed training job OR if it is
     a single trainer job. Otherwise False.
     """
-    return get_rank() == _MASTER_RANK
+    return get_rank() == _PRIMARY_RANK
 
 
 def all_reduce_mean(tensor: torch.Tensor) -> torch.Tensor:
@@ -236,7 +236,7 @@ def init_distributed_data_parallel_model(
         )
 
 
-def broadcast_object(obj: Any, src: int = _MASTER_RANK) -> Any:
+def broadcast_object(obj: Any, src: int = _PRIMARY_RANK) -> Any:
     # Either broadcast from master to the fleet (default),
     # or use the src setting as the original rank
     if get_rank() == src:

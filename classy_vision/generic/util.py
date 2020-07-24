@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import torch
 import torch.nn as nn
-from classy_vision.generic.distributed_util import broadcast_object, is_master
+from classy_vision.generic.distributed_util import broadcast_object, is_primary
 from fvcore.common.file_io import PathManager
 from torch._six import container_abcs
 
@@ -225,7 +225,7 @@ def load_and_broadcast_checkpoint(
 
     See :func:`load_checkpoint` for the arguments.
     """
-    if is_master():
+    if is_primary():
         checkpoint = load_checkpoint(checkpoint_path, device)
     else:
         checkpoint = None
