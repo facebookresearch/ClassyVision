@@ -125,6 +125,7 @@ class ClassyVideoDataset(ClassyDataset):
         audio_samples = config.get("audio_samples", 0)
         step_between_clips = config.get("step_between_clips", 1)
         frame_rate = config.get("frame_rate", None)
+        dilation = config.get("dilation", 1)
         clips_per_video = config.get("clips_per_video", 1)
 
         (
@@ -157,6 +158,7 @@ class ClassyVideoDataset(ClassyDataset):
             audio_samples,
             step_between_clips,
             frame_rate,
+            dilation,
             clips_per_video,
         )
 

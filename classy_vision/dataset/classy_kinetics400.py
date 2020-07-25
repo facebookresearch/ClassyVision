@@ -45,6 +45,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         audio_channels: int,
         step_between_clips: int,
         frame_rate: Optional[int],
+        dilation: int,
         clips_per_video: int,
         video_dir: str,
         extensions: List[str],
@@ -72,6 +73,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             step_between_clips: Number of frames between each clip.
             frame_rate: desired video frame rate. If None, keep
                 orignal video frame rate.
+            dilation: the spacing between adjacent sampled frames
             clips_per_video: Number of clips to sample from each video
             video_dir: path to video folder
             extensions: A list of file extensions, such as "avi" and "mp4". Only
@@ -104,6 +106,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
             _audio_channels=audio_channels,
+            dilation=dilation,
         )
         metadata = dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
@@ -149,6 +152,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             audio_samples,
             step_between_clips,
             frame_rate,
+            dilation,
             clips_per_video,
         ) = cls.parse_config(config)
         extensions = config.get("extensions", ("mp4"))
@@ -169,6 +173,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             audio_channels,
             step_between_clips,
             frame_rate,
+            dilation,
             clips_per_video,
             config["video_dir"],
             extensions,
