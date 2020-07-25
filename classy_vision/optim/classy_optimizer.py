@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, Union
 
@@ -221,7 +222,10 @@ class ClassyOptimizer(ABC):
     def _update_schedule(self) -> None:
         """Update the optimizer's parameters based on self.parameters."""
         for group in self.optimizer.param_groups:
-            group.update(self.parameters)
+            lr_scale = group.get("lr_scale", 1.0)
+            parameters = copy.deepcopy(self.parameters)
+            parameters["lr"] *= lr_scale
+            group.update(parameters)
 
         # Here there's an assumption that pytorch optimizer maintain the order
         # of param_groups and that frozen_param_groups were added before the
