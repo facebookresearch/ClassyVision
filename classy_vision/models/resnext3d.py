@@ -257,13 +257,7 @@ class ResNeXt3DBase(ClassyModel):
         out = self.stem([x])
         out = self.stages(out)
 
-        head_outputs = self.execute_heads()
-        if len(head_outputs) == 0:
-            raise Exception("Expecting at least one head that generates output")
-        elif len(head_outputs) == 1:
-            return list(head_outputs.values())[0]
-        else:
-            return head_outputs
+        return out
 
     @property
     def input_shape(self):
