@@ -13,13 +13,33 @@ from test.generic.utils import compare_model_state, compare_samples, compare_sta
 
 import torch
 from classy_vision.dataset import build_dataset
+from classy_vision.generic.distributed_util import is_distributed_training_run
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
-from classy_vision.losses import build_loss
+from classy_vision.losses import ClassyLoss, build_loss, register_loss
 from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer
 from classy_vision.tasks import ClassificationTask, build_task
 from classy_vision.trainer import LocalTrainer
+
+
+@register_loss("test_stateful_loss")
+class TestStatefulLoss(ClassyLoss):
+    def __init__(self, in_plane):
+        super(TestStatefulLoss, self).__init__()
+
+        self.alpha = torch.nn.Parameter(torch.Tensor(in_plane, 2))
+        torch.nn.init.xavier_normal(self.alpha)
+
+    @classmethod
+    def from_config(cls, config) -> "TestStatefulLoss":
+        return cls(in_plane=config["in_plane"])
+
+    def forward(self, output, target):
+        value = output.matmul(self.alpha)
+        loss = torch.mean(torch.abs(value))
+
+        return loss
 
 
 class TestClassificationTask(unittest.TestCase):
@@ -260,3 +280,13 @@ class TestClassificationTask(unittest.TestCase):
             trainer = LocalTrainer()
             task_2.set_use_gpu(not use_gpu)
             trainer.train(task_2)
+
+    @unittest.skipUnless(
+        is_distributed_training_run(), "This test needs a distributed run"
+    )
+    def test_get_classy_state_on_loss(self):
+        config = get_fast_test_task_config()
+        config["loss"] = {"name": "test_stateful_loss", "in_plane": 256}
+        task = build_task(config)
+        task.prepare()
+        self.assertIn("alpha", task.get_classy_state()["loss"])
