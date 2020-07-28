@@ -32,9 +32,9 @@ from classy_vision.generic.util import (
     split_batchnorm_params,
     update_classy_state,
 )
-from classy_vision.hooks import build_hooks
+from classy_vision.hooks import ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
-from classy_vision.meters import build_meters
+from classy_vision.meters import ClassyMeter, build_meters
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import ClassyOptimizer, build_optimizer
 from torch.distributed import broadcast
@@ -126,7 +126,7 @@ class ClassificationTask(ClassyTask):
         """
         super().__init__()
 
-        self.loss = None
+        self.base_loss = None
         self.datasets = {}
         self.meters = []
         self.num_epochs = 1
@@ -141,6 +141,7 @@ class ClassificationTask(ClassyTask):
         self.hooks = []
         self.train = True
         self.distributed_model = None
+        self.distributed_loss = None
         self.phase_idx = -1
         self.train_phase_idx = -1
         self.num_updates = 0
@@ -249,7 +250,7 @@ class ClassificationTask(ClassyTask):
         Args:
             loss: loss for task
         """
-        self.loss = loss
+        self.base_loss = loss
         return self
 
     def set_meters(self, meters: List["ClassyMeter"]):
@@ -503,6 +504,12 @@ class ClassificationTask(ClassyTask):
         )
 
     @property
+    def loss(self):
+        """Returns loss used in training (can be wrapped with DDP)
+        """
+        return self.distributed_loss if self.distributed_loss else self.base_loss
+
+    @property
     def phase_type(self):
         """Returns current phase type. String with value "train" or "test"
         """
@@ -656,14 +663,16 @@ class ClassificationTask(ClassyTask):
 
         # move the model and loss to the right device
         if self.use_gpu:
-            self.base_model, self.loss = copy_model_to_gpu(self.base_model, self.loss)
+            self.base_model, self.base_loss = copy_model_to_gpu(
+                self.base_model, self.base_loss
+            )
         else:
-            self.loss.cpu()
+            self.base_loss.cpu()
             self.base_model.cpu()
 
         if self.optimizer is not None:
             self.prepare_optimizer(
-                optimizer=self.optimizer, model=self.base_model, loss=self.loss
+                optimizer=self.optimizer, model=self.base_model, loss=self.base_loss
             )
 
         if self.amp_args is not None:
@@ -720,10 +729,13 @@ class ClassificationTask(ClassyTask):
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=self.find_unused_parameters,
         )
-        if isinstance(self.loss, ClassyLoss) and self.loss.has_learned_parameters():
+        if (
+            isinstance(self.base_loss, ClassyLoss)
+            and self.base_loss.has_learned_parameters()
+        ):
             logging.info("Initializing distributed loss")
-            self.loss = init_distributed_data_parallel_model(
-                self.loss,
+            self.distributed_loss = init_distributed_data_parallel_model(
+                self.base_loss,
                 broadcast_buffers=broadcast_buffers,
                 find_unused_parameters=self.find_unused_parameters,
             )
@@ -781,8 +793,8 @@ class ClassificationTask(ClassyTask):
                 "train"
             ].get_classy_state()
 
-        if isinstance(self.loss, ClassyLoss):
-            classy_state_dict["loss"] = self.loss.get_classy_state()
+        if isinstance(self.base_loss, ClassyLoss):
+            classy_state_dict["loss"] = self.base_loss.get_classy_state()
         if self.amp_args is not None:
             classy_state_dict["amp"] = apex.amp.state_dict()
         if deep_copy:
@@ -808,8 +820,8 @@ class ClassificationTask(ClassyTask):
         self.base_model.set_classy_state(state["base_model"])
         if self.optimizer is not None:
             self.optimizer.set_classy_state(state["optimizer"])
-        if state.get("loss") and isinstance(self.loss, ClassyLoss):
-            self.loss.set_classy_state(state["loss"])
+        if state.get("loss") and isinstance(self.base_loss, ClassyLoss):
+            self.base_loss.set_classy_state(state["loss"])
 
         if "amp" in state:
             apex.amp.load_state_dict(state["amp"])
@@ -1045,7 +1057,7 @@ class ClassificationTask(ClassyTask):
         """
         phase = self.phases[self.phase_idx]
         self.base_model.train(phase["train"])
-        self.loss.train(phase["train"])
+        self.base_loss.train(phase["train"])
 
         if (
             self.broadcast_buffers_mode == BroadcastBuffersMode.BEFORE_EVAL
