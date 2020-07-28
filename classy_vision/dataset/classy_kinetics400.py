@@ -32,6 +32,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
 
     def __init__(
         self,
+        metadata_filepath: str,
         split: str,
         batchsize_per_replica: int,
         shuffle: bool,
@@ -48,11 +49,11 @@ class Kinetics400Dataset(ClassyVideoDataset):
         clips_per_video: int,
         video_dir: str,
         extensions: List[str],
-        metadata_filepath: str,
     ):
         """The constructor of Kinetics400Dataset.
 
         Args:
+            metadata_filepath: path to the dataset meta data
             split: dataset split which can be either "train" or "test"
             batchsize_per_replica: batch size per model replica
             shuffle: If true, shuffle the dataset
@@ -76,7 +77,6 @@ class Kinetics400Dataset(ClassyVideoDataset):
             video_dir: path to video folder
             extensions: A list of file extensions, such as "avi" and "mp4". Only
                 video matching those file extensions are added to the dataset
-            metadata_filepath: path to the dataset meta data
 
         """
         # dataset metadata includes the path of video file, the pts of frames in
@@ -156,6 +156,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
         transform = build_video_field_transform_default(transform_config, split)
 
         return cls(
+            config["metadata_file"],
             split,
             batchsize_per_replica,
             shuffle,
@@ -172,5 +173,4 @@ class Kinetics400Dataset(ClassyVideoDataset):
             clips_per_video,
             config["video_dir"],
             extensions,
-            config["metadata_file"],
         )
