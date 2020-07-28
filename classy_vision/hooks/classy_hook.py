@@ -18,7 +18,10 @@ class ClassyHookState:
         return self.__dict__
 
     def set_classy_state(self, state_dict: Dict[str, Any]):
-        self.__dict__ = state_dict
+        # We take a conservative approach and only update the dictionary instead of
+        # replacing it. This allows hooks to continue functioning in case the state
+        # is loaded from older implementations.
+        self.__dict__.update(state_dict)
 
 
 class ClassyHook(ABC):
