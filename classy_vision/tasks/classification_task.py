@@ -32,7 +32,7 @@ from classy_vision.generic.util import (
     split_batchnorm_params,
     update_classy_state,
 )
-from classy_vision.hooks import ClassyHook, build_hooks
+from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import ClassyMeter, build_meters
 from classy_vision.models import ClassyModel, build_model
@@ -327,7 +327,14 @@ class ClassificationTask(ClassyTask):
         assert len({hook.name() for hook in hooks}) == len(
             hooks
         ), "Cannot have repeated hooks of the same class"
-
+        # TODO (zyan3): we move checkpoint hook to the end of the list because some hooks
+        # may change the state of the model, and we want to save changed state in the checkpoint.
+        # This is temporary fix.
+        non_checkpoint_hooks = [
+            hook for hook in hooks if not isinstance(hook, CheckpointHook)
+        ]
+        checkpoint_hooks = [hook for hook in hooks if isinstance(hook, CheckpointHook)]
+        hooks = non_checkpoint_hooks + checkpoint_hooks
         self.hooks = hooks
         return self
 
