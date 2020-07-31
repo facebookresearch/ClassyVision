@@ -98,7 +98,7 @@ class TestLossLrMeterLoggingHook(HookTestBase):
         config["dataset"]["train"]["batchsize_per_replica"] = 10
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
-        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
+        task.set_optimizer_schedulers({"lr": mock_lr_scheduler})
         trainer = LocalTrainer()
 
         # 2 LR updates per epoch = 6
@@ -113,7 +113,7 @@ class TestLossLrMeterLoggingHook(HookTestBase):
 
             def on_step(self, task):
                 if task.train:
-                    lr_list.append(task.optimizer.parameters.lr)
+                    lr_list.append(task.optimizer.options_view.lr)
 
         hook = LRLoggingHook()
         task.set_hooks([hook])

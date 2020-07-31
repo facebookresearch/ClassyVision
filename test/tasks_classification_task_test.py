@@ -165,10 +165,7 @@ class TestClassificationTask(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # make sure fetching the where raises an exception, which means that
-        # where is >= 1.0
-        with self.assertRaises(Exception):
-            task.where
+        self.assertAlmostEqual(task.where, 1.0, delta=1e-3)
 
         # set task_2's state as task's final train checkpoint
         task_2.set_checkpoint(self.base_dir)

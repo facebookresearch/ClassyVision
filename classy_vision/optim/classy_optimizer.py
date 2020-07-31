@@ -10,53 +10,76 @@ from typing import Any, Callable, Dict, Optional, Union
 import torch
 from torch import nn
 
-from .param_scheduler import ClassyParamScheduler, UpdateInterval
+from .param_scheduler import (
+    ClassyParamScheduler,
+    ConstantParamScheduler,
+    UpdateInterval,
+)
 
 
-class AttrDict(dict):
-    """Dictionary class which also support attribute access."""
+class OptionsView:
+    """Convenience object to retrieve options from the optimizer param_groups.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__dict__ = self
+    For instance, to get the current learning rate in the optimizer, instead of
+    traversing optimizer.param_groups and finding all values for the "lr" key,
+    you can just read options_view.lr. This means we don't need to keep an
+    extra copy of optimizer options (such as lr, momentum) that might become
+    inconsistent with the actual values used.
+    """
+
+    def __init__(self, optimizer):
+        self.optimizer = optimizer
+
+    def __getattr__(self, name):
+        values = []
+        for pg in self.optimizer.param_groups:
+            if name in pg:
+                values.append(pg[name])
+
+        values = set(values)
+        if len(values) == 0:
+            raise AttributeError
+        elif len(values) == 1:
+            return values.pop()
+
+        return values
 
 
 class ClassyOptimizer(ABC):
     """
-    Base class for classy optimizers.
+    Base class for optimizers.
 
-    This wraps a :class:`torch.optim.Optimizer` instance, handles learning
-    rate scheduling by using a :class:`param_scheduler.ClassyParamScheduler`.
-    Scheduling is also supported for any other hyperparameter (e.g. weight decay,
-    momentum and others)
+    This wraps a :class:`torch.optim.Optimizer` instance and provides support
+    for parameter scheduling. Typical PyTorch optimizers are used like this:
 
-    Deriving classes can extend functionality be overriding the appropriate functions.
+        optim = SGD(model.parameters(), lr=0.1)
+
+    but the user is responsible for updating lr over the course of training.
+    ClassyOptimizer extend PyTorch optimizers and allow specifying
+    ClassyParamSchedulers instead:
+
+        optim = SGD()
+        optim.set_param_groups(model.parameters(), lr=LinearParamScheduler(1, 2))
+
+    This means that as you step through the optimizer, the learning rate will
+    automatically get updated with the given schedule. To access the current
+    learning rate value (or any other optimizer option), you can read
+    `optim.options_view.lr`. Similar to other Classy abstractions, you can also
+    instantiate ClassyOptimizers from a configuration file.
     """
 
     def __init__(self) -> None:
-        """Constructor for ClassyOptimizer."""
-        self.param_schedulers = {}
-        self.parameters = AttrDict()
-        self.optimizer = None
+        """Constructor for ClassyOptimizer.
 
-    def set_param_schedulers(
-        self, param_schedulers: Dict[str, ClassyParamScheduler]
-    ) -> "ClassyOptimizer":
-        """Set the param schedulers for the Classy Optimizer
-
-        Args:
-            param_schedulers: A dictionary of :class:`ClassyParamScheduler`s containing
-                the parameter scheduler to use for every parameter.
-
-        Returns:
-            self
+        :var options_view: provides convenient access to current values of
+            learning rate, momentum etc.
+        :var _schedulers: list of dictionaries in the param_groups format,
+            containing all ClassyParamScheduler instances needed. Constant values
+            are converted to ConstantParamScheduler before being inserted here.
         """
-        self.param_schedulers = param_schedulers
-        # initialize the parameters with a where of 0
-        self.parameters.update(
-            {param: scheduler(0) for param, scheduler in param_schedulers.items()}
-        )
-        return self
+        self.options_view = OptionsView(self)
+        self.optimizer = None
+        self._schedulers = None
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
@@ -86,7 +109,7 @@ class ClassyOptimizer(ABC):
         """
         raise NotImplementedError
 
-    def set_param_groups(self, param_groups, frozen_param_groups=None):
+    def set_param_groups(self, param_groups, **kwargs):
         """
         Specifies what parameters will be optimized.
 
@@ -94,10 +117,11 @@ class ClassyOptimizer(ABC):
         parameters will get optimized. Unlike PyTorch optimizers, we don't
         require the list of param_groups in the constructor.
 
-        param_groups have the same semantics/usage as PyTorch.
-        frozen_param_groups are a list of param groups that won't be scheduled by
-        ClassyOptimizer. This is useful, for instance, to disable weight decay on a
-        subset of parameters while keeping LR scheduling on those same parameters.
+        Args:
+            param_groups: this is either a list of Tensors (e.g.
+                model.parameters()) or a list of dictionaries. If a dictionary,
+                must contain a key "params" have the same format and semantics as
+                PyTorch.
         """
 
         def cast_param_groups(params):
@@ -117,21 +141,43 @@ class ClassyOptimizer(ABC):
                 pg = [{"params": pg}]
             return pg
 
-        frozen_param_groups = cast_param_groups(frozen_param_groups)
-        assert isinstance(frozen_param_groups, list)
+        self._schedulers = cast_param_groups(param_groups)
 
-        # _frozen_overrides is a copy of frozen_param_groups without the
-        # "params" key.  We need an actual copy here because once param groups
-        # are passed to the optimizer they get mutated.
-        self._frozen_overrides = []
-        for param_group in frozen_param_groups:
-            self._frozen_overrides.append(
-                {k: v for k, v in param_group.items() if k != "params"}
-            )
+        # Convert constant values to constant param schedulers. Use kwargs
+        # values as defaults.
+        for pg in self._schedulers:
+            for k, v in kwargs.items():
+                if isinstance(v, (int, float)):
+                    pg[k] = ConstantParamScheduler(v)
+                else:
+                    pg[k] = v
 
-        # The order between frozen_param_groups and param_groups here matters,
-        # see _update_schedule implementation.
-        self.prepare(frozen_param_groups + cast_param_groups(param_groups))
+            for k, v in pg.items():
+                if isinstance(v, (int, float)):
+                    pg[k] = ConstantParamScheduler(v)
+
+        self.prepare(self._run_schedulers(0, None))
+
+    def _run_schedulers(self, where: float, update_interval: Optional[UpdateInterval]):
+        """Goes over self._schedulers and gets actual values for a particular choice of where.
+
+        Returns a list of dictionaries in the param_groups format. """
+        param_groups = []
+        for pg in self._schedulers:
+            param_group = {}
+            for k, v in pg.items():
+                if k == "params":
+                    param_group[k] = v
+                elif update_interval is None or v.update_interval == update_interval:
+                    assert isinstance(v, ClassyParamScheduler)
+                    param_group[k] = v(where)
+            param_groups.append(param_group)
+
+        return param_groups
+
+    @property
+    def param_groups(self):
+        return self.optimizer.param_groups
 
     def get_classy_state(self) -> Dict[str, Any]:
         """Get the state of the ClassyOptimizer.
@@ -141,10 +187,7 @@ class ClassyOptimizer(ABC):
         Returns:
             A state dictionary containing the state of the optimizer.
         """
-        return {
-            "optim": self.optimizer.state_dict(),
-            "parameters": dict(self.parameters),
-        }
+        return self.optimizer.state_dict()
 
     def set_classy_state(self, state: Dict[str, Any]) -> None:
         """Set the state of the ClassyOptimizer.
@@ -155,8 +198,7 @@ class ClassyOptimizer(ABC):
 
         This is used to load the state of the optimizer from a checkpoint.
         """
-        self.optimizer.load_state_dict(state["optim"])
-        self.parameters.update(state["parameters"])
+        self.optimizer.load_state_dict(state)
 
     def backward(self, loss: torch.Tensor) -> None:
         """
@@ -171,7 +213,7 @@ class ClassyOptimizer(ABC):
         self.zero_grad()
         loss.backward()
 
-    def update_schedule_on_epoch(self, where: float) -> None:
+    def on_epoch(self, where: float) -> None:
         """
         Update the param schedule at the end of an epoch.
 
@@ -183,18 +225,13 @@ class ClassyOptimizer(ABC):
             where: where we are in terms of training progress (output of
                 :func:`tasks.ClassyTask.where`)
         """
-        for param, scheduler in self.param_schedulers.items():
-            assert scheduler.update_interval in [
-                UpdateInterval.EPOCH,
-                UpdateInterval.STEP,
-            ]
+        assert where >= 0 and where < 1, f"Invalid where: {where}"
 
-            if scheduler.update_interval == UpdateInterval.EPOCH:
-                self.parameters[param] = scheduler(where)
+        self._update_schedule(self._run_schedulers(where, UpdateInterval.EPOCH))
 
-        self._update_schedule()
-
-    def update_schedule_on_step(self, where: float) -> None:
+    def step(
+        self, *args, closure: Optional[Callable] = None, where: float = None
+    ) -> None:
         """
         Update the param schedule at the end of a train step.
 
@@ -205,45 +242,33 @@ class ClassyOptimizer(ABC):
 
         Args:
             where: where we are in terms of training progress (output of
-                :method:`ClassyTask.where`)
+                :method:`ClassyTask.where`). Must be a float in the [0;1)
+                interval; This dictates parameter scheduling;
         """
-        for param, scheduler in self.param_schedulers.items():
-            assert scheduler.update_interval in [
-                UpdateInterval.EPOCH,
-                UpdateInterval.STEP,
-            ]
+        if where is None:
+            raise RuntimeError(
+                "ClassyOptimizer.step requires `where` argument to be provided"
+            )
 
-            if scheduler.update_interval == UpdateInterval.STEP:
-                self.parameters[param] = scheduler(where)
+        if self._schedulers is None:
+            raise RuntimeError(
+                "ClassyOptimizer.set_param_groups must be called before step()"
+            )
 
-        self._update_schedule()
+        assert where >= 0 and where < 1, f"Invalid where: {where}"
 
-    def _update_schedule(self) -> None:
-        """Update the optimizer's parameters based on self.parameters."""
-        for group in self.optimizer.param_groups:
-            group.update(self.parameters)
+        self._update_schedule(self._run_schedulers(where, UpdateInterval.STEP))
 
-        # Here there's an assumption that pytorch optimizer maintain the order
-        # of param_groups and that frozen_param_groups were added before the
-        # others. This must be kept in sync with the prepare call in
-        # set_param_groups
-        for i, override in enumerate(self._frozen_overrides):
-            self.optimizer.param_groups[i].update(**override)
-
-    def step(self, closure: Optional[Callable] = None):
-        """
-        Performs a single optimization step.
-
-        See `torch.optim.Optimizer.step <https://pytorch.org/docs/stable/
-        optim.html#torch.optim.Optimizer.step>`_for more information.
-
-        Args:
-            closure: A closure that re-evaluates the model and returns the loss
-        """
         if closure is None:
             self.optimizer.step()
         else:
             self.optimizer.step(closure)
+
+    def _update_schedule(self, param_groups) -> None:
+        """Update optimizer based on a new set of param_groups."""
+        for group, new_group in zip(self.optimizer.param_groups, param_groups):
+            assert group["params"] == new_group["params"]
+            group.update(new_group)
 
     def zero_grad(self):
         """

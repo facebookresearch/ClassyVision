@@ -161,7 +161,7 @@ class TestTensorboardPlotHook(HookTestBase):
         hook = TensorboardPlotHook(writer)
         hook.log_period = 1
         task.set_hooks([hook])
-        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
+        task.set_optimizer_schedulers({"lr": mock_lr_scheduler})
 
         trainer = LocalTrainer()
         trainer.train(task)
