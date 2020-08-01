@@ -30,11 +30,12 @@ class TorchscriptHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_step = ClassyHook._noop
 
-    def __init__(self, torchscript_folder: str) -> None:
+    def __init__(self, torchscript_folder: str, use_trace: bool = True) -> None:
         """The constructor method of TorchscriptHook.
 
         Args:
             torchscript_folder: Folder to store torch scripts in.
+            use_trace: set to true for tracing and false for scripting,
         """
         super().__init__()
         assert isinstance(
@@ -42,12 +43,10 @@ class TorchscriptHook(ClassyHook):
         ), "torchscript_folder must be a string specifying the torchscript directory"
 
         self.torchscript_folder: str = torchscript_folder
+        self.use_trace: bool = use_trace
 
-    def save_torchscript(self, task) -> None:
-        model = task.base_model
-        input_shape = (
-            model.input_shape if hasattr(task.base_model, "input_shape") else None
-        )
+    def torchscript_using_trace(self, model):
+        input_shape = model.input_shape if hasattr(model, "input_shape") else None
         if not input_shape:
             logging.warning(
                 "This model doesn't implement input_shape."
@@ -61,6 +60,20 @@ class TorchscriptHook(ClassyHook):
         )
         with eval_model(model) and torch.no_grad():
             torchscript = torch.jit.trace(model, input_data)
+        return torchscript
+
+    def torchscript_using_script(self, model):
+        with eval_model(model) and torch.no_grad():
+            torchscript = torch.jit.script(model)
+        return torchscript
+
+    def save_torchscript(self, task) -> None:
+        model = task.base_model
+        torchscript = (
+            self.torchscript_using_trace(model)
+            if self.use_trace
+            else self.torchscript_using_script(model)
+        )
 
         # save torchscript:
         logging.info("Saving torchscript to '{}'...".format(self.torchscript_folder))
