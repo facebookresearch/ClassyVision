@@ -13,6 +13,7 @@ from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.hooks import TorchscriptHook
+from classy_vision.models import ResNet
 from classy_vision.tasks import build_task
 
 
@@ -41,18 +42,9 @@ class TestTorchscriptHook(HookTestBase):
             invalid_configs=[invalid_config],
         )
 
-    def test_torchscripting(self):
-        """
-        Test that the save_torchscript function works as expected.
-        """
-        config = get_test_task_config()
+    def execute_hook(self, config, torchscript_folder, torchscript_hook) -> None:
         task = build_task(config)
         task.prepare()
-
-        torchscript_folder = self.base_dir + "/torchscript_end_test/"
-
-        # create a torchscript hook
-        torchscript_hook = TorchscriptHook(torchscript_folder)
 
         # create checkpoint dir, verify on_start hook runs
         os.mkdir(torchscript_folder)
@@ -79,3 +71,31 @@ class TestTorchscriptHook(HookTestBase):
             checkpoint_out = model(input_data)
             torchscript_out = torchscript(input_data)
             self.assertTrue(torch.allclose(checkpoint_out, torchscript_out))
+
+    def test_torchscripting_using_trace(self):
+        """
+        Test that the save_torchscript function works as expected with trace
+        """
+        config = get_test_task_config()
+        torchscript_folder = self.base_dir + "/torchscript_end_test/"
+
+        # create a torchscript hook using trace
+        torchscript_hook = TorchscriptHook(torchscript_folder)
+        self.execute_hook(config, torchscript_folder, torchscript_hook)
+
+    def test_torchscripting_using_script(self):
+        """
+        Test that the save_torchscript function works as expected with script
+        """
+        config = get_test_task_config()
+        # Setting wrapper_cls to None to make ResNet model torchscriptable
+        orig_wrapper_cls = ResNet.wrapper_cls
+        ResNet.wrapper_cls = None
+        torchscript_folder = self.base_dir + "/torchscript_end_test/"
+
+        # create a torchscript hook using script
+        torchscript_hook = TorchscriptHook(torchscript_folder, use_trace=False)
+        self.execute_hook(config, torchscript_folder, torchscript_hook)
+
+        # Reverting back so that other tests don't fail
+        ResNet.wrapper_cls = orig_wrapper_cls
