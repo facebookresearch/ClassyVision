@@ -72,7 +72,7 @@ class TestTorchscriptHook(HookTestBase):
             torchscript_out = torchscript(input_data)
             self.assertTrue(torch.allclose(checkpoint_out, torchscript_out))
 
-    def test_torchscripting_using_trace(self):
+    def _test_torchscripting_using_trace(self):
         """
         Test that the save_torchscript function works as expected with trace
         """
@@ -83,7 +83,7 @@ class TestTorchscriptHook(HookTestBase):
         torchscript_hook = TorchscriptHook(torchscript_folder)
         self.execute_hook(config, torchscript_folder, torchscript_hook)
 
-    def test_torchscripting_using_script(self):
+    def _test_torchscripting_using_script(self):
         """
         Test that the save_torchscript function works as expected with script
         """
