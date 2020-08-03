@@ -66,7 +66,7 @@ def build_head(config):
 
     assert "name" in config, "Expect name in config"
     assert "unique_id" in config, "Expect a global unique id in config"
-    assert config["name"] in HEAD_REGISTRY, "unknown head"
+    assert config["name"] in HEAD_REGISTRY, "unknown head {}".format(config["name"])
     name = config["name"]
     head_config = copy.deepcopy(config)
     del head_config["name"]
