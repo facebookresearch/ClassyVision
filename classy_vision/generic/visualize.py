@@ -145,7 +145,7 @@ def plot_model(
     input_key: Optional[Union[str, List[str]]] = None,
     writer: Optional["SummaryWriter"] = None,
     folder: str = "",
-    train: bool = True,
+    train: bool = False,
 ) -> None:
     """Visualizes a model in TensorBoard.
 
@@ -165,11 +165,12 @@ def plot_model(
     input = get_model_dummy_input(model, size, input_key)
     if writer is None:
         writer = SummaryWriter(log_dir=folder, comment="Model graph")
-    with writer:
+    with torch.no_grad():
         orig_train = model.training
-        model.train(train)  # visualize model in desired mode
+        model.train(train)
         writer.add_graph(model, input_to_model=(input,))
         model.train(orig_train)
+        writer.flush()
 
 
 # function that produces an image map:
