@@ -60,9 +60,13 @@ class TestSimpleClassyModelWrapper(ClassyModelWrapper):
 class TestClassyModel(unittest.TestCase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
+        self.orig_wrapper_cls_1 = MyTestModel.wrapper_cls
+        self.orig_wrapper_cls_2 = MyTestModel2.wrapper_cls
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+        MyTestModel.wrapper_cls = self.orig_wrapper_cls_1
+        MyTestModel2.wrapper_cls = self.orig_wrapper_cls_2
 
     def get_model_config(self, use_head):
         config = {"name": "my_test_model"}
@@ -114,8 +118,6 @@ class TestClassyModel(unittest.TestCase):
                 self.assertTrue(torch.all(param.data == 0))
 
     def test_classy_model_wrapper_instance(self):
-        orig_wrapper_cls = MyTestModel.wrapper_cls
-
         # Test that we return a ClassyModel without a wrapper_cls
         MyTestModel.wrapper_cls = None
         model = MyTestModel()
@@ -133,11 +135,7 @@ class TestClassyModel(unittest.TestCase):
         self.assertIsInstance(model, ClassyModel)
         self.assertIsInstance(model, nn.Module)
 
-        # restore the original wrapper class
-        MyTestModel2.wrapper_cls = orig_wrapper_cls
-
     def test_classy_model_wrapper_torch_scriptable(self):
-        orig_wrapper_cls = MyTestModel2.wrapper_cls
         input = torch.ones((2, 2))
 
         for wrapper_cls, expected_output in [
@@ -151,11 +149,7 @@ class TestClassyModel(unittest.TestCase):
             self.assertTrue(torch.allclose(expected_output, model(input)))
             self.assertTrue(torch.allclose(expected_output, scripted_model(input)))
 
-        # restore the original wrapper class
-        MyTestModel2.wrapper_cls = orig_wrapper_cls
-
     def test_classy_model_wrapper_torch_jittable(self):
-        orig_wrapper_cls = MyTestModel2.wrapper_cls
         input = torch.ones((2, 2))
 
         for wrapper_cls, expected_output in [
@@ -167,9 +161,6 @@ class TestClassyModel(unittest.TestCase):
             jitted_model = torch.jit.trace(model, input)
             self.assertTrue(torch.allclose(expected_output, model(input)))
             self.assertTrue(torch.allclose(expected_output, jitted_model(input)))
-
-        # restore the original wrapper class
-        MyTestModel2.wrapper_cls = orig_wrapper_cls
 
 
 class TestModel(nn.Module):
@@ -214,7 +205,6 @@ class TestClassyModelAdapter(unittest.TestCase):
     def test_classy_model_adapter_properties(self):
         # test that the properties work correctly when passed to the adapter
         model = TestModel()
-        num_classes = 5
         input_shape = (10,)
         model_depth = 1
         classy_model = ClassyModel.from_model(

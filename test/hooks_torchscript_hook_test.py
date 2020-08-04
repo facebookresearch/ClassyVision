@@ -23,9 +23,11 @@ TORCHSCRIPT_FILE = "torchscript.pt"
 class TestTorchscriptHook(HookTestBase):
     def setUp(self) -> None:
         self.base_dir = tempfile.mkdtemp()
+        self.orig_wrapper_cls = ResNet.wrapper_cls
 
     def tearDown(self) -> None:
         shutil.rmtree(self.base_dir)
+        ResNet.wrapper_cls = self.orig_wrapper_cls
 
     def test_constructors(self) -> None:
         """
@@ -89,13 +91,9 @@ class TestTorchscriptHook(HookTestBase):
         """
         config = get_test_task_config()
         # Setting wrapper_cls to None to make ResNet model torchscriptable
-        orig_wrapper_cls = ResNet.wrapper_cls
         ResNet.wrapper_cls = None
         torchscript_folder = self.base_dir + "/torchscript_end_test/"
 
         # create a torchscript hook using script
         torchscript_hook = TorchscriptHook(torchscript_folder, use_trace=False)
         self.execute_hook(config, torchscript_folder, torchscript_hook)
-
-        # Reverting back so that other tests don't fail
-        ResNet.wrapper_cls = orig_wrapper_cls
