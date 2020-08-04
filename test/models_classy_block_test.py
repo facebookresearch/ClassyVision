@@ -17,6 +17,12 @@ from classy_vision.models import (
 
 
 class TestClassyBlock(unittest.TestCase):
+    def setUp(self):
+        self.orig_wrapper_cls = self.DummyTestModel.wrapper_cls
+
+    def tearDown(self):
+        self.DummyTestModel.wrapper_cls = self.orig_wrapper_cls
+
     class DummyTestHead(ClassyHead):
         def __init__(self):
             super().__init__("head_id")
@@ -47,8 +53,6 @@ class TestClassyBlock(unittest.TestCase):
             return self.features.dummy_block(out)
 
     def test_head_execution(self):
-        orig_wrapper_cls = self.DummyTestModel.wrapper_cls
-
         # test head outputs without any extra wrapper logic, which is the case with
         # no wrappers or the base ClassyModelWrapper class
         for wrapper_class in [None, ClassyModelWrapper]:
@@ -71,9 +75,6 @@ class TestClassyBlock(unittest.TestCase):
         output = model(input)
         head_output = model.execute_heads()
         self.assertTrue(torch.allclose(output, head_output["head_id"]))
-
-        # restore the wrapper class
-        self.DummyTestModel.wrapper_cls = orig_wrapper_cls
 
     def test_duplicated_head_ids(self):
         model = self.DummyTestModel()
