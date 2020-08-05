@@ -12,6 +12,7 @@ from test.generic.config_utils import get_test_task_config
 from test.generic.hook_test_utils import HookTestBase
 
 import torch
+import logging
 from classy_vision.hooks import TorchscriptHook
 from classy_vision.models import ResNet
 from classy_vision.tasks import build_task
@@ -65,14 +66,18 @@ class TestTorchscriptHook(HookTestBase):
         with torch.no_grad():
             batchsize = 1
             model = task.model
-            input_data = torch.randn(
-                (batchsize,) + model.input_shape, dtype=torch.float
-            )
+            input_data = torch.ones((batchsize,) + model.input_shape, dtype=torch.float)
             if torch.cuda.is_available():
                 input_data = input_data.cuda()
             checkpoint_out = model(input_data)
             torchscript_out = torchscript(input_data)
-            self.assertTrue(torch.allclose(checkpoint_out, torchscript_out))
+            str_1 = f"checkpoint_out: {checkpoint_out}"
+            str_2 = f"torchscript_out: {torchscript_out}"
+            if not torch.allclose(checkpoint_out, torchscript_out):
+                if not torch.allclose(checkpoint_out, torchscript_out, atol=1e-3):
+                    raise ValueError(str_1 + "\n" + str_2)
+                else:
+                    raise ValueError("Oops")
 
     def test_torchscripting_using_trace(self):
         """
