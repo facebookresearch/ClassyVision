@@ -72,7 +72,7 @@ class TestTorchscriptHook(HookTestBase):
                 input_data = input_data.cuda()
             checkpoint_out = model(input_data)
             torchscript_out = torchscript(input_data)
-            self.assertTrue(torch.allclose(checkpoint_out, torchscript_out))
+            self.assertTrue(torch.allclose(checkpoint_out, torchscript_out, atol=1e-5))
 
     def test_torchscripting_using_trace(self):
         """
