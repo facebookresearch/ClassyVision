@@ -82,7 +82,8 @@ class APITest(unittest.TestCase):
         loss = MyLoss()
 
         optimizer = SGD(momentum=0.9, weight_decay=1e-4, nesterov=True)
-        optimizer.set_param_schedulers(
+        optimizer.set_param_groups(
+            model.parameters(),
             {"lr": LinearParamScheduler(start_value=0.01, end_value=0.009)}
         )
 
