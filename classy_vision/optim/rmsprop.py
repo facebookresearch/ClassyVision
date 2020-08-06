@@ -25,22 +25,22 @@ class RMSProp(ClassyOptimizer):
     ) -> None:
         super().__init__()
 
-        self.parameters.lr = lr
-        self.parameters.momentum = momentum
-        self.parameters.weight_decay = weight_decay
-        self.parameters.alpha = alpha
-        self.parameters.eps = eps
-        self.parameters.centered = centered
+        self._lr = lr
+        self._momentum = momentum
+        self._weight_decay = weight_decay
+        self._alpha = alpha
+        self._eps = eps
+        self._centered = centered
 
     def prepare(self, param_groups):
         self.optimizer = torch.optim.RMSprop(
             param_groups,
-            lr=self.parameters.lr,
-            momentum=self.parameters.momentum,
-            weight_decay=self.parameters.weight_decay,
-            alpha=self.parameters.alpha,
-            eps=self.parameters.eps,
-            centered=self.parameters.centered,
+            lr=self._lr,
+            momentum=self._momentum,
+            weight_decay=self._weight_decay,
+            alpha=self._alpha,
+            eps=self._eps,
+            centered=self._centered,
         )
 
     @classmethod

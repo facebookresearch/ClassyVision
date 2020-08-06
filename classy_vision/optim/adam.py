@@ -23,20 +23,20 @@ class Adam(ClassyOptimizer):
     ) -> None:
         super().__init__()
 
-        self.parameters.lr = lr
-        self.parameters.betas = betas
-        self.parameters.eps = eps
-        self.parameters.weight_decay = weight_decay
-        self.parameters.amsgrad = amsgrad
+        self._lr = lr
+        self._betas = betas
+        self._eps = eps
+        self._weight_decay = weight_decay
+        self._amsgrad = amsgrad
 
     def prepare(self, param_groups) -> None:
         self.optimizer = torch.optim.Adam(
             param_groups,
-            lr=self.parameters.lr,
-            betas=self.parameters.betas,
-            eps=self.parameters.eps,
-            weight_decay=self.parameters.weight_decay,
-            amsgrad=self.parameters.amsgrad,
+            lr=self._lr,
+            betas=self._betas,
+            eps=self._eps,
+            weight_decay=self._weight_decay,
+            amsgrad=self._amsgrad,
         )
 
     @classmethod

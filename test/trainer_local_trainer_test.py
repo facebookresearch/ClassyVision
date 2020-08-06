@@ -12,7 +12,7 @@ from classy_vision.hooks import LossLrMeterLoggingHook
 from classy_vision.losses import build_loss
 from classy_vision.meters import AccuracyMeter
 from classy_vision.models import build_model
-from classy_vision.optim import build_optimizer
+from classy_vision.optim import build_optimizer, build_optimizer_schedulers
 from classy_vision.tasks import ClassificationTask
 from classy_vision.trainer import LocalTrainer
 
@@ -27,6 +27,7 @@ class TestLocalTrainer(unittest.TestCase):
             .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
+            .set_optimizer_schedulers(build_optimizer_schedulers(config["optimizer"]))
             .set_meters([AccuracyMeter(topk=[1])])
             .set_hooks([LossLrMeterLoggingHook()])
         )

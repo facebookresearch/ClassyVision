@@ -12,7 +12,7 @@ from test.generic.config_utils import get_test_mlp_task_config, get_test_task_co
 from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import ClassyHook, LossLrMeterLoggingHook
-from classy_vision.optim.param_scheduler import UpdateInterval
+from classy_vision.optim.param_scheduler import ClassyParamScheduler, UpdateInterval
 from classy_vision.tasks import ClassyTask, build_task
 from classy_vision.trainer import LocalTrainer
 
@@ -87,18 +87,17 @@ class TestLossLrMeterLoggingHook(HookTestBase):
             task.phase_idx += 1
 
     def test_logged_lr(self):
-        # Mock LR scheduler
-        def scheduler_mock(where):
-            return where
+        class SchedulerMock(ClassyParamScheduler):
+            def __call__(self, where):
+                return where
 
-        mock_lr_scheduler = mock.Mock(side_effect=scheduler_mock)
-        mock_lr_scheduler.update_interval = UpdateInterval.STEP
+        mock_lr_scheduler = SchedulerMock(UpdateInterval.STEP)
         config = get_test_mlp_task_config()
         config["num_epochs"] = 3
         config["dataset"]["train"]["batchsize_per_replica"] = 10
         config["dataset"]["test"]["batchsize_per_replica"] = 5
         task = build_task(config)
-        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
+        task.set_optimizer_schedulers({"lr": mock_lr_scheduler})
         trainer = LocalTrainer()
 
         # 2 LR updates per epoch = 6
@@ -113,7 +112,7 @@ class TestLossLrMeterLoggingHook(HookTestBase):
 
             def on_step(self, task):
                 if task.train:
-                    lr_list.append(task.optimizer.parameters.lr)
+                    lr_list.append(task.optimizer.options_view.lr)
 
         hook = LRLoggingHook()
         task.set_hooks([hook])

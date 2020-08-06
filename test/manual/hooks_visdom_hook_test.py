@@ -123,7 +123,7 @@ class TestVisdomHook(HookTestBase):
                 )
                 self.assertAlmostEqual(
                     visdom_hook.metrics[lr_key][-1],
-                    task.optimizer.parameters.lr,
+                    task.optimizer.options_view.lr,
                     places=4,
                 )
 
