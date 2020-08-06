@@ -11,7 +11,7 @@ from classy_vision.dataset import build_dataset
 from classy_vision.hooks import ClassyHook
 from classy_vision.losses import build_loss
 from classy_vision.models import build_model
-from classy_vision.optim import build_optimizer
+from classy_vision.optim import build_optimizer, build_optimizer_schedulers
 from classy_vision.optim.param_scheduler import (
     ClassyParamScheduler,
     UpdateInterval,
@@ -132,6 +132,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
             .set_loss(build_loss(config["loss"]))
             .set_model(build_model(config["model"]))
             .set_optimizer(build_optimizer(config["optimizer"]))
+            .set_optimizer_schedulers(build_optimizer_schedulers(config["optimizer"]))
         )
         for phase_type in ["train", "test"]:
             dataset = build_dataset(config["dataset"][phase_type])
@@ -145,43 +146,45 @@ class TestParamSchedulerIntegration(unittest.TestCase):
 
         where_list = []
 
-        def scheduler_mock(where):
-            where_list.append(where)
-            return 0.1
+        class SchedulerMock(ClassyParamScheduler):
+            def __call__(self, where):
+                where_list.append(where)
+                return 0.1
 
-        mock = Mock(side_effect=scheduler_mock)
-        mock.update_interval = UpdateInterval.EPOCH
-        task.optimizer.param_schedulers["lr"] = mock
+        mock = SchedulerMock(UpdateInterval.EPOCH)
+        task.set_optimizer_schedulers({"lr": mock})
 
         trainer = LocalTrainer()
         trainer.train(task)
 
-        self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
+        # The first call is the initialization
+        self.assertEqual(where_list, [0, 0, 1 / 3, 2 / 3])
 
     def test_param_scheduler_step(self):
         task = self._build_task(num_epochs=3)
 
         where_list = []
 
-        def scheduler_mock(where):
-            where_list.append(where)
-            return 0.1
+        class SchedulerMock(ClassyParamScheduler):
+            def __call__(self, where):
+                where_list.append(where)
+                return 0.1
 
-        mock = Mock(side_effect=scheduler_mock)
-        mock.update_interval = UpdateInterval.STEP
-        task.optimizer.param_schedulers["lr"] = mock
+        mock = SchedulerMock(UpdateInterval.STEP)
+        task.set_optimizer_schedulers({"lr": mock})
 
         trainer = LocalTrainer()
         trainer.train(task)
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.
-        self.assertEqual(where_list, [0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
+        # The first call is the initialization
+        self.assertEqual(where_list, [0, 0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
 
     def test_no_param_schedulers(self):
         task = self._build_task(num_epochs=3, skip_param_schedulers=True)
 
         # there should be no param schedulers
-        self.assertEqual(task.optimizer.param_schedulers, {})
+        self.assertEqual(task.optimizer_schedulers, {})
 
         # we should still be able to train the task
         trainer = LocalTrainer()
@@ -207,33 +210,12 @@ class TestParamSchedulerIntegration(unittest.TestCase):
                     return
 
                 # make sure we have non-zero param groups
-                test_instance.assertGreater(
-                    len(task.optimizer.optimizer.param_groups), 0
-                )
-                # test that our overrides work on the underlying PyTorch optimizer
-                for param_group in task.optimizer.optimizer.param_groups:
-                    test_instance.assertEqual(
-                        param_group["lr"], task.optimizer.parameters.lr
-                    )
-                    test_instance.assertEqual(
-                        param_group["weight_decay"],
-                        task.optimizer.parameters.weight_decay,
-                    )
-                    test_instance.assertEqual(
-                        param_group["momentum"], task.optimizer.parameters.momentum
-                    )
-                lr_list.append(param_group["lr"])
-                weight_decay_list.append(param_group["weight_decay"])
-                momentum_list.append(param_group["momentum"])
+                test_instance.assertGreater(len(task.optimizer.param_groups), 0)
+                lr_list.append(task.optimizer.options_view.lr)
+                weight_decay_list.append(task.optimizer.options_view.weight_decay)
+                momentum_list.append(task.optimizer.options_view.momentum)
 
         task.set_hooks([TestHook()])
-
-        def scheduler_mock(where):
-            return where
-
-        mock = Mock(side_effect=scheduler_mock)
-        mock.update_interval = UpdateInterval.STEP
-        task.optimizer.param_schedulers["lr"] = mock
 
         trainer = LocalTrainer()
         trainer.train(task)

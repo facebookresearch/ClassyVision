@@ -36,7 +36,11 @@ from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import ClassyMeter, build_meters
 from classy_vision.models import ClassyModel, build_model
-from classy_vision.optim import ClassyOptimizer, build_optimizer
+from classy_vision.optim import (
+    ClassyOptimizer,
+    build_optimizer,
+    build_optimizer_schedulers,
+)
 from torch.distributed import broadcast
 
 from . import register_task
@@ -103,6 +107,8 @@ class ClassificationTask(ClassyTask):
     :var test_only: Used to only run the test phase
     :var base_model: Model to be trained, unwrapped in DDP or DP wrappers
     :var optimizer: Optimizer used in train step
+    :var optimizer_schedulers: Dictionary. Key is the name of the optimizer
+        option (e.g. lr), value is a ClassyParamScheduler
     :var checkpoint: Serializable dict which represents state in training
     :var phases: List of phase specific information, e.g. if phase is
         train / test.
@@ -135,6 +141,7 @@ class ClassificationTask(ClassyTask):
         self.test_only = False
         self.base_model = None
         self.optimizer = None
+        self.optimizer_schedulers = {}
         self.checkpoint_dict = None
         self.checkpoint_path = None
         self.phases = []
@@ -402,6 +409,10 @@ class ClassificationTask(ClassyTask):
             logging.info(f"mixup enabled")
         return self
 
+    def set_optimizer_schedulers(self, schedulers):
+        self.optimizer_schedulers = schedulers
+        return self
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassificationTask":
         """Instantiates a ClassificationTask from a configuration.
@@ -425,6 +436,7 @@ class ClassificationTask(ClassyTask):
                 config["num_epochs"] * train_phases_per_epoch
             )
             optimizer = build_optimizer(optimizer_config)
+            param_schedulers = build_optimizer_schedulers(optimizer_config)
 
         datasets = {}
         phase_types = ["train", "test"]
@@ -482,6 +494,7 @@ class ClassificationTask(ClassyTask):
 
         if not test_only:
             task.set_optimizer(optimizer)
+            task.set_optimizer_schedulers(param_schedulers)
 
         use_gpu = config.get("use_gpu")
         if use_gpu is not None:
@@ -622,28 +635,20 @@ class ClassificationTask(ClassyTask):
         }
 
     def prepare_optimizer(self, optimizer, model, loss=None):
+        bn_params, other_params = split_batchnorm_params(model)
+        if loss is not None:
+            bn_params_loss, params_loss = split_batchnorm_params(loss)
+            bn_params = bn_params + bn_params_loss
+            other_params = other_params + params_loss
+
+        bn_schedulers = self.optimizer_schedulers.copy()
         if not self.bn_weight_decay:
-            bn_params, params = split_batchnorm_params(model)
-            if loss is not None:
-                bn_params_loss, params_loss = split_batchnorm_params(loss)
-                bn_params = bn_params + bn_params_loss
-                params = params + params_loss
+            bn_schedulers["weight_decay"] = 0
 
-            frozen_param_groups = (
-                {"params": bn_params, "weight_decay": 0} if len(bn_params) > 0 else None
-            )
-            param_groups = {"params": params}
-        else:
-            frozen_param_groups = None
-            params = model.parameters()
-            if loss is not None:
-                params = chain(params, loss.parameters())
-
-            param_groups = {"params": list(params)}
-
-        self.optimizer.set_param_groups(
-            param_groups=param_groups, frozen_param_groups=frozen_param_groups
-        )
+        param_groups = [{"params": other_params, **self.optimizer_schedulers}]
+        if len(bn_params) > 0:
+            param_groups.append({"params": bn_params, **bn_schedulers})
+        self.optimizer.set_param_groups(param_groups)
 
     def prepare(self):
         """Prepares task for training, populates all derived attributes """
@@ -766,8 +771,6 @@ class ClassificationTask(ClassyTask):
 
         num_steps = num_phases * self.num_batches_per_phase
         where = current_step / num_steps
-
-        assert where >= 0 and where < 1, f"Invalid where: {where}"
 
         return where
 
@@ -947,8 +950,7 @@ class ClassificationTask(ClassyTask):
 
         self.check_inf_nan(loss)
 
-        self.optimizer.update_schedule_on_step(self.where)
-        self.optimizer.step()
+        self.optimizer.step(where=self.where)
 
         self.num_updates += self.get_global_batchsize()
 
@@ -1010,7 +1012,7 @@ class ClassificationTask(ClassyTask):
 
         # Update the optimizer schedule
         if self.train and self.train_phase_idx >= 0:
-            self.optimizer.update_schedule_on_epoch(self.where)
+            self.optimizer.on_epoch(where=self.where)
 
     def done_training(self):
         """Stop condition for training

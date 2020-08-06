@@ -106,7 +106,7 @@ class TensorboardPlotHook(ClassyHook):
                 task.last_batch.step_data["sample_fetch_time"]
             )
         if task.train:
-            self.learning_rates.append(task.optimizer.parameters.lr)
+            self.learning_rates.append(task.optimizer.options_view.lr)
 
     def _get_cum_sample_fetch_times(self, phase_type) -> Tuple[List[float], ...]:
         if not self.sample_fetch_times:

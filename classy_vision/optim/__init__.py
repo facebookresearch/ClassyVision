@@ -35,8 +35,10 @@ def build_optimizer(config):
     "num_epochs" to each of the scheduler configs and then calls
     :func:`build_param_scheduler` on each config in the dictionary.
     """
-    optimizer = OPTIMIZER_REGISTRY[config["name"]].from_config(config)
+    return OPTIMIZER_REGISTRY[config["name"]].from_config(config)
 
+
+def build_optimizer_schedulers(config):
     # create a deepcopy since we will be modifying the param scheduler config
     param_scheduler_config = copy.deepcopy(config.get("param_schedulers", {}))
 
@@ -48,8 +50,7 @@ def build_optimizer(config):
         param: build_param_scheduler(cfg)
         for param, cfg in param_scheduler_config.items()
     }
-    optimizer.set_param_schedulers(param_schedulers)
-    return optimizer
+    return param_schedulers
 
 
 def register_optimizer(name):
@@ -106,5 +107,6 @@ __all__ = [
     "RMSPropTF",
     "SGD",
     "build_optimizer",
+    "build_optimizer_schedulers",
     "register_optimizer",
 ]

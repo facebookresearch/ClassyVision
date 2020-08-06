@@ -24,27 +24,27 @@ class SGD(ClassyOptimizer):
     ):
         super().__init__()
 
-        self.parameters.lr = lr
-        self.parameters.momentum = momentum
-        self.parameters.weight_decay = weight_decay
-        self.parameters.nesterov = nesterov
-        self.parameters.use_larc = use_larc
-        self.larc_config = larc_config
+        self._lr = lr
+        self._momentum = momentum
+        self._weight_decay = weight_decay
+        self._nesterov = nesterov
+        self._use_larc = use_larc
+        self._larc_config = larc_config
 
     def prepare(self, param_groups):
         self.optimizer = torch.optim.SGD(
             param_groups,
-            lr=self.parameters.lr,
-            nesterov=self.parameters.nesterov,
-            momentum=self.parameters.momentum,
-            weight_decay=self.parameters.weight_decay,
+            lr=self._lr,
+            nesterov=self._nesterov,
+            momentum=self._momentum,
+            weight_decay=self._weight_decay,
         )
-        if self.parameters.use_larc:
+        if self._use_larc:
             try:
                 from apex.parallel.LARC import LARC
             except ImportError:
                 raise RuntimeError("Apex needed for LARC")
-            self.optimizer = LARC(optimizer=self.optimizer, **self.larc_config)
+            self.optimizer = LARC(optimizer=self.optimizer, **self._larc_config)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "SGD":

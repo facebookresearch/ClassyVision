@@ -13,7 +13,7 @@ from test.generic.config_utils import get_test_mlp_task_config, get_test_task_co
 from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import TensorboardPlotHook
-from classy_vision.optim.param_scheduler import UpdateInterval
+from classy_vision.optim.param_scheduler import ClassyParamScheduler, UpdateInterval
 from classy_vision.tasks import build_task
 from classy_vision.tasks.classification_task import LastBatchInfo
 from classy_vision.trainer import LocalTrainer
@@ -126,11 +126,11 @@ class TestTensorboardPlotHook(HookTestBase):
 
     def test_logged_lr(self):
         # Mock LR scheduler
-        def scheduler_mock(where):
-            return where
+        class SchedulerMock(ClassyParamScheduler):
+            def __call__(self, where):
+                return where
 
-        mock_lr_scheduler = mock.Mock(side_effect=scheduler_mock)
-        mock_lr_scheduler.update_interval = UpdateInterval.STEP
+        mock_lr_scheduler = SchedulerMock(UpdateInterval.STEP)
 
         # Mock Logging
         class DummySummaryWriter(object):
@@ -161,7 +161,7 @@ class TestTensorboardPlotHook(HookTestBase):
         hook = TensorboardPlotHook(writer)
         hook.log_period = 1
         task.set_hooks([hook])
-        task.optimizer.param_schedulers["lr"] = mock_lr_scheduler
+        task.set_optimizer_schedulers({"lr": mock_lr_scheduler})
 
         trainer = LocalTrainer()
         trainer.train(task)
