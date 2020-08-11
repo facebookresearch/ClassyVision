@@ -11,7 +11,6 @@ import logging
 import math
 import multiprocessing as mp
 import time
-from itertools import chain
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
@@ -388,7 +387,7 @@ class ClassificationTask(ClassyTask):
         self.amp_args = amp_args
 
         if amp_args is None:
-            logging.info(f"AMP disabled")
+            logging.info("AMP disabled")
         else:
             if not apex_available:
                 raise RuntimeError("apex is not installed, cannot enable amp")
@@ -404,9 +403,9 @@ class ClassificationTask(ClassyTask):
         """
         self.mixup_transform = mixup_transform
         if mixup_transform is None:
-            logging.info(f"mixup disabled")
+            logging.info("mixup disabled")
         else:
-            logging.info(f"mixup enabled")
+            logging.info("mixup enabled")
         return self
 
     def set_optimizer_schedulers(self, schedulers):

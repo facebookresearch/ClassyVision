@@ -5,10 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional
 
 import torch
-from torch import nn
 
 from .param_scheduler import (
     ClassyParamScheduler,
