@@ -82,9 +82,6 @@ class APITest(unittest.TestCase):
         loss = MyLoss()
 
         optimizer = SGD(momentum=0.9, weight_decay=1e-4, nesterov=True)
-        optimizer.set_param_schedulers(
-            {"lr": LinearParamScheduler(start_value=0.01, end_value=0.009)}
-        )
 
         task = (
             ClassificationTask()
@@ -93,6 +90,9 @@ class APITest(unittest.TestCase):
             .set_dataset(test_dataset, "test")
             .set_loss(loss)
             .set_optimizer(optimizer)
+            .set_optimizer_schedulers(
+                {"lr": LinearParamScheduler(start_value=0.01, end_value=0.009)}
+            )
             .set_num_epochs(1)
         )
 
