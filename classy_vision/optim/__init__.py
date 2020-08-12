@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
-import warnings
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
