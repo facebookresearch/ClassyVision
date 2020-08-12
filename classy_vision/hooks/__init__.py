@@ -92,6 +92,7 @@ from .exponential_moving_average_model_hook import (  # isort:skip
 from .loss_lr_meter_logging_hook import LossLrMeterLoggingHook  # isort:skip
 from .model_complexity_hook import ModelComplexityHook  # isort:skip
 from .model_tensorboard_hook import ModelTensorboardHook  # isort:skip
+from .precise_batch_norm_hook import PreciseBatchNormHook  # isort:skip
 from .profiler_hook import ProfilerHook  # isort:skip
 from .progress_bar_hook import ProgressBarHook  # isort:skip
 from .tensorboard_plot_hook import TensorboardPlotHook  # isort:skip
@@ -112,6 +113,7 @@ __all__ = [
     "TorchscriptHook",
     "ModelComplexityHook",
     "ModelTensorboardHook",
+    "PreciseBatchNormHook",
     "ProfilerHook",
     "ProgressBarHook",
     "VisdomHook",
