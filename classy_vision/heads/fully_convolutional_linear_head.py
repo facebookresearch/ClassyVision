@@ -56,7 +56,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
         unique_id: str,
         num_classes: int,
         in_plane: int,
-        pool_size: List[int],
+        pool_size: Optional[List[int]],
         activation_func: str,
         use_dropout: Optional[bool] = None,
     ):
@@ -75,7 +75,10 @@ class FullyConvolutionalLinearHead(ClassyHead):
             use_dropout: Whether to apply dropout after the pooling layer.
         """
         super().__init__(unique_id, num_classes)
-        self.final_avgpool = nn.AvgPool3d(pool_size, stride=1)
+        if pool_size is not None:
+            self.final_avgpool = nn.AvgPool3d(pool_size, stride=1)
+        else:
+            self.final_avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         if use_dropout:
             self.dropout = nn.Dropout(p=0.5)
         # we separate average pooling from the fully-convolutional linear projection
@@ -98,18 +101,19 @@ class FullyConvolutionalLinearHead(ClassyHead):
         Returns:
             A FullyConvolutionalLinearHead instance.
         """
-        required_args = ["pool_size", "in_plane", "num_classes"]
+        required_args = ["in_plane", "num_classes"]
         for arg in required_args:
             assert arg in config, "argument %s is required" % arg
 
         config.update({"activation_func": config.get("activation_func", "softmax")})
         config.update({"use_dropout": config.get("use_dropout", False)})
 
-        assert (
-            isinstance(config["pool_size"], Sequence) and len(config["pool_size"]) == 3
-        )
-        for pool_size_dim in config["pool_size"]:
-            assert is_pos_int(pool_size_dim)
+        pool_size = config.get("pool_size", None)
+        if pool_size is not None:
+            assert isinstance(pool_size, Sequence) and len(pool_size) == 3
+            for pool_size_dim in pool_size:
+                assert is_pos_int(pool_size_dim)
+
         assert is_pos_int(config["in_plane"])
         assert is_pos_int(config["num_classes"])
 
@@ -119,7 +123,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
             config["unique_id"],
             num_classes,
             in_plane,
-            config["pool_size"],
+            pool_size,
             config["activation_func"],
             config["use_dropout"],
         )
