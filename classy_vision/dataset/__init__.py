@@ -81,6 +81,7 @@ from .classy_synthetic_image_streaming import (  # isort:skip
 from .classy_synthetic_video import SyntheticVideoDataset  # isort:skip
 from .classy_ucf101 import UCF101Dataset  # isort:skip
 from .classy_video_dataset import ClassyVideoDataset  # isort:skip
+from .dataloader_async_gpu_wrapper import DataloaderAsyncGPUWrapper  # isort:skip
 from .dataloader_limit_wrapper import DataloaderLimitWrapper  # isort:skip
 from .dataloader_skip_none_wrapper import DataloaderSkipNoneWrapper  # isort:skip
 from .dataloader_wrapper import DataloaderWrapper  # isort:skip
@@ -93,6 +94,7 @@ __all__ = [
     "DataloaderLimitWrapper",
     "DataloaderSkipNoneWrapper",
     "DataloaderWrapper",
+    "DataloaderAsyncGPUWrapper",
     "HMDB51Dataset",
     "ImagePathDataset",
     "Kinetics400Dataset",
