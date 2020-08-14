@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 from classy_vision.dataset import register_dataset
 from classy_vision.dataset.classy_dataset import ClassyDataset
 from classy_vision.dataset.core import RandomImageBinaryClassDataset
+from classy_vision.dataset.dataloader_async_gpu_wrapper import DataloaderAsyncGPUWrapper
 from classy_vision.dataset.dataloader_limit_wrapper import DataloaderLimitWrapper
 from classy_vision.dataset.transforms.util import (
     ImagenetConstants,
@@ -36,6 +37,7 @@ class SyntheticImageStreamingDataset(ClassyDataset):
         class_ratio,
         seed,
         length=None,
+        async_gpu_copy: bool = False,
     ):
         if length is None:
             # If length not provided, set to be same as num_samples
@@ -45,9 +47,11 @@ class SyntheticImageStreamingDataset(ClassyDataset):
         super().__init__(
             dataset, batchsize_per_replica, shuffle, transform, num_samples
         )
+        self.async_gpu_copy = async_gpu_copy
 
     @classmethod
     def from_config(cls, config):
+        # Parse the config
         assert all(key in config for key in ["crop_size", "class_ratio", "seed"])
         length = config.get("length")
         crop_size = config["crop_size"]
@@ -59,6 +63,9 @@ class SyntheticImageStreamingDataset(ClassyDataset):
             shuffle,
             num_samples,
         ) = cls.parse_config(config)
+        async_gpu_copy = config.get("async_gpu_copy", False)
+
+        # Build the transforms
         default_transform = transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -70,6 +77,7 @@ class SyntheticImageStreamingDataset(ClassyDataset):
         transform = build_field_transform_default_imagenet(
             transform_config, default_transform=default_transform
         )
+
         return cls(
             batchsize_per_replica,
             shuffle,
@@ -79,10 +87,16 @@ class SyntheticImageStreamingDataset(ClassyDataset):
             class_ratio,
             seed,
             length=length,
+            async_gpu_copy=async_gpu_copy,
         )
 
     def iterator(self, *args, **kwargs):
-        return DataloaderLimitWrapper(
+        dataloader = DataloaderLimitWrapper(
             super().iterator(*args, **kwargs),
             self.num_samples // self.get_global_batchsize(),
         )
+
+        if self.async_gpu_copy:
+            dataloader = DataloaderAsyncGPUWrapper(dataloader)
+
+        return dataloader
