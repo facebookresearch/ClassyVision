@@ -86,23 +86,6 @@ def get_shape(x: Union[Tuple, List, Dict]) -> Union[Tuple, List, Dict]:
         return x.size()
 
 
-def _get_batchsize_per_replica(x: Union[Tuple, List, Dict]) -> int:
-    """
-    Some layer may take tuple/list/dict/list[dict] as input in forward function. We
-    recursively dive into the tuple/list until we meet a tensor and infer the batch size
-    """
-    while isinstance(x, (list, tuple)):
-        assert len(x) > 0, "input x of tuple/list type must have at least one element"
-        x = x[0]
-
-    if isinstance(x, (dict,)):
-        # index zero is always equal to batch size. select an arbitrary key.
-        key_list = list(x.keys())
-        x = x[key_list[0]]
-
-    return x.size()[0]
-
-
 def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int:
     """
     Computes the number of FLOPs required for a single layer.
