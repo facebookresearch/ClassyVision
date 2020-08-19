@@ -1009,10 +1009,6 @@ class ClassificationTask(ClassyTask):
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
-        # Update the optimizer schedule
-        if self.train and self.train_phase_idx >= 0:
-            self.optimizer.on_epoch(where=self.where)
-
     def done_training(self):
         """Stop condition for training
         """
@@ -1112,6 +1108,9 @@ class ClassificationTask(ClassyTask):
 
     def on_phase_end(self):
         self.log_phase_end("train")
+
+        if self.train:
+            self.optimizer.on_epoch(where=self.where)
 
         logging.debug("Syncing losses on phase end...")
         self.synchronize_losses()
