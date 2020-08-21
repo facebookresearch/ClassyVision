@@ -12,41 +12,58 @@ from classy_vision.generic.util import recursive_copy_to_gpu
 from .dataloader_wrapper import DataloaderWrapper
 
 
+# See Nvidia's data_prefetcher for reference
+# https://github.com/NVIDIA/apex/blob/2ca894da7be755711cbbdf56c74bb7904bfd8417/examples/imagenet/main_amp.py#L264
+
+
 class DataloaderAsyncGPUWrapper(DataloaderWrapper):
     """
     Dataloader which wraps another dataloader, and moves the data to GPU asynchronously.
-    At most one batch is pre-emptively copied.
+    At most one batch is pre-emptively copied (per worker).
 
-    credits: @vini
+    credits: @vini, nvidia Apex
     """
 
     def __init__(self, dataloader: Iterable) -> None:
-        super().__init__(dataloader)
-        self.cache = None
-        self.stream = torch.cuda.Stream()
         assert torch.cuda.is_available(), "This Dataloader wrapper needs a CUDA setup"
 
+        super().__init__(dataloader)
+        self.cache = None
+        self.cache_next = None
+        self.stream = torch.cuda.Stream()
+        self._iter = None
+
     def __iter__(self) -> Iterator[Any]:
+        # The wrapped dataloader may have been changed in place
+        # rebuild a new iterator and prefetch
         self._iter = iter(self.dataloader)
+        self.preload()
         return self
 
+    def preload(self):
+        # Get data from the iterator
+        try:
+            self.cache_next = next(self._iter)
+
+            # Copy to the device, in a parallel CUDA stream
+            with torch.cuda.stream(self.stream):
+                self.cache = recursive_copy_to_gpu(self.cache_next, non_blocking=True)
+
+        except StopIteration:
+            self.cache = None
+            return
+
     def __next__(self) -> Any:
-        result = None
+        # Make sure that future work in the main stream (training loop for instance)
+        # waits for the dependent self.stream to be done
+        torch.cuda.current_stream().wait_stream(self.stream)
 
-        with torch.cuda.stream(self.stream):
-            if self.cache is not None:
-                # Make sure that an ongoing transfer is done
-                torch.cuda.current_stream().wait_stream(self.stream)
-                result = self.cache
-            else:
-                result = recursive_copy_to_gpu(next(self._iter))
+        result = self.cache
+        if self.cache is None:
+            raise StopIteration
 
-            # Lookahead and start upload
-            try:
-                self.cache = recursive_copy_to_gpu(next(self._iter))
-            except StopIteration:
-                self.cache = None
-        assert result is not None
+        # Pre-load the next sample
+        self.preload()
 
         return result
 
