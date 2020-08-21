@@ -75,6 +75,8 @@ class LossLrMeterLoggingHook(ClassyHook):
             f"{prefix}[{get_rank()}] {phase_type} phase {phase_type_idx} "
             f"({phase_pct*100:.2f}% done), loss: {loss:.4f}, meters: {task.meters}"
         )
+        if not task.test_only:
+            msg += f", 'learning rate:'{task.optimizer.options_view.lr}"
         if phase_type == "test" and hasattr(task, "ema"):
             msg += f", ema: {task.ema}"
         if log_batches:
