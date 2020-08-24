@@ -166,8 +166,6 @@ class ClassyOptimizer(ABC):
         they are configured as epoch or step. Returns a list of dictionaries in
         the param_groups format. """
 
-        assert where >= 0 and where < 1, f"Invalid where: {where}"
-
         param_groups = []
         for pg in self._param_group_schedulers:
             param_group = {}
@@ -225,8 +223,9 @@ class ClassyOptimizer(ABC):
 
     def on_epoch(self, where: float) -> None:
         """
-        Update the param schedule at the end of an epoch.
+        Called at the end of a phase.
 
+        Updates the param schedule at the end of a phase, till training is in progress.
         This should be called by the task at the end of every epoch to update the
         schedule of epoch based param schedulers (See
         :class:`param_scheduler.ClassyParamScheduler` for more information).
@@ -235,7 +234,9 @@ class ClassyOptimizer(ABC):
             where: where we are in terms of training progress (output of
                 :func:`tasks.ClassyTask.where`)
         """
-        self._update_schedule(self._run_schedulers(where, UpdateInterval.EPOCH))
+        if where < 1:
+            # do not update the schedule on final on_epoch call when where == 1
+            self._update_schedule(self._run_schedulers(where, UpdateInterval.EPOCH))
 
     def step(
         self, *args, closure: Optional[Callable] = None, where: float = None
@@ -257,6 +258,8 @@ class ClassyOptimizer(ABC):
             raise RuntimeError(
                 "ClassyOptimizer.step requires `where` argument to be provided"
             )
+
+        assert where >= 0 and where < 1, f"Invalid where: {where}"
 
         if self._param_group_schedulers is None:
             raise RuntimeError(
