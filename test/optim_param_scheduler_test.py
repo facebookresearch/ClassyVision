@@ -157,8 +157,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         trainer = LocalTrainer()
         trainer.train(task)
 
-        # The first call is the initialization
-        self.assertEqual(where_list, [0, 0, 1 / 3, 2 / 3])
+        self.assertEqual(where_list, [0, 1 / 3, 2 / 3])
 
     def test_param_scheduler_step(self):
         task = self._build_task(num_epochs=3)
@@ -177,7 +176,7 @@ class TestParamSchedulerIntegration(unittest.TestCase):
         trainer.train(task)
 
         # We have 10 samples, batch size is 5. Each epoch is done in two steps.
-        # The first call is the initialization
+        # The first call is the initialization and the second call is inside the step()
         self.assertEqual(where_list, [0, 0, 1 / 6, 2 / 6, 3 / 6, 4 / 6, 5 / 6])
 
     def test_no_param_schedulers(self):
