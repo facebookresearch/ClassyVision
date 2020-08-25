@@ -73,6 +73,27 @@
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Before we get started, let us enable INFO level logging so that we can monitor the progress of our runs.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [2]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="1.-Training-a-model">1. Training a model<a class="anchor-link" href="#1.-Training-a-model">¶</a></h2><p>Let us begin by pre-training a model using a head with 1000 classes</p>
 </div>
 </div>
@@ -291,7 +312,7 @@
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="n">pretrain_checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/checkpoint_{time.time()}"</span>
+<span class="n">pretrain_checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/checkpoint_</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">pretrain_checkpoint_dir</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -310,7 +331,7 @@
 <div class="prompt input_prompt">In [10]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.hooks</span> <span class="kn">import</span> <span class="n">CheckpointHook</span><span class="p">,</span> <span class="n">LossLrMeterLoggingHook</span><span class="p">,</span> <span class="n">ProgressBarHook</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.hooks</span> <span class="kn">import</span> <span class="n">CheckpointHook</span><span class="p">,</span> <span class="n">LossLrMeterLoggingHook</span>
 
 <span class="n">hooks</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">LossLrMeterLoggingHook</span><span class="p">(),</span>
@@ -571,7 +592,7 @@ I0502 181757.168 loss_lr_meter_logging_hook.py:76] Synced meters: [0] test phase
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="n">fine_tuning_checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/checkpoint_{time.time()}"</span>
+<span class="n">fine_tuning_checkpoint_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"/tmp/checkpoint_</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">fine_tuning_checkpoint_dir</span><span class="p">)</span>
 </pre></div>
 </div>

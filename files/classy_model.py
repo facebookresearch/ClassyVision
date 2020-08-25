@@ -30,6 +30,7 @@ model = build_model({"name": "resnet50"})
 input = torch.ones(10, 3, 224, 224)  # a batch of 10 images with 3 channels with dimensions of 224 x 224
 output = model(input)
 
+
 # ## Getting and setting the state of a model
 # 
 # Classy Vision provides the functions `get_classy_state()` and `set_classy_state()` to fetch and save the state of the models. These are considered drop-in replacements for the [`torch.nn.Module.state_dict`](https://pytorch.org/docs/stable/nn.html#torch.nn.Module.state_dict) and [`torch.nn.Module.load_state_dict()`](https://pytorch.org/docs/stable/nn.html#torch.nn.Module.load_state_dict) functions and work similarly. For more information, refer to the [docs](https://classyvision.ai/api/models.html#classy_vision.models.ClassyModel).
@@ -40,6 +41,7 @@ output = model(input)
 state = model.get_classy_state()
 
 model.set_classy_state(state)
+
 
 # ## Heads: Introduction & Using Classy Heads
 # 
@@ -80,6 +82,7 @@ model.set_heads({"block3-2": [head]})
 output = model(input)
 assert output.shape == (10, 10)
 
+
 # Classy Vision supports attaching multiple heads to one or more blocks as well, but that is an advanced concept which this tutorial does not cover. For inquisitive users, here is an example -
 
 # In[4]:
@@ -94,13 +97,14 @@ model.set_heads({"block2-2": [head_1_1, head_1_2], "block3-2": [head_2]})
 
 output = model(input)
 
+
 # ## Creating a custom Classy Model
 # 
 # This section will demonstrate: (1) how to create a custom model within Classy Vision; (2) how to integrate your model with Classy Vision's configuration system; (3) how to use the model for training and inference;
 # 
 # ### 1. Defining a model
 # 
-# Creating a new model in Classy Vision is the simple as creating one within PyTorch. The model needs to derive from `ClassyModel` and implement a `forward` method to perform inference. `ClassyModel` inherits from [`torch.nn.Module`](https://pytorch.org/docs/stable/nn.html#module), so it works exactly as you would expect.
+# Creating a new model in Classy Vision is as simple as creating one within PyTorch. The model needs to derive from `ClassyModel` and implement a `forward` method to perform inference. `ClassyModel` inherits from [`torch.nn.Module`](https://pytorch.org/docs/stable/nn.html#module), so it works exactly as you would expect.
 
 # In[5]:
 
@@ -128,6 +132,7 @@ class MyModel(ClassyModel):
         out = self.fc(out)
         return out
 
+
 # Now we can start using this model for training. Take a look at our [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial for more details on how to train a model from a Jupyter notebook.
 
 # In[6]:
@@ -137,6 +142,7 @@ from classy_vision.tasks import ClassificationTask
 
 my_model = MyModel(num_classes=1000)
 my_task = ClassificationTask().set_model(my_model)
+
 
 # ### 2. Integrating it with the configuration system
 # 
@@ -179,6 +185,7 @@ class MyModel(ClassyModel):
         out = self.fc(out)
         return out
 
+
 # Now we can start using this model in our configurations. The argument passed to `register_model` is used to identify the model class in the configuration:
 
 # In[8]:
@@ -199,6 +206,7 @@ x = torch.rand((1, 3, 200, 200))
 with torch.no_grad():
     print(my_model(x))
 
+
 # Now that your model is integrated with the configuration system, you can train it using `classy_train.py` as described in the [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial, no further changes are needed! Just make sure the code defining your model is in the `models` folder of your classy project.
 
 # ## Converting any PyTorch model to a Classy Model
@@ -217,12 +225,14 @@ classy_model = ClassyModel.from_model(model)
 output = classy_model(input)
 assert output.shape == (10, 1000)
 
+
 # In fact, as soon as a model becomes a Classy Model, it gains all its abilities as well, including the ability to attach heads! Let us inspect the original model to see the modules it comprises.
 
 # In[10]:
 
 
 model
+
 
 # It seems that the final trunk layer of this model is called `layer4`. Let's try to attach heads here.
 
@@ -236,6 +246,7 @@ classy_model.set_heads({"layer4": [head]})
 
 output = classy_model(input)
 assert output.shape == (10, 10)  # it works!
+
 
 # You might be wondering how to figure out the `in_plane` for any module. A simple trick is to try attaching any head and noticing the `Exception` if there is a size mismatch!
 
@@ -251,6 +262,7 @@ try:
 
 except Exception as e:
     print(e)
+
 
 # The error tells us that the size should be 512.
 

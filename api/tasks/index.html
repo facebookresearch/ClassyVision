@@ -217,7 +217,7 @@ may be appropriate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>loss</strong> – Loss (see <a class="reference internal" href="losses.html#classy_vision.losses.ClassyLoss" title="classy_vision.losses.ClassyLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">classy_vision.losses.ClassyLoss</span></code></a>) function used
+<li><p><a class="reference internal" href="#classy_vision.tasks.ClassificationTask.loss" title="classy_vision.tasks.ClassificationTask.loss"><strong>loss</strong></a> – Loss (see <a class="reference internal" href="losses.html#classy_vision.losses.ClassyLoss" title="classy_vision.losses.ClassyLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">classy_vision.losses.ClassyLoss</span></code></a>) function used
 for computing the loss in each forward pass</p></li>
 <li><p><strong>datasets</strong> – Mapping from a <code class="docutils literal notranslate"><span class="pre">phase_type</span></code> in [“train”, “test’]
 to dataset used for training (or testing)</p></li>
@@ -227,6 +227,8 @@ to calculate during training</p></li>
 <li><p><strong>test_only</strong> – Used to only run the test phase</p></li>
 <li><p><strong>base_model</strong> – Model to be trained, unwrapped in DDP or DP wrappers</p></li>
 <li><p><strong>optimizer</strong> – Optimizer used in train step</p></li>
+<li><p><strong>optimizer_schedulers</strong> – Dictionary. Key is the name of the optimizer
+option (e.g. lr), value is a ClassyParamScheduler</p></li>
 <li><p><strong>checkpoint</strong> – Serializable dict which represents state in training</p></li>
 <li><p><strong>phases</strong> – List of phase specific information, e.g. if phase is
 train / test.</p></li>
@@ -261,7 +263,7 @@ sets the train / test state for phase.</p>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.build_dataloader">
 <code class="sig-name descname">build_dataloader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">phase_type</span></em>, <em class="sig-param"><span class="n">pin_memory</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.build_dataloader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Buildss a dataloader iterable for a particular phase type.</p>
+<dd><p>Builds a dataloader iterable for a particular phase type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -367,6 +369,11 @@ See <a class="reference internal" href="#classy_vision.tasks.ClassificationTask.
 <p>Needed for distributed training. This is where a model should be wrapped by DDP.</p>
 </dd></dl>
 <dl class="py method">
+<dt id="classy_vision.tasks.ClassificationTask.loss">
+<em class="property">property </em><code class="sig-name descname">loss</code><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns loss used in training (can be wrapped with DDP)</p>
+</dd></dl>
+<dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.model">
 <em class="property">property </em><code class="sig-name descname">model</code><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns model used in training (can be wrapped with DDP)</p>
@@ -453,9 +460,10 @@ See <a class="reference internal" href="#classy_vision.tasks.ClassificationTask.
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.set_dataloader_mp_context">
-<code class="sig-name descname">set_dataloader_mp_context</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_dataloader_mp_context" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_dataloader_mp_context</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader_mp_context</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_dataloader_mp_context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the multiprocessing context used by the dataloader.</p>
-<p>The context can be either ‘spawn’, ‘fork’ or ‘forkserver’. See
+<p>The context can be either ‘spawn’, ‘fork’, ‘forkserver’ or None (uses the
+default context). See
 <a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html#multiprocessing.get_context">https://docs.python.org/3/library/multiprocessing.html#multiprocessing.get_context</a>
 for more details.</p>
 </dd></dl>
@@ -474,7 +482,7 @@ for more details.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.set_distributed_options">
-<code class="sig-name descname">set_distributed_options</code><span class="sig-paren">(</span><em class="sig-param">broadcast_buffers_mode: classy_vision.tasks.classification_task.BroadcastBuffersMode = &lt;BroadcastBuffersMode.BEFORE_EVAL: 3&gt;</em>, <em class="sig-param">batch_norm_sync_mode: classy_vision.tasks.classification_task.BatchNormSyncMode = &lt;BatchNormSyncMode.DISABLED: 1&gt;</em>, <em class="sig-param">find_unused_parameters: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_distributed_options" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_distributed_options</code><span class="sig-paren">(</span><em class="sig-param">broadcast_buffers_mode: classy_vision.tasks.classification_task.BroadcastBuffersMode = &lt;BroadcastBuffersMode.BEFORE_EVAL: 3&gt;</em>, <em class="sig-param">batch_norm_sync_mode: classy_vision.tasks.classification_task.BatchNormSyncMode = &lt;BatchNormSyncMode.DISABLED: 1&gt;</em>, <em class="sig-param">batch_norm_sync_group_size: int = 0</em>, <em class="sig-param">find_unused_parameters: bool = True</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.set_distributed_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set distributed options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -483,8 +491,12 @@ for more details.</p>
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BroadcastBuffersMode</span></code> for options.</p></li>
 <li><p><strong>batch_norm_sync_mode</strong> – Batch normalization synchronization mode. See
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BatchNormSyncMode</span></code> for options.</p></li>
+<li><p><strong>batch_norm_sync_group_size</strong> – Group size to use for synchronized batch norm.
+0 means that the stats are synchronized across all replicas. For
+efficient synchronization, set it to the number of GPUs in a node (
+usually 8).</p></li>
 <li><p><strong>find_unused_parameters</strong> – See
-<a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.parallel.DistributedDataParallel" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.parallel.DistributedDataParallel</span></code></a> for information.</p></li>
+<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.parallel.DistributedDataParallel</span></code></a> for information.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -581,6 +593,11 @@ for more details.</p>
 <dd class="field-odd"><p><strong>test_phase_period</strong> – The period of test phase</p>
 </dd>
 </dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.tasks.ClassificationTask.synchronize_losses">
+<code class="sig-name descname">synchronize_losses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.tasks.ClassificationTask.synchronize_losses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average the losses across the different replicas</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.tasks.ClassificationTask.train_step">

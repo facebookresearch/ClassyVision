@@ -176,7 +176,8 @@ the transform</p></li>
 <dd><p>A transform which maps image data from tuple to dict.</p>
 <p>This transform has a list of keys (key1, key2, …),
 takes a sample of the form (data1, data2, …) and
-returns a sample of the form {key1: data1, key2: data2, …}</p>
+returns a sample of the form {key1: data1, key2: data2, …}
+If duplicate keys are used, the corresponding values are merged into a list.</p>
 <p>It is useful for mapping output from datasets like the <a class="reference external" href="https://github.com/pytorch/vision/blob/master/torchvision/datasets/folder.py#L177">PyTorch
 ImageFolder</a> dataset (tuple) to dict with named data fields.</p>
 <p>If sample is already a dict with the required keys, pass sample through.</p>
@@ -248,7 +249,7 @@ it.</p>
 also support instantiating transforms available in the
 <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html">torchvision.transforms</a> module. Any keys in the config will get expanded
 to parameters of the transform constructor. For instance, the following
-call will instantiate a <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.CenterCrop" title="(in PyTorch vmaster (1.5.0a0+2a01d34 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.transforms.CenterCrop</span></code></a>:</p>
+call will instantiate a <a class="reference external" href="https://pytorch.org/docs/stable/torchvision/transforms.html#torchvision.transforms.CenterCrop" title="(in PyTorch vmaster (1.6.0a0+4392e52 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchvision.transforms.CenterCrop</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">build_transform</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">})</span>
 </pre></div>
 </div>

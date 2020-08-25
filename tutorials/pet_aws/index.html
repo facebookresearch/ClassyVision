@@ -87,8 +87,8 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">pytorch</span><span class="o">/</span><span class="n">elastic</span><span class="o">.</span><span class="n">git</span>
-<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">torchelastic</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> git clone https://github.com/pytorch/elastic.git
+<span class="o">!</span> pip install torchelastic
 </pre></div>
 </div>
 </div>
@@ -106,8 +106,8 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">facebookresearch</span><span class="o">/</span><span class="n">ClassyVision</span><span class="o">.</span><span class="n">git</span>
-<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">classy_vision</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> git clone https://github.com/facebookresearch/ClassyVision.git
+<span class="o">!</span> pip install classy_vision
 </pre></div>
 </div>
 </div>
@@ -125,7 +125,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> sudo apt install docker-compose
 </pre></div>
 </div>
 </div>
@@ -143,7 +143,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">etcd</span><span class="o">-</span><span class="n">server</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> sudo apt install etcd-server
 </pre></div>
 </div>
 </div>
@@ -161,7 +161,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">export</span> <span class="n">VERSION</span><span class="o">=&lt;</span><span class="n">torchelastic</span> <span class="n">version</span><span class="o">&gt;</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> <span class="nb">export</span> <span class="nv">VERSION</span><span class="o">=</span>&lt;torchelastic version&gt;
 </pre></div>
 </div>
 </div>
@@ -218,7 +218,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">classy</span><span class="o">-</span><span class="n">project</span> <span class="n">my</span><span class="o">-</span><span class="n">project</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> classy-project my-project
 </pre></div>
 </div>
 </div>
@@ -229,7 +229,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="n">cd</span> <span class="n">my</span><span class="o">-</span><span class="n">project</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">cd</span> my-project
 </pre></div>
 </div>
 </div>
@@ -247,7 +247,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">etcd</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">v2</span> <span class="o">--</span><span class="n">listen</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">urls</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">2379</span><span class="p">,</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">4001</span> <span class="o">--</span><span class="n">advertise</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">urls</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">2379</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> etcd --enable-v2 --listen-client-urls http://0.0.0.0:2379,http://127.0.0.1:4001 --advertise-client-urls http://127.0.0.1:2379
 </pre></div>
 </div>
 </div>
@@ -272,7 +272,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">torchelastic</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">launch</span> <span class="o">--</span><span class="n">nproc_per_node</span><span class="o">=</span><span class="err">$</span><span class="n">NUM_CUDA_DEVICES</span> <span class="o">--</span><span class="n">rdzv_endpoint</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">2379</span> \
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> python -m torchelastic.distributed.launch --nproc_per_node<span class="o">=</span><span class="nv">$NUM_CUDA_DEVICES</span> --rdzv_endpoint <span class="m">127</span>.0.0.1:2379 <span class="err">\</span>
     <span class="o">./</span><span class="n">classy_train</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">config</span> <span class="n">configs</span><span class="o">/</span><span class="n">template_config</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">distributed_backend</span> <span class="n">ddp</span>
 </pre></div>
 </div>

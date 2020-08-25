@@ -7,9 +7,44 @@
 # 
 # In this tutorial we will: (1) load a video dataset; (2) configure a video model; (3) configure video meters; (4) build a task; (5) start training; Please note that these steps are being done separately in the tutorial for easy of exposition in the notebook format. As described in our [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial, you can combine all configs used in this tutorial into a single config for ClassificationTask and train it using `classy_train.py`.
 
-# # 1. Prepare the dataset
+# Before we get started, let us enable INFO level logging so that we can monitor the progress of our runs.
+
+# In[ ]:
+
+
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
+# ## 1. Prepare the dataset
 # 
 # All right! Let's start with the dataset. [UCF-101](https://www.crcv.ucf.edu/data/UCF101.php) is a canonical action recognition dataset. It has 101 action classes, and has 3 folds with different training/testing splitting . We use fold 1 in this tutorial. Classy Vision has implemented the dataset `ucf101`, which can be used to load the training and testing splits. 
+
+# ### 1.1 Directories and Metadata File information
+# 
+# You will need to download the videos and the split files of UCF-101 dataset from the [official site](https://www.crcv.ucf.edu/data/UCF101.php). 
+# 
+# You should then have the videos present in a folder -
+# 
+# ```console
+# $ ls /path/to/ucf101
+# ApplyEyeMakeup
+# ...
+# YoYo
+# ```
+# 
+# There also needs to be a folder which contains the split files of the dataset -
+# 
+# ```console
+# $ ls /path/to/UCF101TrainTestSplits-RecognitionTask
+# classInd.txt
+# ...
+# trainlist03.txt
+# ```
+# 
+# Upon initializing the dataset, Classy Vision processes all this dataset information and stores it in a metadata file. This metadata file can be re-used for future runs to make the initialization faster. You can pass the path to store the metadata as `/path/to/ucf101_metadata.pt`.
 
 # In[ ]:
 
@@ -17,11 +52,11 @@
 from classy_vision.dataset import build_dataset
 
 # set it to the folder where video files are saved
-video_dir = "[PUT YOUR VIDEO FOLDER HERE]"
+video_dir = "/path/to/ucf101"
 # set it to the folder where dataset splitting files are saved
-splits_dir = "[PUT THE FOLDER WHICH CONTAINS SPLITTING FILES HERE]"
+splits_dir = "/path/to/UCF101TrainTestSplits-RecognitionTask"
 # set it to the file path for saving the metadata
-metadata_file = "[PUT THE FILE PATH OF DATASET META DATA HERE]"
+metadata_file = "/path/to/ucf101_metadata.pt"
 
 datasets = {}
 datasets["train"] = build_dataset({
@@ -68,9 +103,10 @@ datasets["test"] = build_dataset({
     }    
 })
 
+
 # Note we specify different transforms for training and testing split. For training split, we first randomly select a size from `size_range` [128, 160], and resize the video clip so that its short edge is equal to the random size. After that, we take a random crop of spatial size 112 x 112. We find such data augmentation helps the model generalize better, and use it as the default transform with data augmentation. For testing split, we resize the video clip to have short edge of size 128, and skip the random cropping to use the entire video clip. This is the default transform without data augmentation.
 
-# # 2. Define a model trunk and a head
+# ## 2. Define a model trunk and a head
 # 
 # Next, let's create the video model, which consists of a trunk and a head. The trunk can be viewed as a feature extractor for computing discriminative features from raw video pixels while the head is viewed as a classifier for producing the final predictions. Let's first create the trunk of architecture ResNet3D-18 by using the built-in `resnext3d` model in Classy Vision.
 
@@ -92,7 +128,8 @@ model = build_model({
     "num_classes": 101           # the number of classes
 })
 
-# We also need to create a model head, which consists of an average pooling layer and a linear layer, by using the `fully_convolutional_linear` head. At test time, the shape (channels, frames, height, width) of input tensor is typically `(3 x 8 x 128 x 173)`. The shape of input tensor to the average pooling layer is `(2048, 1, 8, 10)`. Since we do not use a global average pooling but an average pooling layer of kernel size `(1, 7, 7)`, the pooled feature map has shape `(2048, 1, 2, 5)`. The shape of prediction tensor from the linear layer is `(1, 2, 5, 101)`, which indicates the model computes a 101-D prediction vector densely over a `2 x 5` grid. That's why we name the head as `FullyConvolutionalLinearHead` because we use the linear layer as a `1x1` convolution layer to produce spatially dense predictions. Finally, predictions over the `2 x 5` grid are averaged.
+
+# We also need to create a model head, which consists of an average pooling layer and a linear layer, by using the `fully_convolutional_linear` head. At test time, the shape (channels, frames, height, width) of input tensor is typically `(3 x 8 x 128 x 173)`. The shape of input tensor to the average pooling layer is `(512, 1, 8, 10)`. Since we do not use a global average pooling but an average pooling layer of kernel size `(1, 7, 7)`, the pooled feature map has shape `(512, 1, 2, 5)`. The shape of prediction tensor from the linear layer is `(1, 2, 5, 101)`, which indicates the model computes a 101-D prediction vector densely over a `2 x 5` grid. That's why we name the head as `FullyConvolutionalLinearHead` because we use the linear layer as a `1x1` convolution layer to produce spatially dense predictions. Finally, predictions over the `2 x 5` grid are averaged.
 
 # In[ ]:
 
@@ -111,11 +148,11 @@ head = build_head({
 # In Classy Vision, the head can be attached to any residual block in the trunk. 
 # Here we attach the head to the last block as in the standard ResNet model
 fork_block = "pathway0-stage4-block1"
-heads = defaultdict(list)
-heads[fork_block].append(head)
+heads = {fork_block: [head]}
 model.set_heads(heads)
 
-# # 3. Choose the meters
+
+# ## 3. Choose the meters
 # 
 # This is the biggest difference between video and image classification. For images we used `AccuracyMeter` to measure top-1 and top-5 accuracy. For videos you can also use both `AccuracyMeter` and `VideoAccuracyMeter`, but they behave differently:
 #  * `AccuracyMeter` takes one clip-level prediction and compare it with groundtruth video label. It reports the clip-level accuracy.
@@ -139,7 +176,8 @@ meters = build_meters({
     }
 })
 
-# # 4. Build a task
+
+# ## 4. Build a task
 # Great! we have defined the minimal set of components necessary for video classification, including dataset, model, loss function, meters and optimizer. We proceed to define a video classification task, and populate it with all the components.
 
 # In[ ]:
@@ -177,7 +215,8 @@ task = (
 for phase in ["train", "test"]:
     task.set_dataset(datasets[phase], phase)
 
-# # 5. Start training
+
+# ## 5. Start training
 # 
 # After creating a task, you can simply pass that to a Trainer to start training. Here we will train on a single node and 
 # configure logging and checkpoints for training:
@@ -202,6 +241,7 @@ task = task.set_hooks(hooks)
 
 trainer = LocalTrainer()
 trainer.train(task)
+
 
 # As the training progresses, you should see `LossLrMeterLoggingHook` printing the loss, learning rate and meter metrics. Checkpoints will be available in the folder created above.
 # 

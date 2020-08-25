@@ -80,6 +80,8 @@
 </li>
 <li><a href="dataset.html#classy_vision.dataset.ClassyVideoDataset.__init__">(classy_vision.dataset.ClassyVideoDataset method)</a>
 </li>
+<li><a href="dataset.html#classy_vision.dataset.DataloaderAsyncGPUWrapper.__init__">(classy_vision.dataset.DataloaderAsyncGPUWrapper method)</a>
+</li>
 <li><a href="dataset.html#classy_vision.dataset.DataloaderLimitWrapper.__init__">(classy_vision.dataset.DataloaderLimitWrapper method)</a>
 </li>
 <li><a href="dataset.html#classy_vision.dataset.DataloaderSkipNoneWrapper.__init__">(classy_vision.dataset.DataloaderSkipNoneWrapper method)</a>
@@ -126,9 +128,13 @@
 </li>
 <li><a href="hooks.html#classy_vision.hooks.LossLrMeterLoggingHook.__init__">(classy_vision.hooks.LossLrMeterLoggingHook method)</a>
 </li>
+<li><a href="hooks.html#classy_vision.hooks.ModelComplexityHook.__init__">(classy_vision.hooks.ModelComplexityHook method)</a>
+</li>
 <li><a href="hooks.html#classy_vision.hooks.ModelTensorboardHook.__init__">(classy_vision.hooks.ModelTensorboardHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.__init__">(classy_vision.hooks.OutputCSVHook method)</a>
+</li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.__init__">(classy_vision.hooks.PreciseBatchNormHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProgressBarHook.__init__">(classy_vision.hooks.ProgressBarHook method)</a>
 </li>
@@ -169,6 +175,8 @@
 <li><a href="models.html#classy_vision.models.EfficientNet.__init__">(classy_vision.models.EfficientNet method)</a>
 </li>
 <li><a href="models.html#classy_vision.models.MLP.__init__">(classy_vision.models.MLP method)</a>
+</li>
+<li><a href="models.html#classy_vision.models.RegNet.__init__">(classy_vision.models.RegNet method)</a>
 </li>
 <li><a href="models.html#classy_vision.models.ResNet.__init__">(classy_vision.models.ResNet method)</a>
 </li>
@@ -404,6 +412,8 @@
 <h2 id="D">D</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="dataset.html#classy_vision.dataset.DataloaderAsyncGPUWrapper">DataloaderAsyncGPUWrapper (class in classy_vision.dataset)</a>
+</li>
 <li><a href="dataset.html#classy_vision.dataset.DataloaderLimitWrapper">DataloaderLimitWrapper (class in classy_vision.dataset)</a>
 </li>
 <li><a href="dataset.html#classy_vision.dataset.DataloaderSkipNoneWrapper">DataloaderSkipNoneWrapper (class in classy_vision.dataset)</a>
@@ -480,6 +490,8 @@
 </li>
 <li><a href="models.html#classy_vision.models.MLP.forward">(classy_vision.models.MLP method)</a>
 </li>
+<li><a href="models.html#classy_vision.models.RegNet.forward">(classy_vision.models.RegNet method)</a>
+</li>
 <li><a href="models.html#classy_vision.models.ResNeXt.forward">(classy_vision.models.ResNeXt method)</a>
 </li>
 <li><a href="models.html#classy_vision.models.SqueezeAndExcitationLayer.forward">(classy_vision.models.SqueezeAndExcitationLayer method)</a>
@@ -544,6 +556,8 @@
 <li><a href="models.html#classy_vision.models.EfficientNet.from_config">(classy_vision.models.EfficientNet class method)</a>
 </li>
 <li><a href="models.html#classy_vision.models.MLP.from_config">(classy_vision.models.MLP class method)</a>
+</li>
+<li><a href="models.html#classy_vision.models.RegNet.from_config">(classy_vision.models.RegNet class method)</a>
 </li>
 <li><a href="models.html#classy_vision.models.ResNeXt.from_config">(classy_vision.models.ResNeXt class method)</a>
 </li>
@@ -640,15 +654,6 @@
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ExponentialMovingAverageModelHook.get_model_state_iterator">get_model_state_iterator() (classy_vision.hooks.ExponentialMovingAverageModelHook method)</a>
 </li>
-<li><a href="losses.html#classy_vision.losses.ClassyLoss.get_optimizer_params">get_optimizer_params() (classy_vision.losses.ClassyLoss method)</a>
-<ul>
-<li><a href="models.html#classy_vision.models.ClassyModel.get_optimizer_params">(classy_vision.models.ClassyModel method)</a>
-</li>
-<li><a href="models.html#classy_vision.models.DenseNet.get_optimizer_params">(classy_vision.models.DenseNet method)</a>
-</li>
-<li><a href="models.html#classy_vision.models.ResNeXt.get_optimizer_params">(classy_vision.models.ResNeXt method)</a>
-</li>
-</ul></li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.get_total_test_phases">get_total_test_phases() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.get_total_training_phases">get_total_training_phases() (classy_vision.tasks.ClassificationTask method)</a>
@@ -681,19 +686,6 @@
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.init_distributed_data_parallel_model">init_distributed_data_parallel_model() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
-<li><a href="optim.html#classy_vision.optim.Adam.init_pytorch_optimizer">init_pytorch_optimizer() (classy_vision.optim.Adam method)</a>
-<ul>
-<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.init_pytorch_optimizer">(classy_vision.optim.ClassyOptimizer method)</a>
-</li>
-<li><a href="optim.html#classy_vision.optim.RMSProp.init_pytorch_optimizer">(classy_vision.optim.RMSProp method)</a>
-</li>
-<li><a href="optim.html#classy_vision.optim.RMSPropTF.init_pytorch_optimizer">(classy_vision.optim.RMSPropTF method)</a>
-</li>
-<li><a href="optim.html#classy_vision.optim.SGD.init_pytorch_optimizer">(classy_vision.optim.SGD method)</a>
-</li>
-</ul></li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#classy_vision.models.ClassyModel.input_shape">input_shape() (classy_vision.models.ClassyModel property)</a>
 <ul>
 <li><a href="models.html#classy_vision.models.DenseNet.input_shape">(classy_vision.models.DenseNet property)</a>
@@ -702,9 +694,13 @@
 </li>
 <li><a href="models.html#classy_vision.models.MLP.input_shape">(classy_vision.models.MLP property)</a>
 </li>
+<li><a href="models.html#classy_vision.models.RegNet.input_shape">(classy_vision.models.RegNet property)</a>
+</li>
 <li><a href="models.html#classy_vision.models.ResNeXt.input_shape">(classy_vision.models.ResNeXt property)</a>
 </li>
 </ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="param_scheduler.html#classy_vision.optim.param_scheduler.IntervalScaling">IntervalScaling (class in classy_vision.optim.param_scheduler)</a>
 </li>
 <li><a href="dataset.html#classy_vision.dataset.ClassyDataset.iterator">iterator() (classy_vision.dataset.ClassyDataset method)</a>
@@ -732,13 +728,15 @@
 </li>
 <li><a href="param_scheduler.html#classy_vision.optim.param_scheduler.LinearParamScheduler">LinearParamScheduler (class in classy_vision.optim.param_scheduler)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#classy_vision.models.ClassyModel.load_head_states">load_head_states() (classy_vision.models.ClassyModel method)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="dataset.html#classy_vision.dataset.ClassyVideoDataset.load_metadata">load_metadata() (classy_vision.dataset.ClassyVideoDataset class method)</a>
 </li>
 <li><a href="trainer.html#classy_vision.trainer.LocalTrainer">LocalTrainer (class in classy_vision.trainer)</a>
+</li>
+<li><a href="tasks.html#classy_vision.tasks.ClassificationTask.loss">loss() (classy_vision.tasks.ClassificationTask property)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.LossLrMeterLoggingHook">LossLrMeterLoggingHook (class in classy_vision.hooks)</a>
 </li>
@@ -760,6 +758,8 @@
 <li><a href="models.html#classy_vision.models.EfficientNet.model_depth">(classy_vision.models.EfficientNet property)</a>
 </li>
 <li><a href="models.html#classy_vision.models.MLP.model_depth">(classy_vision.models.MLP property)</a>
+</li>
+<li><a href="models.html#classy_vision.models.RegNet.model_depth">(classy_vision.models.RegNet property)</a>
 </li>
 <li><a href="models.html#classy_vision.models.ResNeXt.model_depth">(classy_vision.models.ResNeXt property)</a>
 </li>
@@ -842,6 +842,8 @@
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.on_end">(classy_vision.hooks.OutputCSVHook method)</a>
 </li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.on_end">(classy_vision.hooks.PreciseBatchNormHook method)</a>
+</li>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook.on_end">(classy_vision.hooks.ProfilerHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProgressBarHook.on_end">(classy_vision.hooks.ProgressBarHook method)</a>
@@ -857,6 +859,8 @@
 <li><a href="tasks.html#classy_vision.tasks.ClassyTask.on_end">(classy_vision.tasks.ClassyTask method)</a>
 </li>
 </ul></li>
+<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.on_epoch">on_epoch() (classy_vision.optim.ClassyOptimizer method)</a>
+</li>
 <li><a href="hooks.html#classy_vision.hooks.CheckpointHook.on_phase_end">on_phase_end() (classy_vision.hooks.CheckpointHook method)</a>
 <ul>
 <li><a href="hooks.html#classy_vision.hooks.ClassyHook.on_phase_end">(classy_vision.hooks.ClassyHook method)</a>
@@ -870,6 +874,8 @@
 <li><a href="hooks.html#classy_vision.hooks.ModelTensorboardHook.on_phase_end">(classy_vision.hooks.ModelTensorboardHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.on_phase_end">(classy_vision.hooks.OutputCSVHook method)</a>
+</li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.on_phase_end">(classy_vision.hooks.PreciseBatchNormHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook.on_phase_end">(classy_vision.hooks.ProfilerHook method)</a>
 </li>
@@ -899,6 +905,8 @@
 <li><a href="hooks.html#classy_vision.hooks.ModelTensorboardHook.on_phase_start">(classy_vision.hooks.ModelTensorboardHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.on_phase_start">(classy_vision.hooks.OutputCSVHook method)</a>
+</li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.on_phase_start">(classy_vision.hooks.PreciseBatchNormHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook.on_phase_start">(classy_vision.hooks.ProfilerHook method)</a>
 </li>
@@ -931,6 +939,8 @@
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.on_start">(classy_vision.hooks.OutputCSVHook method)</a>
 </li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.on_start">(classy_vision.hooks.PreciseBatchNormHook method)</a>
+</li>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook.on_start">(classy_vision.hooks.ProfilerHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProgressBarHook.on_start">(classy_vision.hooks.ProgressBarHook method)</a>
@@ -960,6 +970,8 @@
 </li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook.on_step">(classy_vision.hooks.OutputCSVHook method)</a>
 </li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook.on_step">(classy_vision.hooks.PreciseBatchNormHook method)</a>
+</li>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook.on_step">(classy_vision.hooks.ProfilerHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProgressBarHook.on_step">(classy_vision.hooks.ProgressBarHook method)</a>
@@ -969,17 +981,6 @@
 <li><a href="hooks.html#classy_vision.hooks.TorchscriptHook.on_step">(classy_vision.hooks.TorchscriptHook method)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.VisdomHook.on_step">(classy_vision.hooks.VisdomHook method)</a>
-</li>
-</ul></li>
-<li><a href="models.html#classy_vision.models.ClassyModel.output_shape">output_shape() (classy_vision.models.ClassyModel property)</a>
-<ul>
-<li><a href="models.html#classy_vision.models.DenseNet.output_shape">(classy_vision.models.DenseNet property)</a>
-</li>
-<li><a href="models.html#classy_vision.models.EfficientNet.output_shape">(classy_vision.models.EfficientNet property)</a>
-</li>
-<li><a href="models.html#classy_vision.models.MLP.output_shape">(classy_vision.models.MLP property)</a>
-</li>
-<li><a href="models.html#classy_vision.models.ResNeXt.output_shape">(classy_vision.models.ResNeXt property)</a>
 </li>
 </ul></li>
 <li><a href="hooks.html#classy_vision.hooks.OutputCSVHook">OutputCSVHook (class in classy_vision.hooks)</a>
@@ -998,17 +999,29 @@
 </li>
 <li><a href="param_scheduler.html#classy_vision.optim.param_scheduler.PolynomialDecayParamScheduler">PolynomialDecayParamScheduler (class in classy_vision.optim.param_scheduler)</a>
 </li>
+<li><a href="hooks.html#classy_vision.hooks.PreciseBatchNormHook">PreciseBatchNormHook (class in classy_vision.hooks)</a>
+</li>
 <li><a href="meters.html#classy_vision.meters.PrecisionAtKMeter">PrecisionAtKMeter (class in classy_vision.meters)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="tasks.html#classy_vision.tasks.ClassificationTask.prepare">prepare() (classy_vision.tasks.ClassificationTask method)</a>
+<li><a href="optim.html#classy_vision.optim.Adam.prepare">prepare() (classy_vision.optim.Adam method)</a>
 <ul>
+<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.prepare">(classy_vision.optim.ClassyOptimizer method)</a>
+</li>
+<li><a href="optim.html#classy_vision.optim.RMSProp.prepare">(classy_vision.optim.RMSProp method)</a>
+</li>
+<li><a href="optim.html#classy_vision.optim.RMSPropTF.prepare">(classy_vision.optim.RMSPropTF method)</a>
+</li>
+<li><a href="optim.html#classy_vision.optim.SGD.prepare">(classy_vision.optim.SGD method)</a>
+</li>
+<li><a href="tasks.html#classy_vision.tasks.ClassificationTask.prepare">(classy_vision.tasks.ClassificationTask method)</a>
+</li>
 <li><a href="tasks.html#classy_vision.tasks.ClassyTask.prepare">(classy_vision.tasks.ClassyTask method)</a>
 </li>
 <li><a href="tasks.html#classy_vision.tasks.FineTuningTask.prepare">(classy_vision.tasks.FineTuningTask method)</a>
 </li>
 </ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="hooks.html#classy_vision.hooks.ProfilerHook">ProfilerHook (class in classy_vision.hooks)</a>
 </li>
 <li><a href="hooks.html#classy_vision.hooks.ProgressBarHook">ProgressBarHook (class in classy_vision.hooks)</a>
@@ -1038,9 +1051,11 @@
 </li>
 <li><a href="tasks.html#classy_vision.tasks.register_task">register_task() (in module classy_vision.tasks)</a>
 </li>
+<li><a href="transforms.html#classy_vision.dataset.transforms.register_transform">register_transform() (in module classy_vision.dataset.transforms)</a>
+</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="transforms.html#classy_vision.dataset.transforms.register_transform">register_transform() (in module classy_vision.dataset.transforms)</a>
+<li><a href="models.html#classy_vision.models.RegNet">RegNet (class in classy_vision.models)</a>
 </li>
 <li><a href="meters.html#classy_vision.meters.AccuracyMeter.reset">reset() (classy_vision.meters.AccuracyMeter method)</a>
 <ul>
@@ -1113,17 +1128,17 @@
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.set_mixup_transform">set_mixup_transform() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.set_model">set_model() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="hooks.html#classy_vision.hooks.ExponentialMovingAverageModelHook.set_model_state">set_model_state() (classy_vision.hooks.ExponentialMovingAverageModelHook method)</a>
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.set_num_epochs">set_num_epochs() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.set_optimizer">set_optimizer() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
-<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.set_param_schedulers">set_param_schedulers() (classy_vision.optim.ClassyOptimizer method)</a>
+<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.set_param_groups">set_param_groups() (classy_vision.optim.ClassyOptimizer method)</a>
 </li>
 <li><a href="tasks.html#classy_vision.tasks.ClassificationTask.set_test_only">set_test_only() (classy_vision.tasks.ClassificationTask method)</a>
 </li>
@@ -1156,6 +1171,8 @@
 <li><a href="meters.html#classy_vision.meters.RecallAtKMeter.sync_state">(classy_vision.meters.RecallAtKMeter method)</a>
 </li>
 </ul></li>
+<li><a href="tasks.html#classy_vision.tasks.ClassificationTask.synchronize_losses">synchronize_losses() (classy_vision.tasks.ClassificationTask method)</a>
+</li>
 <li><a href="dataset.html#classy_vision.dataset.SyntheticImageDataset">SyntheticImageDataset (class in classy_vision.dataset)</a>
 </li>
 <li><a href="dataset.html#classy_vision.dataset.SyntheticImageStreamingDataset">SyntheticImageStreamingDataset (class in classy_vision.dataset)</a>
@@ -1206,10 +1223,6 @@
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="param_scheduler.html#classy_vision.optim.param_scheduler.ClassyParamScheduler.update_interval">update_interval (classy_vision.optim.param_scheduler.ClassyParamScheduler attribute)</a>
-</li>
-<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.update_schedule_on_epoch">update_schedule_on_epoch() (classy_vision.optim.ClassyOptimizer method)</a>
-</li>
-<li><a href="optim.html#classy_vision.optim.ClassyOptimizer.update_schedule_on_step">update_schedule_on_step() (classy_vision.optim.ClassyOptimizer method)</a>
 </li>
 <li><a href="param_scheduler.html#classy_vision.optim.param_scheduler.UpdateInterval">UpdateInterval (class in classy_vision.optim.param_scheduler)</a>
 </li>

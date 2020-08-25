@@ -88,7 +88,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">facebookresearch</span><span class="o">/</span><span class="n">ClassyVision</span><span class="o">.</span><span class="n">git</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> git clone https://github.com/facebookresearch/ClassyVision.git
 </pre></div>
 </div>
 </div>
@@ -106,8 +106,8 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="n">cd</span> <span class="o">./</span><span class="n">ClassyVision</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">ray</span>
-<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">cd</span> ./ClassyVision/examples/ray
+<span class="o">!</span> pip install -r requirements.txt
 </pre></div>
 </div>
 </div>
@@ -125,7 +125,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">aws</span> <span class="n">ec2</span> <span class="n">describe</span><span class="o">-</span><span class="n">instances</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> aws ec2 describe-instances
 </pre></div>
 </div>
 </div>
@@ -157,7 +157,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">ray</span> <span class="n">up</span> <span class="n">cluster_config</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">y</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> ray up cluster_config.yml -y
 </pre></div>
 </div>
 </div>
@@ -175,7 +175,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">ray</span> <span class="n">down</span> <span class="n">cluster_config</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">y</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> ray down cluster_config.yml -y
 </pre></div>
 </div>
 </div>
@@ -195,7 +195,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">ray</span> <span class="n">up</span> <span class="n">cluster_config</span><span class="o">.</span><span class="n">yml</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> ray up cluster_config.yml
 </pre></div>
 </div>
 </div>
@@ -213,7 +213,7 @@
 <div class="prompt input_prompt">In [ ]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class="highlight hl-ipython3"><pre><span></span><span class="err">!</span> <span class="n">ray</span> <span class="n">attach</span> <span class="n">cluster_config</span><span class="o">.</span><span class="n">yml</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">!</span> ray attach cluster_config.yml
 </pre></div>
 </div>
 </div>

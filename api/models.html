@@ -122,7 +122,7 @@ applying the final fully connected layer.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.models.ClassyModel.from_model">
-<em class="property">classmethod </em><code class="sig-name descname">from_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_shape</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_depth</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_model" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">from_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_depth</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.from_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an <code class="xref py py-class docutils literal notranslate"><span class="pre">nn.Module</span></code> to a <cite>ClassyModel</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -165,25 +165,6 @@ returned Dict’s state will be tied to the object’s.</p>
 attached to that block.</p>
 </dd></dl>
 <dl class="py method">
-<dt id="classy_vision.models.ClassyModel.get_optimizer_params">
-<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bn_weight_decay</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ClassyModel.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns param groups for optimizer.</p>
-<p>Function to return dict of params with “keys” from
-{“regularized_params”, “unregularized_params”}
-to “values” a list of <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Parameter">pytorch Params</a>.</p>
-<p>“weight_decay” provided as part of optimizer is only used
-for “regularized_params”. For “unregularized_params”, weight_decay is set
-to 0.0</p>
-<p>This implementation sets <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#normalization-layers">BatchNorm’s</a> all trainable params to be
-unregularized_params if <code class="docutils literal notranslate"><span class="pre">bn_weight_decay</span></code> is False.</p>
-<p>Override this function for any custom behavior.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bn_weight_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Apply weight decay to bn params if true</p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
 <dt id="classy_vision.models.ClassyModel.head_outputs">
 <em class="property">property </em><code class="sig-name descname">head_outputs</code><a class="headerlink" href="#classy_vision.models.ClassyModel.head_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return outputs of all heads in the format of Dict[head_id, output]</p>
@@ -211,11 +192,6 @@ fine-tuned heads to a pre-trained trunk.</p>
 <dt id="classy_vision.models.ClassyModel.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ClassyModel.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.models.ClassyModel.output_shape">
-<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ClassyModel.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.models.ClassyModel.set_classy_state">
@@ -334,25 +310,6 @@ See <a class="reference internal" href="#classy_vision.models.DenseNet.__init__"
 </dl>
 </dd></dl>
 <dl class="py method">
-<dt id="classy_vision.models.DenseNet.get_optimizer_params">
-<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.DenseNet.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns param groups for optimizer.</p>
-<p>Function to return dict of params with “keys” from
-{“regularized_params”, “unregularized_params”}
-to “values” a list of <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Parameter">pytorch Params</a>.</p>
-<p>“weight_decay” provided as part of optimizer is only used
-for “regularized_params”. For “unregularized_params”, weight_decay is set
-to 0.0</p>
-<p>This implementation sets <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#normalization-layers">BatchNorm’s</a> all trainable params to be
-unregularized_params if <code class="docutils literal notranslate"><span class="pre">bn_weight_decay</span></code> is False.</p>
-<p>Override this function for any custom behavior.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bn_weight_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Apply weight decay to bn params if true</p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
 <dt id="classy_vision.models.DenseNet.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
@@ -361,11 +318,6 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 <dt id="classy_vision.models.DenseNet.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.DenseNet.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.models.DenseNet.output_shape">
-<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.DenseNet.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
@@ -415,11 +367,6 @@ See <a class="reference internal" href="#classy_vision.models.EfficientNet.__ini
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.EfficientNet.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
-<dl class="py method">
-<dt id="classy_vision.models.EfficientNet.output_shape">
-<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.EfficientNet.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>If implemented, returns expected output tensor shape</p>
-</dd></dl>
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.models.MLP">
@@ -459,10 +406,45 @@ See <a class="reference internal" href="#classy_vision.models.MLP.__init__" titl
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.MLP.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.models.RegNet">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">RegNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="p">:</span> <span class="n">classy_vision.models.regnet.RegNetParams</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.RegNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of RegNet, a particular form of AnyNets
+See <a class="reference external" href="https://arxiv.org/abs/2003.13678v1">https://arxiv.org/abs/2003.13678v1</a></p>
 <dl class="py method">
-<dt id="classy_vision.models.MLP.output_shape">
-<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.MLP.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>If implemented, returns expected output tensor shape</p>
+<dt id="classy_vision.models.RegNet.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span><span class="p">:</span> <span class="n">classy_vision.models.regnet.RegNetParams</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.RegNet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor for ClassyModel.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.models.RegNet.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.RegNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform computation of blocks in the order define in get_blocks.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.models.RegNet.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.models.regnet.RegNet<a class="headerlink" href="#classy_vision.models.RegNet.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instantiates a RegNet from a configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A configuration for a RegNet.
+See <cite>RegNetParams</cite> for parameters expected in the config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A RegNet instance.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.models.RegNet.input_shape">
+<em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.RegNet.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns expected input tensor shape</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.models.RegNet.model_depth">
+<em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.RegNet.model_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If implemented, returns number of layers in model</p>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
@@ -477,10 +459,10 @@ See <a class="reference internal" href="#classy_vision.models.MLP.__init__" titl
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.models.ResNeXt">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bn_weight_decay</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">ResNeXt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="classy_vision.models.ResNeXt.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bn_weight_decay</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blocks</span></em>, <em class="sig-param"><span class="n">init_planes</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">64</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">4</span></em>, <em class="sig-param"><span class="n">small_input</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">zero_init_bn_residuals</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base_width_and_cardinality</span><span class="p">:</span> <span class="n">Union[Tuple, List, None]</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">basic_layer</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">final_bn_relu</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">use_se</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">se_reduction_ratio</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of <a class="reference external" href="https://arxiv.org/pdf/1611.05431.pdf">ResNeXt</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -536,25 +518,6 @@ returned Dict’s state will be tied to the object’s.</p>
 </dl>
 </dd></dl>
 <dl class="py method">
-<dt id="classy_vision.models.ResNeXt.get_optimizer_params">
-<code class="sig-name descname">get_optimizer_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.ResNeXt.get_optimizer_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns param groups for optimizer.</p>
-<p>Function to return dict of params with “keys” from
-{“regularized_params”, “unregularized_params”}
-to “values” a list of <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#torch.nn.Parameter">pytorch Params</a>.</p>
-<p>“weight_decay” provided as part of optimizer is only used
-for “regularized_params”. For “unregularized_params”, weight_decay is set
-to 0.0</p>
-<p>This implementation sets <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#normalization-layers">BatchNorm’s</a> all trainable params to be
-unregularized_params if <code class="docutils literal notranslate"><span class="pre">bn_weight_decay</span></code> is False.</p>
-<p>Override this function for any custom behavior.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bn_weight_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Apply weight decay to bn params if true</p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
 <dt id="classy_vision.models.ResNeXt.input_shape">
 <em class="property">property </em><code class="sig-name descname">input_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.input_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns expected input tensor shape</p>
@@ -563,11 +526,6 @@ unregularized_params if <code class="docutils literal notranslate"><span class="
 <dt id="classy_vision.models.ResNeXt.model_depth">
 <em class="property">property </em><code class="sig-name descname">model_depth</code><a class="headerlink" href="#classy_vision.models.ResNeXt.model_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If implemented, returns number of layers in model</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.models.ResNeXt.output_shape">
-<em class="property">property </em><code class="sig-name descname">output_shape</code><a class="headerlink" href="#classy_vision.models.ResNeXt.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>If implemented, returns expected output tensor shape</p>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.models.ResNeXt.set_classy_state">
@@ -655,11 +613,11 @@ See <a class="reference internal" href="#classy_vision.models.ResNeXt3D.__init__
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.models.SqueezeAndExcitationLayer">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">SqueezeAndExcitationLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.models.</code><code class="sig-name descname">SqueezeAndExcitationLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">16</span></em>, <em class="sig-param"><span class="n">reduced_planes</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Squeeze and excitation layer, as per <a class="reference external" href="https://arxiv.org/pdf/1709.01507.pdf">https://arxiv.org/pdf/1709.01507.pdf</a></p>
 <dl class="py method">
 <dt id="classy_vision.models.SqueezeAndExcitationLayer.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="o">=</span><span class="default_value">16</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_planes</span></em>, <em class="sig-param"><span class="n">reduction_ratio</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">16</span></em>, <em class="sig-param"><span class="n">reduced_planes</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.models.SqueezeAndExcitationLayer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
 </dd></dl>
 <dl class="py method">
