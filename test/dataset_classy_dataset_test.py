@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import multiprocessing as mp
 import unittest
 import unittest.mock as mock
 from test.generic.utils import compare_batches, compare_samples
@@ -142,6 +143,15 @@ class TestClassyDataset(unittest.TestCase):
     def test_get_iterator(self):
         # Verifies that we can retrieve samples with iterators
         dl = self.dataset1.iterator(num_workers=0)
+        assert isinstance(
+            dl, DataLoader
+        ), "Classy Iterator should return instance of PyTorch Dataloader"
+        next(iter(dl))
+
+        # We should be able to set num_workers to zero while also passing a mp context
+        dl = self.dataset1.iterator(
+            num_workers=0, multiprocessing_context=mp.get_context()
+        )
         assert isinstance(
             dl, DataLoader
         ), "Classy Iterator should return instance of PyTorch Dataloader"

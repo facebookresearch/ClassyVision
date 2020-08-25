@@ -165,6 +165,9 @@ class ClassyDataset:
         epoch = kwargs.get("current_phase_id", 0)
         assert isinstance(epoch, int), "Epoch must be an int"
         num_workers_override = kwargs.get("num_workers", self.num_workers)
+        if num_workers_override == 0:
+            # set the mp context to None to placate the PyTorch dataloader
+            kwargs["multiprocessing_context"] = None
 
         offset_epoch = shuffle_seed + epoch
 
