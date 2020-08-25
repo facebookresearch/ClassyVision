@@ -231,10 +231,11 @@ class ClassificationTask(ClassyTask):
             self._train_only = False
         return self
 
-    def set_dataloader_mp_context(self, dataloader_mp_context: str):
+    def set_dataloader_mp_context(self, dataloader_mp_context: Optional[str]):
         """Set the multiprocessing context used by the dataloader.
 
-        The context can be either 'spawn', 'fork' or 'forkserver'. See
+        The context can be either 'spawn', 'fork', 'forkserver' or None (uses the
+        default context). See
         https://docs.python.org/3/library/multiprocessing.html#multiprocessing.get_context
         for more details."""
 
