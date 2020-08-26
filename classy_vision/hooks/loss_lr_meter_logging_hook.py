@@ -47,7 +47,7 @@ class LossLrMeterLoggingHook(ClassyHook):
             # do not explicitly state this since it is possible for a
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
-            self._log_loss_meters(task, prefix="Synced meters: ", log_batches=True)
+            self._log_loss_lr_meters(task, prefix="Synced meters: ", log_batches=True)
 
     def on_step(self, task) -> None:
         """
@@ -57,11 +57,11 @@ class LossLrMeterLoggingHook(ClassyHook):
             return
         batches = len(task.losses)
         if batches and batches % self.log_freq == 0:
-            self._log_loss_meters(task, prefix="Approximate meters: ")
+            self._log_loss_lr_meters(task, prefix="Approximate meters: ")
 
-    def _log_loss_meters(self, task, prefix="", log_batches=False) -> None:
+    def _log_loss_lr_meters(self, task, prefix="", log_batches=False) -> None:
         """
-        Compute and log the loss and meters.
+        Compute and log the loss, lr, and meters.
         """
 
         phase_type = task.phase_type
@@ -75,8 +75,8 @@ class LossLrMeterLoggingHook(ClassyHook):
             f"{prefix}[{get_rank()}] {phase_type} phase {phase_type_idx} "
             f"({phase_pct*100:.2f}% done), loss: {loss:.4f}, meters: {task.meters}"
         )
-        if not task.test_only:
-            msg += f", 'learning rate:'{task.optimizer.options_view.lr}"
+        if task.train:
+            msg += f", lr: {task.optimizer.options_view.lr:.4f}"
         if phase_type == "test" and hasattr(task, "ema"):
             msg += f", ema: {task.ema}"
         if log_batches:
