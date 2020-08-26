@@ -59,11 +59,11 @@ class TestLossLrMeterLoggingHook(HookTestBase):
             # create a loss lr meter hook
             loss_lr_meter_hook = LossLrMeterLoggingHook(log_freq=log_freq)
 
-            # check that _log_loss_meters() is called after on_step() every
+            # check that _log_loss_lr_meters() is called after on_step() every
             # log_freq batches and after on_phase_end()
-            # and _log_lr() is called after on_step() every log_freq batches
-            # and after on_phase_end()
-            with mock.patch.object(loss_lr_meter_hook, "_log_loss_meters") as mock_fn:
+            with mock.patch.object(
+                loss_lr_meter_hook, "_log_loss_lr_meters"
+            ) as mock_fn:
                 num_batches = 20
 
                 for i in range(num_batches):
@@ -82,7 +82,7 @@ class TestLossLrMeterLoggingHook(HookTestBase):
             task.losses = losses
 
             with self.assertLogs():
-                loss_lr_meter_hook._log_loss_meters(task)
+                loss_lr_meter_hook._log_loss_lr_meters(task)
 
             task.phase_idx += 1
 
