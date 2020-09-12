@@ -196,6 +196,10 @@ def get_rank() -> int:
     )
 
 
+def get_primary_rank() -> int:
+    return _PRIMARY_RANK
+
+
 def set_cuda_device_index(idx: int) -> None:
     global _cuda_device_index
     _cuda_device_index = idx
