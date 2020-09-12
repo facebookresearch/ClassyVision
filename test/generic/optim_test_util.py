@@ -67,6 +67,10 @@ class TestOptimizer(ABC):
 
         self._set_gradient(self._parameters(), grad_values)
         opt1.step(where=0)
+
+        if config["name"] == "zero":
+            opt1.consolidate_state_dict()
+
         state = opt1.get_classy_state()
 
         opt2 = build_optimizer(config)
@@ -83,6 +87,10 @@ class TestOptimizer(ABC):
                     opt2.optimizer.param_groups[0]["params"][i],
                 )
             )
+
+        if config["name"] == "zero":
+            opt2.consolidate_state_dict()
+
         self._compare_momentum_values(
             opt1.get_classy_state()["optim"], opt2.get_classy_state()["optim"]
         )
@@ -106,6 +114,11 @@ class TestOptimizer(ABC):
                     opt2.optimizer.param_groups[0]["params"][i],
                 )
             )
+
+        if config["name"] == "zero":
+            opt1.consolidate_state_dict()
+            opt2.consolidate_state_dict()
+
         self._compare_momentum_values(
             opt1.get_classy_state()["optim"], opt2.get_classy_state()["optim"]
         )
