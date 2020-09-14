@@ -172,7 +172,9 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
         crit = LabelSmoothingCrossEntropyLoss.from_config(config)
         outputs = torch.tensor([[0.0, 7.0, 0.0, 0.0, 2.0]])
         targets = torch.tensor([[0, 0, 0, 0, 1]])
-        self.assertAlmostEqual(crit(outputs, targets).item(), 5.07609558)
+        self.assertAlmostEqual(
+            crit(outputs, targets).item(), 5.07609558, 5
+        )  ### (tested ans, correct ans, num of decimal places for accuracy)
 
     def test_ignore_index_label_smoothing_cross_entropy(self):
         config = {
@@ -209,4 +211,6 @@ class TestLabelSmoothingCrossEntropyLoss(unittest.TestCase):
         crit(outputs, targets)
 
         crit2 = copy.deepcopy(crit)
-        self.assertAlmostEqual(crit2(outputs, targets).item(), 5.07609558)
+        self.assertAlmostEqual(
+            crit2(outputs, targets).item(), 5.07609558, 5
+        )  ### (tested ans, correct ans, num of decimal places for accuracy)
