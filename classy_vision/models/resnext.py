@@ -258,6 +258,8 @@ class InitialBlock(nn.Module):
 
 @register_model("resnext")
 class ResNeXt(ClassyModel):
+    __ignored_properties__ = ClassyModel.__ignored_properties__ + ["model_depth"]
+
     def __init__(
         self,
         num_blocks,

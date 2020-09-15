@@ -148,6 +148,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
     wrapper_cls = ClassyModelHeadExecutorWrapper
 
     _attachable_block_names: List[str]
+    __ignored_properties__ = ["attachable_block_names", "head_outputs"]
 
     def __init__(self):
         """Constructor for ClassyModel."""
