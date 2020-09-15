@@ -551,6 +551,13 @@ def _train_mode(model: nn.Module, train_mode: bool):
             module.training = train_modes[name]
 
 
+def log_class_usage(component_type, klass):
+    identifier = "ClassyVision"
+    if klass and hasattr(klass, "__name__"):
+        identifier += f".{component_type}.{klass.__name__}"
+    torch._C._log_api_usage_once(identifier)
+
+
 train_model = partial(_train_mode, train_mode=True)
 train_model.__doc__ = """Context manager which puts the model in train mode.
 
