@@ -7,6 +7,7 @@
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
+from classy_vision.generic.util import log_class_usage
 
 from .classy_task import ClassyTask
 
@@ -26,7 +27,10 @@ def build_task(config):
     "foo": "bar"}` will find a class that was registered as "my_task"
     (see :func:`register_task`) and call .from_config on it."""
 
-    return TASK_REGISTRY[config["name"]].from_config(config)
+    task = TASK_REGISTRY[config["name"]].from_config(config)
+    log_class_usage("Task", task)
+
+    return task
 
 
 def register_task(name):
