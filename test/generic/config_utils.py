@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import sys
+
 from classy_vision.tasks import build_task
 
 
@@ -383,3 +385,17 @@ def get_test_classy_video_task():
     config = get_test_video_task_config()
     task = build_task(config)
     return task
+
+
+def get_distributed_launch_cmd(num_processes: int, trainer_path: str, config_path: str):
+    return f"""{sys.executable} -m torch.distributed.launch \
+        --nnodes=1 \
+        --nproc_per_node={num_processes} \
+        --master_addr=localhost \
+        --master_port=29500 \
+        --use_env \
+        {trainer_path} \
+        --config={config_path} \
+        --log_freq=100 \
+        --distributed_backend=ddp
+        """
