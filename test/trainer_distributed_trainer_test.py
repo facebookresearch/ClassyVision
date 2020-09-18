@@ -8,11 +8,13 @@ import copy
 import json
 import os
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-from test.generic.config_utils import get_test_mlp_task_config
+from test.generic.config_utils import (
+    get_distributed_launch_cmd,
+    get_test_mlp_task_config,
+)
 
 import torch
 
@@ -49,17 +51,11 @@ class TestDistributedTrainer(unittest.TestCase):
             ("invalid_config", False),
             ("config", True),
         ]:
-            cmd = f"""{sys.executable} -m torch.distributed.launch \
-            --nnodes=1 \
-            --nproc_per_node={num_processes} \
-            --master_addr=localhost \
-            --master_port=29500 \
-            --use_env \
-            {self.path}/../classy_train.py \
-            --config={self.config_files[config_key]} \
-            --log_freq=100 \
-            --distributed_backend=ddp
-            """
+            cmd = get_distributed_launch_cmd(
+                num_processes=num_processes,
+                trainer_path=f"{self.path}/../classy_train.py",
+                config_path=self.config_files[config_key],
+            )
             result = subprocess.run(cmd, shell=True)
             success = result.returncode == 0
             self.assertEqual(success, expected_success)
@@ -70,16 +66,11 @@ class TestDistributedTrainer(unittest.TestCase):
 
         num_processes = 2
 
-        cmd = f"""{sys.executable} -m torch.distributed.launch \
-        --nnodes=1 \
-        --nproc_per_node={num_processes} \
-        --master_addr=localhost \
-        --master_port=29500 \
-        --use_env \
-        {self.path}/../classy_train.py \
-        --config={self.config_files["sync_bn_config"]} \
-        --log_freq=100 \
-        --distributed_backend=ddp
-        """
+        cmd = get_distributed_launch_cmd(
+            num_processes=num_processes,
+            trainer_path=f"{self.path}/../classy_train.py",
+            config_path=self.config_files["sync_bn_config"],
+        )
+
         result = subprocess.run(cmd, shell=True)
         self.assertEqual(result.returncode, 0)
