@@ -234,7 +234,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
             model_state_dict = copy.deepcopy(model_state_dict)
         return model_state_dict
 
-    def load_head_states(self, state):
+    def load_head_states(self, state, strict=True):
         """Load only the state (weights) of the heads.
 
         For a trunk-heads model, this function allows the user to
@@ -247,9 +247,9 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         """
         for block_name, head_states in state["model"]["heads"].items():
             for head_name, head_state in head_states.items():
-                self._heads[block_name][head_name].load_state_dict(head_state)
+                self._heads[block_name][head_name].load_state_dict(head_state, strict)
 
-    def set_classy_state(self, state):
+    def set_classy_state(self, state, strict=True):
         """Set the state of the ClassyModel.
 
         Args:
@@ -259,7 +259,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         This is used to load the state of the model from a checkpoint.
         """
         # load the state for heads
-        self.load_head_states(state)
+        self.load_head_states(state, strict)
 
         # clear the heads to set the trunk's state. This is done because when heads are
         # attached to modules, we wrap them by ClassyBlocks, thereby changing the
@@ -267,7 +267,7 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         # fetched / set when there are no blocks attached.
         attached_heads = self.get_heads()
         self.clear_heads()
-        self.load_state_dict(state["model"]["trunk"])
+        self.load_state_dict(state["model"]["trunk"], strict)
 
         # set the heads back again
         self.set_heads(attached_heads)
