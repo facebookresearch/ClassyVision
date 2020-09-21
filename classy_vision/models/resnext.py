@@ -469,7 +469,7 @@ class ResNeXt(ClassyModel):
         state["version"] = VERSION
         return state
 
-    def set_classy_state(self, state):
+    def set_classy_state(self, state, strict=True):
         version = state.get("version")
         if version is None:
             # convert the weights from the previous implementation of ResNeXt to the
@@ -485,7 +485,7 @@ class ResNeXt(ClassyModel):
             raise ValueError(
                 f"Unsupported ResNeXt version: {version}. Expected: {VERSION}"
             )
-        super().set_classy_state(state)
+        super().set_classy_state(state, strict)
 
 
 class _ResNeXt(ResNeXt):
