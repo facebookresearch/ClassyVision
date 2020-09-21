@@ -14,9 +14,14 @@ from test.generic.config_utils import get_fast_test_task_config, get_test_task_c
 import torch
 import torch.nn as nn
 from classy_vision.generic.util import load_checkpoint
-from classy_vision.heads import FullyConnectedHead
+from classy_vision.heads import FullyConnectedHead, IdentityHead
 from classy_vision.hooks import CheckpointHook
-from classy_vision.models import ClassyModel, ClassyModelWrapper, register_model
+from classy_vision.models import (
+    ClassyModel,
+    ClassyModelWrapper,
+    build_model,
+    register_model,
+)
 from classy_vision.models.classy_model import _ClassyModelAdapter
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
@@ -161,6 +166,18 @@ class TestClassyModel(unittest.TestCase):
             jitted_model = torch.jit.trace(model, input)
             self.assertTrue(torch.allclose(expected_output, model(input)))
             self.assertTrue(torch.allclose(expected_output, jitted_model(input)))
+
+    def test_classy_model_set_state_strict(self):
+        model_1 = build_model(self.get_model_config(use_head=True))
+        model_state_1 = model_1.get_classy_state(deep_copy=True)
+
+        model_2 = build_model(self.get_model_config(use_head=False))
+        model_2.set_heads({"linear": [IdentityHead("default_head")]})
+
+        with self.assertRaises(RuntimeError):
+            model_2.set_classy_state(model_state_1)
+
+        model_2.set_classy_state(model_state_1, strict=False)
 
 
 class TestModel(nn.Module):
