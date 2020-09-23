@@ -123,7 +123,6 @@ class ClassificationTask(ClassyTask):
     :var data_iterator: Iterator which can be used to obtain batches
     :var losses: Loss curve
     :var perf_log: list of training speed measurements, to be logged
-
     """
 
     def __init__(self):
@@ -151,6 +150,7 @@ class ClassificationTask(ClassyTask):
         self.phase_idx = -1
         self.train_phase_idx = -1
         self.num_updates = 0
+        self.dataloader = None
         self.data_iterator = None
         self.losses = []
         self.broadcast_buffers_mode: BroadcastBuffersMode = (
@@ -541,11 +541,6 @@ class ClassificationTask(ClassyTask):
         """
         return self.phase_idx - self.train_phase_idx - 1
 
-    def get_data_iterator(self):
-        """Returns data iterator for current phase
-        """
-        return self.data_iterator
-
     def get_total_training_phases(self):
         """
         Returns the total number of "train" phases in the task
@@ -604,35 +599,31 @@ class ClassificationTask(ClassyTask):
 
         return [{"train": False} for _ in range(self.num_epochs)]
 
-    def build_dataloader(self, phase_type, pin_memory, **kwargs):
-        """Builds a dataloader iterable for a particular phase type.
+    def build_dataloader_from_dataset(self, dataset, **kwargs):
+        """Builds a dataloader from the provided dataset
 
         Args:
-            phase_type: "train" or "test" iterable
-            pin_memory: if true pin memory on GPU. See PyTorch dataloader
-                documentation for details on ``pin_memory``.
-        Returns:
-            Returns a iterable over the dataset
+            dataset: A ClassyDataset
+            kwargs: Additional kwargs to pass during dataloader construction for
+                derived classes
         """
-        return self.datasets[phase_type].iterator(
-            pin_memory=pin_memory, phase_type=phase_type, **kwargs
+        return dataset.iterator(
+            phase_type=self.phase_type,
+            current_phase_id=self.train_phase_idx if self.train else 0,
+            pin_memory=self.use_gpu and torch.cuda.device_count() > 1,
+            multiprocessing_context=mp.get_context(self.dataloader_mp_context),
+            **kwargs,
         )
 
-    def build_dataloaders(self, pin_memory, **kwargs):
-        """Build a dataloader for each phase type
+    def build_dataloaders_for_current_phase(self):
+        """Builds dataloader(s) for the current phase.
 
-        Args:
-            pin_memory: if true pin memory on GPU. See PyTorch dataloader
-                documentation for details on pin_memory.
-        Returns:
-            Returns an iterable over the dataset associated with each phase_type
+        Deriving classes can override this method to support custom behavior, like
+        supporting multiple dataloaders in parallel.
         """
-        return {
-            phase_type: self.build_dataloader(
-                phase_type, pin_memory=pin_memory, **kwargs
-            )
-            for phase_type in self.datasets.keys()
-        }
+        self.dataloader = self.build_dataloader_from_dataset(
+            self.datasets[self.phase_type]
+        )
 
     def prepare_optimizer(self, optimizer, model, loss=None):
         bn_params, other_params = split_batchnorm_params(model)
@@ -653,15 +644,8 @@ class ClassificationTask(ClassyTask):
     def prepare(self):
         """Prepares task for training, populates all derived attributes """
 
-        pin_memory = self.use_gpu and torch.cuda.device_count() > 1
-
         self.phases = self._build_phases()
         self.train = False if self.test_only else self.train
-        self.dataloaders = self.build_dataloaders(
-            current_phase_id=0,
-            pin_memory=pin_memory,
-            multiprocessing_context=mp.get_context(self.dataloader_mp_context),
-        )
 
         if self.batch_norm_sync_mode == BatchNormSyncMode.PYTORCH:
             self.base_model = nn.SyncBatchNorm.convert_sync_batchnorm(self.base_model)
@@ -849,13 +833,6 @@ class ClassificationTask(ClassyTask):
         ):
             self.datasets["train"].set_classy_state(state.get("train_dataset_iterator"))
 
-        # TODO (mannatsingh): Figure out how to set the state of the dataloaders
-        # Re-build dataloader & re-create iterator.
-        self._recreate_data_loader_from_dataset()
-        self.create_data_iterator()
-        # Set up pytorch module in train vs eval mode, update optimizer.
-        self._set_model_train_mode()
-
     @staticmethod
     def _is_checkpointable_dataset(dataset):
         return hasattr(dataset, "get_classy_state") and hasattr(
@@ -867,7 +844,7 @@ class ClassificationTask(ClassyTask):
 
         # Process next sample
         with Timer() as timer:
-            sample = next(self.get_data_iterator())
+            sample = next(self.data_iterator)
 
         assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
@@ -911,7 +888,7 @@ class ClassificationTask(ClassyTask):
 
         # Process next sample
         with Timer() as timer:
-            sample = next(self.get_data_iterator())
+            sample = next(self.data_iterator)
 
         assert isinstance(sample, dict) and "input" in sample and "target" in sample, (
             f"Returned sample [{sample}] is not a map with 'input' and"
@@ -1005,8 +982,8 @@ class ClassificationTask(ClassyTask):
             self.train_phase_idx += 1
 
         # Re-build dataloader & re-create iterator anytime membership changes.
-        self._recreate_data_loader_from_dataset()
-        self.create_data_iterator()
+        self.build_dataloaders_for_current_phase()
+        self.create_data_iterators()
         # Set up pytorch module in train vs eval mode, update optimizer.
         self._set_model_train_mode()
 
@@ -1015,47 +992,13 @@ class ClassificationTask(ClassyTask):
         """
         return self.phase_idx + 1 >= len(self.phases)
 
-    def _recreate_data_loader_from_dataset(self, phase_type=None):
-        """
-        This utility is invoked to re-create the data loader object
-        for the current phase of execution, using the existing dataset.
-        This is sufficient when advancing phases.
-        """
-        if phase_type is None:
-            phase_type = self.phase_type
-
-        logging.debug("Recreating data loader for new phase")
-        num_workers = 0
-        if hasattr(self.dataloaders[phase_type], "num_workers"):
-            num_workers = self.dataloaders[phase_type].num_workers
-        pin_memory = False
-        if hasattr(self.dataloaders[phase_type], "pin_memory"):
-            pin_memory = self.dataloaders[phase_type].pin_memory
-        multiprocessing_context = None
-        if hasattr(self.dataloaders[phase_type], "multiprocessing_context"):
-            multiprocessing_context = self.dataloaders[
-                phase_type
-            ].multiprocessing_context
-        if phase_type == "test":
-            current_phase_id = 0
-        else:
-            current_phase_id = max(self.train_phase_idx, 0)
-
-        self.dataloaders[phase_type] = self.build_dataloader(
-            phase_type=phase_type,
-            num_workers=num_workers,
-            pin_memory=pin_memory,
-            multiprocessing_context=multiprocessing_context,
-            current_phase_id=current_phase_id,
-        )
-
-    def create_data_iterator(self):
-        """Creates data iterator for phase.
+    def create_data_iterators(self):
+        """Creates data iterator(s) for the current phase.
         """
         # Delete iterator explicitly so that all dataloader processes
         # are cleaned up.
         del self.data_iterator
-        self.data_iterator = iter(self.dataloaders[self.phase_type])
+        self.data_iterator = iter(self.dataloader)
 
     def _set_model_train_mode(self):
         """Set train mode for model
@@ -1085,13 +1028,12 @@ class ClassificationTask(ClassyTask):
     def get_batchsize_per_replica(self):
         """Return local replica's batchsize for dataset (e.g. batchsize per GPU)
         """
-        # TODO(T47573564) - cleaner abstraction
-        return self.dataloaders[self.phase_type].dataset.get_batchsize_per_replica()
+        return self.datasets[self.phase_type].get_batchsize_per_replica()
 
     def get_global_batchsize(self):
         """Return global batchsize across all trainers
         """
-        return self.dataloaders[self.phase_type].dataset.get_global_batchsize()
+        return self.datasets[self.phase_type].get_global_batchsize()
 
     def on_start(self):
         for hook in self.hooks:
