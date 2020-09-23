@@ -8,6 +8,9 @@ import os
 from functools import wraps
 
 import torch
+from classy_vision.hooks import ClassyHook
+from classy_vision.tasks import ClassyTask
+from classy_vision.trainer import ClassyTrainer
 
 
 class Arguments(object):
@@ -263,3 +266,35 @@ def compare_states(test_fixture, state_1, state_2, check_heads=True):
         del state_1[key]
         del state_2[key]
     test_fixture.assertDictEqual(state_1, state_2)
+
+
+class LimitedPhaseException(Exception):
+    pass
+
+
+class LimitedPhaseHook(ClassyHook):
+    on_start = ClassyHook._noop
+    on_phase_start = ClassyHook._noop
+    on_step = ClassyHook._noop
+    on_end = ClassyHook._noop
+
+    def __init__(self, num_phases: int):
+        self.num_phases = num_phases
+        self.phase_counter = 0
+
+    def on_phase_end(self, task):
+        if self.phase_counter >= self.num_phases:
+            raise LimitedPhaseException
+        self.phase_counter += 1
+
+
+class LimitedPhaseTrainer(ClassyTrainer):
+    def __init__(self, num_phases: int):
+        self.num_phases = num_phases
+
+    def train(self, task: ClassyTask):
+        task.hooks = task.hooks + [LimitedPhaseHook(self.num_phases)]
+        try:
+            super().train(task)
+        except LimitedPhaseException:
+            pass

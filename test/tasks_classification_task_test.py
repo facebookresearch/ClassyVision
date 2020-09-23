@@ -9,7 +9,12 @@ import shutil
 import tempfile
 import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
-from test.generic.utils import compare_model_state, compare_samples, compare_states
+from test.generic.utils import (
+    LimitedPhaseTrainer,
+    compare_model_state,
+    compare_samples,
+    compare_states,
+)
 
 import torch
 from classy_vision.dataset import build_dataset
@@ -126,29 +131,21 @@ class TestClassificationTask(unittest.TestCase):
 
         task.set_use_gpu(torch.cuda.is_available())
 
-        # prepare the tasks for the right device
-        task.prepare()
+        # only train 1 phase at a time
+        trainer = LimitedPhaseTrainer(num_phases=1)
 
-        # test in both train and test mode
-        for _ in range(2):
-            task.advance_phase()
-
+        while not task.done_training():
             # set task's state as task_2's checkpoint
             task_2._set_checkpoint_dict(get_checkpoint_dict(task, {}, deep_copy=True))
-            task_2.prepare()
 
-            # task 2 should have the same state
+            # task 2 should have the same state before training
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
-            # this tests that both states' iterators return the same samples
-            sample = next(task.get_data_iterator())
-            sample_2 = next(task_2.get_data_iterator())
-            self._compare_samples(sample, sample_2)
+            # train for one phase
+            trainer.train(task)
+            trainer.train(task_2)
 
-            # test that the train step runs the same way on both states
-            # and the loss remains the same
-            task.train_step()
-            task_2.train_step()
+            # task 2 should have the same state after training
             self._compare_states(task.get_classy_state(), task_2.get_classy_state())
 
     def test_final_train_checkpoint(self):
