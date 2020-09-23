@@ -27,9 +27,7 @@ class ProfilerHook(ClassyHook):
     def on_start(self, task) -> None:
         """Profile the forward pass."""
         logging.info("Profiling forward pass...")
-        batchsize_per_replica = getattr(
-            task.dataloaders[task.phase_type].dataset, "batchsize_per_replica", 1
-        )
+        batchsize_per_replica = task.get_batchsize_per_replica()
         input_shape = task.base_model.input_shape
         p = profile(
             task.model,

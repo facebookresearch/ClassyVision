@@ -43,11 +43,11 @@ class TestDataloaderLimitWrapper(unittest.TestCase):
         self.assertEqual(task.num_batches_per_phase, expected_batches)
 
         # test that the data iterator returns the expected number of batches
-        data_iterator = task.get_data_iterator()
+        data_iterator = task.data_iterator
         self._test_number_of_batches(data_iterator, expected_batches)
 
-        # test that the dataloader can be rebuilt from the dataset inside it
-        task._recreate_data_loader_from_dataset()
-        task.create_data_iterator()
-        data_iterator = task.get_data_iterator()
+        # test that the dataloader can be rebuilt
+        task.build_dataloaders_for_current_phase()
+        task.create_data_iterators()
+        data_iterator = task.data_iterator
         self._test_number_of_batches(data_iterator, expected_batches)

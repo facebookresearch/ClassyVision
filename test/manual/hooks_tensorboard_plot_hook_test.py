@@ -61,6 +61,7 @@ class TestTensorboardPlotHook(HookTestBase):
             config["dataset"]["test"]["batchsize_per_replica"] = 5
             task = build_task(config)
             task.prepare()
+            task.advance_phase()
             task.phase_idx = phase_idx
             task.train = train
 
