@@ -81,7 +81,7 @@ def build_model(config):
             heads[fork_block].append(head)
         model.set_heads(heads)
 
-    log_class_usage("Model", model)
+    log_class_usage("Model", model.__class__)
 
     return model
 
