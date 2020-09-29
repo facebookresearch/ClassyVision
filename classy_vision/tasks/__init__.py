@@ -28,7 +28,7 @@ def build_task(config):
     (see :func:`register_task`) and call .from_config on it."""
 
     task = TASK_REGISTRY[config["name"]].from_config(config)
-    log_class_usage("Task", task)
+    log_class_usage("Task", task.__class__)
 
     return task
 
