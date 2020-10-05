@@ -93,9 +93,8 @@ class MultiStepParamScheduler(ClassyParamScheduler):
             assert (
                 isinstance(config["milestones"], list)
                 and len(config["milestones"]) == len(config["values"]) - 1
-            ), (
-                "Non-Equi Step scheduler requires a list of %d epochs"
-                % (len(config["values"]) - 1)
+            ), "Non-Equi Step scheduler requires a list of %d epochs" % (
+                len(config["values"]) - 1
             )
 
         return cls(
