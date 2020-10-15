@@ -91,8 +91,7 @@ class TorchscriptHook(ClassyHook):
             raise FileNotFoundError(err_msg)
 
     def on_end(self, task) -> None:
-        """Save model into torchscript by the end of training.
-        """
+        """Save model into torchscript by the end of training."""
         if not is_primary() or getattr(task, "test_only", False):
             return
         self.save_torchscript(task)

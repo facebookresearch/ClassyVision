@@ -137,16 +137,12 @@ class ClassyHubInterface:
         return iter(dataset.iterator())
 
     def train(self) -> None:
-        """Sets the model to train mode and enables torch gradient calculation
-
-        """
+        """Sets the model to train mode and enables torch gradient calculation"""
         torch.autograd.set_grad_enabled(True)
         self.model.train()
 
     def eval(self) -> None:
-        """Sets the model to eval mode and disables torch gradient calculation
-
-        """
+        """Sets the model to eval mode and disables torch gradient calculation"""
         torch.autograd.set_grad_enabled(False)
         self.model.eval()
 

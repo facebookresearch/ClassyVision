@@ -77,7 +77,7 @@ class _DenseLayer(nn.Sequential):
 
 class _Transition(nn.Sequential):
     """
-        Transition layer to reduce spatial resolution.
+    Transition layer to reduce spatial resolution.
     """
 
     def __init__(self, in_planes, out_planes, reduction=2):
@@ -115,23 +115,23 @@ class DenseNet(ClassyModel):
         se_reduction_ratio=16,
     ):
         """
-            Implementation of a standard densely connected network (DenseNet).
+        Implementation of a standard densely connected network (DenseNet).
 
-            Contains the following attachable blocks:
-                block{block_idx}-{idx}: This is the output of each dense block,
-                    indexed by the block index and the index of the dense layer
-                transition-{idx}: This is the output of the transition layers
-                trunk_output: The final output of the `DenseNet`. This is
-                    where a `fully_connected` head is normally attached.
+        Contains the following attachable blocks:
+            block{block_idx}-{idx}: This is the output of each dense block,
+                indexed by the block index and the index of the dense layer
+            transition-{idx}: This is the output of the transition layers
+            trunk_output: The final output of the `DenseNet`. This is
+                where a `fully_connected` head is normally attached.
 
-            Args:
-                small_input: set to `True` for 32x32 sized image inputs.
-                final_bn_relu: set to `False` to exclude the final batchnorm and
-                    ReLU layers. These settings are useful when training Siamese
-                    networks.
-                use_se: Enable squeeze and excitation
-                se_reduction_ratio: The reduction ratio to apply in the excitation
-                    stage. Only used if `use_se` is `True`.
+        Args:
+            small_input: set to `True` for 32x32 sized image inputs.
+            final_bn_relu: set to `False` to exclude the final batchnorm and
+                ReLU layers. These settings are useful when training Siamese
+                networks.
+            use_se: Enable squeeze and excitation
+            se_reduction_ratio: The reduction ratio to apply in the excitation
+                stage. Only used if `use_se` is `True`.
         """
         super().__init__()
 

@@ -20,7 +20,7 @@ INPLACE = True
 @register_model("resnet")
 class ResNet(ResNeXt):
     """
-        ResNet is a special case of :class:`ResNeXt`.
+    ResNet is a special case of :class:`ResNeXt`.
     """
 
     def __init__(self, **kwargs):

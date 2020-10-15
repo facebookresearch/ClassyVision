@@ -126,8 +126,7 @@ class ClassificationTask(ClassyTask):
     """
 
     def __init__(self):
-        """Constructs a ClassificationTask
-        """
+        """Constructs a ClassificationTask"""
         super().__init__()
 
         self.base_loss = None
@@ -511,34 +510,29 @@ class ClassificationTask(ClassyTask):
 
     @property
     def num_batches_per_phase(self):
-        """Returns number of batches in current phase iterator
-        """
+        """Returns number of batches in current phase iterator"""
         return len(self.data_iterator)
 
     @property
     def model(self):
-        """Returns model used in training (can be wrapped with DDP)
-        """
+        """Returns model used in training (can be wrapped with DDP)"""
         return (
             self.distributed_model if is_distributed_training_run() else self.base_model
         )
 
     @property
     def loss(self):
-        """Returns loss used in training (can be wrapped with DDP)
-        """
+        """Returns loss used in training (can be wrapped with DDP)"""
         return self.distributed_loss if self.distributed_loss else self.base_loss
 
     @property
     def phase_type(self):
-        """Returns current phase type. String with value "train" or "test"
-        """
+        """Returns current phase type. String with value "train" or "test" """
         return "train" if self.train else "test"
 
     @property
     def eval_phase_idx(self):
-        """Returns current evaluation phase
-        """
+        """Returns current evaluation phase"""
         return self.phase_idx - self.train_phase_idx - 1
 
     def get_total_training_phases(self):
@@ -988,21 +982,18 @@ class ClassificationTask(ClassyTask):
         self._set_model_train_mode()
 
     def done_training(self):
-        """Stop condition for training
-        """
+        """Stop condition for training"""
         return self.phase_idx + 1 >= len(self.phases)
 
     def create_data_iterators(self):
-        """Creates data iterator(s) for the current phase.
-        """
+        """Creates data iterator(s) for the current phase."""
         # Delete iterator explicitly so that all dataloader processes
         # are cleaned up.
         del self.data_iterator
         self.data_iterator = iter(self.dataloader)
 
     def _set_model_train_mode(self):
-        """Set train mode for model
-        """
+        """Set train mode for model"""
         phase = self.phases[self.phase_idx]
         self.base_model.train(phase["train"])
         self.base_loss.train(phase["train"])
@@ -1026,13 +1017,11 @@ class ClassificationTask(ClassyTask):
     # TODO: Functions below should be better abstracted into the dataloader
     # abstraction
     def get_batchsize_per_replica(self):
-        """Return local replica's batchsize for dataset (e.g. batchsize per GPU)
-        """
+        """Return local replica's batchsize for dataset (e.g. batchsize per GPU)"""
         return self.datasets[self.phase_type].get_batchsize_per_replica()
 
     def get_global_batchsize(self):
-        """Return global batchsize across all trainers
-        """
+        """Return global batchsize across all trainers"""
         return self.datasets[self.phase_type].get_global_batchsize()
 
     def on_start(self):

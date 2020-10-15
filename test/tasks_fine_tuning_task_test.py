@@ -22,8 +22,7 @@ from torch.nn.modules.loss import CrossEntropyLoss
 
 @register_loss("batchnorm_cross_entropy_loss")
 class BatchNormCrossEntropyLoss(ClassyLoss):
-    """A special loss containing a BatchNorm module
-    """
+    """A special loss containing a BatchNorm module"""
 
     def __init__(self, num_classes):
         super().__init__()

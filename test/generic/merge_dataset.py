@@ -7,22 +7,22 @@
 
 class MergeDataset:
     """
-        Dataset that merges samples from multiple datasets into single sample.
+    Dataset that merges samples from multiple datasets into single sample.
 
-        If datasets have distinct keys, then we merge dicts, e.g.
+    If datasets have distinct keys, then we merge dicts, e.g.
 
-            dataset1[idx] = {'input': input_tensor}
-            dataset2[idx] = {'target': target_tensor}
-            merged_dataset[idx] = {'input': input_tensor, 'target': target_tensor}
+        dataset1[idx] = {'input': input_tensor}
+        dataset2[idx] = {'target': target_tensor}
+        merged_dataset[idx] = {'input': input_tensor, 'target': target_tensor}
 
-        If datasets have matching keys then we create a list and append, e.g.
+    If datasets have matching keys then we create a list and append, e.g.
 
-            dataset1[idx] = {'input': input_tensor1}
-            dataset2[idx] = {'input': input_tensor2}
-            merged_dataset[idx] = {'input': [input_tensor1, input_tensor2]}
+        dataset1[idx] = {'input': input_tensor1}
+        dataset2[idx] = {'input': input_tensor2}
+        merged_dataset[idx] = {'input': [input_tensor1, input_tensor2]}
 
-        Note, if your datasets' samples do not have consistent keys for each sample,
-        this could lead to inconsistent samples merged samples.
+    Note, if your datasets' samples do not have consistent keys for each sample,
+    this could lead to inconsistent samples merged samples.
     """
 
     def __init__(self, datasets):

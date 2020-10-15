@@ -97,8 +97,7 @@ class PrecisionAtKMeter(ClassyMeter):
         }
 
     def get_classy_state(self):
-        """Contains the states of the meter.
-        """
+        """Contains the states of the meter."""
         return {
             "name": self.name,
             "top_k": self._topk,

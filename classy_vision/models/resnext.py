@@ -49,8 +49,8 @@ def conv1x1(in_planes, out_planes, stride=1):
 
 class GenericLayer(nn.Module):
     """
-        Parent class for 2-layer (BasicLayer) and 3-layer (BottleneckLayer)
-        bottleneck layer class
+    Parent class for 2-layer (BasicLayer) and 3-layer (BottleneckLayer)
+    bottleneck layer class
     """
 
     def __init__(
@@ -122,8 +122,8 @@ class GenericLayer(nn.Module):
 
 class BasicLayer(GenericLayer):
     """
-        ResNeXt layer with `in_planes` input planes and `out_planes`
-        output planes.
+    ResNeXt layer with `in_planes` input planes and `out_planes`
+    output planes.
     """
 
     def __init__(
@@ -167,8 +167,8 @@ class BasicLayer(GenericLayer):
 
 class BottleneckLayer(GenericLayer):
     """
-        ResNeXt bottleneck layer with `in_planes` input planes, `out_planes`
-        output planes, and a bottleneck `reduction`.
+    ResNeXt bottleneck layer with `in_planes` input planes, `out_planes`
+    output planes, and a bottleneck `reduction`.
     """
 
     def __init__(
@@ -223,7 +223,7 @@ class BottleneckLayer(GenericLayer):
 
 class SmallInputInitialBlock(nn.Module):
     """
-        ResNeXt initial block for small input with `in_planes` input planes
+    ResNeXt initial block for small input with `in_planes` input planes
     """
 
     def __init__(self, init_planes):
@@ -240,7 +240,7 @@ class SmallInputInitialBlock(nn.Module):
 
 class InitialBlock(nn.Module):
     """
-        ResNeXt initial block with `in_planes` input planes
+    ResNeXt initial block with `in_planes` input planes
     """
 
     def __init__(self, init_planes):
@@ -274,16 +274,16 @@ class ResNeXt(ClassyModel):
         se_reduction_ratio: int = 16,
     ):
         """
-            Implementation of `ResNeXt <https://arxiv.org/pdf/1611.05431.pdf>`_.
+        Implementation of `ResNeXt <https://arxiv.org/pdf/1611.05431.pdf>`_.
 
-            Args:
-                small_input: set to `True` for 32x32 sized image inputs.
-                final_bn_relu: set to `False` to exclude the final batchnorm and
-                    ReLU layers. These settings are useful when training Siamese
-                    networks.
-                use_se: Enable squeeze and excitation
-                se_reduction_ratio: The reduction ratio to apply in the excitation
-                    stage. Only used if `use_se` is `True`.
+        Args:
+            small_input: set to `True` for 32x32 sized image inputs.
+            final_bn_relu: set to `False` to exclude the final batchnorm and
+                ReLU layers. These settings are useful when training Siamese
+                networks.
+            use_se: Enable squeeze and excitation
+            se_reduction_ratio: The reduction ratio to apply in the excitation
+                stage. Only used if `use_se` is `True`.
         """
         super().__init__()
 
