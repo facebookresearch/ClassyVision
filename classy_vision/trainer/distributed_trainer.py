@@ -62,8 +62,7 @@ def _init_distributed(use_gpu: bool):
 
 
 class DistributedTrainer(ClassyTrainer):
-    """Distributed trainer for using multiple training processes
-    """
+    """Distributed trainer for using multiple training processes"""
 
     def train(self, task):
         _init_env_vars(task.use_gpu)

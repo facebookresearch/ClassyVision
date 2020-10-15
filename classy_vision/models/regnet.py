@@ -369,7 +369,7 @@ class RegNetParams:
         self.relu_in_place = RELU_IN_PLACE
 
     def get_expanded_params(self):
-        """ Programatically compute all the per-block settings,
+        """Programatically compute all the per-block settings,
         given the RegNet parameters.
 
         The first step is to compute the quantized linear block parameters,

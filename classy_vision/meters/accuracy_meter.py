@@ -17,7 +17,7 @@ from . import register_meter
 @register_meter("accuracy")
 class AccuracyMeter(ClassyMeter):
     """Meter to calculate top-k accuracy for single label/ multi label
-       image classification task.
+    image classification task.
     """
 
     def __init__(self, topk):
@@ -96,8 +96,7 @@ class AccuracyMeter(ClassyMeter):
         }
 
     def get_classy_state(self):
-        """Contains the states of the meter.
-        """
+        """Contains the states of the meter."""
         return {
             "name": self.name,
             "top_k": self._topk,

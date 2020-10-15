@@ -164,7 +164,7 @@ class ClassyOptimizer(ABC):
 
         If UpdateInterval is None, updates all schedulers, regardless whether
         they are configured as epoch or step. Returns a list of dictionaries in
-        the param_groups format. """
+        the param_groups format."""
 
         param_groups = []
         for pg in self._param_group_schedulers:

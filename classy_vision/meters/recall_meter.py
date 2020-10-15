@@ -17,7 +17,7 @@ from . import register_meter
 @register_meter("recall_at_k")
 class RecallAtKMeter(ClassyMeter):
     """Meter to calculate top-k recall for single-label or multi-label
-       image classification task.
+    image classification task.
     """
 
     def __init__(self, topk, target_is_one_hot=True, num_classes=None):
@@ -96,8 +96,7 @@ class RecallAtKMeter(ClassyMeter):
         }
 
     def get_classy_state(self):
-        """Contains the states of the meter.
-        """
+        """Contains the states of the meter."""
         return {
             "name": self.name,
             "top_k": self._topk,

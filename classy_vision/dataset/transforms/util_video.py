@@ -247,8 +247,7 @@ class DummyAudioTransform(ClassyTransform):
     """
 
     def __init__(self):
-        """The constructor method of DummyAudioTransform class.
-        """
+        """The constructor method of DummyAudioTransform class."""
 
         pass
 

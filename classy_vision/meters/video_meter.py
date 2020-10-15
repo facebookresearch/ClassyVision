@@ -51,8 +51,7 @@ class VideoMeter(ClassyMeter):
         raise NotImplementedError
 
     def get_classy_state(self):
-        """Contains the states of the meter.
-        """
+        """Contains the states of the meter."""
         state = {}
         state["meter_state"] = self.meter.get_classy_state()
         state["name"] = self.name

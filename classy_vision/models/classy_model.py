@@ -404,14 +404,12 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
 
     @property
     def input_shape(self):
-        """If implemented, returns expected input tensor shape
-        """
+        """If implemented, returns expected input tensor shape"""
         raise NotImplementedError
 
     @property
     def model_depth(self):
-        """If implemented, returns number of layers in model
-        """
+        """If implemented, returns number of layers in model"""
         raise NotImplementedError
 
 

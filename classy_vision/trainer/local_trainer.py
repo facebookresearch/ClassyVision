@@ -13,8 +13,7 @@ from .classy_trainer import ClassyTrainer
 
 
 class LocalTrainer(ClassyTrainer):
-    """Trainer to be used if you want want use only a single training process.
-    """
+    """Trainer to be used if you want want use only a single training process."""
 
     def train(self, task):
         if task.use_gpu:

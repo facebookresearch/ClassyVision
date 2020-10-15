@@ -32,8 +32,7 @@ class ImagenetConstants:
 
 @register_transform("apply_transform_to_key")
 class ApplyTransformToKey:
-    """Serializable class that applies a transform to a key specified field in samples.
-    """
+    """Serializable class that applies a transform to a key specified field in samples."""
 
     def __init__(self, transform: Callable, key: Union[int, str] = "input") -> None:
         """The constructor method of ApplyTransformToKey class.

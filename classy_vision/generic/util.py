@@ -552,8 +552,7 @@ def _train_mode(model: nn.Module, train_mode: bool):
 
 
 def log_class_usage(component_type, klass):
-    """This function is used to log the usage of different Classy components.
-    """
+    """This function is used to log the usage of different Classy components."""
     identifier = "ClassyVision"
     if klass and hasattr(klass, "__name__"):
         identifier += f".{component_type}.{klass.__name__}"

@@ -47,7 +47,7 @@ class LightingTransform(ClassyTransform):
 
     def __call__(self, img):
         """
-            img: (C x H x W) Tensor with values in range [0.0, 1.0]
+        img: (C x H x W) Tensor with values in range [0.0, 1.0]
         """
         assert (
             img.min() >= 0.0 and img.max() <= 1.0
