@@ -161,6 +161,7 @@ class ClassificationTask(ClassyTask):
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
         self.find_unused_parameters = True
+        self.gradient_as_bucket_view = True
         self.use_gpu = torch.cuda.is_available()
         self.dataloader_mp_context = "spawn"
         self.bn_weight_decay = False
@@ -274,6 +275,7 @@ class ClassificationTask(ClassyTask):
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
         batch_norm_sync_group_size: int = 0,
         find_unused_parameters: bool = True,
+        gradient_as_bucket_view: bool = True,
     ):
         """Set distributed options.
 
@@ -287,6 +289,8 @@ class ClassificationTask(ClassyTask):
                 efficient synchronization, set it to the number of GPUs in a node (
                 usually 8).
             find_unused_parameters: See
+                :class:`torch.nn.parallel.DistributedDataParallel` for information.
+            gradient_as_bucket_view: See
                 :class:`torch.nn.parallel.DistributedDataParallel` for information.
 
         Raises:
@@ -317,6 +321,7 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = batch_norm_sync_mode
 
         self.find_unused_parameters = find_unused_parameters
+        self.gradient_as_bucket_view = gradient_as_bucket_view
 
         return self
 
@@ -473,6 +478,9 @@ class ClassificationTask(ClassyTask):
             ),
             "find_unused_parameters": distributed_config.get(
                 "find_unused_parameters", True
+            ),
+            "gradient_as_bucket_view": distributed_config.get(
+                "gradient_as_bucket_view", True
             ),
         }
 
@@ -718,6 +726,7 @@ class ClassificationTask(ClassyTask):
             self.base_model,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=self.find_unused_parameters,
+            gradient_as_bucket_view=self.gradient_as_bucket_view,
         )
         if (
             isinstance(self.base_loss, ClassyLoss)
@@ -728,6 +737,7 @@ class ClassificationTask(ClassyTask):
                 self.base_loss,
                 broadcast_buffers=broadcast_buffers,
                 find_unused_parameters=self.find_unused_parameters,
+                gradient_as_bucket_view=self.gradient_as_bucket_view,
             )
 
     @property
