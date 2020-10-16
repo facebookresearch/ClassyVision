@@ -219,6 +219,7 @@ def init_distributed_data_parallel_model(
     model: torch.nn.Module,
     broadcast_buffers: bool = False,
     find_unused_parameters: bool = True,
+    gradient_as_bucket_view: bool = False,
 ) -> torch.nn.parallel.DistributedDataParallel:
     global _cuda_device_index
 
@@ -228,6 +229,7 @@ def init_distributed_data_parallel_model(
             model,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=find_unused_parameters,
+            gradient_as_bucket_view=gradient_as_bucket_view,
         )
     else:
         # GPU model
@@ -237,6 +239,7 @@ def init_distributed_data_parallel_model(
             output_device=_cuda_device_index,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=find_unused_parameters,
+            gradient_as_bucket_view=gradient_as_bucket_view,
         )
 
 
