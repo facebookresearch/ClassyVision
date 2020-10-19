@@ -19,6 +19,7 @@ class FineTuningTask(ClassificationTask):
         super().__init__(*args, **kwargs)
         self.pretrained_checkpoint_dict = None
         self.pretrained_checkpoint_path = None
+        self.pretrained_checkpoint_load_strict = True
         self.reset_heads = False
         self.freeze_trunk = False
 
@@ -38,6 +39,9 @@ class FineTuningTask(ClassificationTask):
         pretrained_checkpoint_path = config.get("pretrained_checkpoint")
         if pretrained_checkpoint_path:
             task.set_pretrained_checkpoint(pretrained_checkpoint_path)
+            task.set_pretrained_checkpoint_load_strict(
+                config.get("pretrained_checkpoint_load_strict", True)
+            )
 
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
@@ -45,6 +49,12 @@ class FineTuningTask(ClassificationTask):
 
     def set_pretrained_checkpoint(self, checkpoint_path: str) -> "FineTuningTask":
         self.pretrained_checkpoint_path = checkpoint_path
+        return self
+
+    def set_pretrained_checkpoint_load_strict(
+        self, pretrained_checkpoint_load_strict: bool
+    ):
+        self.pretrained_checkpoint_load_strict = pretrained_checkpoint_load_strict
         return self
 
     def _set_pretrained_checkpoint_dict(
@@ -93,6 +103,7 @@ class FineTuningTask(ClassificationTask):
                 self.base_model,
                 self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
                 self.reset_heads,
+                self.pretrained_checkpoint_load_strict,
             )
             assert (
                 state_load_success
