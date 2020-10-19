@@ -274,7 +274,9 @@ def load_checkpoint(
     return checkpoint
 
 
-def update_classy_model(model, model_state_dict: Dict, reset_heads: bool) -> bool:
+def update_classy_model(
+    model, model_state_dict: Dict, reset_heads: bool, strict: bool = True
+) -> bool:
     """
     Updates the model with the provided model state dictionary.
 
@@ -283,6 +285,8 @@ def update_classy_model(model, model_state_dict: Dict, reset_heads: bool) -> boo
         model_state_dict: State dict, should be the output of a call to
             ClassyVisionModel.get_classy_state().
         reset_heads: if False, uses the heads' state from model_state_dict.
+        strict: if True, strictly match the module/buffer keys in current model and
+            pass-in model_state_dict
     """
     try:
         if reset_heads:
@@ -291,7 +295,7 @@ def update_classy_model(model, model_state_dict: Dict, reset_heads: bool) -> boo
             model_state_dict["model"]["heads"] = current_model_state_dict["model"][
                 "heads"
             ]
-        model.set_classy_state(model_state_dict)
+        model.set_classy_state(model_state_dict, strict=strict)
         logging.info("Model state load successful")
         return True
     except Exception:

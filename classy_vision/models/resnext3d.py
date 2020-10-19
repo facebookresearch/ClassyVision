@@ -174,7 +174,7 @@ class ResNeXt3DBase(ClassyModel):
                 nn.init.normal_(m.weight, mean=0.0, std=0.01)
                 nn.init.constant_(m.bias, 0)
 
-    def set_classy_state(self, state):
+    def set_classy_state(self, state, strict=True):
         # We need to support both regular checkpoint loading and 2D conv weight
         # inflation into 3D conv weight in this function.
         self.load_head_states(state)
@@ -222,7 +222,7 @@ class ResNeXt3DBase(ClassyModel):
                 )
 
             current_state[name] = weight_src.clone()
-        self.load_state_dict(current_state)
+        self.load_state_dict(current_state, strict=strict)
 
         # set the heads back again
         self.set_heads(attached_heads)
