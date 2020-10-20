@@ -121,6 +121,12 @@ def add_generic_args(parser):
         help="""Distributed backend: either 'none' (for non-distributed runs)
              or 'ddp' (for distributed runs). Default none.""",
     )
+    parser.add_argument(
+        "--ema_decay",
+        default=0,
+        type=float,
+        help="""Decay rate of model Exponential Moving Averaging""",
+    )
 
     return parser
 
