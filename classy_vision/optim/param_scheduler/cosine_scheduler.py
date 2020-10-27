@@ -13,11 +13,12 @@ from . import ClassyParamScheduler, UpdateInterval, register_param_scheduler
 @register_param_scheduler("cosine")
 class CosineParamScheduler(ClassyParamScheduler):
     """
-    Changes the param value after every epoch based on a `cosine schedule <https:
-    //arxiv.org/pdf/1608.03983.pdf>`_.
-    Can be used for either cosine decay or cosine warmup schedules based on
-    start and end values.
-    The schedule is updated after every train step by default.
+    Cosine decay or cosine warmup schedules based on start and end values.
+    The schedule is updated after every train step by default based on the
+    fraction of samples seen. The schedule was proposed in 'SGDR: Stochastic
+    Gradient Descent with Warm Restarts' (https://arxiv.org/abs/1608.03983).
+    Note that this class only implements the cosine annealing part of SGDR,
+    and not the restarts.
 
     Example:
 
