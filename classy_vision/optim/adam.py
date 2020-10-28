@@ -48,7 +48,7 @@ class Adam(ClassyOptimizer):
                 See :func:`__init__` for parameters expected in the config.
 
         Returns:
-            A Adam instance.
+            An Adam instance.
         """
         # Default params
         config.setdefault("lr", 0.1)
