@@ -953,6 +953,9 @@ class ClassificationTask(ClassyTask):
         synchronized_losses_tensor = all_reduce_mean(losses_tensor)
         self.losses = synchronized_losses_tensor.tolist()
 
+    def extra_work_advance_phase(self):
+        pass
+
     def advance_phase(self):
         """Performs bookkeeping / task updates between phases
 
@@ -975,6 +978,7 @@ class ClassificationTask(ClassyTask):
         if self.train:
             self.train_phase_idx += 1
 
+        self.extra_work_advance_phase()
         # Re-build dataloader & re-create iterator anytime membership changes.
         self.build_dataloaders_for_current_phase()
         self.create_data_iterators()
