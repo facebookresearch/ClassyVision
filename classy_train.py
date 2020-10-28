@@ -117,7 +117,7 @@ def main(args, config):
 
 
 def configure_hooks(args, config):
-    hooks = [LossLrMeterLoggingHook(args.log_freq), ModelComplexityHook()]
+    hooks = [LossLrMeterLoggingHook(args.log_freq), ModelComplexityHook(verbose=True)]
 
     # Make a folder to store checkpoints and tensorboard logging outputs
     suffix = datetime.now().isoformat()
