@@ -30,12 +30,15 @@ class TorchscriptHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_step = ClassyHook._noop
 
-    def __init__(self, torchscript_folder: str, use_trace: bool = True) -> None:
+    def __init__(
+        self, torchscript_folder: str, use_trace: bool = True, device: str = "cpu"
+    ) -> None:
         """The constructor method of TorchscriptHook.
 
         Args:
             torchscript_folder: Folder to store torch scripts in.
             use_trace: set to true for tracing and false for scripting,
+            device: move to device before saving.
         """
         super().__init__()
         assert isinstance(
@@ -44,6 +47,7 @@ class TorchscriptHook(ClassyHook):
 
         self.torchscript_folder: str = torchscript_folder
         self.use_trace: bool = use_trace
+        self.device: str = device
 
     def torchscript_using_trace(self, model):
         input_shape = model.input_shape if hasattr(model, "input_shape") else None
@@ -77,6 +81,7 @@ class TorchscriptHook(ClassyHook):
 
         # save torchscript:
         logging.info("Saving torchscript to '{}'...".format(self.torchscript_folder))
+        torchscript = torchscript.to(self.device)
         torchscript_name = f"{self.torchscript_folder}/{TORCHSCRIPT_FILE}"
         with PathManager.open(torchscript_name, "wb") as f:
             torch.jit.save(torchscript, f)
