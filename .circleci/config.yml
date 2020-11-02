@@ -92,9 +92,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v4-cpu-dependencies-{{ checksum "requirements.txt" }}
+            - v5-cpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v4-cpu-dependencies-
+            - v5-cpu-dependencies-
 
       - <<: *install_dep
 
@@ -105,7 +105,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v4-cpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v5-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -154,9 +154,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-gpu-dependencies-{{ checksum "requirements.txt" }}
+            - v3-gpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v2-gpu-dependencies-
+            - v3-gpu-dependencies-
 
       - <<: *install_dep
 
@@ -171,7 +171,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v2-gpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v3-gpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
