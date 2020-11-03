@@ -9,7 +9,7 @@ from . import ClassyOptimizer, register_optimizer
 class Adadelta(ClassyOptimizer):
     def __init__(
         self,
-        lr: float = 0.1,
+        lr: float = 1.0,
         rho: float = 0.9,
         eps: float = 1e-6,
         weight_decay: float = 0
@@ -33,14 +33,14 @@ class Adadelta(ClassyOptimizer):
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "Adadelta":
-        """Instantiates a Adam from a configuration.
+        """Instantiates a Adadelta from a configuration.
 
         Args:
-            config: A configuration for a Adam.
+            config: A configuration for a Adadelta.
                 See :func:`__init__` for parameters expected in the config.
 
         Returns:
-            An Adam instance.
+            An Adadelta instance.
         """
         # Default params
         config.setdefault("lr", 0.1)
