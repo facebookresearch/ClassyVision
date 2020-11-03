@@ -98,6 +98,7 @@ from .adam import Adam  # isort:skip
 from .rmsprop import RMSProp  # isort:skip
 from .rmsprop_tf import RMSPropTF  # isort:skip
 from .sgd import SGD  # isort:skip
+from .adadelta import Adadelta #isort:skip
 
 __all__ = [
     "Adadelta",
