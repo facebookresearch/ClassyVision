@@ -48,11 +48,6 @@ class Adadelta(ClassyOptimizer):
         config.setdefult("eps", 1e-6)
         config.setdefult("weight_decay", 0)
 
-        assert (
-            type(config["rho"]) == float
-            and config["rho"] >= 0.0
-            and config["rho"] <= 1.0
-        ), "Config must contain a rho value in [0.0, 1.0] for Adaldelta optimizer"
 
         return cls(
             lr=config["lr"]
