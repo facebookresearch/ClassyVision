@@ -5,6 +5,8 @@ from classy_vision.optim.adam import Adadelta
 
 
 class TestAdadeltaOptimizer(TestOptimizer, unittest.Testcase):
+    def _check_momentum_buffer(self):
+        return False
 
     def _get_config(self):
         return {
