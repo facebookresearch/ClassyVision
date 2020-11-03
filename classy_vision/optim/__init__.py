@@ -100,6 +100,7 @@ from .rmsprop_tf import RMSPropTF  # isort:skip
 from .sgd import SGD  # isort:skip
 
 __all__ = [
+    "Adadelta",
     "Adam",
     "ClassyOptimizer",
     "RMSProp",
