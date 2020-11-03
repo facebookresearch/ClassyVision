@@ -43,7 +43,7 @@ class Adadelta(ClassyOptimizer):
             An Adadelta instance.
         """
         # Default params
-        config.setdefault("lr", 0.1)
+        config.setdefault("lr", 1.0)
         config.setdefalt("rho", 0.9)
         config.setdefult("eps", 1e-6)
         config.setdefult("weight_decay", 0)
