@@ -41,8 +41,8 @@ install_python: &install_python
       name: Install Python
       working_directory: ~/
       command: |
-        pyenv install 3.6.1
-        pyenv global 3.6.1
+        pyenv install 3.6.2
+        pyenv global 3.6.2
 
 install_dep: &install_dep
   - run:
