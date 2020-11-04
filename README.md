@@ -13,16 +13,6 @@
 
 --------------------------------------------------------------------------------
 
-[Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutiae of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
-
-* Ease of use. The library features a modular, flexible design that allows anyone to train machine learning models on top of PyTorch using very simple abstractions. The system also has out-of-the-box integration with Amazon Web Services (AWS), facilitating research at scale and making it simple to move between research and production.
-* High performance. Researchers can use the framework to train Resnet50 on ImageNet in as little as 15 minutes, for example.
-* Demonstrated success in training at scale. We’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
-* Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
-* Elastic training. We have also added experimental integration with [PyTorch Elastic](https://github.com/pytorch/elastic), which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
-
-Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases. 
-
 ## News
 
 <details>
@@ -32,7 +22,7 @@ Classy Vision is beta software. The project is under active development and our 
 
 #### New Features
 - Release [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf) model implementation ([#475](https://github.com/facebookresearch/ClassyVision/pull/475))
-- Add support to convert any `PyTorch` model to a `ClassyModel` with the ability to attach heads to it ([[#461](https://github.com/facebookresearch/ClassyVision/pull/461)](https://github.com/facebookresearch/ClassyVision/pull/461))
+- Add support to convert any `PyTorch` model to a `ClassyModel` with the ability to attach heads to it ([#461](https://github.com/facebookresearch/ClassyVision/pull/461)](https://github.com/facebookresearch/ClassyVision/pull/461))
   - Added a corresponding [tutorial](https://classyvision.ai/tutorials/classy_model) on `ClassyModel` and `ClassyHeads` ([#485](https://github.com/facebookresearch/ClassyVision/pull/485))
 - [Squeeze and Excitation](https://arxiv.org/pdf/1709.01507.pdf) support for `ResNe(X)t` and `DenseNet` models ([#426](https://github.com/facebookresearch/ClassyVision/pull/426), [#427](https://github.com/facebookresearch/ClassyVision/pull/427))
 - Made `ClassyHook`s registrable ([#401](https://github.com/facebookresearch/ClassyVision/pull/401)) and configurable ([#402](https://github.com/facebookresearch/ClassyVision/pull/402)) 
@@ -63,13 +53,13 @@ Classy Vision is beta software. The project is under active development and our 
  </summary>
 
 #### Release notes
- - checkpoint_folder renamed to checkpoint_load_path ([#379](https://github.com/facebookresearch/ClassyVision/pull/379))
- - head support on DenseNet ([#383](https://github.com/facebookresearch/ClassyVision/pull/383))
- - Cleaner abstraction in ClassyTask/ClassyTrainer: eval_step, on_start, on_end, …
+ - `checkpoint_folder` renamed to `checkpoint_load_path` ([#379](https://github.com/facebookresearch/ClassyVision/pull/379))
+ - head support on `DenseNet` ([#383](https://github.com/facebookresearch/ClassyVision/pull/383))
+ - Cleaner abstraction in `ClassyTask`/`ClassyTrainer`: `eval_step`, `on_start`, `on_end`, …
  - Speed metrics in TB ([#385](https://github.com/facebookresearch/ClassyVision/pull/385))
- - test_phase_period in ClassificationTask ([#395](https://github.com/facebookresearch/ClassyVision/pull/395))
+ - `test_phase_period` in `ClassificationTask` ([#395](https://github.com/facebookresearch/ClassyVision/pull/395))
  - support for losses with trainable parameters ([#394](https://github.com/facebookresearch/ClassyVision/pull/394))
- - Added presets for some typical resNe(X)t configurations: [#405](https://github.com/facebookresearch/ClassyVision/pull/405))
+ - Added presets for some typical `ResNe(X)t` configurations: [#405](https://github.com/facebookresearch/ClassyVision/pull/405))
  </details>
 
 <details>
@@ -78,8 +68,8 @@ Classy Vision is beta software. The project is under active development and our 
  </summary>
 
 #### New features
- - Adam optimizer ([#301](https://github.com/facebookresearch/ClassyVision/pull/301))
- - R(2+1)d units ([#322](https://github.com/facebookresearch/ClassyVision/pull/322))
+ - `Adam` optimizer ([#301](https://github.com/facebookresearch/ClassyVision/pull/301))
+ - `R(2+1)d` units ([#322](https://github.com/facebookresearch/ClassyVision/pull/322))
  - Mixed precision training ([#338](https://github.com/facebookresearch/ClassyVision/pull/338))
  - One-hot targets in meters ([#349](https://github.com/facebookresearch/ClassyVision/pull/349))
 
@@ -94,6 +84,18 @@ This release has been tested on the latest PyTorch (1.4) and torchvision (0.5) r
 - [A new framework for large-scale training of state-of-the-art visual classification models](https://ai.facebook.com/blog/a-new-framework-for-large-scale-training-of-state-of-the-art-visual-classification-models/)
 - [NeurIPS 2019 Expo Workshop Presentation](https://research.fb.com/wp-content/uploads/2019/12/3.-Classy-Vision.key)
 </details>
+
+
+
+[Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutiae of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
+
+* Ease of use. The library features a modular, flexible design that allows anyone to train machine learning models on top of PyTorch using very simple abstractions. The system also has out-of-the-box integration with Amazon Web Services (AWS), facilitating research at scale and making it simple to move between research and production.
+* High performance. Researchers can use the framework to train Resnet50 on ImageNet in as little as 15 minutes, for example.
+* Demonstrated success in training at scale. We’ve used it to replicate the state-of-the-art results from the paper [Exploring the Limits of Weakly Supervised Pretraining](https://arxiv.org/abs/1805.00932).
+* Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
+* Elastic training. We have also added experimental integration with [PyTorch Elastic](https://github.com/pytorch/elastic), which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
+
+Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases. 
 
 ## Installation
 
