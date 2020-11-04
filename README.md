@@ -1,17 +1,3 @@
-<p align="center"><img width="70%" src="website/static/img/cv-logo.png" /></p>
-<p align="center">
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
- </a>
- <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
-  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
- </a>
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
- </a>
-</p>
-
---------------------------------------------------------------------------------
 
 ## News
 
@@ -85,6 +71,22 @@ This release has been tested on the latest PyTorch (1.4) and torchvision (0.5) r
 - [NeurIPS 2019 Expo Workshop Presentation](https://research.fb.com/wp-content/uploads/2019/12/3.-Classy-Vision.key)
 </details>
 
+
+
+<p align="center"><img width="70%" src="website/static/img/cv-logo.png" /></p>
+<p align="center">
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
+ </a>
+ <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
+  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
+ </a>
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+ </a>
+</p>
+
+--------------------------------------------------------------------------------
 
 
 [Classy Vision](http://classyvision.ai) is a new end-to-end, PyTorch-based framework for large-scale training of state-of-the-art image and video classification models. Previous computer vision (CV) libraries have been focused on providing components for users to build their own frameworks for their research. While this approach offers flexibility for researchers, in production settings it leads to duplicative efforts, and requires users to migrate research between frameworks and to relearn the minutiae of efficient distributed training and data loading. Our PyTorch-based CV framework offers a better solution for training at scale and for deploying to production. It offers several notable advantages:
