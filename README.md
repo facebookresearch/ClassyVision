@@ -16,9 +16,9 @@
 ## News
 
 <details open>
- <summary>
+ <summary><b>
   2020-04-29: Classy Vision v0.4 Released
- </summary>
+ </b></summary>
 
 #### New Features
 - Release [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf) model implementation ([#475](https://github.com/facebookresearch/ClassyVision/pull/475))
@@ -48,9 +48,9 @@
 </details>
 
 <details>
- <summary>
+ <summary><b>
   2020-03-06: Classy Vision v0.3 Released
- </summary>
+ </b></summary>
 
 #### Release notes
  - `checkpoint_folder` renamed to `checkpoint_load_path` ([#379](https://github.com/facebookresearch/ClassyVision/pull/379))
@@ -63,9 +63,9 @@
  </details>
 
 <details>
- <summary>
+ <summary><b>
   2020-01-24: Classy Vision v0.2 Released
- </summary>
+ </b></summary>
 
 #### New features
  - `Adam` optimizer ([#301](https://github.com/facebookresearch/ClassyVision/pull/301))
@@ -77,9 +77,9 @@ This release has been tested on the latest PyTorch (1.4) and torchvision (0.5) r
 </details>
 
 <details>
- <summary>
+ <summary><b>
   2019-12-05: Classy Vision v0.1 Released
- </summary>
+ </b></summary>
 
 - [A new framework for large-scale training of state-of-the-art visual classification models](https://ai.facebook.com/blog/a-new-framework-for-large-scale-training-of-state-of-the-art-visual-classification-models/)
 - [NeurIPS 2019 Expo Workshop Presentation](https://research.fb.com/wp-content/uploads/2019/12/3.-Classy-Vision.key)
