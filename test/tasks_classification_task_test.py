@@ -7,6 +7,7 @@
 import copy
 import shutil
 import tempfile
+import itertools
 import unittest
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from test.generic.utils import (
@@ -284,3 +285,24 @@ class TestClassificationTask(unittest.TestCase):
         task = build_task(config)
         task.prepare()
         self.assertIn("alpha", task.get_classy_state()["loss"])
+
+    def test_grad_norm_clip(self):
+        config = get_fast_test_task_config()
+        config["loss"] = {"name": "test_stateful_loss", "in_plane": 256}
+        config["grad_norm_clip"] = grad_norm_clip = 1
+        task = build_task(config)
+        task.prepare()
+
+        # set fake gradients with norm > grad_norm_clip
+        for param in itertools.chain(
+            task.base_model.parameters(), task.base_loss.parameters()
+        ):
+            param.grad = 1.1 + torch.rand(param.shape)
+            self.assertGreater(param.grad.norm(), grad_norm_clip)
+
+        task._clip_grad_norm()
+
+        for param in itertools.chain(
+            task.base_model.parameters(), task.base_loss.parameters()
+        ):
+            self.assertLessEqual(param.grad.norm(), grad_norm_clip)

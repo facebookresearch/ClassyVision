@@ -6,6 +6,7 @@
 
 import copy
 import enum
+import itertools
 import json
 import logging
 import math
@@ -157,6 +158,7 @@ class ClassificationTask(ClassyTask):
         )
         self.amp_args = None
         self.mixup_transform = None
+        self.grad_norm_clip = None
         self.perf_log = []
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
@@ -412,6 +414,24 @@ class ClassificationTask(ClassyTask):
         self.optimizer_schedulers = schedulers
         return self
 
+    def set_grad_norm_clip(
+        self,
+        grad_norm_clip: Optional[float],
+    ) -> "ClassificationTask":
+        """Enable / disable clipping the gradient norm
+
+        Args:
+            grad_norm_clip: The value to clip the gradient by, set to None to disable
+        """
+        if grad_norm_clip is None:
+            logging.info(f"Disabled gradient norm clipping: {grad_norm_clip}")
+        else:
+            logging.info(
+                f"Enabled gradient norm clipping with threshold: {grad_norm_clip}"
+            )
+        self.grad_norm_clip = grad_norm_clip
+        return self
+
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassificationTask":
         """Instantiates a ClassificationTask from a configuration.
@@ -489,6 +509,7 @@ class ClassificationTask(ClassyTask):
             .set_distributed_options(**distributed_options)
             .set_hooks(hooks)
             .set_bn_weight_decay(config.get("bn_weight_decay", False))
+            .set_grad_norm_clip(config.get("grad_norm_clip"))
         )
 
         if not test_only:
@@ -916,6 +937,9 @@ class ClassificationTask(ClassyTask):
         else:
             self.optimizer.backward(local_loss)
 
+        if self.grad_norm_clip is not None:
+            self._clip_grad_norm()
+
         self.check_inf_nan(loss)
 
         self.optimizer.step(where=self.where)
@@ -988,6 +1012,22 @@ class ClassificationTask(ClassyTask):
         # are cleaned up.
         del self.data_iterator
         self.data_iterator = iter(self.dataloader)
+
+    def _clip_grad_norm(self):
+        """Clip the gradient norms based on self.grad_norm_clip"""
+        model_params = (
+            self.base_model.parameters()
+            if self.amp_args is None
+            else apex.amp.master_params(self.optimizer.optimizer)
+        )
+        loss_params = (
+            self.base_loss.parameters()
+            if self._loss_has_learnable_params()
+            else iter(())
+        )
+        nn.utils.clip_grad_norm_(
+            itertools.chain(model_params, loss_params), self.grad_norm_clip
+        )
 
     def _set_model_train_mode(self):
         """Set train mode for model"""
