@@ -719,10 +719,7 @@ class ClassificationTask(ClassyTask):
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=self.find_unused_parameters,
         )
-        if (
-            isinstance(self.base_loss, ClassyLoss)
-            and self.base_loss.has_learned_parameters()
-        ):
+        if self._loss_has_learnable_params():
             logging.info("Initializing distributed loss")
             self.distributed_loss = init_distributed_data_parallel_model(
                 self.base_loss,
@@ -1013,6 +1010,13 @@ class ClassificationTask(ClassyTask):
             logging.info("Synchronizing buffers before evaluation.")
             for buffer in buffers:
                 broadcast(buffer, 0, group=self.distributed_model.process_group)
+
+    def _loss_has_learnable_params(self):
+        """Returns True if the loss has any learnable parameters"""
+        return (
+            isinstance(self.base_loss, ClassyLoss)
+            and self.base_loss.has_learned_parameters()
+        )
 
     # TODO: Functions below should be better abstracted into the dataloader
     # abstraction
