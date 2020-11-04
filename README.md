@@ -1,4 +1,4 @@
-<p align="center"><img width="70%" src="website/static/img/cv-logo.png" /></p>
+<p align="center"><img width="30%" src="website/static/img/cv-logo.png" /></p>
 <p align="center">
  <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
