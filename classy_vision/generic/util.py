@@ -563,6 +563,10 @@ def log_class_usage(component_type, klass):
     torch._C._log_api_usage_once(identifier)
 
 
+def get_torch_version():
+    return torch.__version__[:3]
+
+
 train_model = partial(_train_mode, train_mode=True)
 train_model.__doc__ = """Context manager which puts the model in train mode.
 

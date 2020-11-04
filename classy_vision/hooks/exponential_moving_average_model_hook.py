@@ -10,6 +10,7 @@ from typing import Any, Dict, Iterable, Tuple
 
 import torch
 import torch.nn as nn
+from classy_vision.generic.util import get_torch_version
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
 
@@ -50,6 +51,8 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         self.device = "cuda" if device == "gpu" else "cpu"
         self.state.model_state = {}
         self.state.ema_model_state = {}
+        self.ema_model_state_list = []
+        self.param_list = []
         logging.info(
             f"{self.__class__.__name__} initialized with a decay of "
             f"{decay} on device {device}"
@@ -85,9 +88,23 @@ class ExponentialMovingAverageModelHook(ClassyHook):
                 self.state.ema_model_state[name] = self.state.ema_model_state[name].to(
                     device=self.device
                 )
-            return
-        self._save_current_model_state(task.base_model, self.state.model_state)
-        self._save_current_model_state(task.base_model, self.state.ema_model_state)
+        else:
+            self._save_current_model_state(task.base_model, self.state.model_state)
+            self._save_current_model_state(task.base_model, self.state.ema_model_state)
+
+        if self.use_optimization(task):
+            non_fp_states = []
+            for name in self.state.ema_model_state:
+                if self.state.ema_model_state[name].dtype not in [
+                    torch.float32,
+                    torch.float16,
+                ]:
+                    non_fp_states.append(name)
+            if non_fp_states:
+                logging.warning(
+                    f"In {self.__class__.__name__}, {non_fp_states} are excluded in EMA hook"
+                    f"because the dtype is not fp32 or fp16."
+                )
 
     def on_phase_start(self, task) -> None:
         # restore the right state depending on the phase type
@@ -95,6 +112,18 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             (not task.train and task.ema) if hasattr(task, "ema") else not task.train
         )
         self.set_model_state(task, use_ema=use_ema)
+        if self.use_optimization(task):
+            self.param_list = []
+            self.ema_model_state_list = []
+            for name, param in self.get_model_state_iterator(task.base_model):
+                if param.dtype in [torch.float32, torch.float16]:
+                    self.param_list.append(param)
+                    self.ema_model_state_list.append(self.state.ema_model_state[name])
+        else:
+            logging.warning(
+                "ExponentialMovingAverageModelHook has better performance since PyTorch version 1.7 "
+                "and the ema state is on the same device as the model params"
+            )
 
     def on_phase_end(self, task) -> None:
         if task.train:
@@ -107,14 +136,20 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             return
 
         with torch.no_grad():
-            for name, param in self.get_model_state_iterator(task.base_model):
-                self.state.ema_model_state[
-                    name
-                ] = self.decay * self.state.ema_model_state[name] + (
-                    1 - self.decay
-                ) * param.to(
-                    device=self.device
+            if self.use_optimization(task):
+                torch._foreach_mul_(self.ema_model_state_list, self.decay)
+                torch._foreach_add_(
+                    self.ema_model_state_list, self.param_list, alpha=(1 - self.decay)
                 )
+            else:
+                for name, param in self.get_model_state_iterator(task.base_model):
+                    self.state.ema_model_state[
+                        name
+                    ] = self.decay * self.state.ema_model_state[name] + (
+                        1 - self.decay
+                    ) * param.to(
+                        device=self.device
+                    )
 
     def set_model_state(self, task, use_ema: bool) -> None:
         """
@@ -124,3 +159,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         with torch.no_grad():
             for name, param in self.get_model_state_iterator(task.base_model):
                 param.copy_(model_state[name])
+
+    def use_optimization(self, task):
+        # we can only use the optimization if we are on PyTorch >= 1.7 and the EMA state is on the same device as the model
+        return get_torch_version() >= "1.7" and task.use_gpu == (self.device == "cuda")

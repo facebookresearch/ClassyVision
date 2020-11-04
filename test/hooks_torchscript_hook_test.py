@@ -70,6 +70,8 @@ class TestTorchscriptHook(HookTestBase):
             )
             if torch.cuda.is_available():
                 input_data = input_data.cuda()
+                model = model.cuda()
+                torchscript = torchscript.cuda()
             checkpoint_out = model(input_data)
             torchscript_out = torchscript(input_data)
             self.assertTrue(torch.allclose(checkpoint_out, torchscript_out, atol=1e-5))
