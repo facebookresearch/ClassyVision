@@ -22,7 +22,7 @@
 
 #### New Features
 - Release [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf) model implementation ([#475](https://github.com/facebookresearch/ClassyVision/pull/475))
-- Add support to convert any `PyTorch` model to a `ClassyModel` with the ability to attach heads to it ([#461](https://github.com/facebookresearch/ClassyVision/pull/461)](https://github.com/facebookresearch/ClassyVision/pull/461))
+- Add support to convert any `PyTorch` model to a `ClassyModel` with the ability to attach heads to it ([#461](https://github.com/facebookresearch/ClassyVision/pull/461))
   - Added a corresponding [tutorial](https://classyvision.ai/tutorials/classy_model) on `ClassyModel` and `ClassyHeads` ([#485](https://github.com/facebookresearch/ClassyVision/pull/485))
 - [Squeeze and Excitation](https://arxiv.org/pdf/1709.01507.pdf) support for `ResNe(X)t` and `DenseNet` models ([#426](https://github.com/facebookresearch/ClassyVision/pull/426), [#427](https://github.com/facebookresearch/ClassyVision/pull/427))
 - Made `ClassyHook`s registrable ([#401](https://github.com/facebookresearch/ClassyVision/pull/401)) and configurable ([#402](https://github.com/facebookresearch/ClassyVision/pull/402)) 
