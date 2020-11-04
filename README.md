@@ -1,16 +1,21 @@
-<p align="center"><img width="30%" src="website/static/img/cv-logo.png" /></p>
-<p align="center">
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
- </a>
- <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
-  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
- </a>
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
- </a>
-</p>
-
+<table>
+ <tr>
+  <td><img width="30%" src="website/static/img/cv-logo.png" /></td>
+  <td>
+   <table>
+    <tr><td><a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
+     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
+    </a></td></tr>
+    <tr><td><a href="https://circleci.com/gh/facebookresearch/ClassyVision">
+     <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
+    </a></td></tr>
+    <tr></td><a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
+     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+    </a></td></tr>
+    </table>
+   </td>
+  </tr>
+</table>
 --------------------------------------------------------------------------------
 
 ## News
