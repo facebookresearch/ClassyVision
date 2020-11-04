@@ -15,7 +15,7 @@
 
 ## News
 
-<details>
+<details open>
  <summary>
   2020-04-29: Classy Vision v0.4 Released
  </summary>
