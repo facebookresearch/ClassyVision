@@ -123,6 +123,7 @@ class ClassificationTask(ClassyTask):
     :var data_iterator: Iterator which can be used to obtain batches
     :var losses: Loss curve
     :var perf_log: list of training speed measurements, to be logged
+    :var clip_grad_norm: maximum gradient norm (default None)
     """
 
     def __init__(self):
@@ -165,6 +166,7 @@ class ClassificationTask(ClassyTask):
         self.dataloader_mp_context = "spawn"
         self.bn_weight_decay = False
         self._train_only = True
+        self.clip_grad_norm = None
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -173,6 +175,19 @@ class ClassificationTask(ClassyTask):
             not self.use_gpu or torch.cuda.is_available()
         ), "CUDA required to train on GPUs"
 
+        return self
+
+    def set_clip_grad_norm(self, clip_grad_norm: Optional[float]):
+        """Sets maximum gradient norm.
+
+        None means gradient clipping is disabled. Defaults to None."""
+        self.clip_grad_norm = clip_grad_norm
+        if clip_grad_norm is None:
+            logging.info("Disabled gradient norm clipping.")
+        else:
+            logging.info(
+                f"Enabled gradient norm clipping with threshold: {clip_grad_norm}"
+            )
         return self
 
     def set_checkpoint(self, checkpoint_path: str):
@@ -489,6 +504,7 @@ class ClassificationTask(ClassyTask):
             .set_distributed_options(**distributed_options)
             .set_hooks(hooks)
             .set_bn_weight_decay(config.get("bn_weight_decay", False))
+            .set_clip_grad_norm(config.get("clip_grad_norm"))
         )
 
         if not test_only:
@@ -934,9 +950,18 @@ class ClassificationTask(ClassyTask):
         else:
             self.optimizer.backward(loss)
 
+        if self.clip_grad_norm is not None:
+            self._do_clip_gradients(self.clip_grad_norm)
+
         self.check_inf_nan(loss)
 
         self.optimizer.step(where=self.where)
+
+    def _do_clip_gradients(self, max_norm):
+        nn.utils.clip_grad_norm_(
+            apex.amp.master_params(self.optimizer),
+            max_norm,
+        )
 
     def update_meters(self, model_output, sample):
         target = sample["target"].detach().cpu()
