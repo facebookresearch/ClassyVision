@@ -124,6 +124,7 @@ class ClassificationTask(ClassyTask):
     :var losses: Loss curve
     :var perf_log: list of training speed measurements, to be logged
     :var clip_grad_norm: maximum gradient norm (default None)
+    :var simulated_batch_size: batch size simulated via gradient accumulation
     """
 
     def __init__(self):
@@ -167,6 +168,7 @@ class ClassificationTask(ClassyTask):
         self.bn_weight_decay = False
         self._train_only = True
         self.clip_grad_norm = None
+        self.simulated_batch_size = None
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -188,6 +190,13 @@ class ClassificationTask(ClassyTask):
             logging.info(
                 f"Enabled gradient norm clipping with threshold: {clip_grad_norm}"
             )
+        return self
+
+    def set_simulated_batch_size(self, simulated_batch_size: Optional[int]):
+        """Sets a simulated batch size by gradient accumulation.
+
+        None means gradient accumulation is disabled. Defaults to None."""
+        self.simulated_batch_size = simulated_batch_size
         return self
 
     def set_checkpoint(self, checkpoint_path: str):
@@ -505,6 +514,7 @@ class ClassificationTask(ClassyTask):
             .set_hooks(hooks)
             .set_bn_weight_decay(config.get("bn_weight_decay", False))
             .set_clip_grad_norm(config.get("clip_grad_norm"))
+            .set_simulated_batch_size(config.get("simulated_batch_size"))
         )
 
         if not test_only:
@@ -695,6 +705,15 @@ class ClassificationTask(ClassyTask):
                 self.base_model, self.optimizer.optimizer = apex.amp.initialize(
                     self.base_model, self.optimizer.optimizer, **self.amp_args
                 )
+
+        if self.simulated_batch_size is not None:
+            if self.simulated_batch_size % self.get_global_batchsize() != 0:
+                raise RuntimeError(f"Global batch size ({self.get_global_batchsize()}) " f"must be divisible by simulated_batch_size ({self.simulated_batch_size})")
+        else:
+            self.simulated_batch_size = self.get_global_batchsize()
+
+        self.optimizer_period = self.simulated_batch_size // self.get_global_batchsize()
+
 
         if self.checkpoint_path:
             self.checkpoint_dict = load_and_broadcast_checkpoint(self.checkpoint_path)
@@ -943,19 +962,35 @@ class ClassificationTask(ClassyTask):
     def run_optimizer(self, loss):
         """Runs backwards pass and update the optimizer"""
 
-        if self.amp_args is not None:
+        # Gradient accumulation logic. We always set optimizer_period, even
+        # if gradient accumulation is disabled. Assumes all batches have the
+        # same size
+        update_idx = self.num_updates // self.get_global_batchsize()
+        if (update_idx % self.optimizer_period) == 0:
             self.optimizer.zero_grad()
+
+        if self.amp_args is not None:
             with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
                 scaled_loss.backward()
         else:
-            self.optimizer.backward(loss)
+            loss.backward()
 
-        if self.clip_grad_norm is not None:
-            self._do_clip_gradients(self.clip_grad_norm)
+        if (update_idx % self.optimizer_period) == self.optimizer_period - 1:
+            if self.optimizer_period != 1:
+                self.rescale_gradients(1/self.optimizer_period)
+
+            # Clipping must happen after grad accumulation
+            if self.clip_grad_norm is not None:
+                self._do_clip_gradients(self.clip_grad_norm)
+
+            self.optimizer.step(where=self.where)
 
         self.check_inf_nan(loss)
 
-        self.optimizer.step(where=self.where)
+    def rescale_gradients(self, scale):
+        for param in apex.amp.master_params(self.optimizer):
+            if param.grad is not None:
+                param.grad.data.mul_(scale)
 
     def _do_clip_gradients(self, max_norm):
         nn.utils.clip_grad_norm_(
