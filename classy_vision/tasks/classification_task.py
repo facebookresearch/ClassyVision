@@ -902,26 +902,13 @@ class ClassificationTask(ClassyTask):
             output = self.model(sample["input"])
 
             local_loss = self.compute_loss(output, sample)
-
             loss = local_loss.detach().clone()
-
             self.losses.append(loss.data.cpu().item() * target.size(0))
 
             self.update_meters(output, sample)
 
-        # Run backwards pass / update optimizer
-        if self.amp_args is not None:
-            self.optimizer.zero_grad()
-            with apex.amp.scale_loss(
-                local_loss, self.optimizer.optimizer
-            ) as scaled_loss:
-                scaled_loss.backward()
-        else:
-            self.optimizer.backward(local_loss)
-
-        self.check_inf_nan(loss)
-
-        self.optimizer.step(where=self.where)
+        # Backwards pass + optimizer step
+        self.run_optimizer(local_loss)
 
         self.num_updates += self.get_global_batchsize()
 
@@ -936,6 +923,20 @@ class ClassificationTask(ClassyTask):
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
+
+    def run_optimizer(self, loss):
+        """Runs backwards pass and update the optimizer"""
+
+        if self.amp_args is not None:
+            self.optimizer.zero_grad()
+            with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            self.optimizer.backward(loss)
+
+        self.check_inf_nan(loss)
+
+        self.optimizer.step(where=self.where)
 
     def update_meters(self, model_output, sample):
         target = sample["target"].detach().cpu()
