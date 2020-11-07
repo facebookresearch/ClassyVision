@@ -21,6 +21,14 @@ from fvcore.common.file_io import PathManager
 from torch._six import container_abcs
 
 
+try:
+    import apex
+
+    apex_available = True
+except ImportError:
+    apex_available = False
+
+
 # constants:
 CHECKPOINT_FILE = "checkpoint.torch"
 CPU_DEVICE = torch.device("cpu")
@@ -579,3 +587,16 @@ eval_model.__doc__ = """Context manager which puts the model in eval mode.
 
     After returning, it restores the state of every sub-module individually.
     """
+
+
+def master_params(optimizer):
+    """Generator to iterate over all parameters in the optimizer param_groups.
+
+    When apex is available, uses that to guarantee we get the FP32 copy of the
+    parameters when O2 is enabled. Otherwise, iterate ourselves."""
+    if apex_available:
+        yield from apex.amp.master_params(optimizer)
+    else:
+        for group in optimizer.param_groups:
+            for p in group["params"]:
+                yield p

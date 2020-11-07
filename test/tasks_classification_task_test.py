@@ -49,6 +49,26 @@ class TestStatefulLoss(ClassyLoss):
         return loss
 
 
+# Generate a simple model that has a very high gradient w.r.t. to this
+# loss
+class SimpleModel(ClassyModel):
+    def __init__(self):
+        super().__init__()
+        self.param = nn.Parameter(torch.tensor(5.0), requires_grad=True)
+
+    def forward(self, x):
+        return x + self.param
+
+    @classmethod
+    def from_config(cls):
+        return cls()
+
+
+class SimpleLoss(nn.Module):
+    def forward(self, x, y):
+        return x.pow(2).mean()
+
+
 class TestClassificationTask(unittest.TestCase):
     def _compare_model_state(self, model_state_1, model_state_2, check_heads=True):
         compare_model_state(self, model_state_1, model_state_2, check_heads)
@@ -288,24 +308,6 @@ class TestClassificationTask(unittest.TestCase):
         self.assertIn("alpha", task.get_classy_state()["loss"])
 
     def test_gradient_clipping(self):
-        # Generate a simple model that has a very high gradient w.r.t. to this
-        # loss
-        class SimpleModel(ClassyModel):
-            def __init__(self):
-                super().__init__()
-                self.param = nn.Parameter(torch.tensor(5.0), requires_grad=True)
-
-            def forward(self, x):
-                return x + self.param
-
-            @classmethod
-            def from_config(cls):
-                return cls()
-
-        class SimpleLoss(nn.Module):
-            def forward(self, out, target):
-                return out.pow(2).mean()
-
         apex_available = True
         try:
             import apex  # noqa F401
@@ -357,3 +359,43 @@ class TestClassificationTask(unittest.TestCase):
             task.base_model.parameters(), task.base_loss.parameters()
         ):
             self.assertLessEqual(param.grad.norm(), grad_norm_clip)
+
+    # helper used by gradient accumulation tests
+    def train_with_batch(self, simulated_bs, actual_bs, clip_grad_norm=None):
+        config = copy.deepcopy(get_fast_test_task_config())
+        config["dataset"]["train"]["num_samples"] = 12
+        config["dataset"]["train"]["batchsize_per_replica"] = actual_bs
+        del config["dataset"]["test"]
+
+        task = build_task(config)
+        task.set_num_epochs(1)
+        task.set_model(SimpleModel())
+        task.set_loss(SimpleLoss())
+        task.set_meters([])
+        task.set_use_gpu(torch.cuda.is_available())
+        if simulated_bs is not None:
+            task.set_simulated_global_batchsize(simulated_bs)
+        if clip_grad_norm is not None:
+            task.set_clip_grad_norm(clip_grad_norm)
+
+        task.set_optimizer(SGD(lr=1))
+
+        trainer = LocalTrainer()
+        trainer.train(task)
+
+        return task.model.param
+
+    def test_gradient_accumulation(self):
+        param_with_accumulation = self.train_with_batch(simulated_bs=4, actual_bs=2)
+        param = self.train_with_batch(simulated_bs=4, actual_bs=4)
+
+        self.assertAlmostEqual(param_with_accumulation, param, delta=1e-5)
+
+    def test_gradient_accumulation_and_clipping(self):
+        param = self.train_with_batch(simulated_bs=6, actual_bs=2, clip_grad_norm=0.1)
+
+        # param starts at 5, it has to decrease, LR = 1
+        # clipping the grad to 0.1 means we drop 0.1 per update. num_samples =
+        # 12 and the simulated batch size is 6, so we should do 2 updates: 5 ->
+        # 4.9 -> 4.8
+        self.assertAlmostEqual(param, 4.8, delta=1e-5)
