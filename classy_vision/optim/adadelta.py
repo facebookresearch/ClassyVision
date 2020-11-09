@@ -44,14 +44,14 @@ class Adadelta(ClassyOptimizer):
         """
         # Default params
         config.setdefault("lr", 1.0)
-        config.setdefalt("rho", 0.9)
-        config.setdefult("eps", 1e-6)
-        config.setdefult("weight_decay", 0)
+        config.setdefault("rho", 0.9)
+        config.setdefault("eps", 1e-6)
+        config.setdefault("weight_decay", 0)
 
 
         return cls(
-            lr=config["lr"]
-            rho=config["rho"]
-            eps=config["eps"]
-            weight_decay=["weight_decay"]
+            lr=config["lr"],
+            rho=config["rho"],
+            eps=config["eps"],
+            weight_decay=["weight_decay"],
         )
