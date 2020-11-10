@@ -1,0 +1,622 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Classy Vision · An end-to-end framework for image and video classification</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="An end-to-end framework for image and video classification"/><meta property="og:title" content="Classy Vision · An end-to-end framework for image and video classification"/><meta property="og:type" content="website"/><meta property="og:url" content="https://classyvision.ai/"/><meta property="og:description" content="An end-to-end framework for image and video classification"/><meta property="og:image" content="https://classyvision.ai/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://classyvision.ai/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="/css/code_block_buttons.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="/js/code_block_buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/favicon.png" alt="Classy Vision"/><h2 class="headerTitleWithLogo">Classy Vision</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/tutorials/" target="_self">Tutorials</a></li><li class=""><a href="/api/" target="_self">API Reference</a></li><li class=""><a href="https://github.com/facebookresearch/ClassyVision" target="_self">GitHub</a></li><li class=""><a target="_self"></a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span></span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Tutorials</h3><ul class=""><li class="navListItem"><a class="navItem" href="/tutorials/">Overview</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Using Classy Vision</h3><ul class=""><li class="navListItem"><a class="navItem" href="/tutorials/getting_started">Getting started</a></li><li class="navListItem"><a class="navItem" href="/tutorials/ray_aws">Distributed training on AWS</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/tutorials/classy_dataset">Creating a custom dataset</a></li><li class="navListItem"><a class="navItem" href="/tutorials/classy_model">Creating and using Classy Models</a></li><li class="navListItem"><a class="navItem" href="/tutorials/classy_loss">Creating a custom loss</a></li><li class="navListItem"><a class="navItem" href="/tutorials/video_classification">How to do video classification</a></li><li class="navListItem"><a class="navItem" href="/tutorials/fine_tuning">Fine Tuning a model</a></li><li class="navListItem"><a class="navItem" href="/tutorials/pet_aws">Elastic training</a></li><li class="navListItem"><a class="navItem" href="/tutorials/torchscript">Productionizing models</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="tutorialBody">
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js">
+</script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js">
+</script>
+<div class="notebook">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Creating-a-custom-dataset">Creating a custom dataset<a class="anchor-link" href="#Creating-a-custom-dataset">¶</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In this tutorial we will learn how to do the following:</p>
+<ol>
+<li>Create a custom dataset within Classy Vision</li>
+<li>Integrate a dataset with Classy Vision's configuration system</li>
+<li>Iterate over the samples contained in a dataset</li>
+<li>Using transforms with Classy Vision</li>
+<li>Create a ImageNet dataset, using standard transforms, using torchvision</li>
+</ol>
+<p>If you haven't already read our <a href="https://classyvision.ai/tutorials/getting_started">Getting started</a> tutorial, we recommend starting there before reading this tutorial.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="1.-Create-a-custom-dataset-within-Classy-Vision">1. Create a custom dataset within Classy Vision<a class="anchor-link" href="#1.-Create-a-custom-dataset-within-Classy-Vision">¶</a></h2><p>Creating a dataset for use / using an existing dataset in Classy Vision is as easy as it is in PyTorch, it only requires wrapping the dataset in our dataloading class, ClassyDataset.</p>
+<p>First, specify a dataset with a <code>__getitem__</code> and <code>__len__</code> function, the same as required by torch.utils.data.Dataset</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torch.utils.data</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="k">class</span> <span class="nc">MyDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">100</span>
+        
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> \
+            <span class="s2">"Provided index </span><span class="si">{}</span><span class="s2"> must be in range [0, </span><span class="si">{}</span><span class="s2">)."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now for most training tasks we want to be able to configure the batchsize on the fly, transform samples, shuffle the dataset, maybe limit the number of samples to shorten a training run, and then construct an iterator for the training loop. ClassyDataset is a simple wrapper that provides this functionality.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span>
+
+<span class="k">class</span> <span class="nc">MyClassyDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MyDataset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It's that easy! Later in the tutorial we will see how to use the iterator, but before moving on, let's talk about what each of these arguments does.</p>
+<ul>
+<li><strong>batchsize_per_replica</strong>: the batchsize per trainer (so if you have 8 GPUs with 1 trainer processes and a batchsize_per_replica of 32, then your batchsize for single update is 8 * 32 = 256).</li>
+<li><strong>shuffle</strong>: If true, then shuffle the dataset before each epoch.</li>
+<li><strong>transform</strong>: A callable applied to each sample before returning. Note that this can get tricky since many datasets (e.g. torchvision datasets) return complex samples containing both the image / video content and a label and possibly additional metadata. We pass the <em>whole</em> sample to the transform, so it needs to know how to parse the sample...more on this later.</li>
+<li><strong>num_samples</strong>: Not needed in the standard use cases, but this allows a user to adjust the length of samples retrieved in an epoch, can be convenient for debugging via config (e.g. setting num_samples = 10 will speed up training). By default this is set to None and iteration proceeds over the whole dataset.</li>
+</ul>
+<p>To get started with a basic task just do:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="kn">import</span> <span class="n">ClassificationTask</span>
+
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">MyClassyDataset</span><span class="p">(</span>
+    <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">num_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Note, the "train" here is the phase type.</span>
+<span class="c1"># It tells the task to set the model in train mode / do a backwards pass, etc, using our new dataset</span>
+<span class="n">my_task</span> <span class="o">=</span> <span class="n">ClassificationTask</span><span class="p">()</span><span class="o">.</span><span class="n">set_dataset</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For more details on training a model, please see our <a href="https://classyvision.ai/tutorials/getting_started">Getting started</a> tutorial.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="2.-Integrating-a-dataset-with-Classy-Vision's-configuration-system">2. Integrating a dataset with Classy Vision's configuration system<a class="anchor-link" href="#2.-Integrating-a-dataset-with-Classy-Vision's-configuration-system">¶</a></h2><p>Classy Vision is also able to read a configuration file and instantiate the dataset. This is useful to keep your experiments organized and reproducible. For that, you have to:</p>
+<ul>
+<li>Implement a from_config method</li>
+<li>Add the register_model decorator to MyClassyDataset</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
+
+<span class="nd">@register_dataset</span><span class="p">(</span><span class="s2">"my_dataset"</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MyClassyDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">MyDataset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+        
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">build_transforms</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"transforms"</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"batchsize_per_replica"</span><span class="p">],</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"shuffle"</span><span class="p">],</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">num_samples</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"num_samples"</span><span class="p">],</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can start using this dataset in our configurations. The string argument passed to the register_dataset is a unique identifier for this model (if you try to register two models with the same name, it will throw an error):</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"my_dataset"</span><span class="p">,</span>
+    <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"shuffle"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]}],</span>
+    <span class="s2">"num_samples"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">build_dataset</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,</span> <span class="n">MyClassyDataset</span><span class="p">)</span>
+
+<span class="n">sample</span> <span class="o">=</span> <span class="n">my_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="3.-Iterate-over-the-samples-contained-in-a-dataset">3. Iterate over the samples contained in a dataset<a class="anchor-link" href="#3.-Iterate-over-the-samples-contained-in-a-dataset">¶</a></h2><p>As mentioned above, the ClassyDataset class adds several pieces of basic logic for constructing a torch.utils.data.Dataloader for your dataset. ClassyDataset supports local and distributed training out-of-box by internally using a PyTorch DistributedSampler for sampling the dataset along with the PyTorch Dataloader for batching and parallelizing sample retrieval. To get an iterable for epoch 0, do the following:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"my_dataset"</span><span class="p">,</span>
+    <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"shuffle"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">"num_samples"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">build_dataset</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,</span> <span class="n">MyClassyDataset</span><span class="p">)</span>
+
+<span class="c1"># multiprocessing_context can be set to "spawn", "forkserver", "fork" or None.</span>
+<span class="c1"># If None is used, then the dataloader inherits the context of the parent thread.</span>
+<span class="c1"># If num_workers is 0, then multiprocessing is not used by the dataloader</span>
+<span class="c1">#</span>
+<span class="c1"># A warning, while fork is fast and simple to get started with, it </span>
+<span class="c1"># is unsafe to use with threading and can lead to difficult to debug errors.</span>
+<span class="c1"># Spawn / forkserver are threadsafe, but they come with additional startup costs.</span>
+<span class="n">iterator</span> <span class="o">=</span> <span class="n">my_dataset</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span>
+    <span class="n">shuffle_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">epoch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># 0 indicates to do dataloading on the master process</span>
+    <span class="n">pin_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">multiprocessing_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">)</span>
+
+<span class="c1"># Iterate over all 100 samples.</span>
+<span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="n">iterator</span><span class="p">):</span>
+    <span class="c1"># Do stuff with sample...</span>
+    <span class="c1"># Note that size now has an extra dimension representing the batchsize</span>
+    <span class="k">assert</span> <span class="n">sample</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You can also provide a custom iterator function if you would like to return a custom iterator or a custom sampler. Please see the ClassyDataset code for more details.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.-Using-transforms-with-Classy-Vision">4. Using transforms with Classy Vision<a class="anchor-link" href="#4.-Using-transforms-with-Classy-Vision">¶</a></h2><p>You may have noticed in the configuration section that we did something slightly more complicated with the transform configuration. In particular, just like our datasets / models etc, we have a registration / build mechanism for transforms so that transforms can be specified via config.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Transform-example-using-Classy-Vision's-synthetic-image-dataset">Transform example using Classy Vision's synthetic image dataset<a class="anchor-link" href="#Transform-example-using-Classy-Vision's-synthetic-image-dataset">¶</a></h4><p>We also automatically register torchvision transforms, so let's start with an example of how to specify torchvision transforms and the synthetic image dataset we provide for testing / proto-typing.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torchvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="kn">import</span> <span class="n">SyntheticImageDataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
+
+<span class="c1"># Declarative approach</span>
+
+<span class="c1"># Transform to be applied to image</span>
+<span class="n">image_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+    <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+    <span class="n">transforms</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+    <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+    <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]),</span>
+<span class="p">])</span>
+
+<span class="n">decl_dataset</span> <span class="o">=</span> <span class="n">SyntheticImageDataset</span><span class="p">(</span>
+    <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">image_transform</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">crop_size</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span>
+    <span class="n">class_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># FAILS!!!!</span>
+<span class="c1"># decl_dataset[0]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This fails! Why?</p>
+<p>It fails because most datasets don't return just an image, they return image or video content data, label data, and (potentially) sample metadata. In Classy Vision, the sample format is specified by the task and our classification_task expects a dict with input / target keys.</p>
+<p>For example, the sample format for the SyntheticImageDataset looks like:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>{"input": &lt;PIL Image&gt;, "target": &lt;Target&gt;}</code></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For our transforms to work, we need to specify which key to apply the transform to.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torchvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.classy_synthetic_image</span> <span class="kn">import</span> <span class="n">SyntheticImageDataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span><span class="p">,</span> <span class="n">ApplyTransformToKey</span>
+
+<span class="c1"># Declarative approach</span>
+
+<span class="c1"># Transform to be applied to image</span>
+<span class="n">image_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]),</span>
+<span class="p">])</span>
+
+<span class="c1"># Transform wrapper that says which key to apply the transform to</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">ApplyTransformToKey</span><span class="p">(</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">image_transform</span><span class="p">,</span>
+    <span class="n">key</span><span class="o">=</span><span class="s2">"input"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">decl_dataset</span> <span class="o">=</span> <span class="n">SyntheticImageDataset</span><span class="p">(</span>
+    <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">crop_size</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span>
+    <span class="n">class_ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Success!!!!</span>
+<span class="n">decl_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now let's see how to do the same thing via a config.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Note that this cell won't work until we fix the synthetic dataset from_config function</span>
+
+<span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
+
+<span class="c1"># Configuration approach</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"synthetic_image"</span><span class="p">,</span>
+    <span class="s2">"batchsize_per_replica"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"use_shuffle"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"apply_transform_to_key"</span><span class="p">,</span>
+            <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Resize"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">256</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ToTensor"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]},</span>
+            <span class="p">],</span>
+            <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"input"</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+    <span class="s2">"num_samples"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">"crop_size"</span><span class="p">:</span> <span class="mi">320</span><span class="p">,</span>
+    <span class="s2">"class_ratio"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"seed"</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+
+<span class="n">config_dataset</span> <span class="o">=</span> <span class="n">build_dataset</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Sample should be the same as that provided by the decl_dataset</span>
+<span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">config_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"input"</span><span class="p">],</span> <span class="n">decl_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"input"</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Transform-example-for-a-torchvision-dataset">Transform example for a torchvision dataset<a class="anchor-link" href="#Transform-example-for-a-torchvision-dataset">¶</a></h4><p>Torchvision has a different sample format using tuples for images:</p>
+<p><code>(&lt;PIL Image&gt;, &lt;Target&gt;)</code></p>
+<p>The ApplyTransformToKey will still work (the key in this case is '0'), but for our classification tasks, we also want a sample that is a dict with "input"/"target" keys.</p>
+<p>Because this is a common dataset format, we provide a convenience transform called "GenericImageTransform" which applies a specified transform to the torchvision tuple image key and then maps the whole sample to a dict. This is just a convenience transform, we can also do this using raw composable blocks, but it makes things more verbose.</p>
+<p>All of the transforms in the next cell have the same effect on an image:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torchvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">build_transforms</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms.util</span> <span class="kn">import</span> <span class="n">GenericImageTransform</span>
+
+<span class="c1"># Declarative</span>
+<span class="n">image_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">256</span><span class="p">),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+        <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]),</span>
+<span class="p">])</span>
+<span class="n">decl_transform</span> <span class="o">=</span> <span class="n">GenericImageTransform</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">image_transform</span><span class="p">)</span>
+
+<span class="c1"># Configuration with helper function</span>
+<span class="n">transform_config</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"generic_image_transform"</span><span class="p">,</span>
+    <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Resize"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">256</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ToTensor"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]},</span>
+    <span class="p">],</span> 
+<span class="p">}]</span>
+<span class="n">config_helper_transform</span> <span class="o">=</span> <span class="n">build_transforms</span><span class="p">(</span><span class="n">transform_config</span><span class="p">)</span>
+
+<span class="c1"># Configuration using raw, composable functions:</span>
+<span class="n">transform_config</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"tuple_to_map"</span><span class="p">,</span> <span class="s2">"list_of_map_keys"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"input"</span><span class="p">,</span> <span class="s2">"target"</span><span class="p">]},</span>
+    <span class="p">{</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"apply_transform_to_key"</span><span class="p">,</span>
+        <span class="s2">"transforms"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Resize"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">256</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"CenterCrop"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">:</span> <span class="mi">224</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"ToTensor"</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Normalize"</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="s2">"std"</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]},</span>
+        <span class="p">],</span> 
+        <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"input"</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+<span class="n">config_raw_transform</span> <span class="o">=</span> <span class="n">build_transforms</span><span class="p">(</span><span class="n">transform_config</span><span class="p">)</span>
+
+<span class="c1"># These transforms are all functionally the same</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="5.-Create-a-Classy-Imagenet">5. Create a Classy Imagenet<a class="anchor-link" href="#5.-Create-a-Classy-Imagenet">¶</a></h2><p>Now, to complete this tutorial, we show our code for creating an ImageNet dataset in classy vision using the pre-existing torchvision dataset. Code very similar to this (+ some typing and helper functions) is in the datasets folder of the base Classy Vision repository.</p>
+<p>Note, we do not distribute any of the underlying dataset data with Classy Vision. Before this will work, you will need to download a torchvision compatible copy of the Imagenet dataset yourself.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">ClassyDataset</span><span class="p">,</span> <span class="n">register_dataset</span>
+<span class="kn">from</span> <span class="nn">classy_vision.dataset.transforms</span> <span class="kn">import</span> <span class="n">ClassyTransform</span><span class="p">,</span> <span class="n">build_transforms</span>
+<span class="kn">from</span> <span class="nn">torchvision.datasets.imagenet</span> <span class="kn">import</span> <span class="n">ImageNet</span>
+        
+        
+<span class="nd">@register_dataset</span><span class="p">(</span><span class="s2">"example_imagenet"</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ExampleImageNetDataset</span><span class="p">(</span><span class="n">ClassyDataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">,</span>
+        <span class="n">batchsize_per_replica</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">,</span>  <span class="c1"># Root directory for your Imagenet dataset</span>
+    <span class="p">):</span>  
+        <span class="c1"># Create torchvision dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">ImageNet</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">batchsize_per_replica</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">num_samples</span>
+        <span class="p">)</span>   
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">batchsize_per_replica</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"batchsize_per_replica"</span><span class="p">)</span>
+        <span class="n">shuffle</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_shuffle"</span><span class="p">)</span>
+        <span class="n">num_samples</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_samples"</span><span class="p">)</span>
+        <span class="n">transform_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"transforms"</span><span class="p">)</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"split"</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"root"</span><span class="p">)</span>
+        <span class="n">download</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"download"</span><span class="p">)</span>
+        
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">build_transforms</span><span class="p">(</span><span class="n">transform_config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">batchsize_per_replica</span><span class="o">=</span><span class="n">batchsize_per_replica</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+            <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="n">download</span><span class="o">=</span><span class="n">download</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion">¶</a></h2><p>In this tutorial we have seen how to create a custom dataset using ClassyDataset, how to integrate this dataset with the configuration system, how to iterate over samples / use multiple workers, how to use transforms in the configuration system and finally we showed an example of how to use a torchvision dataset in Classy Vision.</p>
+<p>For more details on how to use the dataset for training, please see <a href="https://classyvision.ai/tutorials/getting_started">Getting started</a>.</p>
+</div>
+</div>
+</div>
+</div></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/classy_dataset.ipynb" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Jupyter Notebook</a></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/classy_dataset.py" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Source Code</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footerSection"><h5>Documentation</h5><a href="/tutorials/">Tutorials</a><a href="/api/">API Reference</a></div><div class="footerSection"><h5>Social</h5><div class="social"><a class="github-button" href="https://github.com/facebookresearch/ClassyVision" data-count-href="https://github.com/facebookresearch/ClassyVision/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star Classy Vision on GitHub">ClassyVision</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright"><span>Copyright © 2020 Facebook Inc.</span> </section><script>
+            (function() {
+              var BAD_BASE = '/classyvision/';
+              if (window.location.origin !== 'https://classyvision.ai') {
+                var pathname = window.location.pathname;
+                var newPathname = pathname.slice(pathname.indexOf(BAD_BASE) === 0 ? BAD_BASE.length : 1);
+                var newLocation = 'https://classyvision.ai/' + newPathname;
+                console.log('redirecting to ' + newLocation);
+                window.location.href = newLocation;
+              }
+            })();
+          </script></footer></div></body></html>
