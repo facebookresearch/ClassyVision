@@ -96,17 +96,17 @@ from .classy_model import (  # isort:skip
 )  # isort:skip
 from .densenet import DenseNet  # isort:skip
 from .efficientnet import EfficientNet  # isort:skip
+from .lecun_normal_init import lecun_normal_init  # isort:skip
 from .mlp import MLP  # isort:skip
 from .regnet import RegNet  # isort:skip
 from .resnet import ResNet  # isort:skip
 from .resnext import ResNeXt  # isort:skip
 from .resnext3d import ResNeXt3D  # isort:skip
 from .squeeze_and_excitation_layer import SqueezeAndExcitationLayer  # isort:skip
+from .vision_transformer import VisionTransformer  # isort:skip
 
 
 __all__ = [
-    "build_model",
-    "register_model",
     "ClassyBlock",
     "ClassyModel",
     "ClassyModelHeadExecutorWrapper",
@@ -119,4 +119,8 @@ __all__ = [
     "ResNeXt",
     "ResNeXt3D",
     "SqueezeAndExcitationLayer",
+    "VisionTransformer",
+    "build_model",
+    "lecun_normal_init",
+    "register_model",
 ]
