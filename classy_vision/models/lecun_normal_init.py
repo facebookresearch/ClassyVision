@@ -3,8 +3,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import torch.nn as nn
 import math
+
+import torch.nn as nn
 
 
 def lecun_normal_init(tensor, fan_in):

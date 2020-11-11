@@ -143,6 +143,7 @@ def check_generic_args(args):
     # when in debugging mode, enter debugger upon error:
     if args.debug:
         import sys
+
         from classy_vision.generic.debug import debug_info
 
         sys.excepthook = debug_info
