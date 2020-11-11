@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from classy_vision.generic.util import (
     load_and_broadcast_checkpoint,
@@ -21,6 +21,7 @@ class FineTuningTask(ClassificationTask):
         self.pretrained_checkpoint_dict = None
         self.pretrained_checkpoint_path = None
         self.pretrained_checkpoint_load_strict = True
+        self.pretrained_checkpoint_hooks = []
         self.reset_heads = False
         self.freeze_trunk = False
 
@@ -43,6 +44,9 @@ class FineTuningTask(ClassificationTask):
             task.set_pretrained_checkpoint_load_strict(
                 config.get("pretrained_checkpoint_load_strict", True)
             )
+            task.set_pretrained_checkpoint_hooks(
+                config.get("pretrained_checkpoint_hooks", [])
+            )
 
         task.set_reset_heads(config.get("reset_heads", False))
         task.set_freeze_trunk(config.get("freeze_trunk", False))
@@ -57,6 +61,14 @@ class FineTuningTask(ClassificationTask):
     ):
         self.pretrained_checkpoint_load_strict = pretrained_checkpoint_load_strict
         return self
+
+    def set_pretrained_checkpoint_hooks(self, hooks: List[str]):
+        """
+        Args:
+            hooks: a list of the names of the hooks we want to load state dict from
+                pretrained checkpoint
+        """
+        self.pretrained_checkpoint_hooks = hooks
 
     def _set_pretrained_checkpoint_dict(
         self, checkpoint_dict: Dict[str, Any]
@@ -85,6 +97,14 @@ class FineTuningTask(ClassificationTask):
         else:
             self.base_model.train(phase["train"])
 
+    def _load_hooks_from_pretrained_checkpoint(self, state: Dict[str, Any]):
+        for hook in self.hooks:
+            if (
+                hook.name() in state["hooks"]
+                and hook.name() in self.pretrained_checkpoint_hooks
+            ):
+                hook.set_classy_state(state["hooks"][hook.name()])
+
     def prepare(self) -> None:
         super().prepare()
         if self.checkpoint_dict is None:
@@ -103,15 +123,19 @@ class FineTuningTask(ClassificationTask):
                     self.pretrained_checkpoint_dict is not None
                 ), "Need a pretrained checkpoint for fine tuning"
 
+                state = self.pretrained_checkpoint_dict["classy_state_dict"]
+
                 state_load_success = update_classy_model(
                     self.base_model,
-                    self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
+                    state["base_model"],
                     self.reset_heads,
                     self.pretrained_checkpoint_load_strict,
                 )
                 assert (
                     state_load_success
                 ), "Update classy state from pretrained checkpoint was unsuccessful."
+
+                self._load_hooks_from_pretrained_checkpoint(state)
 
         if self.freeze_trunk:
             # do not track gradients for all the parameters in the model except
