@@ -4,9 +4,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import unittest
 from test.generic.utils import compare_model_state
-import copy
+
 import torch
 from classy_vision.models import build_model
 
