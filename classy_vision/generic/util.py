@@ -153,16 +153,15 @@ def recursive_copy_to_device(
     value: Any, non_blocking: bool, device: torch.device
 ) -> Any:
     """
-    Recursively searches lists, tuples, dicts and copies tensors to device if
-    possible. Non-tensor values are passed as-is in the result.
+    Recursively searches lists, tuples, dicts and copies any object which
+    supports an object.to API (e.g. tensors) to device if possible.
+    Other values are passed as-is in the result.
 
     Note:  These are all copies, so if there are two objects that reference
     the same object, then after this call, there will be two different objects
     referenced on the device.
     """
-    if isinstance(value, torch.Tensor):
-        return value.to(device, non_blocking=non_blocking)
-    elif isinstance(value, list) or isinstance(value, tuple):
+    if isinstance(value, list) or isinstance(value, tuple):
         device_val = []
         for val in value:
             device_val.append(
@@ -178,6 +177,8 @@ def recursive_copy_to_device(
             )
 
         return device_val
+    elif callable(getattr(value, "to", None)):
+        return value.to(device=device, non_blocking=non_blocking)
 
     return value
 
