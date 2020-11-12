@@ -4,7 +4,7 @@ from test.generic.optim_test_util import TestOptimizer
 from classy_vision.optim.adadelta import Adadelta
 
 
-class TestAdadeltaOptimizer(TestOptimizer, unittest.Testcase):
+class TestAdadeltaOptimizer(TestOptimizer, unittest.TestCase):
     def _check_momentum_buffer(self):
         return False
 
