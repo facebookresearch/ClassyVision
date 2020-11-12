@@ -5,7 +5,7 @@ import torch.optim
 from . import ClassyOptimizer, register_optimizer
 
 
-@register_optimzer("adadelta")
+@register_optimizer("adadelta")
 class Adadelta(ClassyOptimizer):
     def __init__(
         self,
