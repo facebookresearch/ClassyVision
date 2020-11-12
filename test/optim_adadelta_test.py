@@ -1,7 +1,7 @@
 import unittest
 from test.generic.optim_test_util import TestOptimizer
 
-from classy_vision.optim.adam import Adadelta
+from classy_vision.optim.adadelta import Adadelta
 
 
 class TestAdadeltaOptimizer(TestOptimizer, unittest.Testcase):
