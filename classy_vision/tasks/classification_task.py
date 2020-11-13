@@ -27,10 +27,10 @@ from classy_vision.generic.util import (
     Timer,
     copy_model_to_gpu,
     load_and_broadcast_checkpoint,
+    master_params,
     recursive_copy_to_gpu,
     split_batchnorm_params,
     update_classy_state,
-    master_params,
 )
 from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
@@ -985,6 +985,8 @@ class ClassificationTask(ClassyTask):
         if (update_idx % self.optimizer_period) == 0:
             self.optimizer.zero_grad()
 
+        self.check_inf_nan(loss)
+
         if self.amp_args is not None:
             with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
                 scaled_loss.backward()
@@ -1000,8 +1002,6 @@ class ClassificationTask(ClassyTask):
                 self._clip_gradients(self.clip_grad_norm)
 
             self.optimizer.step(where=self.where)
-
-        self.check_inf_nan(loss)
 
     def _rescale_gradients(self, scale):
         for param in master_params(self.optimizer):
