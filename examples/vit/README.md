@@ -10,8 +10,8 @@ This paper takes transformer based models that have been extremely successful in
 
 ## Training Recipes
 
-- These recipes were used to train models using 16GB V100 GPUs using mixed precision training. 
-- The `batchsize_per_replica` in any config can be adjusted based on a the GPU memory available.
+- These recipes were used to train models using 16GB V100 GPUs using mixed precision training
+- Based on the type of GPUs available, the `batchsize_per_replica` in any config can be adjusted and mixed precision training can be disabled
 - We use gradient accumulation in all our training runs with a pre-defined global batch size (`simulated_global_batchsize`)
   - This means these configs can be used with any number of GPUs, as long as `simulated_global_batchsize` is divisible by `batchsize_per_replica * num_gpus`
 
