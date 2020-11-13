@@ -53,5 +53,5 @@ class Adadelta(ClassyOptimizer):
             lr=config["lr"],
             rho=config["rho"],
             eps=config["eps"],
-            weight_decay=["weight_decay"],
+            weight_decay=config["weight_decay"],
         )
