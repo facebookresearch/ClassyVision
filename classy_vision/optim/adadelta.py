@@ -12,7 +12,7 @@ class Adadelta(ClassyOptimizer):
         lr: float = 1.0,
         rho: float = 0.9,
         eps: float = 1e-6,
-        weight_decay: float = 0
+        weight_decay: float = 0.0
     ) -> None:
         super.__init__()
 
@@ -46,12 +46,12 @@ class Adadelta(ClassyOptimizer):
         config.setdefault("lr", 1.0)
         config.setdefault("rho", 0.9)
         config.setdefault("eps", 1e-6)
-        config.setdefault("weight_decay", 0)
+        config.setdefault("weight_decay", 0.0)
 
 
         return cls(
             lr=config["lr"],
             rho=config["rho"],
             eps=config["eps"],
-            weight_decay=config["weight_decay"],
+            weight_decay=config["weight_decay"]
         )
