@@ -14,8 +14,9 @@ This paper takes transformer based models that have been extremely successful in
 - Based on the type of GPUs available, the `batchsize_per_replica` in any config can be adjusted and mixed precision training can be disabled
 - We use gradient accumulation in all our training runs with a pre-defined global batch size (`simulated_global_batchsize`)
   - This means these configs can be used with any number of GPUs, as long as `simulated_global_batchsize` is divisible by `batchsize_per_replica * num_gpus`
+- Users need to download ImageNet 1K and modify the config to point to the correct paths to the train and val sets
 
-### Pre-training on ImageNet
+### Pre-training on ImageNet 1K
 
 | Model | Training configuration | Top-1 Accuracy (%) |
 | --- |--- | --- |
@@ -23,9 +24,10 @@ This paper takes transformer based models that have been extremely successful in
 | ViT-B/16 | [vit_b16_in.json](vit_b16_in.json) | 78.98 |
 
 
-### Fine tuning on ImageNet
+### Fine tuning on ImageNet 1K
 
-The numbers reported in Table 5 of the paper for ImageNet include an additional fine tuning step using a higher resolution of 384 after pre-training.
+- The numbers reported in Table 5 of the paper for ImageNet include an additional fine tuning step using a higher resolution of 384 after pre-training
+- The `pretrained_checkpoint` in the config needs to point to the location of a checkpoint of a pre-training run
 
 | Model | Training configuration | Top-1 Accuracy (%) |
 | --- |--- | --- |
