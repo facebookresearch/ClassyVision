@@ -4,7 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Dict
+import logging
+from typing import Any, Dict, List
 
 from classy_vision.generic.util import (
     load_and_broadcast_checkpoint,
@@ -20,6 +21,7 @@ class FineTuningTask(ClassificationTask):
         self.pretrained_checkpoint_dict = None
         self.pretrained_checkpoint_path = None
         self.pretrained_checkpoint_load_strict = True
+        self.hooks_load_from_pretrained_checkpoint = []
         self.reset_heads = False
         self.freeze_trunk = False
 
@@ -38,9 +40,12 @@ class FineTuningTask(ClassificationTask):
 
         pretrained_checkpoint_path = config.get("pretrained_checkpoint")
         if pretrained_checkpoint_path:
-            task.set_pretrained_checkpoint(pretrained_checkpoint_path)
-            task.set_pretrained_checkpoint_load_strict(
+            task.set_pretrained_checkpoint(
+                pretrained_checkpoint_path
+            ).set_pretrained_checkpoint_load_strict(
                 config.get("pretrained_checkpoint_load_strict", True)
+            ).set_hooks_load_from_pretrained_checkpoint(
+                config.get("hooks_load_from_pretrained_checkpoint", [])
             )
 
         task.set_reset_heads(config.get("reset_heads", False))
@@ -55,6 +60,19 @@ class FineTuningTask(ClassificationTask):
         self, pretrained_checkpoint_load_strict: bool
     ):
         self.pretrained_checkpoint_load_strict = pretrained_checkpoint_load_strict
+        return self
+
+    def set_hooks_load_from_pretrained_checkpoint(
+        self, hooks_load_from_pretrained_checkpoint: List[str]
+    ):
+        """
+        Args:
+            hooks_load_from_pretrained_checkpoint: a list of the names of the hooks that we
+                want to load state dict from pretrained checkpoint
+        """
+        self.hooks_load_from_pretrained_checkpoint = (
+            hooks_load_from_pretrained_checkpoint
+        )
         return self
 
     def _set_pretrained_checkpoint_dict(
@@ -84,6 +102,14 @@ class FineTuningTask(ClassificationTask):
         else:
             self.base_model.train(phase["train"])
 
+    def _load_hooks_from_pretrained_checkpoint(self, state: Dict[str, Any]):
+        for hook in self.hooks:
+            if (
+                hook.name() in state["hooks"]
+                and hook.name() in self.hooks_load_from_pretrained_checkpoint
+            ):
+                hook.set_classy_state(state["hooks"][hook.name()])
+
     def prepare(self) -> None:
         super().prepare()
         if self.checkpoint_dict is None:
@@ -95,19 +121,26 @@ class FineTuningTask(ClassificationTask):
                     self.pretrained_checkpoint_path
                 )
 
-            assert (
-                self.pretrained_checkpoint_dict is not None
-            ), "Need a pretrained checkpoint for fine tuning"
+            if self.pretrained_checkpoint_dict is None:
+                logging.warn("a pretrained checkpoint is not provided")
+            else:
+                assert (
+                    self.pretrained_checkpoint_dict is not None
+                ), "Need a pretrained checkpoint for fine tuning"
 
-            state_load_success = update_classy_model(
-                self.base_model,
-                self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
-                self.reset_heads,
-                self.pretrained_checkpoint_load_strict,
-            )
-            assert (
-                state_load_success
-            ), "Update classy state from pretrained checkpoint was unsuccessful."
+                state = self.pretrained_checkpoint_dict["classy_state_dict"]
+
+                state_load_success = update_classy_model(
+                    self.base_model,
+                    state["base_model"],
+                    self.reset_heads,
+                    self.pretrained_checkpoint_load_strict,
+                )
+                assert (
+                    state_load_success
+                ), "Update classy state from pretrained checkpoint was unsuccessful."
+
+                self._load_hooks_from_pretrained_checkpoint(state)
 
         if self.freeze_trunk:
             # do not track gradients for all the parameters in the model except
