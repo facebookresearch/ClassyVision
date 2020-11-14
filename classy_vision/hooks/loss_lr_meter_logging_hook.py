@@ -34,6 +34,10 @@ class LossLrMeterLoggingHook(ClassyHook):
             log_freq, int
         ), "log_freq must be an int or None"
         self.log_freq: Optional[int] = log_freq
+        self.state.meter_max = {
+            "train": {},
+            "test": {},
+        }
 
     def on_start(self, task) -> None:
         logging.info(f"Starting training. Task: {task}")
@@ -48,7 +52,9 @@ class LossLrMeterLoggingHook(ClassyHook):
             # do not explicitly state this since it is possible for a
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
-            self._log_loss_lr_meters(task, prefix="Synced meters: ", log_batches=True)
+            self._log_loss_lr_meters(
+                task, prefix="Synced meters: ", log_batches=True, log_meter_max=True
+            )
 
         logging.info(
             f"max memory allocated(MB) {torch.cuda.max_memory_allocated() // 1e6}"
@@ -67,7 +73,25 @@ class LossLrMeterLoggingHook(ClassyHook):
         if batches and batches % self.log_freq == 0:
             self._log_loss_lr_meters(task, prefix="Approximate meters: ")
 
-    def _log_loss_lr_meters(self, task, prefix="", log_batches=False) -> None:
+    def _log_meter_max(self, task):
+        for meter in task.meters:
+            if meter.name not in self.state.meter_max[task.phase_type]:
+                self.state.meter_max[task.phase_type][meter.name] = {
+                    k: v for k, v in meter.value.items()
+                }
+            else:
+                for k, v in meter.value.items():
+                    self.state.meter_max[task.phase_type][meter.name][k] = max(
+                        v, self.state.meter_max[task.phase_type][meter.name][k]
+                    )
+            for k, v in self.state.meter_max[task.phase_type][meter.name].items():
+                logging.info(
+                    f"phase {task.phase_type}, meter {meter.name} {k}, current best: {v}"
+                )
+
+    def _log_loss_lr_meters(
+        self, task, prefix="", log_batches=False, log_meter_max=False
+    ) -> None:
         """
         Compute and log the loss, lr, and meters.
         """
@@ -89,5 +113,8 @@ class LossLrMeterLoggingHook(ClassyHook):
             msg += f", ema: {task.ema}"
         if log_batches:
             msg += f", processed batches: {batches}"
+
+        if log_meter_max:
+            self._log_meter_max(task)
 
         logging.info(msg)
