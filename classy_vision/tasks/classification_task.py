@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import contextlib
 import copy
 import enum
 import json
@@ -982,16 +983,32 @@ class ClassificationTask(ClassyTask):
         # if gradient accumulation is disabled. Assumes all batches have the
         # same size
         update_idx = self.num_updates // self.get_global_batchsize()
-        if (update_idx % self.optimizer_period) == 0:
+        do_zero_grad = (update_idx % self.optimizer_period) == 0
+        do_step = (update_idx % self.optimizer_period) == self.optimizer_period - 1
+
+        if do_zero_grad:
             self.optimizer.zero_grad()
 
-        if self.amp_args is not None:
-            with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
-                scaled_loss.backward()
-        else:
-            loss.backward()
+        # only sync with DDP when we need to perform an optimizer step
+        ctx_mgr_model = (
+            self.distributed_model.no_sync()
+            if self.distributed_model is not None and not do_step
+            else contextlib.suppress()
+        )
+        ctx_mgr_loss = (
+            self.distributed_loss.no_sync()
+            if self.distributed_loss is not None and not do_step
+            else contextlib.suppress()
+        )
 
-        if (update_idx % self.optimizer_period) == self.optimizer_period - 1:
+        with ctx_mgr_model, ctx_mgr_loss:
+            if self.amp_args is not None:
+                with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                loss.backward()
+
+        if do_step:
             if self.optimizer_period != 1:
                 self._rescale_gradients(1 / self.optimizer_period)
 
