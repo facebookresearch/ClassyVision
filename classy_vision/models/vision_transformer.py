@@ -13,6 +13,7 @@ https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision
 """
 
 import copy
+import logging
 import math
 from collections import OrderedDict
 from functools import partial
@@ -20,6 +21,7 @@ from functools import partial
 import torch
 import torch.nn as nn
 from classy_vision.models import ClassyModel, register_model
+
 from .lecun_normal_init import lecun_normal_init
 
 
@@ -143,7 +145,7 @@ class VisionTransformer(ClassyModel):
         classifier="token",
     ):
         super().__init__()
-        assert image_size % patch_size == 0, "Input shape indivisble by patch size"
+        assert image_size % patch_size == 0, "Input shape indivisible by patch size"
         assert classifier in ["token", "gap"], "Unexpected classifier mode"
         self.image_size = image_size
         self.patch_size = patch_size
@@ -178,6 +180,7 @@ class VisionTransformer(ClassyModel):
         )
         self.trunk_output = nn.Identity()
 
+        self.seq_length = seq_length
         self.init_weights()
 
     def init_weights(self):
