@@ -15,6 +15,8 @@ This paper takes transformer based models that have been extremely successful in
 - We use gradient accumulation in all our training runs with a pre-defined global batch size (`simulated_global_batchsize`)
   - This means these configs can be used with any number of GPUs, as long as `simulated_global_batchsize` is divisible by `batchsize_per_replica * num_gpus`
 - Users need to download ImageNet 1K and modify the config to point to the correct paths to the train and val sets
+- In addition to the paper's training setup, we use label smoothing, mixup and AutoAugment with reasonable defaults
+  - Note that the training hyperparameters here are borrowed from the paper, so the results can possibly be improved with further tuning
 
 ### Pre-training on ImageNet 1K
 
@@ -22,14 +24,17 @@ This paper takes transformer based models that have been extremely successful in
 | --- |--- | --- |
 | ViT-B/32 | [vit_b32_in.json](vit_b32_in.json) | 73.30 |
 | ViT-B/16 | [vit_b16_in.json](vit_b16_in.json) | 78.98 |
-
+| ViT-L/32 | [vit_l32_in.json](vit_l32_in.json) | 73.60 |
+| ViT-L/16 | [vit_l16_in.json](vit_l16_in.json) | 76.53 [training diverged and restarted] |
 
 ### Fine tuning on ImageNet 1K
 
 - The numbers reported in Table 5 of the paper for ImageNet include an additional fine tuning step using a higher resolution of 384 after pre-training
 - The `pretrained_checkpoint` in the config needs to point to the location of a checkpoint of a pre-training run
 
-| Model | Training configuration | Top-1 Accuracy (%) |
-| --- |--- | --- |
-| ViT-B/32 | [vit_b32_in_ft.json](vit_b32_in_ft.json) | 76.67 |
-| ViT-B/16 | [vit_b16_in_ft.json](vit_b16_in_ft.json) | 79.76 |
+| Model | Training configuration | Top-1 Accuracy (%) | Paper Top-1 Accuracy (%)
+| --- |--- | --- | --- |
+| ViT-B/32 | [vit_b32_in_ft.json](vit_b32_in_ft.json) | 76.67 | 73.38 |
+| ViT-B/16 | [vit_b16_in_ft.json](vit_b16_in_ft.json) | 79.76 | 77.91 |
+| ViT-L/32 | [vit_l32_in_ft.json](vit_l32_in_ft.json) |  | 71.16 |
+| ViT-L/16 | [vit_l16_in_ft.json](vit_l16_in_ft.json) |  | 76.53 |
