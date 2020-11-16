@@ -59,7 +59,7 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
             "name": "soft_target_cross_entropy",
             "ignore_index": -1,
             "reduction": "mean",
-            "normalize_targets": None,
+            "normalize_targets": False,
         }
         crit = SoftTargetCrossEntropyLoss.from_config(config)
         outputs = self._get_outputs()
