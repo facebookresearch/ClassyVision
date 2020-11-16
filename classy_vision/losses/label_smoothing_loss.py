@@ -16,22 +16,25 @@ from classy_vision.losses.soft_target_cross_entropy_loss import (
 
 @register_loss("label_smoothing_cross_entropy")
 class LabelSmoothingCrossEntropyLoss(ClassyLoss):
-    def __init__(self, ignore_index, reduction, smoothing_param):
+    def __init__(self, ignore_index=-100, reduction="mean", smoothing_param=None):
         """Intializer for the label smoothed cross entropy loss.
         This decreases gap between output scores and encourages generalization.
-        Targets provided to forward can be one-hot vectors (NxC) or class indices(Nx1)
+        Targets provided to forward can be one-hot vectors (NxC) or class indices (Nx1).
 
-        Config params:
-        'weight': weight of sample (not yet implemented),
-        'ignore_index': sample should be ignored for loss (optional),
-        'smoothing_param': value to be added to each target entry
+        This normalizes the targets to a sum of 1 based on the total count of positive
+        targets for a given sample before applying label smoothing.
+
+        Args:
+            ignore_index: sample should be ignored for loss if the class is this value
+            reduction: specifies reduction to apply to the output
+            smoothing_param: value to be added to each target entry
         """
         super().__init__()
         self._ignore_index = ignore_index
         self._reduction = reduction
         self._smoothing_param = smoothing_param
         self.loss_function = SoftTargetCrossEntropyLoss(
-            self._ignore_index, self._reduction, None
+            self._ignore_index, self._reduction, normalize_targets=False
         )
         self._eps = np.finfo(np.float32).eps
 
@@ -47,7 +50,6 @@ class LabelSmoothingCrossEntropyLoss(ClassyLoss):
             A LabelSmoothingCrossEntropyLoss instance.
         """
 
-        assert "weight" not in config, '"weight" not implemented'
         assert (
             "smoothing_param" in config
         ), "Label Smoothing needs a smoothing parameter"
@@ -79,7 +81,6 @@ class LabelSmoothingCrossEntropyLoss(ClassyLoss):
         return valid_targets
 
     def smooth_targets(self, valid_targets, classes):
-
         """
         This function takes valid (No ignore values present) one-hot target vectors
         and computes smoothed target vectors (normalized) according to the loss's

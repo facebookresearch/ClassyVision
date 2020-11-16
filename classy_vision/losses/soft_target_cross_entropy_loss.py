@@ -15,19 +15,20 @@ from classy_vision.losses import ClassyLoss, register_loss
 
 @register_loss("soft_target_cross_entropy")
 class SoftTargetCrossEntropyLoss(ClassyLoss):
-    def __init__(self, ignore_index, reduction, normalize_targets):
+    def __init__(self, ignore_index=-100, reduction="mean", normalize_targets=True):
         """Intializer for the soft target cross-entropy loss loss.
         This allows the targets for the cross entropy loss to be multilabel
 
-        Config params:
-        'weight': weight of sample (not yet implemented),
-        'ignore_index': sample should be ignored for loss (optional),
-        'reduction': specifies reduction to apply to the output (optional),
+        Args:
+            ignore_index: sample should be ignored for loss if the class is this value
+            reduction: specifies reduction to apply to the output
+            normalize_targets: whether the targets should be normalized to a sum of 1
+                based on the total count of positive targets for a given sample
         """
         super(SoftTargetCrossEntropyLoss, self).__init__()
         self._ignore_index = ignore_index
         self._reduction = reduction
-        assert normalize_targets in [None, "count_based"]
+        assert isinstance(normalize_targets, bool)
         self._normalize_targets = normalize_targets
         if self._reduction != "mean":
             raise NotImplementedError(
@@ -47,12 +48,10 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
             A SoftTargetCrossEntropyLoss instance.
         """
 
-        if "weight" in config:
-            raise NotImplementedError('"weight" not implemented')
         return cls(
             ignore_index=config.get("ignore_index", -100),
             reduction=config.get("reduction", "mean"),
-            normalize_targets=config.get("normalize_targets", "count_based"),
+            normalize_targets=config.get("normalize_targets", True),
         )
 
     def forward(self, output, target):
@@ -77,7 +76,7 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
         )
         valid_mask = target != self._ignore_index
         valid_targets = target.float() * valid_mask.float()
-        if self._normalize_targets == "count_based":
+        if self._normalize_targets:
             valid_targets /= self._eps + valid_targets.sum(dim=1, keepdim=True)
         per_sample_per_target_loss = -valid_targets * F.log_softmax(output, -1)
         # perform reduction
