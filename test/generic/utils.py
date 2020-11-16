@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+import unittest
 from functools import wraps
 
 import torch
@@ -298,3 +299,18 @@ class LimitedPhaseTrainer(ClassyTrainer):
             super().train(task)
         except LimitedPhaseException:
             pass
+
+
+class ClassyTestCase(unittest.TestCase):
+    def assertTorchAllClose(
+        self, tensor_1, tensor_2, rtol=1e-5, atol=1e-8, equal_nan=False
+    ):
+        for tensor in [tensor_1, tensor_2]:
+            if not isinstance(tensor, torch.Tensor):
+                raise AssertionError(
+                    f"Expected tensor, not {tensor} of type {type(tensor)}"
+                )
+        if not torch.allclose(
+            tensor_1, tensor_2, rtol=rtol, atol=atol, equal_nan=equal_nan
+        ):
+            raise AssertionError(f"{tensor_1} is not close to {tensor_2}")
