@@ -208,19 +208,6 @@ class ClassyOptimizer(ABC):
         """
         self.optimizer.load_state_dict(state["optim"])
 
-    def backward(self, loss: torch.Tensor) -> None:
-        """
-        Computer gradients with respect to the loss.
-
-        Calls :func:`zero_grad` and then computes the gradient using
-        `torch.Tensor.backward <https://pytorch.org/docs/stable/
-        tensors.html#torch.Tensor.backward>`_. See :mod:`torch.autograd` for
-        more information.
-        """
-        # TODO (aadcock): Add gradient accumulation logic
-        self.zero_grad()
-        loss.backward()
-
     def on_epoch(self, where: float) -> None:
         """
         Called at the end of a phase.
