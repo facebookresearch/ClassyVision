@@ -59,8 +59,17 @@ class TestVisionTransformer(unittest.TestCase):
             ],
         }
 
-    def _test_model(self, model_config, image_size=224, expected_out_dims=1000):
+    def _test_model(
+        self,
+        model_config,
+        image_size=224,
+        expected_out_dims=1000,
+        test_forward_pass=True,
+    ):
         model = build_model(model_config)
+
+        if not test_forward_pass:
+            return
 
         # Verify forward pass works
         input = torch.ones([2, 3, image_size, image_size])
@@ -79,7 +88,8 @@ class TestVisionTransformer(unittest.TestCase):
         self._test_model(self.get_vit_b_16_224_config())
 
     def test_vit_l_32_224(self):
-        self._test_model(self.get_vit_l_32_224_config())
+        # testing the forward pass is slow so we skip it
+        self._test_model(self.get_vit_l_32_224_config(), test_forward_pass=False)
 
     def test_all_presets(self):
         for model_name, image_size, expected_out_dims in [
@@ -89,10 +99,12 @@ class TestVisionTransformer(unittest.TestCase):
             ("vit_l_16", 32, 1024),
             ("vit_h_14", 14, 1280),
         ]:
+            # testing the forward pass is slow so we skip it
             self._test_model(
                 {"name": model_name, "image_size": image_size},
                 image_size,
                 expected_out_dims,
+                test_forward_pass=False,
             )
 
     def test_resolution_change(self):
