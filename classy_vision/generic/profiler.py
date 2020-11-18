@@ -246,7 +246,8 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int
     # linear layer:
     elif layer_type in ["Linear"]:
         weight_ops = layer.weight.numel()
-        flops = x.size()[0] * weight_ops
+        bias_ops = layer.bias.numel() if layer.bias is not None else 0
+        flops = x.size()[0] * (weight_ops + bias_ops)
 
     # batch normalization / layer normalization:
     elif layer_type in [
@@ -287,7 +288,7 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int
     ]
     if verbose:
         logging.info("\t".join(message))
-    return flops
+    return int(flops)
 
 
 def _layer_activations(
@@ -315,7 +316,7 @@ def _layer_activations(
     message = [f"module: {typestr}", f"activations: {activations}"]
     if verbose:
         logging.info("\t".join(message))
-    return activations
+    return int(activations)
 
 
 def summarize_profiler_info(prof: torch.autograd.profiler.profile) -> str:
@@ -350,9 +351,9 @@ class ComplexityComputer:
     def compute(self, layer: nn.Module, x: Any, out: Any, module_name: str):
         if self.count_unique and module_name in self.seen_modules:
             return
-        if self.verbose:
-            logging.info(f"module name: {module_name}")
         self.count += self.compute_fn(layer, x, out, self.verbose)
+        if self.verbose:
+            logging.info(f"module name: {module_name}, count {self.count}")
         self.seen_modules.add(module_name)
 
     def reset(self):

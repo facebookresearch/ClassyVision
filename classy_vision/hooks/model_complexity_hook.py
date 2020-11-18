@@ -27,11 +27,12 @@ class ModelComplexityHook(ClassyHook):
     on_phase_end = ClassyHook._noop
     on_end = ClassyHook._noop
 
-    def __init__(self) -> None:
+    def __init__(self, verbose=False) -> None:
         super().__init__()
         self.num_flops = None
         self.num_activations = None
         self.num_parameters = None
+        self.verbose = verbose
 
     def on_start(self, task) -> None:
         """Measure number of parameters, FLOPs and activations."""
@@ -48,15 +49,13 @@ class ModelComplexityHook(ClassyHook):
                     input_key=task.base_model.input_key
                     if hasattr(task.base_model, "input_key")
                     else None,
+                    verbose=self.verbose,
                 )
                 if self.num_flops is None:
                     logging.info("FLOPs for forward pass: skipped.")
                     self.num_flops = 0
                 else:
-                    logging.info(
-                        "FLOPs for forward pass: %d MFLOPs"
-                        % (float(self.num_flops) / 1e6)
-                    )
+                    logging.info(f"FLOPs for forward pass: {self.num_flops} FLOPs")
             except ClassyProfilerNotImplementedError as e:
                 logging.warning(f"Could not compute FLOPs for model forward pass: {e}")
             try:
@@ -66,6 +65,7 @@ class ModelComplexityHook(ClassyHook):
                     input_key=task.base_model.input_key
                     if hasattr(task.base_model, "input_key")
                     else None,
+                    verbose=self.verbose,
                 )
                 logging.info(f"Number of activations in model: {self.num_activations}")
             except ClassyProfilerNotImplementedError as e:
