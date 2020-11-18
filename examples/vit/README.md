@@ -27,7 +27,7 @@ This paper takes transformer based models that have been extremely successful in
 | ViT-L/32 | [vit_l32_in.json](vit_l32_in.json) | 73.60 |
 | ViT-L/16 | [vit_l16_in.json](vit_l16_in.json) | 76.53 (*)|
 
-(*) training diverged and restarted
+(*) training diverged and accuracy went to 0 around phase 87
 
 ### Fine tuning on ImageNet 1K
 
@@ -41,4 +41,4 @@ This paper takes transformer based models that have been extremely successful in
 | ViT-L/32 | [vit_l32_in_ft.json](vit_l32_in_ft.json) | 75.38 | 71.16 |
 | ViT-L/16 | [vit_l16_in_ft.json](vit_l16_in_ft.json) | 77.02 (*)| 76.53 |
 
-(*) pre-training diverged and restarted
+(*) pre-training diverged and accuracy went to 0 around phase 87  
