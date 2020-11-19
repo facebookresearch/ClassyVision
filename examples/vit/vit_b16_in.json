@@ -1,0 +1,117 @@
+{
+  "name": "classification_task",
+  "num_epochs": 300,
+  "loss": {
+    "name": "label_smoothing_cross_entropy",
+    "smoothing_param": 0.1
+  },
+  "mixup": {
+    "alpha": 0.2,
+    "num_classes": 1000
+  },
+  "simulated_global_batchsize": 4096,
+  "clip_grad_norm": 1,
+  "amp_args": {
+    "opt_level": "O1"
+  },
+  "dataset": {
+    "train": {
+      "name": "image_path",
+      "image_folder": "PATH/TO/IMAGENET/TRAIN",
+      "batchsize_per_replica": 64,
+      "num_samples": null,
+      "use_shuffle": true,
+      "transforms": [
+        {
+          "name": "apply_transform_to_key",
+          "transforms": [
+            {"name": "RandomResizedCrop", "size": 224},
+            {"name": "RandomHorizontalFlip"},
+            {"name": "imagenet_autoaugment"},
+            {"name": "ToTensor"},
+            {
+              "name": "Normalize",
+              "mean": [0.485, 0.456, 0.406],
+              "std": [0.229, 0.224, 0.225]
+            }
+          ],
+          "key": "input"
+        }
+      ]
+    },
+    "test": {
+      "name": "image_path",
+      "image_folder": "PATH/TO/IMAGENET/VAL",
+      "batchsize_per_replica": 64,
+      "num_samples": null,
+      "use_shuffle": false,
+      "transforms": [
+        {
+          "name": "apply_transform_to_key",
+          "transforms": [
+            {"name": "Resize", "size": 256},
+            {"name": "CenterCrop", "size": 224},
+            {"name": "ToTensor"},
+            {
+              "name": "Normalize",
+              "mean": [0.485, 0.456, 0.406],
+              "std": [0.229, 0.224, 0.225]
+            }
+          ],
+          "key": "input"
+        }
+      ]
+    }
+  },
+  "meters": {
+    "accuracy": {
+      "topk": [1, 5]
+    }
+  },
+  "model": {
+    "name": "vision_transformer",
+    "image_size": 224,
+    "patch_size": 16,
+    "hidden_dim": 768,
+    "mlp_dim": 3072,
+    "num_heads": 12,
+    "num_layers": 12,
+    "attention_dropout_rate": 0,
+    "dropout_rate": 0.1,
+    "heads": [
+      {
+        "name": "vision_transformer_head",
+        "unique_id": "default_head",
+        "num_classes": 1000,
+        "fork_block": "trunk_output",
+        "in_plane": 768,
+        "hidden_dim": 3072
+      }
+    ]
+  },
+  "optimizer": {
+    "name": "adamw",
+    "betas": [0.9, 0.999],
+    "weight_decay": 0.3,
+    "param_schedulers": {
+      "lr": {
+        "name": "composite",
+        "schedulers": [
+          {
+            "name": "linear",
+            "start_value": 0,
+            "end_value": 0.003
+          },
+          {
+            "name": "cosine",
+            "start_value": 0.003,
+            "end_value": 0
+          }
+        ],
+        "update_interval": "step",
+        "interval_scaling": ["rescaled", "fixed"],
+        "lengths": [0.1, 0.9]
+      }
+    }
+  }
+}
