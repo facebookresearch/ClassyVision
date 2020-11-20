@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 "sphinx",
                 "isort==5.2.2",
                 "bs4",
-                "nbconvert",
+                "nbconvert==6.0.7",
                 "pre-commit",
                 "parameterized",
             ]
