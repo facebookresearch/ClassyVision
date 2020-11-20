@@ -105,17 +105,24 @@ that most losses are stateless and do not need to load any state.</p>
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">LabelSmoothingCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span></em>, <em class="sig-param"><span class="n">reduction</span></em>, <em class="sig-param"><span class="n">smoothing_param</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">LabelSmoothingCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span><span class="o">=</span><span class="default_value">- 100</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">smoothing_param</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span></em>, <em class="sig-param"><span class="n">reduction</span></em>, <em class="sig-param"><span class="n">smoothing_param</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span><span class="o">=</span><span class="default_value">- 100</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">smoothing_param</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.LabelSmoothingCrossEntropyLoss.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intializer for the label smoothed cross entropy loss.
 This decreases gap between output scores and encourages generalization.
-Targets provided to forward can be one-hot vectors (NxC) or class indices(Nx1)</p>
-<p>Config params:
-‘weight’: weight of sample (not yet implemented),
-‘ignore_index’: sample should be ignored for loss (optional),
-‘smoothing_param’: value to be added to each target entry</p>
+Targets provided to forward can be one-hot vectors (NxC) or class indices (Nx1).</p>
+<p>This normalizes the targets to a sum of 1 based on the total count of positive
+targets for a given sample before applying label smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignore_index</strong> – sample should be ignored for loss if the class is this value</p></li>
+<li><p><strong>reduction</strong> – specifies reduction to apply to the output</p></li>
+<li><p><strong>smoothing_param</strong> – value to be added to each target entry</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.losses.LabelSmoothingCrossEntropyLoss.compute_valid_targets">
@@ -184,16 +191,22 @@ See <a class="reference internal" href="#classy_vision.losses.MultiOutputSumLoss
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.losses.SoftTargetCrossEntropyLoss">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">SoftTargetCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span></em>, <em class="sig-param"><span class="n">reduction</span></em>, <em class="sig-param"><span class="n">normalize_targets</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.losses.</code><code class="sig-name descname">SoftTargetCrossEntropyLoss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span><span class="o">=</span><span class="default_value">- 100</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">normalize_targets</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="classy_vision.losses.SoftTargetCrossEntropyLoss.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span></em>, <em class="sig-param"><span class="n">reduction</span></em>, <em class="sig-param"><span class="n">normalize_targets</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ignore_index</span><span class="o">=</span><span class="default_value">- 100</span></em>, <em class="sig-param"><span class="n">reduction</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">normalize_targets</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.losses.SoftTargetCrossEntropyLoss.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intializer for the soft target cross-entropy loss loss.
 This allows the targets for the cross entropy loss to be multilabel</p>
-<p>Config params:
-‘weight’: weight of sample (not yet implemented),
-‘ignore_index’: sample should be ignored for loss (optional),
-‘reduction’: specifies reduction to apply to the output (optional),</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignore_index</strong> – sample should be ignored for loss if the class is this value</p></li>
+<li><p><strong>reduction</strong> – specifies reduction to apply to the output</p></li>
+<li><p><strong>normalize_targets</strong> – whether the targets should be normalized to a sum of 1
+based on the total count of positive targets for a given sample</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 <dl class="py method">
 <dt id="classy_vision.losses.SoftTargetCrossEntropyLoss.forward">

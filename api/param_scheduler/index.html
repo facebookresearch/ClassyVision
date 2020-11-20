@@ -222,6 +222,11 @@ See <a class="reference internal" href="#classy_vision.optim.param_scheduler.Cos
 </dd></dl>
 </dd></dl>
 <dl class="py class">
+<dt id="classy_vision.optim.param_scheduler.IntervalScaling">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">IntervalScaling</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.param_scheduler.IntervalScaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+<dl class="py class">
 <dt id="classy_vision.optim.param_scheduler.LinearParamScheduler">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">LinearParamScheduler</code><span class="sig-paren">(</span><em class="sig-param">start_value: float</em>, <em class="sig-param">end_value: float</em>, <em class="sig-param">update_interval: classy_vision.optim.param_scheduler.classy_vision_param_scheduler.UpdateInterval = &lt;UpdateInterval.STEP: 'step'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.param_scheduler.LinearParamScheduler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Linearly interpolates parameter between <code class="docutils literal notranslate"><span class="pre">start_value</span></code> and <code class="docutils literal notranslate"><span class="pre">end_value</span></code>.
@@ -433,36 +438,6 @@ See <a class="reference internal" href="#classy_vision.optim.param_scheduler.Ste
 </dd></dl>
 </dd></dl>
 <dl class="py class">
-<dt id="classy_vision.optim.param_scheduler.UpdateInterval">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">UpdateInterval</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enum for specifying update frequency for scheduler.</p>
-<dl class="py attribute">
-<dt id="classy_vision.optim.param_scheduler.UpdateInterval.EPOCH">
-<code class="sig-name descname">EPOCH</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval.EPOCH" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update param before each epoch</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py attribute">
-<dt id="classy_vision.optim.param_scheduler.UpdateInterval.STEP">
-<code class="sig-name descname">STEP</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval.STEP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update param before each optimizer step</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.optim.param_scheduler.IntervalScaling">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">IntervalScaling</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.IntervalScaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
-</dd></dl>
-<dl class="py class">
 <dt id="classy_vision.optim.param_scheduler.StepWithFixedGammaParamScheduler">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">StepWithFixedGammaParamScheduler</code><span class="sig-paren">(</span><em class="sig-param">base_value: float</em>, <em class="sig-param">num_decays: int</em>, <em class="sig-param">gamma: float</em>, <em class="sig-param">num_epochs: int</em>, <em class="sig-param">update_interval: classy_vision.optim.param_scheduler.classy_vision_param_scheduler.UpdateInterval = &lt;UpdateInterval.STEP: 'step'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.param_scheduler.StepWithFixedGammaParamScheduler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decays the param value by gamma at equal number of steps so as to have the
@@ -512,6 +487,45 @@ See <a class="reference internal" href="#classy_vision.optim.param_scheduler.Ste
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A StepWithFixedGammaParamScheduler instance.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.optim.param_scheduler.UpdateInterval">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.optim.param_scheduler.</code><code class="sig-name descname">UpdateInterval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enum for specifying update frequency for scheduler.</p>
+<dl class="py attribute">
+<dt id="classy_vision.optim.param_scheduler.UpdateInterval.EPOCH">
+<code class="sig-name descname">EPOCH</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval.EPOCH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update param before each epoch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt id="classy_vision.optim.param_scheduler.UpdateInterval.STEP">
+<code class="sig-name descname">STEP</code><a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval.STEP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update param before each optimizer step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.optim.param_scheduler.UpdateInterval.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">default</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>classy_vision.optim.param_scheduler.classy_vision_param_scheduler.UpdateInterval<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> → classy_vision.optim.param_scheduler.classy_vision_param_scheduler.UpdateInterval<a class="headerlink" href="#classy_vision.optim.param_scheduler.UpdateInterval.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches the update interval from a config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – The config for the parameter scheduler</p></li>
+<li><p><strong>default</strong> – The value to use if the config doesn’t specify an update interval.
+If not set, STEP is used.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

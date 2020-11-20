@@ -12,32 +12,6 @@
 <div class="body" role="main">
 <div class="section" id="module-classy_vision.hooks">
 <span id="hooks"></span><h1>Hooks<a class="headerlink" href="#module-classy_vision.hooks" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="classy_vision.hooks.build_hook">
-<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">build_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hook_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.build_hook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Builds a ClassyHook from a config.</p>
-<p>This assumes a ‘name’ key in the config which is used to determine
-what hook class to instantiate. For instance, a config <cite>{“name”:
-“my_hook”, “foo”: “bar”}</cite> will find a class that was registered as
-“my_hook” (see <a class="reference internal" href="#classy_vision.hooks.register_hook" title="classy_vision.hooks.register_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_hook()</span></code></a>) and call .from_config on
-it.</p>
-</dd></dl>
-<dl class="py function">
-<dt id="classy_vision.hooks.register_hook">
-<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">register_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.register_hook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers a <a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> subclass.</p>
-<p>This decorator allows Classy Vision to instantiate a subclass of
-<a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> from a configuration file, even if the class
-itself is not part of the base Classy Vision framework. To use it,
-apply this decorator to a ClassyHook subclass, like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_hook</span><span class="p">(</span><span class="s1">'custom_hook'</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">CustomHook</span><span class="p">(</span><span class="n">ClassyHook</span><span class="p">):</span>
-   <span class="o">...</span>
-</pre></div>
-</div>
-<p>To instantiate a hook from a configuration file, see
-<a class="reference internal" href="#classy_vision.hooks.build_hook" title="classy_vision.hooks.build_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_hook()</span></code></a>.</p>
-</dd></dl>
 <dl class="py class">
 <dt id="classy_vision.hooks.CheckpointHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">CheckpointHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">input_args</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">phase_types</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Collection<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checkpoint_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.CheckpointHook" title="Permalink to this definition">¶</a></dt>
@@ -176,7 +150,7 @@ E.g. -</p>
 </dd></dl>
 <dl class="py class">
 <dt id="classy_vision.hooks.ClassyHookFunctions">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHookFunctions</code><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ClassyHookFunctions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.ClassyHookFunctions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enumeration of all the hook functions in the ClassyHook class.</p>
 </dd></dl>
 <dl class="py class">
@@ -287,148 +261,6 @@ not updating weights after initialization.</p></li>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
-<dt id="classy_vision.hooks.OutputCSVHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">OutputCSVHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span></em>, <em class="sig-param"><span class="n">id_key</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span></em>, <em class="sig-param"><span class="n">id_key</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called at the end of training.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called at the end of each phase (epoch).</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called at the start of training.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.OutputCSVHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the output of the model to a CSV file.</p>
-<p>This hook assumes the dataset provides an “id” key. It also expects the
-task to provide an output of shape (B, C) where B is the batch size and
-C is the number of classes. Targets can be either one-hot encoded or
-single numbers.</p>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.hooks.TensorboardPlotHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TensorboardPlotHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hook for writing the losses, learning rates and meters to <cite>tensorboard &lt;https
-://www.tensorflow.org/tensorboard</cite>&gt;_.</p>
-<p>Global steps are counted in terms of the number of samples processed.</p>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>The constructor method of TensorboardPlotHook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tb_writer</strong> – <a href="#id1"><span class="problematic" id="id2">`</span></a>Tensorboard SummaryWriter &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.</p></li>
-<li><p><strong>readthedocs.io/en/latest/tensorboard.html#tensorboardX.</strong> – </p></li>
-<li><p><strong>instance</strong><strong> or </strong><strong>None</strong> (<em>SummaryWriter&gt;`_</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.from_config">
-<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.hooks.tensorboard_plot_hook.TensorboardPlotHook<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.from_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>The config is expected to include the key
-“summary_writer” with arguments which correspond
-to those listed at &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.
-readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the losses and learning rates to tensorboard.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize losses and learning_rates.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called at the start of training.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TensorboardPlotHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store the observed learning rates.</p>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.hooks.TorchscriptHook">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TorchscriptHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">torchscript_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">use_trace</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hook to convert a task model into torch script.</p>
-<p>Saves the torch scripts in torchscript_folder.</p>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">torchscript_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">use_trace</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>The constructor method of TorchscriptHook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>torchscript_folder</strong> – Folder to store torch scripts in.</p></li>
-<li><p><strong>use_trace</strong> – set to true for tracing and false for scripting,</p></li>
-<li><p><strong>device</strong> – move to device before saving.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.on_end">
-<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save model into torchscript by the end of training.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.on_phase_end">
-<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.on_phase_start">
-<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.on_start">
-<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called at the start of training.</p>
-</dd></dl>
-<dl class="py method">
-<dt id="classy_vision.hooks.TorchscriptHook.on_step">
-<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derived classes can set their hook functions to this.</p>
-<p>This is useful if they want those hook functions to not do anything.</p>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
 <dt id="classy_vision.hooks.ModelComplexityHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">ModelComplexityHook</code><a class="headerlink" href="#classy_vision.hooks.ModelComplexityHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs the number of paramaters and forward pass FLOPs and activations of the model.</p>
@@ -479,7 +311,7 @@ readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tb_writer</strong> – <a href="#id3"><span class="problematic" id="id4">`</span></a>Tensorboard SummaryWriter &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.</p></li>
+<li><p><strong>tb_writer</strong> – <a href="#id1"><span class="problematic" id="id2">`</span></a>Tensorboard SummaryWriter &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.</p></li>
 <li><p><strong>readthedocs.io/en/latest/tensorboard.html#tensorboardX.</strong> – </p></li>
 <li><p><strong>instance</strong><strong> or </strong><strong>None</strong> (<em>SummaryWriter&gt;`_</em>) – </p></li>
 </ul>
@@ -522,6 +354,45 @@ readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
 <code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.ModelTensorboardHook.on_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.hooks.OutputCSVHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">OutputCSVHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span></em>, <em class="sig-param"><span class="n">id_key</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span></em>, <em class="sig-param"><span class="n">id_key</span><span class="o">=</span><span class="default_value">'id'</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">'\t'</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of training.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of each phase (epoch).</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this.</p>
+<p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.OutputCSVHook.on_step">
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.OutputCSVHook.on_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the output of the model to a CSV file.</p>
+<p>This hook assumes the dataset provides an “id” key. It also expects the
+task to provide an output of shape (B, C) where B is the batch size and
+C is the number of classes. Targets can be either one-hot encoded or
+single numbers.</p>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
@@ -646,6 +517,109 @@ batch norm stats at the end of a train phase to make them more precise. See
 </dd></dl>
 </dd></dl>
 <dl class="py class">
+<dt id="classy_vision.hooks.TensorboardPlotHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TensorboardPlotHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook for writing the losses, learning rates and meters to <cite>tensorboard &lt;https
+://www.tensorflow.org/tensorboard</cite>&gt;_.</p>
+<p>Global steps are counted in terms of the number of samples processed.</p>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tb_writer</span></em>, <em class="sig-param"><span class="n">log_period</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">10</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of TensorboardPlotHook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tb_writer</strong> – <a href="#id3"><span class="problematic" id="id4">`</span></a>Tensorboard SummaryWriter &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.</p></li>
+<li><p><strong>readthedocs.io/en/latest/tensorboard.html#tensorboardX.</strong> – </p></li>
+<li><p><strong>instance</strong><strong> or </strong><strong>None</strong> (<em>SummaryWriter&gt;`_</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> → classy_vision.hooks.tensorboard_plot_hook.TensorboardPlotHook<a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>The config is expected to include the key
+“summary_writer” with arguments which correspond
+to those listed at &lt;<a class="reference external" href="https://tensorboardx">https://tensorboardx</a>.
+readthedocs.io/en/latest/tensorboard.html#tensorboardX.SummaryWriter&gt;:</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this.</p>
+<p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the losses and learning rates to tensorboard.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize losses and learning_rates.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TensorboardPlotHook.on_step">
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TensorboardPlotHook.on_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store the observed learning rates.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt id="classy_vision.hooks.TorchscriptHook">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">TorchscriptHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">torchscript_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">use_trace</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook to convert a task model into torch script.</p>
+<p>Saves the torch scripts in torchscript_folder.</p>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">torchscript_folder</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">use_trace</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">device</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'cpu'</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor method of TorchscriptHook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>torchscript_folder</strong> – Folder to store torch scripts in.</p></li>
+<li><p><strong>use_trace</strong> – set to true for tracing and false for scripting,</p></li>
+<li><p><strong>device</strong> – move to device before saving.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.on_end">
+<code class="sig-name descname">on_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save model into torchscript by the end of training.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.on_phase_end">
+<code class="sig-name descname">on_phase_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_phase_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this.</p>
+<p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.on_phase_start">
+<code class="sig-name descname">on_phase_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_phase_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this.</p>
+<p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.on_start">
+<code class="sig-name descname">on_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the start of training.</p>
+</dd></dl>
+<dl class="py method">
+<dt id="classy_vision.hooks.TorchscriptHook.on_step">
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.hooks.TorchscriptHook.on_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derived classes can set their hook functions to this.</p>
+<p>This is useful if they want those hook functions to not do anything.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
 <dt id="classy_vision.hooks.VisdomHook">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">VisdomHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">server</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">env</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'main'</span></em>, <em class="sig-param"><span class="n">title_suffix</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.VisdomHook" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots metrics on to <a class="reference external" href="https://github.com/facebookresearch/visdom">Visdom</a>.</p>
@@ -696,6 +670,32 @@ batch norm stats at the end of a train phase to make them more precise. See
 <dd><p>Derived classes can set their hook functions to this.</p>
 <p>This is useful if they want those hook functions to not do anything.</p>
 </dd></dl>
+</dd></dl>
+<dl class="py function">
+<dt id="classy_vision.hooks.build_hook">
+<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">build_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hook_config</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.build_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a ClassyHook from a config.</p>
+<p>This assumes a ‘name’ key in the config which is used to determine
+what hook class to instantiate. For instance, a config <cite>{“name”:
+“my_hook”, “foo”: “bar”}</cite> will find a class that was registered as
+“my_hook” (see <a class="reference internal" href="#classy_vision.hooks.register_hook" title="classy_vision.hooks.register_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_hook()</span></code></a>) and call .from_config on
+it.</p>
+</dd></dl>
+<dl class="py function">
+<dt id="classy_vision.hooks.register_hook">
+<code class="sig-prename descclassname">classy_vision.hooks.</code><code class="sig-name descname">register_hook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.hooks.register_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a <a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> subclass.</p>
+<p>This decorator allows Classy Vision to instantiate a subclass of
+<a class="reference internal" href="#classy_vision.hooks.ClassyHook" title="classy_vision.hooks.ClassyHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassyHook</span></code></a> from a configuration file, even if the class
+itself is not part of the base Classy Vision framework. To use it,
+apply this decorator to a ClassyHook subclass, like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@register_hook</span><span class="p">(</span><span class="s1">'custom_hook'</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">CustomHook</span><span class="p">(</span><span class="n">ClassyHook</span><span class="p">):</span>
+   <span class="o">...</span>
+</pre></div>
+</div>
+<p>To instantiate a hook from a configuration file, see
+<a class="reference internal" href="#classy_vision.hooks.build_hook" title="classy_vision.hooks.build_hook"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_hook()</span></code></a>.</p>
 </dd></dl>
 </div>
 </div>

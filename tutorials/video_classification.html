@@ -61,34 +61,28 @@
 <script
   src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js">
 </script>
-<div class="notebook">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<body class="notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="How-to-do-video-classification">How to do video classification<a class="anchor-link" href="#How-to-do-video-classification">¶</a></h1>
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>In this tutorial, we will show how to train a video classification model in Classy Vision. Given an input video, the video classification task is to predict the most probable class label. This is very similar to image classification, which was covered in other tutorials, but there are a few differences that make video special. As the video duration can be long, we sample short video clips of a small number of frames, use the classifier to make predictions, and finally average the clip-level predictions to get the final video-level predictions.</p>
 <p>In this tutorial we will: (1) load a video dataset; (2) configure a video model; (3) configure video meters; (4) build a task; (5) start training; Please note that these steps are being done separately in the tutorial for easy of exposition in the notebook format. As described in our <a href="https://classyvision.ai/tutorials/getting_started">Getting started</a> tutorial, you can combine all configs used in this tutorial into a single config for ClassificationTask and train it using <code>classy_train.py</code>.</p>
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Before we get started, let us enable INFO level logging so that we can monitor the progress of our runs.</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -98,16 +92,14 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="1.-Prepare-the-dataset">1. Prepare the dataset<a class="anchor-link" href="#1.-Prepare-the-dataset">¶</a></h2><p>All right! Let's start with the dataset. <a href="https://www.crcv.ucf.edu/data/UCF101.php">UCF-101</a> is a canonical action recognition dataset. It has 101 action classes, and has 3 folds with different training/testing splitting . We use fold 1 in this tutorial. Classy Vision has implemented the dataset <code>ucf101</code>, which can be used to load the training and testing splits.</p>
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="1.1-Directories-and-Metadata-File-information">1.1 Directories and Metadata File information<a class="anchor-link" href="#1.1-Directories-and-Metadata-File-information">¶</a></h3><p>You will need to download the videos and the split files of UCF-101 dataset from the <a href="https://www.crcv.ucf.edu/data/UCF101.php">official site</a>.</p>
 <p>You should then have the videos present in a folder -</p>
 <div class="highlight"><pre><span></span><span class="gp">$</span> ls /path/to/ucf101
@@ -123,13 +115,12 @@
 </pre></div>
 <p>Upon initializing the dataset, Classy Vision processes all this dataset information and stores it in a metadata file. This metadata file can be re-used for future runs to make the initialization faster. You can pass the path to store the metadata as <code>/path/to/ucf101_metadata.pt</code>.</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.dataset</span> <span class="kn">import</span> <span class="n">build_dataset</span>
 
 <span class="c1"># set it to the folder where video files are saved</span>
@@ -188,25 +179,22 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Note we specify different transforms for training and testing split. For training split, we first randomly select a size from <code>size_range</code> [128, 160], and resize the video clip so that its short edge is equal to the random size. After that, we take a random crop of spatial size 112 x 112. We find such data augmentation helps the model generalize better, and use it as the default transform with data augmentation. For testing split, we resize the video clip to have short edge of size 128, and skip the random cropping to use the entire video clip. This is the default transform without data augmentation.</p>
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2.-Define-a-model-trunk-and-a-head">2. Define a model trunk and a head<a class="anchor-link" href="#2.-Define-a-model-trunk-and-a-head">¶</a></h2><p>Next, let's create the video model, which consists of a trunk and a head. The trunk can be viewed as a feature extractor for computing discriminative features from raw video pixels while the head is viewed as a classifier for producing the final predictions. Let's first create the trunk of architecture ResNet3D-18 by using the built-in <code>resnext3d</code> model in Classy Vision.</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.models</span> <span class="kn">import</span> <span class="n">build_model</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">({</span>
@@ -226,18 +214,17 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>We also need to create a model head, which consists of an average pooling layer and a linear layer, by using the <code>fully_convolutional_linear</code> head. At test time, the shape (channels, frames, height, width) of input tensor is typically <code>(3 x 8 x 128 x 173)</code>. The shape of input tensor to the average pooling layer is <code>(512, 1, 8, 10)</code>. Since we do not use a global average pooling but an average pooling layer of kernel size <code>(1, 7, 7)</code>, the pooled feature map has shape <code>(512, 1, 2, 5)</code>. The shape of prediction tensor from the linear layer is <code>(1, 2, 5, 101)</code>, which indicates the model computes a 101-D prediction vector densely over a <code>2 x 5</code> grid. That's why we name the head as <code>FullyConvolutionalLinearHead</code> because we use the linear layer as a <code>1x1</code> convolution layer to produce spatially dense predictions. Finally, predictions over the <code>2 x 5</code> grid are averaged.</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.heads</span> <span class="kn">import</span> <span class="n">build_head</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
@@ -259,9 +246,9 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="3.-Choose-the-meters">3. Choose the meters<a class="anchor-link" href="#3.-Choose-the-meters">¶</a></h2><p>This is the biggest difference between video and image classification. For images we used <code>AccuracyMeter</code> to measure top-1 and top-5 accuracy. For videos you can also use both <code>AccuracyMeter</code> and <code>VideoAccuracyMeter</code>, but they behave differently:</p>
 <ul>
 <li><code>AccuracyMeter</code> takes one clip-level prediction and compare it with groundtruth video label. It reports the clip-level accuracy.</li>
@@ -270,13 +257,12 @@
 </li>
 </ul>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.meters</span> <span class="kn">import</span> <span class="n">build_meters</span><span class="p">,</span> <span class="n">AccuracyMeter</span><span class="p">,</span> <span class="n">VideoAccuracyMeter</span>
 
 <span class="n">meters</span> <span class="o">=</span> <span class="n">build_meters</span><span class="p">({</span>
@@ -294,18 +280,17 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="4.-Build-a-task">4. Build a task<a class="anchor-link" href="#4.-Build-a-task">¶</a></h2><p>Great! we have defined the minimal set of components necessary for video classification, including dataset, model, loss function, meters and optimizer. We proceed to define a video classification task, and populate it with all the components.</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">classy_vision.tasks</span> <span class="kn">import</span> <span class="n">ClassificationTask</span>
 <span class="kn">from</span> <span class="nn">classy_vision.optim</span> <span class="kn">import</span> <span class="n">build_optimizer</span>
 <span class="kn">from</span> <span class="nn">classy_vision.losses</span> <span class="kn">import</span> <span class="n">build_loss</span>
@@ -342,19 +327,18 @@
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="5.-Start-training">5. Start training<a class="anchor-link" href="#5.-Start-training">¶</a></h2><p>After creating a task, you can simply pass that to a Trainer to start training. Here we will train on a single node and 
 configure logging and checkpoints for training:</p>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -377,15 +361,14 @@ configure logging and checkpoints for training:</p>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>As the training progresses, you should see <code>LossLrMeterLoggingHook</code> printing the loss, learning rate and meter metrics. Checkpoints will be available in the folder created above.</p>
 <h2 id="6.-Conclusion">6. Conclusion<a class="anchor-link" href="#6.-Conclusion">¶</a></h2><p>Video classification is very similar to image classification in Classy Vision, you just need to use an appropriate dataset, model and meters. This tutorial glossed over many details about training, please take a look at our <a href="https://classyvision.ai/tutorials/getting_started">Getting started</a> tutorial to learn more. Refer to our API reference for more details about <a href="https://classyvision.ai/api/models.html#classy_vision.models.ResNeXt3D">ResNeXt3D</a> models, <a href="https://classyvision.ai/api/dataset.html#classy_vision.dataset.UCF101Dataset">UCF101</a> dataset and <a href="http://classyvision.ai/api/meters.html#classy_vision.meters.VideoAccuracyMeter">VideoAccuracy</a> meters.</p>
 </div>
 </div>
-</div>
-</div></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/video_classification.ipynb" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Jupyter Notebook</a></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/video_classification.py" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Source Code</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footerSection"><h5>Documentation</h5><a href="/tutorials/">Tutorials</a><a href="/api/">API Reference</a></div><div class="footerSection"><h5>Social</h5><div class="social"><a class="github-button" href="https://github.com/facebookresearch/ClassyVision" data-count-href="https://github.com/facebookresearch/ClassyVision/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star Classy Vision on GitHub">ClassyVision</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright"><span>Copyright © 2020 Facebook Inc.</span> </section><script>
+</body></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/video_classification.ipynb" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Jupyter Notebook</a></div><div class="tutorialButtonWrapper buttonWrapper"><a class="tutorialButton button" download="" href="/files/video_classification.py" target="_blank"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>Download Tutorial Source Code</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><div class="footerSection"><h5>Documentation</h5><a href="/tutorials/">Tutorials</a><a href="/api/">API Reference</a></div><div class="footerSection"><h5>Social</h5><div class="social"><a class="github-button" href="https://github.com/facebookresearch/ClassyVision" data-count-href="https://github.com/facebookresearch/ClassyVision/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star Classy Vision on GitHub">ClassyVision</a></div></div></section><a href="https://opensource.facebook.com/" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/oss_logo.png" alt="Facebook Open Source" width="170" height="45"/></a><section class="copyright"><span>Copyright © 2020 Facebook Inc.</span> </section><script>
             (function() {
               var BAD_BASE = '/classyvision/';
               if (window.location.origin !== 'https://classyvision.ai') {

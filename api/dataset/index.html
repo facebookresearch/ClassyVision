@@ -273,6 +273,18 @@ documentation</a>.</p></li>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
+<dt id="classy_vision.dataset.DataloaderAsyncGPUWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">DataloaderAsyncGPUWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.DataloaderAsyncGPUWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataloader which wraps another dataloader, and moves the data to GPU asynchronously.
+At most one batch is pre-emptively copied (per worker).</p>
+<p>credits: @vini, nvidia Apex</p>
+<dl class="py method">
+<dt id="classy_vision.dataset.DataloaderAsyncGPUWrapper.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.dataset.DataloaderAsyncGPUWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
 <dt id="classy_vision.dataset.DataloaderLimitWrapper">
 <em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">DataloaderLimitWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em>, <em class="sig-param"><span class="n">limit</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">wrap_around</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.DataloaderLimitWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dataloader which wraps another dataloader and only returns a limited
@@ -321,18 +333,6 @@ dataloader is exhausted before <cite>limit</cite> calls.</p></li>
 <dl class="py method">
 <dt id="classy_vision.dataset.DataloaderWrapper.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.dataset.DataloaderWrapper.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-</dd></dl>
-<dl class="py class">
-<dt id="classy_vision.dataset.DataloaderAsyncGPUWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">classy_vision.dataset.</code><code class="sig-name descname">DataloaderAsyncGPUWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em><span class="sig-paren">)</span><a class="headerlink" href="#classy_vision.dataset.DataloaderAsyncGPUWrapper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dataloader which wraps another dataloader, and moves the data to GPU asynchronously.
-At most one batch is pre-emptively copied (per worker).</p>
-<p>credits: @vini, nvidia Apex</p>
-<dl class="py method">
-<dt id="classy_vision.dataset.DataloaderAsyncGPUWrapper.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataloader</span><span class="p">:</span> <span class="n">Iterable</span></em><span class="sig-paren">)</span> → <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><a class="headerlink" href="#classy_vision.dataset.DataloaderAsyncGPUWrapper.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 </dd></dl>
