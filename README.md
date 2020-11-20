@@ -1,21 +1,49 @@
-<p align="center"><img width="30%" src="website/static/img/cv-logo.png" /></p>
+<p align="center"><img width="50%" src="website/static/img/cv-logo.png" /></p>
 <p align="center">
  <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
  </a>
  <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
-  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=svg&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
+  <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=shield&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
  </a>
  <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
  </a>
 </p>
 
---------------------------------------------------------------------------------
+## What's New:
 
-## News
+- November 2020: [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) now available, with training [recipes](https://github.com/facebookresearch/ClassyVision/tree/master/examples/vit)!
 
-<details open>
+<details>
+ <summary><b>
+  2020-11-20: Classy Vision v0.5 Released
+ </b></summary>
+
+#### New Features
+- Release [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) model implementation, with [recipes](https://github.com/facebookresearch/ClassyVision/tree/master/examples/vit)(#646)
+- Implemented gradient clipping (#643)
+- Implemented gradient accumulation (#644)
+- Added support for [AdamW](https://arxiv.org/abs/1711.05101) (#636)
+- Added Precise batch norm hook (#592)
+- Added support for adaptive pooling in `fully_convolutional_linear_head` (#602)
+- Added support for sync batch norm group size (#534)
+- Added a CSV Hook to manually inspect model predictions
+- Added a ClassyModel tutorial (#485)
+- Migrated to [Hydra 1.0](https://github.com/facebookresearch/hydra) (#536)
+- Migrated off of [tensorboardX](https://github.com/lanpa/tensorboardX) (#488)
+
+
+#### Breaking Changes
+- `ClassyOptimizer` API improvements
+    - added `OptionsView` to retrieve options from the optimizer `param_group`
+- Removed `ClassyModel.evaluation_mode` (#521)
+- Removed `ImageNetDataset`, now a subset of `ImagePathDataset` (#494)
+- Renamed `is_master` to `is_leader` in `distributed_util` (#576)
+
+</details>
+
+<details>
  <summary><b>
   2020-04-29: Classy Vision v0.4 Released
  </b></summary>
@@ -61,30 +89,6 @@
  - support for losses with trainable parameters ([#394](https://github.com/facebookresearch/ClassyVision/pull/394))
  - Added presets for some typical `ResNe(X)t` configurations: [#405](https://github.com/facebookresearch/ClassyVision/pull/405))
  </details>
-
-<details>
- <summary><b>
-  2020-01-24: Classy Vision v0.2 Released
- </b></summary>
-
-#### New features
- - `Adam` optimizer ([#301](https://github.com/facebookresearch/ClassyVision/pull/301))
- - `R(2+1)d` units ([#322](https://github.com/facebookresearch/ClassyVision/pull/322))
- - Mixed precision training ([#338](https://github.com/facebookresearch/ClassyVision/pull/338))
- - One-hot targets in meters ([#349](https://github.com/facebookresearch/ClassyVision/pull/349))
-
-This release has been tested on the latest PyTorch (1.4) and torchvision (0.5) releases. It also includes bug fixes and other smaller features.
-</details>
-
-<details>
- <summary><b>
-  2019-12-05: Classy Vision v0.1 Released
- </b></summary>
-
-- [A new framework for large-scale training of state-of-the-art visual classification models](https://ai.facebook.com/blog/a-new-framework-for-large-scale-training-of-state-of-the-art-visual-classification-models/)
-- [NeurIPS 2019 Expo Workshop Presentation](https://research.fb.com/wp-content/uploads/2019/12/3.-Classy-Vision.key)
-</details>
-
 
 ## About
 
