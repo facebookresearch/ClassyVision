@@ -58,7 +58,7 @@ class DataloaderLimitWrapper(DataloaderWrapper):
             if self.wrap_around:
                 # create a new iterator to load data from the beginning
                 logging.info(
-                    f"Wrapping around after {self._count} calls. Limit: {self.limit}"
+                    f"Wrapping around after {self._count - 1} calls. Limit: {self.limit}"
                 )
                 try:
                     self._iter = iter(self.dataloader)

@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import logging
 from typing import Any, Dict
 
 from classy_vision.generic.util import (
@@ -95,19 +96,22 @@ class FineTuningTask(ClassificationTask):
                     self.pretrained_checkpoint_path
                 )
 
-            assert (
-                self.pretrained_checkpoint_dict is not None
-            ), "Need a pretrained checkpoint for fine tuning"
+            if self.pretrained_checkpoint_dict is None:
+                logging.warn("a pretrained checkpoint is not provided")
+            else:
+                assert (
+                    self.pretrained_checkpoint_dict is not None
+                ), "Need a pretrained checkpoint for fine tuning"
 
-            state_load_success = update_classy_model(
-                self.base_model,
-                self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
-                self.reset_heads,
-                self.pretrained_checkpoint_load_strict,
-            )
-            assert (
-                state_load_success
-            ), "Update classy state from pretrained checkpoint was unsuccessful."
+                state_load_success = update_classy_model(
+                    self.base_model,
+                    self.pretrained_checkpoint_dict["classy_state_dict"]["base_model"],
+                    self.reset_heads,
+                    self.pretrained_checkpoint_load_strict,
+                )
+                assert (
+                    state_load_success
+                ), "Update classy state from pretrained checkpoint was unsuccessful."
 
         if self.freeze_trunk:
             # do not track gradients for all the parameters in the model except
