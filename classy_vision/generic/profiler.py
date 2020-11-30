@@ -103,7 +103,7 @@ def _get_batchsize_per_replica(x: Union[Tuple, List, Dict]) -> int:
     return x.size()[0]
 
 
-def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int:
+def _layer_flops(layer: nn.Module, y: Any, verbose: bool, *args) -> int:
     """
     Computes the number of FLOPs required for a single layer.
 
@@ -118,6 +118,7 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int
 
     """
 
+    x = args[0]
     # get layer type:
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
@@ -274,7 +275,12 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int
         #   Class MyModule(nn.Module):
         #     def flops(self, x):
         #       ...
-        flops = layer.flops(x)
+        #   or
+        #
+        #   Class MyModule(nn.Module):
+        #     def flops(self, x1, x2):
+        #       ...
+        flops = layer.flops(*args)
 
     if flops is None:
         raise ClassyProfilerNotImplementedError(layer)
@@ -292,7 +298,10 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any, verbose: bool = False) -> int
 
 
 def _layer_activations(
-    layer: nn.Module, x: Any, out: Any, verbose: bool = False
+    layer: nn.Module,
+    out: Any,
+    verbose: bool,
+    *args,
 ) -> int:
     """
     Computes the number of activations produced by a single layer.
@@ -302,12 +311,12 @@ def _layer_activations(
     will be used to compute the activations instead.
 
     Class MyModule(nn.Module):
-        def activations(self, x, out):
+        def activations(self, out, *args):
             ...
     """
     typestr = layer.__repr__()
     if hasattr(layer, "activations"):
-        activations = layer.activations(x, out)
+        activations = layer.activations(out, *args)
     elif isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
         activations = out.numel()
     else:
@@ -348,10 +357,10 @@ class ComplexityComputer:
         self.verbose = verbose
         self.seen_modules = set()
 
-    def compute(self, layer: nn.Module, x: Any, out: Any, module_name: str):
+    def compute(self, layer: nn.Module, out: Any, module_name: str, *args):
         if self.count_unique and module_name in self.seen_modules:
             return
-        self.count += self.compute_fn(layer, x, out, self.verbose)
+        self.count += self.compute_fn(layer, out, self.verbose, *args)
         if self.verbose:
             logging.info(f"module name: {module_name}, count {self.count}")
         self.seen_modules.add(module_name)
@@ -380,7 +389,7 @@ def _patched_computation_module(
 
         def forward(self, *args, **kwargs):
             out = self._original_forward(*args, **kwargs)
-            complexity_computer.compute(self, args[0], out, module_name)
+            complexity_computer.compute(self, out, module_name, *args)
             return out
 
         def __repr__(self):
