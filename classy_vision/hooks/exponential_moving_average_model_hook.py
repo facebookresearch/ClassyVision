@@ -32,7 +32,11 @@ class ExponentialMovingAverageModelHook(ClassyHook):
     on_end = ClassyHook._noop
 
     def __init__(
-        self, decay: float, consider_bn_buffers: bool = True, device: str = "gpu"
+        self,
+        decay: float,
+        consider_bn_buffers: bool = True,
+        device: str = "gpu",
+        ema_model_state_init: bool = False,
     ) -> None:
         """The constructor method of ExponentialMovingAverageModelHook.
 
@@ -49,6 +53,7 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         self.decay: int = decay
         self.consider_bn_buffers = consider_bn_buffers
         self.device = "cuda" if device == "gpu" else "cpu"
+        self.ema_model_state_init = ema_model_state_init
         self.state.model_state = {}
         self.state.ema_model_state = {}
         self.ema_model_state_list = []
@@ -72,25 +77,37 @@ class ExponentialMovingAverageModelHook(ClassyHook):
             iterable = itertools.chain(iterable, buffers_iterable)
         return iterable
 
-    def _save_current_model_state(self, model: nn.Module, model_state: Dict[str, Any]):
+    def _save_current_model_state(
+        self, model: nn.Module, model_state: Dict[str, Any], overwrite: bool = False
+    ):
         """Copy the model's state to the provided dict."""
         for name, param in self.get_model_state_iterator(model):
-            model_state[name] = param.detach().clone().to(device=self.device)
+            if overwrite or (name not in model_state):
+                model_state[name] = param.detach().clone().to(device=self.device)
 
     def on_start(self, task) -> None:
         if self.state.model_state:
             # loaded state from checkpoint, do not re-initialize, only move the state
             # to the right device
             for name in self.state.model_state:
-                self.state.model_state[name] = self.state.model_state[name].to(
-                    device=self.device
-                )
+                if self.ema_model_state_init:
+                    self.state.model_state[name] = (
+                        self.state.ema_model_state[name]
+                        .detach()
+                        .clone()
+                        .to(device=self.device)
+                    )
+                else:
+                    self.state.model_state[name] = self.state.model_state[name].to(
+                        device=self.device
+                    )
+
                 self.state.ema_model_state[name] = self.state.ema_model_state[name].to(
                     device=self.device
                 )
-        else:
-            self._save_current_model_state(task.base_model, self.state.model_state)
-            self._save_current_model_state(task.base_model, self.state.ema_model_state)
+
+        self._save_current_model_state(task.base_model, self.state.model_state)
+        self._save_current_model_state(task.base_model, self.state.ema_model_state)
 
         if self.use_optimization(task):
             non_fp_states = []
@@ -129,7 +146,9 @@ class ExponentialMovingAverageModelHook(ClassyHook):
         if task.train:
             # save the current model state since this will be overwritten by the ema
             # state in the test phase
-            self._save_current_model_state(task.base_model, self.state.model_state)
+            self._save_current_model_state(
+                task.base_model, self.state.model_state, overwrite=True
+            )
 
     def on_step(self, task) -> None:
         if not task.train:
