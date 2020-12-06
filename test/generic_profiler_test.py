@@ -53,6 +53,28 @@ class TestConvModule(nn.Conv2d):
         return 0
 
 
+class TestModuleWithTwoArguments(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x1, x2):
+        return x1 + x2
+
+    def flops(self, x1, x2):
+        return x1.numel()
+
+
+class TestModuleDoubleValue(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(10, 10, bias=False)
+        self.add = TestModuleWithTwoArguments()
+
+    def forward(self, x):
+        x = self.linear(x)
+        return self.add(x, x)
+
+
 class TestModel(nn.Module):
     def __init__(self):
         super().__init__()
@@ -178,6 +200,11 @@ class TestProfilerFunctions(unittest.TestCase):
         self.assertEqual(
             compute_flops(model, input_shape=input_shape), TestModuleWithFlops._flops
         )  # the conv is applied twice
+
+        # test that a model has a module which takes two positional arguments
+        model = nn.Sequential(TestModuleDoubleValue())
+        input_shape = (10,)
+        self.assertEqual(compute_flops(model, input_shape=input_shape), 110)
 
 
 class TestHelperFunctions(unittest.TestCase):
