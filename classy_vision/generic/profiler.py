@@ -86,7 +86,7 @@ def get_shape(x: Union[Tuple, List, Dict]) -> Union[Tuple, List, Dict]:
         return x.size()
 
 
-def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
+def _layer_flops(layer: nn.Module, layer_args: List[Any], y: Any) -> int:
     """
     Computes the number of FLOPs required for a single layer.
 
@@ -101,6 +101,7 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
 
     """
 
+    x = layer_args[0]
     # get layer type:
     typestr = layer.__repr__()
     layer_type = typestr[: typestr.find("(")].strip()
@@ -323,7 +324,12 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
         #   Class MyModule(nn.Module):
         #     def flops(self, x):
         #       ...
-        flops = layer.flops(x)
+        #   or
+        #
+        #   Class MyModule(nn.Module):
+        #     def flops(self, x1, x2):
+        #       ...
+        flops = layer.flops(*layer_args)
 
     if flops is None:
         raise ClassyProfilerNotImplementedError(layer)
@@ -336,10 +342,10 @@ def _layer_flops(layer: nn.Module, x: Any, y: Any) -> int:
         f"flops(M): {int(flops) / 1e6}",
     ]
     logging.debug("\t".join(message))
-    return flops
+    return int(flops)
 
 
-def _layer_activations(layer: nn.Module, x: Any, out: Any) -> int:
+def _layer_activations(layer: nn.Module, layer_args: List[Any], out: Any) -> int:
     """
     Computes the number of activations produced by a single layer.
 
@@ -348,12 +354,13 @@ def _layer_activations(layer: nn.Module, x: Any, out: Any) -> int:
     will be used to compute the activations instead.
 
     Class MyModule(nn.Module):
-        def activations(self, x, out):
+        def activations(self, out, *layer_args):
             ...
     """
+
     typestr = layer.__repr__()
     if hasattr(layer, "activations"):
-        activations = layer.activations(x, out)
+        activations = layer.activations(out, *layer_args)
     elif isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
         activations = out.numel()
     else:
@@ -361,7 +368,7 @@ def _layer_activations(layer: nn.Module, x: Any, out: Any) -> int:
 
     message = [f"module: {typestr}", f"activations: {activations}"]
     logging.debug("\t".join(message))
-    return activations
+    return int(activations)
 
 
 def summarize_profiler_info(prof: torch.autograd.profiler.profile) -> str:
@@ -392,11 +399,13 @@ class ComplexityComputer:
         self.count = 0
         self.seen_modules = set()
 
-    def compute(self, layer: nn.Module, x: Any, out: Any, module_name: str):
+    def compute(
+        self, layer: nn.Module, layer_args: List[Any], out: Any, module_name: str
+    ):
         if self.count_unique and module_name in self.seen_modules:
             return
-        logging.debug(f"module name: {module_name}")
-        self.count += self.compute_fn(layer, x, out)
+        self.count += self.compute_fn(layer, layer_args, out)
+        logging.debug(f"module name: {module_name}, count {self.count}")
         self.seen_modules.add(module_name)
 
     def reset(self):
@@ -423,7 +432,7 @@ def _patched_computation_module(
 
         def forward(self, *args, **kwargs):
             out = self._original_forward(*args, **kwargs)
-            complexity_computer.compute(self, args[0], out, module_name)
+            complexity_computer.compute(self, list(args), out, module_name)
             return out
 
         def __repr__(self):
@@ -524,7 +533,11 @@ def compute_flops(
     Compute the number of FLOPs needed for a forward pass.
     """
     return compute_complexity(
-        model, _layer_flops, input_shape, input_key, patch_attr="flops"
+        model,
+        _layer_flops,
+        input_shape,
+        input_key,
+        patch_attr="flops",
     )
 
 
@@ -537,7 +550,11 @@ def compute_activations(
     Compute the number of activations created in a forward pass.
     """
     return compute_complexity(
-        model, _layer_activations, input_shape, input_key, patch_attr="activations"
+        model,
+        _layer_activations,
+        input_shape,
+        input_key,
+        patch_attr="activations",
     )
 
 
