@@ -50,11 +50,13 @@ class TestPreciseBatchNormHook(HookTestBase):
         config = get_test_mlp_task_config()
         task = build_task(config)
         num_samples = 10
-        precise_batch_norm_hook = PreciseBatchNormHook(num_samples)
-        task.set_hooks([precise_batch_norm_hook])
-        task.prepare()
-        trainer = ClassyTrainer()
-        trainer.train(task)
+
+        for cache_sample in [True, False]:
+            precise_batch_norm_hook = PreciseBatchNormHook(num_samples, cache_sample)
+            task.set_hooks([precise_batch_norm_hook])
+            task.prepare()
+            trainer = ClassyTrainer()
+            trainer.train(task)
 
     def test_bn_stats(self):
         base_self = self
