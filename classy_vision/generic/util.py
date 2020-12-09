@@ -98,7 +98,7 @@ def is_leaf(module: nn.Module) -> bool:
     Returns True if module is leaf in the graph.
     """
     assert isinstance(module, nn.Module), "module should be nn.Module"
-    return len([c for c in module.children()]) == 0 or hasattr(module, "_mask")
+    return len(list(module.children())) == 0 or hasattr(module, "_mask")
 
 
 def is_on_gpu(model: torch.nn.Module) -> bool:

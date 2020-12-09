@@ -4,12 +4,20 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import contextlib
 from typing import Any, Dict
 
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
 from classy_vision.generic.util import is_pos_int, maybe_convert_to_one_hot
 from classy_vision.meters import ClassyMeter
+
+try:
+    from torch.cuda.amp import autocast
+
+    is_amp_available = True
+except ImportError:
+    is_amp_available = False
 
 from . import register_meter
 
@@ -137,7 +145,12 @@ class AccuracyMeter(ClassyMeter):
         # Convert target to 0/1 encoding if isn't
         target = maybe_convert_to_one_hot(target, model_output)
 
-        _, pred = model_output.topk(max(self._topk), dim=1, largest=True, sorted=True)
+        # If Pytorch AMP is being used, model outputs are probably fp16
+        # Since .topk() is not compatible with fp16, we promote the model outputs to full precision
+        _, pred = model_output.float().topk(
+            max(self._topk), dim=1, largest=True, sorted=True
+        )
+
         for i, k in enumerate(self._topk):
             self._curr_correct_predictions_k[i] += (
                 torch.gather(target, dim=1, index=pred[:, :k])

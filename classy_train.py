@@ -46,7 +46,7 @@ import torch
 from classy_vision.generic.distributed_util import get_rank, get_world_size
 from classy_vision.generic.opts import check_generic_args, parse_train_arguments
 from classy_vision.generic.registry_utils import import_all_packages_from_directory
-from classy_vision.generic.util import load_checkpoint, load_json
+from classy_vision.generic.util import load_json
 from classy_vision.hooks import (
     CheckpointHook,
     LossLrMeterLoggingHook,
