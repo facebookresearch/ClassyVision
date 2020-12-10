@@ -4,9 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Optional
 
-import torch
 from classy_vision.generic.distributed_util import barrier
 from classy_vision.tasks import ClassyTask
 
