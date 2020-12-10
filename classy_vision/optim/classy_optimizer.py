@@ -7,8 +7,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
-import torch
-
 from .param_scheduler import (
     ClassyParamScheduler,
     ConstantParamScheduler,

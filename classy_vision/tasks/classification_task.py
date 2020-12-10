@@ -55,6 +55,18 @@ try:
 except ImportError:
     apex_available = False
 
+try:
+    from torch.cuda.amp import GradScaler as TorchGradScaler
+
+except ImportError:
+    pass
+
+
+class AmpType(enum.Enum):
+    # Automatic Mixed Precision supported types
+    APEX = enum.auto()
+    PYTORCH = enum.auto()
+
 
 class BroadcastBuffersMode(enum.Enum):
     DISABLED = enum.auto()
@@ -162,6 +174,8 @@ class ClassificationTask(ClassyTask):
             BroadcastBuffersMode.BEFORE_EVAL
         )
         self.amp_args = None
+        self.amp_type = None
+        self.amp_grad_scaler = None
         self.mixup_transform = None
         self.perf_log = []
         self.last_batch = None
@@ -422,8 +436,24 @@ class ClassificationTask(ClassyTask):
         if amp_args is None:
             logging.info("AMP disabled")
         else:
-            if not apex_available:
-                raise RuntimeError("apex is not installed, cannot enable amp")
+            # Check that the requested AMP type is known
+            try:
+                self.amp_type = AmpType[self.amp_args["amp_type"].upper()]
+            except KeyError:
+                logging.info("AMP type not specified, defaulting to Apex")
+                self.amp_type = AmpType.APEX
+
+            # Check for CUDA availability, required for both Apex and Pytorch AMP
+            if not torch.cuda.is_available():
+                raise RuntimeError(
+                    "AMP is required but CUDA is not supported, cannot enable AMP"
+                )
+
+            # Check for Apex availability
+            if self.amp_type == AmpType.APEX and not apex_available:
+                raise RuntimeError(
+                    "Apex AMP is required but Apex is not installed, cannot enable AMP"
+                )
 
             logging.info(f"AMP enabled with args {amp_args}")
         return self
@@ -701,19 +731,21 @@ class ClassificationTask(ClassyTask):
             )
 
         if self.amp_args is not None:
-            # Initialize apex.amp. This updates the model and the PyTorch optimizer (
-            # if training, which is wrapped by the ClassyOptimizer in self.optimizer).
-            # Please note this must happen before loading the checkpoint, cause
-            # there's amp state to be restored.
-
-            if self.optimizer is None:
-                self.base_model = apex.amp.initialize(
-                    self.base_model, optimizers=None, **self.amp_args
-                )
-            else:
-                self.base_model, self.optimizer.optimizer = apex.amp.initialize(
-                    self.base_model, self.optimizer.optimizer, **self.amp_args
-                )
+            if self.amp_type == AmpType.APEX:
+                # Initialize apex.amp. This updates the model and the PyTorch optimizer (
+                # if training, which is wrapped by the ClassyOptimizer in self.optimizer).
+                # Please note this must happen before loading the checkpoint, cause
+                # there's amp state to be restored.
+                if self.optimizer is None:
+                    self.base_model = apex.amp.initialize(
+                        self.base_model, optimizers=None, **self.amp_args
+                    )
+                else:
+                    self.base_model, self.optimizer.optimizer = apex.amp.initialize(
+                        self.base_model, self.optimizer.optimizer, **self.amp_args
+                    )
+            elif self.amp_type == AmpType.PYTORCH:
+                self.amp_grad_scaler = TorchGradScaler()
 
         if self.simulated_global_batchsize is not None:
             if self.simulated_global_batchsize % self.get_global_batchsize() != 0:
@@ -836,7 +868,11 @@ class ClassificationTask(ClassyTask):
         if isinstance(self.base_loss, ClassyLoss):
             classy_state_dict["loss"] = self.base_loss.get_classy_state()
         if self.amp_args is not None:
-            classy_state_dict["amp"] = apex.amp.state_dict()
+            classy_state_dict["amp"] = (
+                apex.amp.state_dict()
+                if self.amp_type == AmpType.APEX
+                else self.amp_grad_scaler.state_dict()
+            )
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
         return classy_state_dict
@@ -864,7 +900,10 @@ class ClassificationTask(ClassyTask):
             self.base_loss.set_classy_state(state["loss"])
 
         if "amp" in state:
-            apex.amp.load_state_dict(state["amp"])
+            if self.amp_type == AmpType.APEX:
+                apex.amp.load_state_dict(state["amp"])
+            else:
+                self.amp_grad_scaler.load_state_dict(state["amp"])
 
         for hook in self.hooks:
             # we still want to be able to run when new hooks are added or old
@@ -901,7 +940,14 @@ class ClassificationTask(ClassyTask):
         if self.use_gpu:
             sample = recursive_copy_to_gpu(sample, non_blocking=True)
 
-        with torch.no_grad():
+        # Optional Pytorch AMP context
+        torch_amp_context = (
+            torch.cuda.amp.autocast()
+            if self.amp_type == AmpType.PYTORCH
+            else contextlib.suppress()
+        )
+
+        with torch.no_grad(), torch_amp_context:
             output = self.model(sample["input"])
 
             local_loss = self.compute_loss(output, sample)
@@ -949,8 +995,15 @@ class ClassificationTask(ClassyTask):
         if self.mixup_transform is not None:
             sample = self.mixup_transform(sample)
 
-        with torch.enable_grad():
-            # Forward pass
+        # Optional Pytorch AMP context
+        torch_amp_context = (
+            torch.cuda.amp.autocast()
+            if self.amp_type == AmpType.PYTORCH
+            else contextlib.suppress()
+        )
+
+        # Forward pass
+        with torch.enable_grad(), torch_amp_context:
             output = self.model(sample["input"])
 
             local_loss = self.compute_loss(output, sample)
@@ -1004,13 +1057,16 @@ class ClassificationTask(ClassyTask):
         )
 
         with ctx_mgr_model, ctx_mgr_loss:
-            if self.amp_args is not None:
+            if self.amp_type == AmpType.APEX:
                 with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
                     scaled_loss.backward()
+            elif self.amp_type == AmpType.PYTORCH:
+                self.amp_grad_scaler.scale(loss).backward()
             else:
                 loss.backward()
 
         if do_step:
+            # Handle gradient accumulation related gradient rescaling
             if self.optimizer_period != 1:
                 self._rescale_gradients(1 / self.optimizer_period)
 
@@ -1018,7 +1074,14 @@ class ClassificationTask(ClassyTask):
             if self.clip_grad_norm is not None:
                 self._clip_gradients(self.clip_grad_norm)
 
-            self.optimizer.step(where=self.where)
+            if self.amp_type == AmpType.PYTORCH:
+                # If using mixed precision, handle underflow-related scaling
+                # See https://pytorch.org/docs/stable/amp.html#gradient-scaling
+                # for context
+                self.amp_grad_scaler.step(self.optimizer, where=self.where)
+                self.amp_grad_scaler.update()
+            else:
+                self.optimizer.step(where=self.where)
 
     def _rescale_gradients(self, scale):
         for param in master_params(self.optimizer):
