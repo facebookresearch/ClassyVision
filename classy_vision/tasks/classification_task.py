@@ -455,6 +455,10 @@ class ClassificationTask(ClassyTask):
                     "Apex AMP is required but Apex is not installed, cannot enable AMP"
                 )
 
+            # Set Torch AMP grad scaler, used to prevent gradient underflow
+            elif self.amp_type == AmpType.PYTORCH:
+                self.amp_grad_scaler = TorchGradScaler()
+
             logging.info(f"AMP enabled with args {amp_args}")
         return self
 
@@ -744,8 +748,6 @@ class ClassificationTask(ClassyTask):
                     self.base_model, self.optimizer.optimizer = apex.amp.initialize(
                         self.base_model, self.optimizer.optimizer, **self.amp_args
                     )
-            elif self.amp_type == AmpType.PYTORCH:
-                self.amp_grad_scaler = TorchGradScaler()
 
         if self.simulated_global_batchsize is not None:
             if self.simulated_global_batchsize % self.get_global_batchsize() != 0:
