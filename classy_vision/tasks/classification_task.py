@@ -188,6 +188,7 @@ class ClassificationTask(ClassyTask):
         self.clip_grad_norm = None
         self.simulated_global_batchsize = None
         self.optimizer_period = 1
+        self.bucket_cap_mb = 25
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -804,6 +805,7 @@ class ClassificationTask(ClassyTask):
             self.base_model,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=self.find_unused_parameters,
+            bucket_cap_mb=self.bucket_cap_mb,
         )
         if (
             isinstance(self.base_loss, ClassyLoss)
@@ -814,6 +816,7 @@ class ClassificationTask(ClassyTask):
                 self.base_loss,
                 broadcast_buffers=broadcast_buffers,
                 find_unused_parameters=self.find_unused_parameters,
+                bucket_cap_mb=self.bucket_cap_mb,
             )
 
     @property

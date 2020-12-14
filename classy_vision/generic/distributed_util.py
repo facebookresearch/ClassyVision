@@ -219,6 +219,7 @@ def init_distributed_data_parallel_model(
     model: torch.nn.Module,
     broadcast_buffers: bool = False,
     find_unused_parameters: bool = True,
+    bucket_cap_mb: int = 25,
 ) -> torch.nn.parallel.DistributedDataParallel:
     global _cuda_device_index
 
@@ -237,6 +238,7 @@ def init_distributed_data_parallel_model(
             output_device=_cuda_device_index,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=find_unused_parameters,
+            bucket_cap_mb=bucket_cap_mb,
         )
 
 
