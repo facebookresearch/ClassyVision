@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import logging
 from typing import Any, Dict
 
 import torch
@@ -185,9 +186,10 @@ class ResNeXt3DBase(ClassyModel):
 
         current_state = self.state_dict()
         for name, weight_src in state["model"]["trunk"].items():
-            assert name in current_state, (
-                "weight %s is not found in ResNeXt3D model" % name
-            )
+            if name not in current_state:
+                logging.warn(f"weight {name} is not found in current ResNeXt3D state")
+                continue
+
             weight_tgt = current_state[name]
             assert (
                 weight_src.dim() == weight_tgt.dim()
