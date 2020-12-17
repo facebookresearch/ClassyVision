@@ -8,6 +8,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+from classy_vision.generic.util import log_class_usage
+
 
 class ClassyTask(ABC):
     """
@@ -22,6 +24,7 @@ class ClassyTask(ABC):
         Constructs a ClassyTask.
         """
         self.hooks = []
+        log_class_usage("Task", self.__class__)
 
     @classmethod
     @abstractmethod
