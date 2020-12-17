@@ -870,11 +870,12 @@ class ClassificationTask(ClassyTask):
         if isinstance(self.base_loss, ClassyLoss):
             classy_state_dict["loss"] = self.base_loss.get_classy_state()
         if self.amp_args is not None:
-            classy_state_dict["amp"] = (
-                apex.amp.state_dict()
-                if self.amp_type == AmpType.APEX
-                else self.amp_grad_scaler.state_dict()
-            )
+            if self.amp_type == AmpType.APEX:
+                classy_state_dict["amp"] = apex.amp.state_dict()
+
+            elif self.amp_grad_scaler is not None:
+                classy_state_dict["amp"] = self.amp_grad_scaler.state_dict()
+
         if deep_copy:
             classy_state_dict = copy.deepcopy(classy_state_dict)
         return classy_state_dict
