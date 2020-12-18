@@ -7,6 +7,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+from classy_vision.generic.util import log_class_usage
+
 
 class ClassyHookState:
     """Class to store state within instances of ClassyHook.
@@ -50,6 +52,7 @@ class ClassyHook(ABC):
     """
 
     def __init__(self):
+        log_class_usage("Hooks", self.__class__)
         self.state = ClassyHookState()
 
     @classmethod
