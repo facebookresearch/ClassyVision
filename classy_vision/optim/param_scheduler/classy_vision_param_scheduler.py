@@ -7,6 +7,8 @@
 from enum import Enum
 from typing import Any, Dict
 
+from classy_vision.generic.util import log_class_usage
+
 
 class UpdateInterval(Enum):
     """
@@ -60,6 +62,7 @@ class ClassyParamScheduler(object):
             update_interval: Specifies the frequency of the param updates
         """
         self.update_interval = update_interval
+        log_class_usage("ParamScheduler", self.__class__)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyParamScheduler":
