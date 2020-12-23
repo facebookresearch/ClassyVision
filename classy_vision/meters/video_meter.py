@@ -27,6 +27,7 @@ class VideoMeter(ClassyMeter):
             clips_per_video_train: No. of clips sampled per video at train time
             clips_per_video_test: No. of clips sampled per video at test time
         """
+        super().__init__()
 
         self._clips_per_video_train = clips_per_video_train
         self._clips_per_video_test = clips_per_video_test
