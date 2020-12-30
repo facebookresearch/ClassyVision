@@ -9,7 +9,6 @@ from collections import defaultdict
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
-from classy_vision.generic.util import log_class_usage
 from classy_vision.heads import build_head
 
 from .classy_model import ClassyModel
@@ -80,8 +79,6 @@ def build_model(config):
             head = build_head(updated_config)
             heads[fork_block].append(head)
         model.set_heads(heads)
-
-    log_class_usage("Model", model.__class__)
 
     return model
 
