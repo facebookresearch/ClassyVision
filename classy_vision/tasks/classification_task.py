@@ -188,6 +188,7 @@ class ClassificationTask(ClassyTask):
         self.clip_grad_norm = None
         self.simulated_global_batchsize = None
         self.optimizer_period = 1
+        self.ddp_bucket_cap_mb = 25
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -321,6 +322,7 @@ class ClassificationTask(ClassyTask):
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
         batch_norm_sync_group_size: int = 0,
         find_unused_parameters: bool = True,
+        bucket_cap_mb: int = 25,
     ):
         """Set distributed options.
 
@@ -335,7 +337,8 @@ class ClassificationTask(ClassyTask):
                 usually 8).
             find_unused_parameters: See
                 :class:`torch.nn.parallel.DistributedDataParallel` for information.
-
+            bucket_cap_mb: See
+                :class:`torch.nn.parallel.DistributedDataParallel` for information.
         Raises:
             RuntimeError: If batch_norm_sync_mode is `BatchNormSyncMode.APEX` and apex
                 is not installed.
@@ -364,6 +367,7 @@ class ClassificationTask(ClassyTask):
         self.batch_norm_sync_mode = batch_norm_sync_mode
 
         self.find_unused_parameters = find_unused_parameters
+        self.ddp_bucket_cap_mb = bucket_cap_mb
 
         return self
 
@@ -541,6 +545,7 @@ class ClassificationTask(ClassyTask):
             "find_unused_parameters": distributed_config.get(
                 "find_unused_parameters", True
             ),
+            "bucket_cap_mb": distributed_config.get("bucket_cap_mb", 25),
         }
 
         task = (
@@ -804,6 +809,7 @@ class ClassificationTask(ClassyTask):
             self.base_model,
             broadcast_buffers=broadcast_buffers,
             find_unused_parameters=self.find_unused_parameters,
+            bucket_cap_mb=self.ddp_bucket_cap_mb,
         )
         if (
             isinstance(self.base_loss, ClassyLoss)
@@ -814,6 +820,7 @@ class ClassificationTask(ClassyTask):
                 self.base_loss,
                 broadcast_buffers=broadcast_buffers,
                 find_unused_parameters=self.find_unused_parameters,
+                bucket_cap_mb=self.ddp_bucket_cap_mb,
             )
 
     @property
