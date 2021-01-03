@@ -7,6 +7,7 @@
 from typing import Any, Dict, Tuple
 
 import torch
+from classy_vision.generic.util import log_class_usage
 
 
 class ClassyMeter:
@@ -15,6 +16,9 @@ class ClassyMeter:
 
     This can include meters like  Accuracy, Precision and Recall, etc.
     """
+
+    def __init__(self):
+        log_class_usage("Meter", self.__class__)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyMeter":
