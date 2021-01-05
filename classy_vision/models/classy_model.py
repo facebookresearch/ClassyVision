@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
+from classy_vision.generic.util import log_class_usage
 from classy_vision.heads.classy_head import ClassyHead
 
 from .classy_block import ClassyBlock
@@ -157,6 +158,8 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         self._attachable_block_names = []
         self._heads = nn.ModuleDict()
         self._head_outputs = {}
+
+        log_class_usage("Model", self.__class__)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyModel":
