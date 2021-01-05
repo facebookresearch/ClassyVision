@@ -6,10 +6,11 @@
 
 import tempfile
 import unittest
+from itertools import product
 from typing import Any, Dict, List
 
 import torch
-from classy_vision.generic.distributed_util import broadcast_object
+from classy_vision.generic.distributed_util import _PRIMARY_RANK, broadcast_object
 from torch.multiprocessing import Event, Process, Queue
 
 
@@ -76,13 +77,17 @@ class TestDistributedUtil(unittest.TestCase):
 
     def test_broadcast_object(self):
         world_size = 3
-        for obj in self._get_test_objects():
+        for use_disk, obj in product([True, False], self._get_test_objects()):
             filename = tempfile.NamedTemporaryFile(delete=True).name
             inputs = [None] * world_size
             inputs[0] = obj  # only the master worker has the object
 
             calls = [
-                {"world_size": world_size, "function": broadcast_object, "inputs": [i]}
+                {
+                    "world_size": world_size,
+                    "function": broadcast_object,
+                    "inputs": [i, _PRIMARY_RANK, use_disk],
+                }
                 for i in inputs
             ]
             results = run_in_process_group(filename, calls)
@@ -102,7 +107,7 @@ class TestDistributedUtil(unittest.TestCase):
 
     def test_broadcast_object_pick_source(self):
         world_size = 3
-        for obj in self._get_test_objects():
+        for use_disk, obj in product([True, False], self._get_test_objects()):
             filename = tempfile.NamedTemporaryFile(delete=True).name
             inputs = [None] * world_size
             source_rank = 1
@@ -112,7 +117,7 @@ class TestDistributedUtil(unittest.TestCase):
                 {
                     "world_size": world_size,
                     "function": broadcast_object,
-                    "inputs": [i, source_rank],
+                    "inputs": [i, source_rank, use_disk],
                 }
                 for i in inputs
             ]
