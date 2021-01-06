@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, Optional, Sequence, Union
 
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.generic.distributed_util import get_rank, get_world_size
-from classy_vision.generic.util import is_pos_int
+from classy_vision.generic.util import is_pos_int, log_class_usage
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
@@ -67,6 +67,8 @@ class ClassyDataset:
         self.num_samples = num_samples
         self.dataset = dataset
         self.num_workers = DEFAULT_NUM_WORKERS
+
+        log_class_usage("Dataset", self.__class__)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyDataset":
