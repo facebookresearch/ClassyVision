@@ -7,6 +7,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
+from classy_vision.generic.util import log_class_usage
+
 from .param_scheduler import (
     ClassyParamScheduler,
     ConstantParamScheduler,
@@ -78,6 +80,7 @@ class ClassyOptimizer(ABC):
         self.options_view = OptionsView(self)
         self.optimizer = None
         self._param_group_schedulers = None
+        log_class_usage("Optimizer", self.__class__)
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ClassyOptimizer":
