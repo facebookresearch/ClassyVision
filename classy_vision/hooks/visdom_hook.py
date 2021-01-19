@@ -101,10 +101,9 @@ class VisdomHook(ClassyHook):
 
         # update learning curve visualizations:
         phase_type = "train" if task.train else "test"
-        title = "%s-%s-%d" % (
+        title = "%s-%s" % (
             phase_type,
             task.base_model.__class__.__name__,
-            task.base_model.model_depth,
         )
         title += self.title_suffix
 
