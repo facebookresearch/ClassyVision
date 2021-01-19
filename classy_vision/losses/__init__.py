@@ -10,6 +10,7 @@ from pathlib import Path
 import torch
 import torch.nn.modules.loss as torch_losses
 from classy_vision.generic.registry_utils import import_all_modules
+from classy_vision.generic.util import log_class_usage
 
 from .classy_loss import ClassyLoss
 
@@ -44,21 +45,23 @@ def build_loss(config):
 
     assert "name" in config, f"name not provided for loss: {config}"
     name = config["name"]
-    if name in LOSS_REGISTRY:
-        return LOSS_REGISTRY[name].from_config(config)
-
-    # the name should be available in torch.nn.modules.loss
-    assert hasattr(torch_losses, name), (
-        f"{name} isn't a registered loss"
-        ", nor is it available in torch.nn.modules.loss"
-    )
     args = copy.deepcopy(config)
     del args["name"]
-    if "weight" in args:
+    if "weight" in args and args["weight"] is not None:
         # if we are passing weights, we need to change the weights from a list
         # to a tensor
         args["weight"] = torch.tensor(args["weight"], dtype=torch.float)
-    return getattr(torch_losses, name)(**args)
+    if name in LOSS_REGISTRY:
+        loss = LOSS_REGISTRY[name].from_config(config)
+    else:
+        # the name should be available in torch.nn.modules.loss
+        assert hasattr(torch_losses, name), (
+            f"{name} isn't a registered loss"
+            ", nor is it available in torch.nn.modules.loss"
+        )
+        loss = getattr(torch_losses, name)(**args)
+    log_class_usage("Loss", loss.__class__)
+    return loss
 
 
 def register_loss(name):
