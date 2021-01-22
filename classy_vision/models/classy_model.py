@@ -410,11 +410,6 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
         """If implemented, returns expected input tensor shape"""
         raise NotImplementedError
 
-    @property
-    def model_depth(self):
-        """If implemented, returns number of layers in model"""
-        raise NotImplementedError
-
 
 class _ClassyModelAdapter(ClassyModel):
     """
@@ -449,9 +444,3 @@ class _ClassyModelAdapter(ClassyModel):
         if self._input_shape is not None:
             return self._input_shape
         return super().input_shape
-
-    @property
-    def model_depth(self):
-        if self._model_depth is not None:
-            return self._model_depth
-        return super().model_depth

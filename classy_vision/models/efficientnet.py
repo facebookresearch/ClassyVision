@@ -559,11 +559,6 @@ class EfficientNet(ClassyModel):
     def input_shape(self):
         return (3, self.image_resolution, self.image_resolution)
 
-    @property
-    def model_depth(self):
-        # stem + blocks + conv head + fc
-        return sum(block.depth for block in self.blocks) + 3
-
 
 class _EfficientNet(EfficientNet):
     def __init__(self, **kwargs):

@@ -52,10 +52,6 @@ class MyTestModel2(ClassyModel):
     def input_shape(self):
         return (1, 2, 3)
 
-    @property
-    def model_depth(self):
-        return 1
-
 
 class TestSimpleClassyModelWrapper(ClassyModelWrapper):
     def forward(self, x):
@@ -228,7 +224,6 @@ class TestClassyModelAdapter(unittest.TestCase):
             model, input_shape=input_shape, model_depth=model_depth
         )
         self.assertEqual(classy_model.input_shape, input_shape)
-        self.assertEqual(classy_model.model_depth, model_depth)
 
     def test_train_step(self):
         # test that the model can be run in a train step
