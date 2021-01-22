@@ -39,7 +39,7 @@
     - added `OptionsView` to retrieve options from the optimizer `param_group`
 - Removed `ClassyModel.evaluation_mode` (#521)
 - Removed `ImageNetDataset`, now a subset of `ImagePathDataset` (#494)
-- Renamed `is_master` to `is_leader` in `distributed_util` (#576)
+- Renamed `is_master` to `is_primary` in `distributed_util` (#576)
 
 </details>
 
