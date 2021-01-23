@@ -15,7 +15,6 @@ class TestMLPModel(unittest.TestCase):
         config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
         model = build_model(config)
         self.assertTrue(isinstance(model, ClassyModel))
-        self.assertEqual(model.model_depth, 2)
 
         tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)
         output = model.forward(tensor)

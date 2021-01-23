@@ -541,10 +541,6 @@ class RegNet(ClassyModel):
     def input_shape(self):
         return (3, 224, 224)
 
-    @property
-    def model_depth(self):
-        return self.stem.depth + self.trunk_depth
-
 
 # Register some "classic" RegNets
 class _RegNet(RegNet):
