@@ -494,6 +494,7 @@ class ClassificationTask(ClassyTask):
         Returns:
             A ClassificationTask instance.
         """
+
         test_only = config.get("test_only", False)
         if not test_only:
             # TODO Make distinction between epochs and phases in optimizer clear
@@ -1252,7 +1253,6 @@ class ClassificationTask(ClassyTask):
 
     def __repr__(self):
         if hasattr(self, "_config"):
-            config = json.dumps(self._config, indent=4)
-            return f"{super().__repr__()} initialized with config:\n{config}"
+            return f"{super().__repr__()} initialized with config:\n{self._config}"
 
         return super().__repr__()
