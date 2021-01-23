@@ -85,7 +85,3 @@ class MLP(ClassyModel):
         out = x.view(batchsize_per_replica, -1)
         out = self.mlp(out)
         return out
-
-    @property
-    def input_shape(self):
-        return (self._num_inputs,)

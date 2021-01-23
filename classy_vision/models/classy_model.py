@@ -407,8 +407,11 @@ class ClassyModel(nn.Module, metaclass=_ClassyModelMeta):
 
     @property
     def input_shape(self):
-        """If implemented, returns expected input tensor shape"""
-        raise NotImplementedError
+        """Returns the input shape that the model can accept, excluding the batch dimension.
+
+        By default it returns (3, 224, 224).
+        """
+        return (3, 224, 224)
 
 
 class _ClassyModelAdapter(ClassyModel):
