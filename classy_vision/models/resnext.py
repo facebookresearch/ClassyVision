@@ -434,13 +434,6 @@ class ResNeXt(ClassyModel):
 
         return out
 
-    @property
-    def input_shape(self):
-        if self.small_input:
-            return (3, 32, 32)
-        else:
-            return (3, 224, 224)
-
     def _convert_model_state(self, state):
         """Convert model state from the old implementation to the current format.
 
