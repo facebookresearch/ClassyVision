@@ -89,7 +89,3 @@ class MLP(ClassyModel):
     @property
     def input_shape(self):
         return (self._num_inputs,)
-
-    @property
-    def model_depth(self):
-        return self._model_depth

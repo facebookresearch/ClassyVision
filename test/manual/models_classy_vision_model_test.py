@@ -46,7 +46,6 @@ class TestClassyModel(unittest.TestCase):
             self.assertTrue(
                 type(model.input_shape) == tuple and len(model.input_shape) == 3
             )
-            self.assertTrue(type(model.model_depth) == int)
 
     def test_get_set_state(self):
         config = self._get_config(self.model_configs[0])

@@ -139,7 +139,6 @@ class TestRegNetModelBuild(unittest.TestCase):
         """
         model = build_model(config)
         assert isinstance(model, RegNet)
-        assert model.model_depth  # Check that this attribute is properly implemented
 
 
 class TestRegNetModelFW(unittest.TestCase):

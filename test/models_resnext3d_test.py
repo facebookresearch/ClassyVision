@@ -90,7 +90,6 @@ class TestResNeXt3D(unittest.TestCase):
         for model_config in self.model_configs:
             model = build_model(model_config)
             self.assertTrue(isinstance(model, ClassyModel))
-            self.assertTrue(type(model.model_depth) == int)
 
     def test_forward_pass(self):
         for split, split_config in self.forward_pass_configs.items():

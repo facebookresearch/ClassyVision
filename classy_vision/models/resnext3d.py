@@ -279,10 +279,6 @@ class ResNeXt3DBase(ClassyModel):
         )
 
     @property
-    def model_depth(self):
-        return sum(self.num_blocks)
-
-    @property
     def input_key(self):
         return self._input_key
 
