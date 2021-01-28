@@ -8,7 +8,30 @@ from typing import Any, Dict, Optional
 
 import torch
 from classy_vision.generic.util import convert_to_one_hot
+from torch._six import container_abcs
 from torch.distributions.beta import Beta
+
+
+def _recursive_mixup(sample: Any, permuted_indices: torch.Tensor, coeff: float):
+    if isinstance(sample, (tuple, list)):
+        mixed_sample = []
+        for s in sample:
+            mixed_sample.append(_recursive_mixup(s, permuted_indices, coeff))
+
+        return mixed_sample if isinstance(sample, list) else tuple(mixed_sample)
+    elif isinstance(sample, container_abcs.Mapping):
+        mixed_sample = {}
+        for key, val in sample.items():
+            mixed_sample[key] = _recursive_mixup(val, permuted_indices, coeff)
+
+        return mixed_sample
+    else:
+        assert torch.is_tensor(sample), "sample is expected to be a pytorch tensor"
+        # Assume training data is at least 3D tensor (i.e. 1D data)
+        if sample.ndim >= 3:
+            sample = coeff * sample + (1.0 - coeff) * sample[permuted_indices, :]
+
+        return sample
 
 
 class MixupTransform:
@@ -42,7 +65,10 @@ class MixupTransform:
 
         c = Beta(self.alpha, self.alpha).sample().to(device=sample["target"].device)
         permuted_indices = torch.randperm(sample["target"].shape[0])
-        for key in ["input", "target"]:
-            sample[key] = c * sample[key] + (1.0 - c) * sample[key][permuted_indices, :]
+
+        sample["target"] = (
+            c * sample["target"] + (1.0 - c) * sample["target"][permuted_indices, :]
+        )
+        sample["input"] = _recursive_mixup(sample["input"], permuted_indices, c)
 
         return sample
