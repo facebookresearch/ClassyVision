@@ -37,8 +37,9 @@ def _init_env_vars(use_gpu: bool):
         # From https://github.com/pytorch/elastic/blob/4175e9ec3ac346b89dab13eeca00e8f00b6daa8f/examples/imagenet/main.py#L156  # noqa B950
         # when using NCCL, on failures, surviving nodes will deadlock on NCCL ops
         # because NCCL uses a spin-lock on the device. Set this env var to enable a
-        # watchdog thread that will destroy stale NCCL communicators
-        os.environ["NCCL_BLOCKING_WAIT"] = "1"
+        # watchdog thread that will destroy stale NCCL communicators, and
+        # asynchronously handle NCCL errors and timed out collectives.
+        os.environ["NCCL_ASYNC_ERROR_HANDLING"] = "1"
 
 
 def _init_distributed(use_gpu: bool):
