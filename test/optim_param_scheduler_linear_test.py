@@ -7,8 +7,10 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.linear_scheduler import LinearParamScheduler
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
+    LinearParamScheduler,
+)
 
 
 class TestLienarScheduler(unittest.TestCase):
@@ -26,13 +28,13 @@ class TestLienarScheduler(unittest.TestCase):
         bad_config = copy.deepcopy(config)
         # No start lr
         del bad_config["start_value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             LinearParamScheduler.from_config(bad_config)
 
         # No end lr
         bad_config["start_value"] = config["start_value"]
         del bad_config["end_value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             LinearParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):

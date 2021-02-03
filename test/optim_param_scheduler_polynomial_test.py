@@ -7,8 +7,8 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.polynomial_decay_scheduler import (
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
     PolynomialDecayParamScheduler,
 )
 
@@ -31,13 +31,13 @@ class TestPolynomialScheduler(unittest.TestCase):
         # Invalid Base lr
         bad_config = copy.deepcopy(config)
         del bad_config["base_value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             PolynomialDecayParamScheduler.from_config(bad_config)
 
         # Invalid Power
         bad_config = copy.deepcopy(config)
         del bad_config["power"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             PolynomialDecayParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):

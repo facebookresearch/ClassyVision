@@ -7,8 +7,8 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.constant_scheduler import (
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
     ConstantParamScheduler,
 )
 
@@ -25,7 +25,7 @@ class TestFixedScheduler(unittest.TestCase):
 
         bad_config = copy.deepcopy(config)
         del bad_config["value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             ConstantParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):

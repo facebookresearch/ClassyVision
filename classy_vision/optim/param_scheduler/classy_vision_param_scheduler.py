@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, Dict
 
 from classy_vision.generic.util import log_class_usage
+from fvcore.common import param_scheduler
 
 
 class UpdateInterval(Enum):
@@ -42,7 +43,7 @@ class UpdateInterval(Enum):
         return cls[config["update_interval"].upper()]
 
 
-class ClassyParamScheduler(object):
+class ClassyParamScheduler(param_scheduler.ParamScheduler):
     """
     Base class for Classy parameter schedulers.
 
@@ -50,9 +51,6 @@ class ClassyParamScheduler(object):
         update_interval: Specifies how often to update each parameter
             (before each epoch or each batch)
     """
-
-    # To be used for comparisons with where
-    WHERE_EPSILON = 1e-6
 
     def __init__(self, update_interval: UpdateInterval):
         """
@@ -75,18 +73,3 @@ class ClassyParamScheduler(object):
             A ClassyParamScheduler instance.
         """
         raise NotImplementedError
-
-    def __call__(self, where: float):
-        """
-        Get the param for a given point at training.
-
-        For Classy Vision we update params (such as learning rate) based on
-        the percent progress of training completed. This allows a
-        scheduler to be agnostic to the exact specifications of a
-        particular run (e.g. 120 epochs vs 90 epochs).
-
-        Args:
-            where: A float in [0;1) that represents how far training has progressed
-
-        """
-        raise NotImplementedError("Param schedulers must override __call__")

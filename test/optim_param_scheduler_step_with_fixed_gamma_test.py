@@ -7,8 +7,8 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.step_with_fixed_gamma_scheduler import (
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
     StepWithFixedGammaParamScheduler,
 )
 
@@ -31,24 +31,24 @@ class TestStepWithFixedGammaScheduler(unittest.TestCase):
         # Invalid num epochs
         bad_config = copy.deepcopy(config)
         bad_config["num_epochs"] = -1
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid num_decays
         bad_config["num_decays"] = 0
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid base_value
         bad_config = copy.deepcopy(config)
         bad_config["base_value"] = -0.01
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 
         # Invalid gamma
         bad_config = copy.deepcopy(config)
         bad_config["gamma"] = [2]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepWithFixedGammaParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):

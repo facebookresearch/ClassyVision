@@ -7,8 +7,8 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.multi_step_scheduler import (
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
     MultiStepParamScheduler,
 )
 
@@ -30,47 +30,47 @@ class TestMultiStepParamScheduler(unittest.TestCase):
 
         bad_config = copy.deepcopy(config)
         bad_config["num_epochs"] = -1
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Invalid values
         bad_config["num_epochs"] = config["num_epochs"]
         del bad_config["values"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             MultiStepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = {"a": "b"}
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = []
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Invalid drop epochs
         bad_config["values"] = config["values"]
         bad_config["milestones"] = {"a": "b"}
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Too many
         bad_config["milestones"] = [3, 6, 8, 12]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Too few
         bad_config["milestones"] = [3, 6]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Exceeds num_epochs
         bad_config["milestones"] = [3, 6, 12]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
         # Out of order
         bad_config["milestones"] = [3, 8, 6]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             MultiStepParamScheduler.from_config(bad_config)
 
     def _test_config_scheduler(self, config, expected_schedule):

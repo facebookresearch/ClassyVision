@@ -7,8 +7,10 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.cosine_scheduler import CosineParamScheduler
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
+    CosineParamScheduler,
+)
 
 
 class TestCosineScheduler(unittest.TestCase):
@@ -27,13 +29,13 @@ class TestCosineScheduler(unittest.TestCase):
         bad_config = copy.deepcopy(config)
         # Invalid Base lr
         del bad_config["start_value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             CosineParamScheduler.from_config(bad_config)
 
         # Invalid end_value
         bad_config["start_value"] = config["start_value"]
         del bad_config["end_value"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises((AssertionError, TypeError)):
             CosineParamScheduler.from_config(bad_config)
 
     def test_scheduler_as_decay(self):

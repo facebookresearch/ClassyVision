@@ -7,8 +7,10 @@
 import copy
 import unittest
 
-from classy_vision.optim.param_scheduler import build_param_scheduler
-from classy_vision.optim.param_scheduler.step_scheduler import StepParamScheduler
+from classy_vision.optim.param_scheduler import (
+    build_param_scheduler,
+    StepParamScheduler,
+)
 
 
 class TestStepScheduler(unittest.TestCase):
@@ -27,21 +29,21 @@ class TestStepScheduler(unittest.TestCase):
 
         bad_config = copy.deepcopy(config)
         bad_config["num_epochs"] = -1
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepParamScheduler.from_config(bad_config)
 
         # Invalid Values
         bad_config["num_epochs"] = config["num_epochs"]
         del bad_config["values"]
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             StepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = {"a": "b"}
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepParamScheduler.from_config(bad_config)
 
         bad_config["values"] = []
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             StepParamScheduler.from_config(bad_config)
 
     def test_scheduler(self):

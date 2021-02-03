@@ -68,26 +68,26 @@ class TestCompositeScheduler(unittest.TestCase):
         # No schedulers
         bad_config["schedulers"] = []
         bad_config["lengths"] = []
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             CompositeParamScheduler.from_config(bad_config)
 
         # Size of schedulers and lengths doesn't match
         bad_config["schedulers"] = copy.deepcopy(config["schedulers"])
         bad_config["lengths"] = copy.deepcopy(config["lengths"])
         bad_config["schedulers"].append(bad_config["schedulers"][-1])
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             CompositeParamScheduler.from_config(bad_config)
 
         # Sum of lengths < 1
         bad_config["schedulers"] = copy.deepcopy(config["schedulers"])
         bad_config["lengths"][-1] -= 0.1
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             CompositeParamScheduler.from_config(bad_config)
 
         # Sum of lengths > 1
         bad_config["lengths"] = copy.deepcopy(config["lengths"])
         bad_config["lengths"][-1] += 0.1
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             CompositeParamScheduler.from_config(bad_config)
 
         # Bad value for update_interval

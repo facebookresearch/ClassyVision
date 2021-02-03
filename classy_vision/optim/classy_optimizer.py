@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, Optional
 from classy_vision.generic.util import log_class_usage
 
 from .param_scheduler import (
-    ClassyParamScheduler,
+    ParamScheduler,
     ConstantParamScheduler,
     UpdateInterval,
 )
@@ -55,7 +55,7 @@ class ClassyOptimizer(ABC):
 
     but the user is responsible for updating lr over the course of training.
     ClassyOptimizers extend PyTorch optimizers and allow specifying
-    ClassyParamSchedulers instead:
+    ParamSchedulers instead:
 
         optim = SGD()
         optim.set_param_groups(model.parameters(), lr=LinearParamScheduler(1, 2))
@@ -73,7 +73,7 @@ class ClassyOptimizer(ABC):
         :var options_view: provides convenient access to current values of
             learning rate, momentum etc.
         :var _param_group_schedulers: list of dictionaries in the param_groups
-            format, containing all ClassyParamScheduler instances needed. Constant
+            format, containing all ParamScheduler instances needed. Constant
             values are converted to ConstantParamScheduler before being inserted
             here.
         """
@@ -175,8 +175,8 @@ class ClassyOptimizer(ABC):
                     param_group[k] = v
                 elif update_interval is None or v.update_interval == update_interval:
                     assert isinstance(
-                        v, ClassyParamScheduler
-                    ), f"Elements in param_groups must inherit from ClassyParamScheduler, found: {v}"
+                        v, ParamScheduler
+                    ), f"Elements in param_groups must inherit from ParamScheduler, found: {v}"
                     param_group[k] = v(where)
             param_groups.append(param_group)
 
@@ -216,7 +216,7 @@ class ClassyOptimizer(ABC):
         Updates the param schedule at the end of a phase, till training is in progress.
         This should be called by the task at the end of every epoch to update the
         schedule of epoch based param schedulers (See
-        :class:`param_scheduler.ClassyParamScheduler` for more information).
+        :class:`param_scheduler.ParamScheduler` for more information).
 
         Args:
             where: where we are in terms of training progress (output of

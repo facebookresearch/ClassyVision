@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from classy_vision.generic.registry_utils import import_all_modules
+from fvcore.common.param_scheduler import ParamScheduler
 
 from .classy_vision_param_scheduler import (  # noqa F401
     ClassyParamScheduler,
@@ -21,8 +22,8 @@ FILE_ROOT = Path(__file__).parent
 PARAM_SCHEDULER_REGISTRY = {}
 
 
-def build_param_scheduler(config: Dict[str, Any]) -> ClassyParamScheduler:
-    """Builds a :class:`ClassyParamScheduler` from a config.
+def build_param_scheduler(config: Dict[str, Any]) -> ParamScheduler:
+    """Builds a :class:`ParamScheduler` from a config.
 
     This assumes a 'name' key in the config which is used to determine what
     param scheduler class to instantiate. For instance, a config `{"name":
@@ -33,17 +34,18 @@ def build_param_scheduler(config: Dict[str, Any]) -> ClassyParamScheduler:
 
 
 def register_param_scheduler(name):
-    """Registers a :class:`ClassyParamScheduler` subclass.
+    """Registers a :class:`ParamScheduler` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
-    ClassyParamScheduler from a configuration file, even if the class itself is not
+    ParamScheduler from a configuration file, even if the class itself is not
     part of the Classy Vision framework. To use it, apply this decorator to a
-    ClassyParamScheduler subclass, like this:
+    ParamScheduler subclass that implements a `from_config` classmethod, like
+    this:
 
     .. code-block:: python
 
         @register_param_scheduler('my_scheduler')
-        class MyParamScheduler(ClassyParamScheduler):
+        class MyParamScheduler(ParamScheduler):
             ...
 
     To instantiate a param scheduler from a configuration file, see
@@ -54,9 +56,9 @@ def register_param_scheduler(name):
             raise ValueError(
                 "Cannot register duplicate param scheduler ({})".format(name)
             )
-        if not issubclass(cls, ClassyParamScheduler):
+        if not issubclass(cls, ParamScheduler):
             raise ValueError(
-                "Param Scheduler ({}: {}) must extend ClassyParamScheduler".format(
+                "Param Scheduler ({}: {}) must extend ParamScheduler".format(
                     name, cls.__name__
                 )
             )
@@ -70,17 +72,18 @@ def register_param_scheduler(name):
 import_all_modules(FILE_ROOT, "classy_vision.optim.param_scheduler")
 
 from .composite_scheduler import CompositeParamScheduler, IntervalScaling  # isort:skip
-from .constant_scheduler import ConstantParamScheduler  # isort:skip
-from .cosine_scheduler import CosineParamScheduler  # isort:skip
-from .linear_scheduler import LinearParamScheduler  # isort:skip
-from .multi_step_scheduler import MultiStepParamScheduler  # isort:skip
-from .polynomial_decay_scheduler import PolynomialDecayParamScheduler  # isort:skip
-from .step_scheduler import StepParamScheduler  # isort:skip
-from .step_with_fixed_gamma_scheduler import (  # isort:skip
+from .fvcore_schedulers import (
+    ConstantParamScheduler,
+    CosineParamScheduler,
+    LinearParamScheduler,
+    MultiStepParamScheduler,
+    PolynomialDecayParamScheduler,
+    StepParamScheduler,
     StepWithFixedGammaParamScheduler,
-)
+)  # isort:skip
 
 __all__ = [
+    "ParamScheduler",
     "ClassyParamScheduler",
     "CompositeParamScheduler",
     "ConstantParamScheduler",
