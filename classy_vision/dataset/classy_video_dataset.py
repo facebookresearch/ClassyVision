@@ -223,13 +223,13 @@ class ClassyVideoDataset(ClassyDataset):
                 os.makedirs(filedir, exist_ok=True)
                 logging.info(f"Save metadata to file: {filedir}")
             except Exception as err:
-                logging.warn(f"Fail to create folder: {filedir}")
+                logging.warning(f"Fail to create folder: {filedir}")
                 raise err
 
         try:
             torch.save(metadata, filepath)
         except ValueError:
-            logging.warn(f"Fail to save metadata to file: {filepath}")
+            logging.warning(f"Fail to save metadata to file: {filepath}")
 
     @property
     def video_clips(self):

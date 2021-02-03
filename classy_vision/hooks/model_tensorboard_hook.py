@@ -77,5 +77,5 @@ class ModelTensorboardHook(ClassyHook):
                     writer=self.tb_writer,
                 )
             except Exception:
-                logging.warn("Unable to plot model to tensorboard")
+                logging.warning("Unable to plot model to tensorboard")
                 logging.debug("Exception encountered:", exc_info=True)

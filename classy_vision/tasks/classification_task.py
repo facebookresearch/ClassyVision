@@ -921,7 +921,7 @@ class ClassificationTask(ClassyTask):
             if hook.name() in state["hooks"]:
                 hook.set_classy_state(state["hooks"][hook.name()])
             else:
-                logging.warn(f"No state found for hook: {hook.name()}")
+                logging.warning(f"No state found for hook: {hook.name()}")
 
         if "train" in self.datasets and self._is_checkpointable_dataset(
             self.datasets["train"]
