@@ -122,9 +122,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v6-cpu-dependencies-{{ checksum "requirements.txt" }}
+            - v7-cpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v6-cpu-dependencies-
+            - v7-cpu-dependencies-
 
       - <<: *install_dep
 
@@ -135,7 +135,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v6-cpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v7-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -173,9 +173,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v3-gpu-dependencies-{{ checksum "requirements.txt" }}
+            - v4-gpu-dependencies-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v3-gpu-dependencies-
+            - v4-gpu-dependencies-
 
       - <<: *install_dep
 
@@ -188,7 +188,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v3-gpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v4-gpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -210,9 +210,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
+            - v2-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-gpu-b3-dependencies-
+            - v2-gpu-bc-dependencies-
 
       - <<: *install_dep_bc
 
@@ -225,7 +225,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v1-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
+          key: v2-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
 
       - <<: *run_tests
 
