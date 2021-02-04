@@ -11,7 +11,7 @@ from classy_vision.generic.distributed_util import is_primary
 from classy_vision.generic.util import eval_model, get_model_dummy_input
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
-from fvcore.common.file_io import PathManager
+from iopath.common.file_io import g_pathmgr
 
 
 # constants
@@ -83,13 +83,13 @@ class TorchscriptHook(ClassyHook):
         logging.info("Saving torchscript to '{}'...".format(self.torchscript_folder))
         torchscript = torchscript.to(self.device)
         torchscript_name = f"{self.torchscript_folder}/{TORCHSCRIPT_FILE}"
-        with PathManager.open(torchscript_name, "wb") as f:
+        with g_pathmgr.open(torchscript_name, "wb") as f:
             torch.jit.save(torchscript, f)
 
     def on_start(self, task) -> None:
         if not is_primary() or getattr(task, "test_only", False):
             return
-        if not PathManager.exists(self.torchscript_folder):
+        if not g_pathmgr.exists(self.torchscript_folder):
             err_msg = "Torchscript folder '{}' does not exist.".format(
                 self.torchscript_folder
             )
