@@ -18,7 +18,6 @@ import torch
 import torch.nn as nn
 from classy_vision.generic.distributed_util import broadcast_object, is_primary
 from fvcore.common.file_io import PathManager
-from torch._six import container_abcs
 
 
 try:
@@ -169,7 +168,7 @@ def recursive_copy_to_device(
             )
 
         return device_val if isinstance(value, list) else tuple(device_val)
-    elif isinstance(value, container_abcs.Mapping):
+    elif isinstance(value, collections.abc.Mapping):
         device_val = {}
         for key, val in value.items():
             device_val[key] = recursive_copy_to_device(
