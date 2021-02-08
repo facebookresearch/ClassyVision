@@ -268,7 +268,7 @@ DEFAULT_KEY_MAP = TupleToMapTransform(["input", "input", "target"])
 def build_video_field_transform_default(
     config: Optional[Dict[str, List[Dict[str, Any]]]],
     split: str = "train",
-    key: str = "input",
+    key: Optional[str] = "input",
     key_map_transform: Optional[Callable] = DEFAULT_KEY_MAP,
 ) -> Callable:
     """Returns transform that first maps sample to video keys, then
@@ -310,10 +310,12 @@ def build_video_field_transform_default(
         ]
     )
 
-    transform = ApplyTransformToKey(
-        transforms.Compose([TupleToMapTransform(["video", "audio"]), transform]),
-        key=key,
-    )
+    if key is not None:
+        transform = ApplyTransformToKey(
+            transforms.Compose([TupleToMapTransform(["video", "audio"]), transform]),
+            key=key,
+        )
+
     if key_map_transform is None:
         return transform
 
