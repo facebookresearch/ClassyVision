@@ -131,3 +131,19 @@ class ClassyMeter:
 
         values = ",".join([f"{key}={value:.6f}" for key, value in self.value.items()])
         return f"{self.name}_meter({values})"
+
+    def value_better_than(self, other) -> bool:
+        """Return whether current meter value is better than the other value.
+
+        The default implementation assumes meter value is a dict and larger meter value is better.
+        """
+        if isinstance(self.value, dict):
+            for k, v in self.value.items():
+                if isinstance(v, (float, int)):
+                    if v > other[k]:
+                        return True
+                    elif v < other[k]:
+                        return False
+            return False
+        else:
+            raise NotImplementedError
