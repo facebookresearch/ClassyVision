@@ -31,7 +31,11 @@ class TorchscriptHook(ClassyHook):
     on_step = ClassyHook._noop
 
     def __init__(
-        self, torchscript_folder: str, use_trace: bool = True, device: str = "cpu"
+        self,
+        torchscript_folder: str,
+        use_trace: bool = True,
+        trace_strict: bool = True,
+        device: str = "cpu",
     ) -> None:
         """The constructor method of TorchscriptHook.
 
@@ -47,6 +51,7 @@ class TorchscriptHook(ClassyHook):
 
         self.torchscript_folder: str = torchscript_folder
         self.use_trace: bool = use_trace
+        self.trace_strict: bool = trace_strict
         self.device: str = device
 
     def torchscript_using_trace(self, model):
@@ -63,7 +68,7 @@ class TorchscriptHook(ClassyHook):
             input_key=model.input_key if hasattr(model, "input_key") else None,
         )
         with eval_model(model) and torch.no_grad():
-            torchscript = torch.jit.trace(model, input_data)
+            torchscript = torch.jit.trace(model, input_data, strict=self.trace_strict)
         return torchscript
 
     def torchscript_using_script(self, model):
@@ -87,7 +92,7 @@ class TorchscriptHook(ClassyHook):
             torch.jit.save(torchscript, f)
 
     def on_start(self, task) -> None:
-        if not is_primary() or getattr(task, "test_only", False):
+        if not is_primary():
             return
         if not g_pathmgr.exists(self.torchscript_folder):
             err_msg = "Torchscript folder '{}' does not exist.".format(
@@ -96,7 +101,7 @@ class TorchscriptHook(ClassyHook):
             raise FileNotFoundError(err_msg)
 
     def on_end(self, task) -> None:
-        """Save model into torchscript by the end of training."""
-        if not is_primary() or getattr(task, "test_only", False):
+        """Save model into torchscript by the end of training/testing."""
+        if not is_primary():
             return
         self.save_torchscript(task)
