@@ -60,6 +60,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
         pool_size: Optional[List[int]],
         activation_func: str,
         use_dropout: Optional[bool] = None,
+        dropout_ratio: float = 0.5,
     ):
         """
         Constructor for FullyConvolutionalLinearHead.
@@ -75,6 +76,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
             activation_func: activation function to use. 'softmax': applies
                 softmax on the output. 'sigmoid': applies sigmoid on the output.
             use_dropout: Whether to apply dropout after the pooling layer.
+            dropout_ratio: dropout ratio.
         """
         super().__init__(unique_id, num_classes)
         if pool_size is not None:
@@ -82,7 +84,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
         else:
             self.final_avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         if use_dropout:
-            self.dropout = nn.Dropout(p=0.5)
+            self.dropout = nn.Dropout(p=dropout_ratio)
         # we separate average pooling from the fully-convolutional linear projection
         # because for multi-path models such as SlowFast model, the input can be
         # more than 1 tesnor. In such case, we can define a new head to combine multiple
@@ -128,6 +130,7 @@ class FullyConvolutionalLinearHead(ClassyHead):
             pool_size,
             config["activation_func"],
             config["use_dropout"],
+            config.get("dropout_ratio", 0.5),
         )
 
     def forward(self, x):
