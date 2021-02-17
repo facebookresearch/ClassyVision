@@ -42,6 +42,7 @@ from classy_vision.optim import (
     build_optimizer,
     build_optimizer_schedulers,
 )
+from classy_vision.optim.zero import ZeRO
 from torch.distributed import broadcast
 
 from . import register_task
@@ -189,6 +190,12 @@ class ClassificationTask(ClassyTask):
         self.simulated_global_batchsize = None
         self.optimizer_period = 1
         self.ddp_bucket_cap_mb = 25
+        self.use_sharded_ddp = False
+
+    def set_use_sharded_ddp(self, use_sharded_ddp: bool):
+        self.use_sharded_ddp = use_sharded_ddp
+        if self.use_sharded_ddp:
+            logging.info("Using Sharded DDP")
 
     def set_use_gpu(self, use_gpu: bool):
         self.use_gpu = use_gpu
@@ -459,9 +466,20 @@ class ClassificationTask(ClassyTask):
                     "Apex AMP is required but Apex is not installed, cannot enable AMP"
                 )
 
+            if self.use_sharded_ddp and self.amp_type == AmpType.APEX:
+                raise RuntimeError(
+                    "ShardedDDP has been requested, which is incompatible with Apex AMP"
+                )
+
             # Set Torch AMP grad scaler, used to prevent gradient underflow
             elif self.amp_type == AmpType.PYTORCH:
-                self.amp_grad_scaler = TorchGradScaler()
+                from fairscale.optim.grad_scaler import ShardedGradScaler
+
+                if self.use_sharded_ddp:
+                    logging.info("Using ShardedGradScaler to manage Pytorch AMP")
+                    self.amp_grad_scaler = ShardedGradScaler()
+                else:
+                    self.amp_grad_scaler = TorchGradScaler()
 
             logging.info(f"AMP enabled with args {amp_args}")
         return self
@@ -563,6 +581,7 @@ class ClassificationTask(ClassyTask):
             .set_bn_weight_decay(config.get("bn_weight_decay", False))
             .set_clip_grad_norm(config.get("clip_grad_norm"))
             .set_simulated_global_batchsize(config.get("simulated_global_batchsize"))
+            .set_use_sharded_ddp(config.get("use_sharded_ddp", False))
         )
 
         if not test_only:
@@ -805,12 +824,23 @@ class ClassificationTask(ClassyTask):
         broadcast_buffers = (
             self.broadcast_buffers_mode == BroadcastBuffersMode.FORWARD_PASS
         )
-        self.distributed_model = init_distributed_data_parallel_model(
-            self.base_model,
-            broadcast_buffers=broadcast_buffers,
-            find_unused_parameters=self.find_unused_parameters,
-            bucket_cap_mb=self.ddp_bucket_cap_mb,
-        )
+        # Replace the original DDP wrap by the shard-aware ShardedDDP
+        if self.use_sharded_ddp and isinstance(self.optimizer, ZeRO):
+            from fairscale.nn.data_parallel import ShardedDataParallel
+
+            logging.info("Using ShardedDDP")
+            self.distributed_model = ShardedDataParallel(
+                module=self.base_model,
+                sharded_optimizer=self.optimizer.optimizer,
+                broadcast_buffers=broadcast_buffers,
+            )
+        else:
+            self.distributed_model = init_distributed_data_parallel_model(
+                self.base_model,
+                broadcast_buffers=broadcast_buffers,
+                find_unused_parameters=self.find_unused_parameters,
+                bucket_cap_mb=self.ddp_bucket_cap_mb,
+            )
         if (
             isinstance(self.base_loss, ClassyLoss)
             and self.base_loss.has_learned_parameters()
