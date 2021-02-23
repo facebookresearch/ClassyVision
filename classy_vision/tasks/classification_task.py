@@ -62,6 +62,13 @@ try:
 except ImportError:
     pass
 
+try:
+    from fairscale.optim.grad_scaler import ShardedGradScaler
+
+    fairscale_available = True
+except ImportError:
+    fairscale_available = False
+
 
 class AmpType(enum.Enum):
     # Automatic Mixed Precision supported types
@@ -467,14 +474,19 @@ class ClassificationTask(ClassyTask):
                     "Apex AMP is required but Apex is not installed, cannot enable AMP"
                 )
 
-            if self.use_sharded_ddp and self.amp_type == AmpType.APEX:
-                raise RuntimeError(
-                    "ShardedDDP has been requested, which is incompatible with Apex AMP"
-                )
+            if self.use_sharded_ddp:
+                if self.amp_type == AmpType.APEX:
+                    raise RuntimeError(
+                        "ShardedDDP has been requested, which is incompatible with Apex AMP"
+                    )
+
+                if not fairscale_available:
+                    raise RuntimeError(
+                        "ShardedDDP has been requested, but fairscale is not installed in the current environment"
+                    )
 
             # Set Torch AMP grad scaler, used to prevent gradient underflow
             elif self.amp_type == AmpType.PYTORCH:
-                from fairscale.optim.grad_scaler import ShardedGradScaler
 
                 if self.use_sharded_ddp:
                     logging.info("Using ShardedGradScaler to manage Pytorch AMP")
