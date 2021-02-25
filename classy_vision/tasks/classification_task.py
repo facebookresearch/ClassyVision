@@ -188,7 +188,7 @@ class ClassificationTask(ClassyTask):
         self.perf_log = []
         self.last_batch = None
         self.batch_norm_sync_mode = BatchNormSyncMode.DISABLED
-        self.find_unused_parameters = True
+        self.find_unused_parameters = False
         self.use_gpu = torch.cuda.is_available()
         self.dataloader_mp_context = "spawn"
         self.bn_weight_decay = False
@@ -336,7 +336,7 @@ class ClassificationTask(ClassyTask):
         broadcast_buffers_mode: BroadcastBuffersMode = BroadcastBuffersMode.BEFORE_EVAL,
         batch_norm_sync_mode: BatchNormSyncMode = BatchNormSyncMode.DISABLED,
         batch_norm_sync_group_size: int = 0,
-        find_unused_parameters: bool = True,
+        find_unused_parameters: bool = False,
         bucket_cap_mb: int = 25,
     ):
         """Set distributed options.
@@ -574,7 +574,7 @@ class ClassificationTask(ClassyTask):
                 "batch_norm_sync_group_size", 0
             ),
             "find_unused_parameters": distributed_config.get(
-                "find_unused_parameters", True
+                "find_unused_parameters", False
             ),
             "bucket_cap_mb": distributed_config.get("bucket_cap_mb", 25),
         }
