@@ -572,7 +572,12 @@ def log_class_usage(component_type, klass):
 
 
 def get_torch_version():
-    return torch.__version__[:3]
+    """Get the torch version as a [major, minor, revision].
+
+    All comparisons must be done with the three version values.
+    """
+    version_list = torch.__version__.split(".")
+    return [int(version_str) for version_str in version_list]
 
 
 train_model = partial(_train_mode, train_mode=True)

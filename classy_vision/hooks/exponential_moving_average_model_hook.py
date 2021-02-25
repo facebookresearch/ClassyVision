@@ -162,4 +162,6 @@ class ExponentialMovingAverageModelHook(ClassyHook):
 
     def use_optimization(self, task):
         # we can only use the optimization if we are on PyTorch >= 1.7 and the EMA state is on the same device as the model
-        return get_torch_version() >= "1.7" and task.use_gpu == (self.device == "cuda")
+        return get_torch_version() >= [1, 7, 0] and task.use_gpu == (
+            self.device == "cuda"
+        )

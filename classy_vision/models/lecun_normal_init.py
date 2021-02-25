@@ -13,7 +13,7 @@ from torch import Tensor
 
 
 def lecun_normal_init(tensor, fan_in):
-    if get_torch_version() >= "1.7":
+    if get_torch_version() >= [1, 7, 0]:
         trunc_normal_ = nn.init.trunc_normal_
     else:
 
