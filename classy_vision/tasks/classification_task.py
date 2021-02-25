@@ -1030,6 +1030,16 @@ class ClassificationTask(ClassyTask):
         if loss == float("inf") or loss == float("-inf") or loss != loss:
             raise FloatingPointError(f"Loss is infinity or NaN: {loss}")
 
+    def _do_step(self):
+        """Tells if we will be performing an optimizer step.
+
+        Returns True always if there is no gradient accumulation. With gradient
+        accumulation returns True only when the gradients will be synchronized and we
+        will be performing an optimizer step.
+        """
+        update_idx = self.num_updates // self.get_global_batchsize()
+        return (update_idx % self.optimizer_period) == self.optimizer_period - 1
+
     def train_step(self):
         """Train step to be executed in train loop."""
 
@@ -1059,18 +1069,33 @@ class ClassificationTask(ClassyTask):
             else contextlib.suppress()
         )
 
-        # Forward pass
-        with torch.enable_grad(), torch_amp_context:
-            output = self.model(sample["input"])
+        # only sync with DDP when we need to perform an optimizer step
+        # an optimizer step can be skipped if gradient accumulation is enabled
+        do_step = self._do_step()
+        ctx_mgr_model = (
+            self.distributed_model.no_sync()
+            if self.distributed_model is not None and not do_step
+            else contextlib.suppress()
+        )
+        ctx_mgr_loss = (
+            self.distributed_loss.no_sync()
+            if self.distributed_loss is not None and not do_step
+            else contextlib.suppress()
+        )
 
-            local_loss = self.compute_loss(output, sample)
-            loss = local_loss.detach().clone()
-            self.losses.append(loss.data.cpu().item() * target.size(0))
+        with ctx_mgr_model, ctx_mgr_loss:
+            # Forward pass
+            with torch.enable_grad(), torch_amp_context:
+                output = self.model(sample["input"])
 
-            self.update_meters(output, sample)
+                local_loss = self.compute_loss(output, sample)
+                loss = local_loss.detach().clone()
+                self.losses.append(loss.data.cpu().item() * target.size(0))
 
-        # Backwards pass + optimizer step
-        self.run_optimizer(local_loss)
+                self.update_meters(output, sample)
+
+            # Backwards pass + optimizer step
+            self.run_optimizer(local_loss)
 
         self.num_updates += self.get_global_batchsize()
 
@@ -1096,31 +1121,18 @@ class ClassificationTask(ClassyTask):
         # same size
         update_idx = self.num_updates // self.get_global_batchsize()
         do_zero_grad = (update_idx % self.optimizer_period) == 0
-        do_step = (update_idx % self.optimizer_period) == self.optimizer_period - 1
+        do_step = self._do_step()
 
         if do_zero_grad:
             self.optimizer.zero_grad()
 
-        # only sync with DDP when we need to perform an optimizer step
-        ctx_mgr_model = (
-            self.distributed_model.no_sync()
-            if self.distributed_model is not None and not do_step
-            else contextlib.suppress()
-        )
-        ctx_mgr_loss = (
-            self.distributed_loss.no_sync()
-            if self.distributed_loss is not None and not do_step
-            else contextlib.suppress()
-        )
-
-        with ctx_mgr_model, ctx_mgr_loss:
-            if self.amp_type == AmpType.APEX:
-                with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            elif self.amp_type == AmpType.PYTORCH:
-                self.amp_grad_scaler.scale(loss).backward()
-            else:
-                loss.backward()
+        if self.amp_type == AmpType.APEX:
+            with apex.amp.scale_loss(loss, self.optimizer.optimizer) as scaled_loss:
+                scaled_loss.backward()
+        elif self.amp_type == AmpType.PYTORCH:
+            self.amp_grad_scaler.scale(loss).backward()
+        else:
+            loss.backward()
 
         if do_step:
             # Handle gradient accumulation related gradient rescaling
