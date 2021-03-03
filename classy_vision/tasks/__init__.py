@@ -4,12 +4,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import sys
 from pathlib import Path
 
+from classy_vision.configuration import ClassyConfigDict
 from classy_vision.generic.registry_utils import import_all_modules
 
 from .classy_task import ClassyTask
-
 
 FILE_ROOT = Path(__file__).parent
 
@@ -18,7 +19,7 @@ TASK_REGISTRY = {}
 TASK_CLASS_NAMES = set()
 
 
-def build_task(config):
+def build_task(config, validate_config=None):
     """Builds a ClassyTask from a config.
 
     This assumes a 'name' key in the config which is used to determine what
@@ -26,7 +27,17 @@ def build_task(config):
     "foo": "bar"}` will find a class that was registered as "my_task"
     (see :func:`register_task`) and call .from_config on it."""
 
+    if validate_config is None:
+        # do not validate configs in unittests unless explicitly asked
+        validate_config = "unittest" not in sys.modules.keys()
+
+    config = ClassyConfigDict(config)
+
     task = TASK_REGISTRY[config["name"]].from_config(config)
+
+    if validate_config:
+        # at this stage all the configs keys should have been used
+        config.check_unused_keys()
 
     return task
 

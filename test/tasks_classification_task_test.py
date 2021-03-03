@@ -19,6 +19,7 @@ from test.generic.utils import (
 
 import torch
 import torch.nn as nn
+from classy_vision.configuration import ConfigUnusedKeysError
 from classy_vision.dataset import build_dataset
 from classy_vision.generic.distributed_util import is_distributed_training_run
 from classy_vision.generic.util import get_checkpoint_dict, get_torch_version
@@ -91,6 +92,10 @@ class TestClassificationTask(unittest.TestCase):
         config = get_test_task_config()
         task = build_task(config)
         self.assertTrue(isinstance(task, ClassificationTask))
+
+        config["asd"] = 1
+        with self.assertRaises(ConfigUnusedKeysError):
+            task = build_task(config)
 
     def test_hooks_config_builds_correctly(self):
         config = get_test_task_config()

@@ -7,6 +7,7 @@
 from typing import Any, Dict
 
 import torch.optim
+from classy_vision.configuration import ClassyConfigDict
 
 from . import ClassyOptimizer, register_optimizer
 
@@ -63,10 +64,11 @@ class SGD(ClassyOptimizer):
         config.setdefault("weight_decay", 0.0)
         config.setdefault("nesterov", False)
         config.setdefault("use_larc", False)
-        config.setdefault(
-            "larc_config", {"clip": True, "eps": 1e-08, "trust_coefficient": 0.02}
-        )
-
+        if config["use_larc"]:
+            larc_config = ClassyConfigDict(clip=True, eps=1e-8, trust_coefficient=0.02)
+        else:
+            larc_config = None
+        config.setdefault("larc_config", larc_config)
         assert (
             config["momentum"] >= 0.0
             and config["momentum"] < 1.0
