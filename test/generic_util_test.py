@@ -19,12 +19,12 @@ import torch.nn as nn
 from classy_vision.generic.util import (
     CHECKPOINT_FILE,
     Timer,
+    get_torch_version,
     load_checkpoint,
     save_checkpoint,
     split_batchnorm_params,
     update_classy_model,
     update_classy_state,
-    get_torch_version,
 )
 from classy_vision.models import build_model
 from classy_vision.tasks import build_task

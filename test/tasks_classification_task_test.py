@@ -21,7 +21,7 @@ import torch
 import torch.nn as nn
 from classy_vision.dataset import build_dataset
 from classy_vision.generic.distributed_util import is_distributed_training_run
-from classy_vision.generic.util import get_checkpoint_dict
+from classy_vision.generic.util import get_checkpoint_dict, get_torch_version
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
 from classy_vision.losses import ClassyLoss, build_loss, register_loss
 from classy_vision.models import ClassyModel, build_model
@@ -399,3 +399,20 @@ class TestClassificationTask(unittest.TestCase):
         # 12 and the simulated batch size is 6, so we should do 2 updates: 5 ->
         # 4.9 -> 4.8
         self.assertAlmostEqual(param, 4.8, delta=1e-5)
+
+    @unittest.skipIf(
+        get_torch_version() < [1, 8],
+        "FP16 Grad compression is only available from PyTorch 1.8",
+    )
+    def test_fp16_grad_compression(self):
+        # there is no API defined to check that a DDP hook has been enabled, so we just
+        # test that we set the right variables
+        config = copy.deepcopy(get_fast_test_task_config())
+        task = build_task(config)
+        self.assertFalse(task.fp16_grad_compress)
+
+        config.setdefault("distributed", {})
+        config["distributed"]["fp16_grad_compress"] = True
+
+        task = build_task(config)
+        self.assertTrue(task.fp16_grad_compress)
