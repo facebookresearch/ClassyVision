@@ -33,6 +33,7 @@ from classy_vision.generic.util import (
     split_batchnorm_params,
     update_classy_state,
 )
+from classy_vision.generic.util import get_torch_version
 from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import ClassyMeter, build_meters
@@ -198,6 +199,7 @@ class ClassificationTask(ClassyTask):
         self.optimizer_period = 1
         self.ddp_bucket_cap_mb = 25
         self.use_sharded_ddp = False
+        self.fp16_grad_compress = False
 
     def set_use_sharded_ddp(self, use_sharded_ddp: bool):
         self.use_sharded_ddp = use_sharded_ddp
@@ -338,6 +340,7 @@ class ClassificationTask(ClassyTask):
         batch_norm_sync_group_size: int = 0,
         find_unused_parameters: bool = False,
         bucket_cap_mb: int = 25,
+        fp16_grad_compress: bool = False,
     ):
         """Set distributed options.
 
@@ -386,6 +389,14 @@ class ClassificationTask(ClassyTask):
 
         self.find_unused_parameters = find_unused_parameters
         self.ddp_bucket_cap_mb = bucket_cap_mb
+
+        if fp16_grad_compress:
+            if get_torch_version() < [1, 8, 0]:
+                raise RuntimeError(
+                    "FP16 grad compression is only supported since PyTorch 1.8"
+                )
+            logging.info("Enabling FP16 grad compression")
+        self.fp16_grad_compress = fp16_grad_compress
 
         return self
 
@@ -580,6 +591,7 @@ class ClassificationTask(ClassyTask):
                 "find_unused_parameters", False
             ),
             "bucket_cap_mb": distributed_config.get("bucket_cap_mb", 25),
+            "fp16_grad_compress": distributed_config.get("fp16_grad_compress", False),
         }
 
         task = (
@@ -861,6 +873,17 @@ class ClassificationTask(ClassyTask):
                 find_unused_parameters=self.find_unused_parameters,
                 bucket_cap_mb=self.ddp_bucket_cap_mb,
             )
+            if self.fp16_grad_compress:
+
+                from torch.distributed.algorithms import ddp_comm_hooks
+
+                # FP16 hook is stateless and only takes a process group as the state.
+                # We use the default process group so we set the state to None.
+                process_group = None
+                self.distributed_model.register_comm_hook(
+                    process_group,
+                    ddp_comm_hooks.default_hooks.fp16_compress_hook,
+                )
         if (
             isinstance(self.base_loss, ClassyLoss)
             and self.base_loss.has_learned_parameters()
