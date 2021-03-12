@@ -18,6 +18,7 @@ class SqueezeAndExcitationLayer(nn.Module):
         in_planes,
         reduction_ratio: Optional[int] = 16,
         reduced_planes: Optional[int] = None,
+        activation: Optional[nn.Module] = None,
     ):
         super().__init__()
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
@@ -26,12 +27,15 @@ class SqueezeAndExcitationLayer(nn.Module):
         # neither both nor none of them
         assert bool(reduction_ratio) != bool(reduced_planes)
 
+        if activation is None:
+            activation = nn.ReLU()
+
         reduced_planes = (
             in_planes // reduction_ratio if reduced_planes is None else reduced_planes
         )
         self.excitation = nn.Sequential(
             nn.Conv2d(in_planes, reduced_planes, kernel_size=1, stride=1, bias=True),
-            nn.ReLU(),
+            activation,
             nn.Conv2d(reduced_planes, in_planes, kernel_size=1, stride=1, bias=True),
             nn.Sigmoid(),
         )
