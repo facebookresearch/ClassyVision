@@ -30,7 +30,7 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
         self._reduction = reduction
         assert isinstance(normalize_targets, bool)
         self._normalize_targets = normalize_targets
-        if self._reduction != "mean":
+        if self._reduction not in ["none", "mean"]:
             raise NotImplementedError(
                 'reduction type "{}" not implemented'.format(self._reduction)
             )
@@ -79,11 +79,14 @@ class SoftTargetCrossEntropyLoss(ClassyLoss):
         if self._normalize_targets:
             valid_targets /= self._eps + valid_targets.sum(dim=1, keepdim=True)
         per_sample_per_target_loss = -valid_targets * F.log_softmax(output, -1)
+        per_sample_loss = torch.sum(per_sample_per_target_loss, -1)
         # perform reduction
         if self._reduction == "mean":
-            per_sample_loss = torch.sum(per_sample_per_target_loss, -1)
             # normalize based on the number of samples with > 0 non-ignored targets
             loss = per_sample_loss.sum() / torch.sum(
                 (torch.sum(valid_mask, -1) > 0)
             ).clamp(min=1)
+        elif self._reduction == "none":
+            loss = per_sample_loss
+
         return loss
