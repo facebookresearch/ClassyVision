@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 from typing import Optional
 
@@ -34,6 +35,10 @@ class LossLrMeterLoggingHook(ClassyHook):
             log_freq, int
         ), "log_freq must be an int or None"
         self.log_freq: Optional[int] = log_freq
+        self.state.meter_best = {
+            "train": {},
+            "test": {},
+        }
 
     def on_start(self, task) -> None:
         logging.info(f"Starting training. Task: {task}")
@@ -48,7 +53,9 @@ class LossLrMeterLoggingHook(ClassyHook):
             # do not explicitly state this since it is possible for a
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
-            self._log_loss_lr_meters(task, prefix="Synced meters: ", log_batches=True)
+            self._log_loss_lr_meters(
+                task, prefix="Synced meters: ", log_batches=True, log_best_meter=True
+            )
 
         logging.info(
             f"max memory allocated(MB) {torch.cuda.max_memory_allocated() // 1e6}"
@@ -67,7 +74,28 @@ class LossLrMeterLoggingHook(ClassyHook):
         if batches and batches % self.log_freq == 0:
             self._log_loss_lr_meters(task, prefix="Approximate meters: ")
 
-    def _log_loss_lr_meters(self, task, prefix="", log_batches=False) -> None:
+    def _log_best_meter(self, task):
+        for meter in task.meters:
+            if meter.name not in self.state.meter_best[task.phase_type]:
+                self.state.meter_best[task.phase_type][meter.name] = copy.deepcopy(
+                    meter.value
+                )
+            else:
+                if meter.value_better_than(
+                    self.state.meter_best[task.phase_type][meter.name]
+                ):
+                    self.state.meter_best[task.phase_type][meter.name] = copy.deepcopy(
+                        meter.value
+                    )
+
+            current_best = self.state.meter_best[task.phase_type][meter.name]
+            logging.info(
+                f"phase {task.phase_type}, meter {meter.name}, current best: {current_best}"
+            )
+
+    def _log_loss_lr_meters(
+        self, task, prefix="", log_batches=False, log_best_meter=False
+    ) -> None:
         """
         Compute and log the loss, lr, and meters.
         """
@@ -89,5 +117,8 @@ class LossLrMeterLoggingHook(ClassyHook):
             msg += f", ema: {task.ema}"
         if log_batches:
             msg += f", processed batches: {batches}"
+
+        if log_best_meter:
+            self._log_best_meter(task)
 
         logging.info(msg)
