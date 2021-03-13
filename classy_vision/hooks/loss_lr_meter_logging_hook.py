@@ -7,6 +7,7 @@
 import logging
 from typing import Optional
 
+import torch
 from classy_vision.generic.distributed_util import get_rank
 from classy_vision.hooks import register_hook
 from classy_vision.hooks.classy_hook import ClassyHook
@@ -48,6 +49,13 @@ class LossLrMeterLoggingHook(ClassyHook):
             # trainer to implement an unsynced end of phase meter or
             # for meters to not provide a sync function.
             self._log_loss_lr_meters(task, prefix="Synced meters: ", log_batches=True)
+
+        logging.info(
+            f"max memory allocated(MB) {torch.cuda.max_memory_allocated() // 1e6}"
+        )
+        logging.info(
+            f"max memory reserved(MB) {torch.cuda.max_memory_reserved() // 1e6}"
+        )
 
     def on_step(self, task) -> None:
         """
