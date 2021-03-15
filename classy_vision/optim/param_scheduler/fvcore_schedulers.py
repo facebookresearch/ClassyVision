@@ -70,6 +70,12 @@ CosineParamScheduler = _create_classy_scheduler_class(
     default_update_interval=UpdateInterval.STEP,
 )
 
+ExponentialParamScheduler = _create_classy_scheduler_class(
+    param_scheduler.ExponentialParamScheduler,
+    "exponential",
+    default_update_interval=UpdateInterval.STEP,
+)
+
 LinearParamScheduler = _create_classy_scheduler_class(
     param_scheduler.LinearParamScheduler,
     "linear",
