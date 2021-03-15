@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import traceback
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -17,6 +18,8 @@ FILE_ROOT = Path(__file__).parent
 
 HEAD_REGISTRY = {}
 HEAD_CLASS_NAMES = set()
+HEAD_REGISTRY_TB = {}
+HEAD_CLASS_NAMES_TB = {}
 
 
 def register_head(name):
@@ -38,19 +41,25 @@ def register_head(name):
 
     def register_head_cls(cls):
         if name in HEAD_REGISTRY:
-            raise ValueError("Cannot register duplicate head ({})".format(name))
+            msg = "Cannot register duplicate head ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, HEAD_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyHead):
             raise ValueError(
                 "Head ({}: {}) must extend ClassyHead".format(name, cls.__name__)
             )
         if cls.__name__ in HEAD_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register head with duplicate class name ({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register head with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, HEAD_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         HEAD_REGISTRY[name] = cls
         HEAD_CLASS_NAMES.add(cls.__name__)
+        HEAD_REGISTRY_TB[name] = tb
+        HEAD_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_head_cls

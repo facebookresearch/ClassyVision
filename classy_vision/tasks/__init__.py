@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import traceback
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -16,6 +17,8 @@ FILE_ROOT = Path(__file__).parent
 
 TASK_REGISTRY = {}
 TASK_CLASS_NAMES = set()
+TASK_REGISTRY_TB = {}
+TASK_CLASS_NAMES_TB = {}
 
 
 def build_task(config):
@@ -49,19 +52,25 @@ def register_task(name):
 
     def register_task_cls(cls):
         if name in TASK_REGISTRY:
-            raise ValueError("Cannot register duplicate task ({})".format(name))
+            msg = "Cannot register duplicate task ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, TASK_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyTask):
             raise ValueError(
                 "Task ({}: {}) must extend ClassyTask".format(name, cls.__name__)
             )
         if cls.__name__ in TASK_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register task with duplicate class name ({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register task with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, TASK_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         TASK_REGISTRY[name] = cls
         TASK_CLASS_NAMES.add(cls.__name__)
+        TASK_REGISTRY_TB[name] = tb
+        TASK_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_task_cls

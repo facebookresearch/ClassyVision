@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import traceback
 from collections import defaultdict
 from pathlib import Path
 
@@ -19,6 +20,8 @@ FILE_ROOT = Path(__file__).parent
 
 MODEL_REGISTRY = {}
 MODEL_CLASS_NAMES = set()
+MODEL_REGISTRY_TB = {}
+MODEL_CLASS_NAMES_TB = {}
 
 
 def register_model(name):
@@ -40,19 +43,25 @@ def register_model(name):
 
     def register_model_cls(cls):
         if name in MODEL_REGISTRY:
-            raise ValueError("Cannot register duplicate model ({})".format(name))
+            msg = "Cannot register duplicate model ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, MODEL_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyModel):
             raise ValueError(
                 "Model ({}: {}) must extend ClassyModel".format(name, cls.__name__)
             )
         if cls.__name__ in MODEL_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register model with duplicate class name ({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register model with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, MODEL_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         MODEL_REGISTRY[name] = cls
         MODEL_CLASS_NAMES.add(cls.__name__)
+        MODEL_REGISTRY_TB[name] = tb
+        MODEL_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_model_cls

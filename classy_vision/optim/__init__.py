@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import traceback
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -18,6 +19,8 @@ FILE_ROOT = Path(__file__).parent
 
 OPTIMIZER_REGISTRY = {}
 OPTIMIZER_CLASS_NAMES = set()
+OPTIMIZER_REGISTRY_TB = {}
+OPTIMIZER_CLASS_NAMES_TB = {}
 
 
 def build_optimizer(config):
@@ -71,7 +74,10 @@ def register_optimizer(name):
 
     def register_optimizer_cls(cls):
         if name in OPTIMIZER_REGISTRY:
-            raise ValueError("Cannot register duplicate optimizer ({})".format(name))
+            msg = (
+                "Cannot register duplicate optimizer ({}). Already registered at \n{}\n"
+            )
+            raise ValueError(msg.format(name, OPTIMIZER_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyOptimizer):
             raise ValueError(
                 "Optimizer ({}: {}) must extend ClassyVisionOptimizer".format(
@@ -79,13 +85,18 @@ def register_optimizer(name):
                 )
             )
         if cls.__name__ in OPTIMIZER_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register optimizer with duplicate class name({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register optimizer with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, OPTIMIZER_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         OPTIMIZER_REGISTRY[name] = cls
         OPTIMIZER_CLASS_NAMES.add(cls.__name__)
+        OPTIMIZER_REGISTRY_TB[name] = tb
+        OPTIMIZER_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_optimizer_cls

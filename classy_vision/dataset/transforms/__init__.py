@@ -6,6 +6,7 @@
 
 
 import copy
+import traceback
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
@@ -21,6 +22,7 @@ FILE_ROOT = Path(__file__).parent
 
 
 TRANSFORM_REGISTRY = {}
+TRANSFORM_REGISTRY_TB = {}
 
 
 def build_transform(transform_config: Dict[str, Any]) -> Callable:
@@ -96,7 +98,10 @@ def register_transform(name: str):
 
     def register_transform_cls(cls: Callable[..., Callable]):
         if name in TRANSFORM_REGISTRY:
-            raise ValueError("Cannot register duplicate transform ({})".format(name))
+            msg = (
+                "Cannot register duplicate transform ({}). Already registered at \n{}\n"
+            )
+            raise ValueError(msg.format(name, TRANSFORM_REGISTRY_TB[name]))
         if hasattr(transforms, name) or hasattr(transforms_video, name):
             raise ValueError(
                 "{} has existed in torchvision.transforms, Please change the name!".format(
@@ -104,6 +109,8 @@ def register_transform(name: str):
                 )
             )
         TRANSFORM_REGISTRY[name] = cls
+        tb = "".join(traceback.format_stack())
+        TRANSFORM_REGISTRY_TB[name] = tb
         return cls
 
     return register_transform_cls

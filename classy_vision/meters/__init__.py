@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import traceback
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -15,6 +16,7 @@ FILE_ROOT = Path(__file__).parent
 
 
 METER_REGISTRY = {}
+METER_REGISTRY_TB = {}
 
 
 def build_meter(config):
@@ -51,7 +53,8 @@ def register_meter(name):
 
     def register_meter_cls(cls):
         if name in METER_REGISTRY:
-            raise ValueError("Cannot register duplicate meter ({})".format(name))
+            msg = "Cannot register duplicate meter ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, METER_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyMeter):
             raise ValueError(
                 "Meter ({}: {}) must extend \
@@ -59,7 +62,9 @@ def register_meter(name):
                     name, cls.__name__
                 )
             )
+        tb = "".join(traceback.format_stack())
         METER_REGISTRY[name] = cls
+        METER_REGISTRY_TB[name] = tb
         return cls
 
     return register_meter_cls
