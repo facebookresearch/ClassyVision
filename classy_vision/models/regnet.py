@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import torch.nn as nn
+from classy_vision.generic.util import get_torch_version
 from classy_vision.models import ClassyModel, register_model
 from classy_vision.models.squeeze_and_excitation_layer import SqueezeAndExcitationLayer
 
@@ -33,6 +34,12 @@ class StemType(Enum):
     SIMPLE_STEM_IN = auto()
 
 
+# The different possible activations
+class ActivationType(Enum):
+    RELU = auto()
+    SILU = auto()
+
+
 class BasicTransform(nn.Sequential):
     """Basic transformation: [3x3 conv, BN, Relu] x2."""
 
@@ -43,14 +50,14 @@ class BasicTransform(nn.Sequential):
         stride: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
     ):
         super().__init__()
 
         self.a = nn.Sequential(
             nn.Conv2d(width_in, width_out, 3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(inplace=relu_inplace),
+            activation,
             nn.Conv2d(width_out, width_out, 3, stride=1, padding=1, bias=False),
         )
 
@@ -67,13 +74,13 @@ class ResStemCifar(nn.Sequential):
         width_out: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
     ):
         super().__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(width_in, width_out, 3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(relu_inplace),
+            activation,
         )
         self.depth = 2
 
@@ -87,13 +94,13 @@ class ResStemIN(nn.Sequential):
         width_out: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
     ):
         super().__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(width_in, width_out, 7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(relu_inplace),
+            activation,
             nn.MaxPool2d(3, stride=2, padding=1),
         )
         self.depth = 3
@@ -108,13 +115,13 @@ class SimpleStemIN(nn.Sequential):
         width_out: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
     ):
         super().__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(width_in, width_out, 3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(relu_inplace),
+            activation,
         )
         self.depth = 2
 
@@ -129,7 +136,7 @@ class VanillaBlock(nn.Sequential):
         stride: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
         *args,
         **kwargs,
     ):
@@ -137,13 +144,13 @@ class VanillaBlock(nn.Sequential):
         self.a = nn.Sequential(
             nn.Conv2d(width_in, width_out, 3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(inplace=relu_inplace),
+            activation,
         )
 
         self.b = nn.Sequential(
             nn.Conv2d(width_out, width_out, 3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(inplace=relu_inplace),
+            activation,
         )
 
         self.depth = 2
@@ -159,7 +166,7 @@ class ResBasicBlock(nn.Module):
         stride: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
         *args,
         **kwargs,
     ):
@@ -171,9 +178,9 @@ class ResBasicBlock(nn.Module):
             )
             self.bn = nn.BatchNorm2d(width_out, eps=bn_epsilon, momentum=bn_momentum)
         self.f = BasicTransform(
-            width_in, width_out, stride, bn_epsilon, bn_momentum, relu_inplace
+            width_in, width_out, stride, bn_epsilon, bn_momentum, activation
         )
-        self.relu = nn.ReLU(relu_inplace)
+        self.activation = activation
 
         # The projection and transform happen in parallel,
         # and ReLU is not counted with respect to depth
@@ -185,7 +192,7 @@ class ResBasicBlock(nn.Module):
         else:
             x = x + self.f(x)
 
-        return self.relu(x)
+        return self.activation(x)
 
 
 class BottleneckTransform(nn.Sequential):
@@ -198,7 +205,7 @@ class BottleneckTransform(nn.Sequential):
         stride: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
         bot_mul: float,
         group_width: int,
         se_ratio: Optional[float],
@@ -210,13 +217,13 @@ class BottleneckTransform(nn.Sequential):
         self.a = nn.Sequential(
             nn.Conv2d(width_in, w_b, 1, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(w_b, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(inplace=relu_inplace),
+            activation,
         )
 
         self.b = nn.Sequential(
             nn.Conv2d(w_b, w_b, 3, stride=stride, padding=1, groups=g, bias=False),
             nn.BatchNorm2d(w_b, eps=bn_epsilon, momentum=bn_momentum),
-            nn.ReLU(inplace=relu_inplace),
+            activation,
         )
 
         if se_ratio:
@@ -224,7 +231,10 @@ class BottleneckTransform(nn.Sequential):
             # beginning of the block
             width_se_out = int(round(se_ratio * width_in))
             self.se = SqueezeAndExcitationLayer(
-                in_planes=w_b, reduction_ratio=None, reduced_planes=width_se_out
+                in_planes=w_b,
+                reduction_ratio=None,
+                reduced_planes=width_se_out,
+                activation=activation,
             )
 
         self.c = nn.Conv2d(w_b, width_out, 1, stride=1, padding=0, bias=False)
@@ -242,7 +252,7 @@ class ResBottleneckBlock(nn.Module):
         stride: int,
         bn_epsilon: float,
         bn_momentum: float,
-        relu_inplace: bool,
+        activation: nn.Module,
         bot_mul: float = 1.0,
         group_width: int = 1,
         se_ratio: Optional[float] = None,
@@ -262,15 +272,15 @@ class ResBottleneckBlock(nn.Module):
             stride,
             bn_epsilon,
             bn_momentum,
-            relu_inplace,
+            activation,
             bot_mul,
             group_width,
             se_ratio,
         )
-        self.relu = nn.ReLU(relu_inplace)
+        self.activation = activation
 
         # The projection and transform happen in parallel,
-        # and ReLU is not counted with respect to depth
+        # and activation is not counted with respect to depth
         self.depth = self.f.depth
 
     def forward(self, x, *args):
@@ -278,7 +288,7 @@ class ResBottleneckBlock(nn.Module):
             x = self.bn(self.proj(x)) + self.f(x)
         else:
             x = x + self.f(x)
-        return self.relu(x)
+        return self.activation(x)
 
 
 class AnyStage(nn.Sequential):
@@ -291,6 +301,7 @@ class AnyStage(nn.Sequential):
         stride: int,
         depth: int,
         block_constructor: nn.Module,
+        activation: nn.Module,
         bot_mul: float,
         group_width: int,
         params: "RegNetParams",
@@ -306,7 +317,7 @@ class AnyStage(nn.Sequential):
                 stride if i == 0 else 1,
                 params.bn_epsilon,
                 params.bn_momentum,
-                params.relu_in_place,
+                activation,
                 bot_mul,
                 group_width,
                 params.se_ratio,
@@ -346,6 +357,7 @@ class RegNetParams:
         stem_type: StemType = "SIMPLE_STEM_IN",
         stem_width: int = 32,
         block_type: BlockType = "RES_BOTTLENECK_BLOCK",
+        activation_type: ActivationType = "RELU",
         use_se: bool = True,
         se_ratio: float = 0.25,
         bn_epsilon: float = 1e-05,
@@ -361,6 +373,7 @@ class RegNetParams:
         self.group_w = group_w
         self.stem_type = StemType[stem_type]
         self.block_type = BlockType[block_type]
+        self.activation_type = ActivationType[activation_type]
         self.stem_width = stem_width
         self.use_se = use_se
         self.se_ratio = se_ratio if use_se else None
@@ -434,6 +447,17 @@ class RegNet(ClassyModel):
     def __init__(self, params: RegNetParams):
         super().__init__()
 
+        if params.activation_type == ActivationType.SILU and get_torch_version() < [
+            1,
+            7,
+        ]:
+            raise RuntimeError("SiLU activation is only supported since PyTorch 1.7")
+
+        activation = {
+            ActivationType.RELU: nn.ReLU(params.relu_in_place),
+            ActivationType.SILU: nn.SiLU(),
+        }[params.activation_type]
+
         # Ad hoc stem
         self.stem = {
             StemType.RES_STEM_CIFAR: ResStemCifar,
@@ -444,7 +468,7 @@ class RegNet(ClassyModel):
             params.stem_width,
             params.bn_epsilon,
             params.bn_momentum,
-            params.relu_in_place,
+            activation,
         )
 
         # Instantiate all the AnyNet blocks in the trunk
@@ -471,6 +495,7 @@ class RegNet(ClassyModel):
                         stride,
                         depth,
                         block_fun,
+                        activation,
                         bot_mul,
                         group_width,
                         params,
@@ -509,6 +534,7 @@ class RegNet(ClassyModel):
             stem_type=config.get("stem_type", "simple_stem_in").upper(),
             stem_width=config.get("stem_width", 32),
             block_type=config.get("block_type", "res_bottleneck_block").upper(),
+            activation_type=config.get("activation_type", "relu").upper(),
             use_se=config.get("use_se", True),
             se_ratio=config.get("se_ratio", 0.25),
             bn_epsilon=config.get("bn_epsilon", 1e-05),

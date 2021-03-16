@@ -4,10 +4,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
 import logging
 import unittest
 
 import torch
+import torch.nn as nn
+from classy_vision.generic.util import get_torch_version
 from classy_vision.models import RegNet, build_model
 from parameterized import parameterized
 
@@ -164,3 +167,54 @@ class TestRegNetModelFW(unittest.TestCase):
         # Default presets output 7x7 feature maps for 224x224 inputs
         assert output.shape[-1] == 7
         assert output.shape[-2] == 7
+
+
+class TestRegNet(unittest.TestCase):
+    def _compare_models(self, model_1, model_2, expect_same: bool):
+        if expect_same:
+            self.assertMultiLineEqual(repr(model_1), repr(model_2))
+        else:
+            self.assertNotEqual(repr(model_1), repr(model_2))
+
+    def swap_relu_with_silu(self, module):
+        for child_name, child in module.named_children():
+            if isinstance(child, nn.ReLU):
+                setattr(module, child_name, nn.SiLU())
+            else:
+                self.swap_relu_with_silu(child)
+
+    def _check_no_module_cls_in_model(self, module_cls, model):
+        for module in model.modules():
+            self.assertNotIsInstance(module, module_cls)
+
+    @unittest.skipIf(
+        get_torch_version() < [1, 7],
+        "SiLU activation is only supported since PyTorch 1.7",
+    )
+    def test_activation(self):
+        config = REGNET_TEST_CONFIGS[0][0]
+        model_default = build_model(config)
+        config = copy.deepcopy(config)
+        config["activation_type"] = "relu"
+        model_relu = build_model(config)
+
+        # both models should be the same
+        self._compare_models(model_default, model_relu, expect_same=True)
+
+        # we don't expect any silus in the model
+        self._check_no_module_cls_in_model(nn.SiLU, model_relu)
+
+        config["activation_type"] = "silu"
+        model_silu = build_model(config)
+
+        # the models should be different
+        self._compare_models(model_silu, model_relu, expect_same=False)
+
+        # swap out all relus with silus
+        self.swap_relu_with_silu(model_relu)
+        print(model_relu)
+        # both models should be the same
+        self._compare_models(model_relu, model_silu, expect_same=True)
+
+        # we don't expect any relus in the model
+        self._check_no_module_cls_in_model(nn.ReLU, model_relu)

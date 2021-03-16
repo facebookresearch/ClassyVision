@@ -391,7 +391,7 @@ class ClassificationTask(ClassyTask):
         self.ddp_bucket_cap_mb = bucket_cap_mb
 
         if fp16_grad_compress:
-            if get_torch_version() < [1, 8, 0]:
+            if get_torch_version() < [1, 8]:
                 raise RuntimeError(
                     "FP16 grad compression is only supported since PyTorch 1.8"
                 )
