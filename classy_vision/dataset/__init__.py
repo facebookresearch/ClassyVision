@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import traceback
 from pathlib import Path
 
 from classy_vision.generic.registry_utils import import_all_modules
@@ -14,7 +15,9 @@ from .classy_dataset import ClassyDataset
 FILE_ROOT = Path(__file__).parent
 
 DATASET_REGISTRY = {}
+DATASET_REGISTRY_TB = {}
 DATASET_CLASS_NAMES = set()
+DATASET_CLASS_NAMES_TB = {}
 
 
 def build_dataset(config, *args, **kwargs):
@@ -50,19 +53,25 @@ def register_dataset(name):
 
     def register_dataset_cls(cls):
         if name in DATASET_REGISTRY:
-            raise ValueError("Cannot register duplicate dataset ({})".format(name))
+            msg = "Cannot register duplicate dataset ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, DATASET_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyDataset):
             raise ValueError(
                 "Dataset ({}: {}) must extend ClassyDataset".format(name, cls.__name__)
             )
         if cls.__name__ in DATASET_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register dataset with duplicate class name({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register dataset with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, DATASET_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         DATASET_REGISTRY[name] = cls
         DATASET_CLASS_NAMES.add(cls.__name__)
+        DATASET_REGISTRY_TB[name] = tb
+        DATASET_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_dataset_cls

@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import traceback
 from pathlib import Path
 from typing import Any, Dict
 
@@ -20,6 +21,7 @@ FILE_ROOT = Path(__file__).parent
 
 
 PARAM_SCHEDULER_REGISTRY = {}
+PARAM_SCHEDULER_REGISTRY_TB = {}
 
 
 def build_param_scheduler(config: Dict[str, Any]) -> ParamScheduler:
@@ -53,16 +55,17 @@ def register_param_scheduler(name):
 
     def register_param_scheduler_cls(cls):
         if name in PARAM_SCHEDULER_REGISTRY:
-            raise ValueError(
-                "Cannot register duplicate param scheduler ({})".format(name)
-            )
+            msg = "Cannot register duplicate param scheduler ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, PARAM_SCHEDULER_REGISTRY_TB[name]))
         if not issubclass(cls, ParamScheduler):
             raise ValueError(
                 "Param Scheduler ({}: {}) must extend ParamScheduler".format(
                     name, cls.__name__
                 )
             )
+        tb = "".join(traceback.format_stack())
         PARAM_SCHEDULER_REGISTRY[name] = cls
+        PARAM_SCHEDULER_REGISTRY_TB[name] = tb
         return cls
 
     return register_param_scheduler_cls

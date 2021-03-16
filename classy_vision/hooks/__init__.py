@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import traceback
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -19,6 +20,8 @@ FILE_ROOT = Path(__file__).parent
 
 HOOK_REGISTRY = {}
 HOOK_CLASS_NAMES = set()
+HOOK_REGISTRY_TB = {}
+HOOK_CLASS_NAMES_TB = {}
 
 
 def register_hook(name):
@@ -41,19 +44,25 @@ def register_hook(name):
 
     def register_hook_cls(cls):
         if name in HOOK_REGISTRY:
-            raise ValueError("Cannot register duplicate hook ({})".format(name))
+            msg = "Cannot register duplicate hook ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, HOOK_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyHook):
             raise ValueError(
                 "Hook ({}: {}) must extend ClassyHook".format(name, cls.__name__)
             )
         if cls.__name__ in HOOK_CLASS_NAMES:
-            raise ValueError(
-                "Cannot register hook with duplicate class name ({})".format(
-                    cls.__name__
-                )
+            msg = (
+                "Cannot register hook with duplicate class name({})."
+                + "Previously registered at \n{}\n"
             )
+            raise ValueError(
+                msg.format(cls.__name__, HOOK_CLASS_NAMES_TB[cls.__name__])
+            )
+        tb = "".join(traceback.format_stack())
         HOOK_REGISTRY[name] = cls
         HOOK_CLASS_NAMES.add(cls.__name__)
+        HOOK_REGISTRY_TB[name] = tb
+        HOOK_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_hook_cls

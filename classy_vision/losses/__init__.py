@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
+import traceback
 from pathlib import Path
 
 import torch
@@ -19,7 +20,9 @@ FILE_ROOT = Path(__file__).parent
 
 
 LOSS_REGISTRY = {}
+LOSS_REGISTRY_TB = {}
 LOSS_CLASS_NAMES = set()
+LOSS_CLASS_NAMES_TB = {}
 
 
 def build_loss(config):
@@ -83,13 +86,17 @@ def register_loss(name):
 
     def register_loss_cls(cls):
         if name in LOSS_REGISTRY:
-            raise ValueError("Cannot register duplicate optimizer ({})".format(name))
+            msg = "Cannot register duplicate loss ({}). Already registered at \n{}\n"
+            raise ValueError(msg.format(name, LOSS_REGISTRY_TB[name]))
         if not issubclass(cls, ClassyLoss):
             raise ValueError(
                 "Loss ({}: {}) must extend ClassyLoss".format(name, cls.__name__)
             )
+        tb = "".join(traceback.format_stack())
         LOSS_REGISTRY[name] = cls
         LOSS_CLASS_NAMES.add(cls.__name__)
+        LOSS_REGISTRY_TB[name] = tb
+        LOSS_CLASS_NAMES_TB[cls.__name__] = tb
         return cls
 
     return register_loss_cls
