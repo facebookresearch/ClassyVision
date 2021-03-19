@@ -13,7 +13,7 @@ import math
 import re
 import warnings
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Sequence
 
 import torch.nn as nn
 from classy_vision.generic.util import is_pos_int, is_pos_int_tuple
@@ -267,7 +267,7 @@ class ResNeXt(ClassyModel):
         reduction: int = 4,
         small_input: bool = False,
         zero_init_bn_residuals: bool = False,
-        base_width_and_cardinality: Optional[Union[Tuple, List]] = None,
+        base_width_and_cardinality: Optional[Sequence] = None,
         basic_layer: bool = False,
         final_bn_relu: bool = True,
         use_se: bool = False,
@@ -288,7 +288,7 @@ class ResNeXt(ClassyModel):
         super().__init__()
 
         # assertions on inputs:
-        assert type(num_blocks) == list
+        assert isinstance(num_blocks, Sequence)
         assert all(is_pos_int(n) for n in num_blocks)
         assert is_pos_int(init_planes) and is_pos_int(reduction)
         assert type(small_input) == bool
@@ -297,7 +297,7 @@ class ResNeXt(ClassyModel):
         ), "zero_init_bn_residuals must be a boolean, set to true if gamma of last\
              BN of residual block should be initialized to 0.0, false for 1.0"
         assert base_width_and_cardinality is None or (
-            isinstance(base_width_and_cardinality, (tuple, list))
+            isinstance(base_width_and_cardinality, Sequence)
             and len(base_width_and_cardinality) == 2
             and is_pos_int(base_width_and_cardinality[0])
             and is_pos_int(base_width_and_cardinality[1])
