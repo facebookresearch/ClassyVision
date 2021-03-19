@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Dict
+from typing import Any, Dict, Sequence
 
 from classy_vision.generic.util import is_pos_int
 from classy_vision.meters.accuracy_meter import AccuracyMeter
@@ -30,7 +30,7 @@ class VideoAccuracyMeter(VideoMeter):
             clips_per_video_test: No. of clips sampled per video at test time
         """
         super().__init__(clips_per_video_train, clips_per_video_test)
-        assert isinstance(topk, list), "topk must be a list"
+        assert isinstance(topk, Sequence), "topk must be a sequence"
         assert len(topk) > 0, "topk list should have at least one element"
         assert [is_pos_int(x) for x in topk], "each value in topk must be >= 1"
 

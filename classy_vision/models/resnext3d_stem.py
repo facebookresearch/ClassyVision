@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Sequence
+
 import torch.nn as nn
 
 from .r2plus1_util import r2plus1_unit
@@ -232,9 +234,9 @@ class ResNeXt3DStemMultiPathway(nn.Module):
         self._construct_stem(dim_in, dim_out)
 
     def _construct_stem(self, dim_in, dim_out):
-        assert type(dim_in) == list
+        assert isinstance(dim_in, Sequence)
         assert all(dim > 0 for dim in dim_in)
-        assert type(dim_out) == list
+        assert isinstance(dim_out, Sequence)
         assert all(dim > 0 for dim in dim_out)
 
         self.blocks = {}
@@ -325,9 +327,9 @@ class R2Plus1DStemMultiPathway(ResNeXt3DStemMultiPathway):
         )
 
     def _construct_stem(self, dim_in, dim_out):
-        assert type(dim_in) == list
+        assert isinstance(dim_in, Sequence)
         assert all(dim > 0 for dim in dim_in)
-        assert type(dim_out) == list
+        assert isinstance(dim_out, Sequence)
         assert all(dim > 0 for dim in dim_out)
 
         self.blocks = {}
