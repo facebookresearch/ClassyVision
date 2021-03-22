@@ -53,16 +53,16 @@
 - Add support to convert any `PyTorch` model to a `ClassyModel` with the ability to attach heads to it ([#461](https://github.com/facebookresearch/ClassyVision/pull/461))
   - Added a corresponding [tutorial](https://classyvision.ai/tutorials/classy_model) on `ClassyModel` and `ClassyHeads` ([#485](https://github.com/facebookresearch/ClassyVision/pull/485))
 - [Squeeze and Excitation](https://arxiv.org/pdf/1709.01507.pdf) support for `ResNe(X)t` and `DenseNet` models ([#426](https://github.com/facebookresearch/ClassyVision/pull/426), [#427](https://github.com/facebookresearch/ClassyVision/pull/427))
-- Made `ClassyHook`s registrable ([#401](https://github.com/facebookresearch/ClassyVision/pull/401)) and configurable ([#402](https://github.com/facebookresearch/ClassyVision/pull/402)) 
+- Made `ClassyHook`s registrable ([#401](https://github.com/facebookresearch/ClassyVision/pull/401)) and configurable ([#402](https://github.com/facebookresearch/ClassyVision/pull/402))
 - Migrated to [`TorchElastic v0.2.0`](https://pytorch.org/elastic/master/examples.html#classy-vision) ([#464](https://github.com/facebookresearch/ClassyVision/pull/464))
 - Add `SyncBatchNorm` support ([#423](https://github.com/facebookresearch/ClassyVision/pull/423))
-- Implement [`mixup`](https://arxiv.org/abs/1710.09412) train augmentation ([#469](https://github.com/facebookresearch/ClassyVision/pull/469)) 
+- Implement [`mixup`](https://arxiv.org/abs/1710.09412) train augmentation ([#469](https://github.com/facebookresearch/ClassyVision/pull/469))
 - Support [`LARC`](https://arxiv.org/abs/1708.03888) for SGD optimizer ([#408](https://github.com/facebookresearch/ClassyVision/pull/408))
 - Added convenience wrappers for `Iterable` datasets ([#455](https://github.com/facebookresearch/ClassyVision/pull/455))
 - `Tensorboard` improvements
   - Plot histograms of model weights to Tensorboard ([#432](https://github.com/facebookresearch/ClassyVision/pull/432))
   - Reduce data logged to tensorboard ([#436](https://github.com/facebookresearch/ClassyVision/pull/436))
-- Invalid (`NaN` / `Inf`) loss detection 
+- Invalid (`NaN` / `Inf`) loss detection
 - Revamped logging ([#478](https://github.com/facebookresearch/ClassyVision/pull/478))
 - Add `bn_weight_decay` configuration option for `ResNe(X)t` models
 - Support specifying `update_interval` to Parameter Schedulers ([#418](https://github.com/facebookresearch/ClassyVision/pull/418))
@@ -100,12 +100,12 @@
 * Integration with PyTorch Hub. AI researchers and engineers can download and fine-tune the best publically available ImageNet models with just a few lines of code.
 * Elastic training. We have also added experimental integration with [PyTorch Elastic](https://github.com/pytorch/elastic), which allows distributed training jobs to adjust as available resources in the cluster changes. It also makes distributed training robust to transient hardware failures.
 
-Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases. 
+Classy Vision is beta software. The project is under active development and our APIs are subject to change in future releases.
 
 ## Installation
 
 #### Installation Requirements
-Make sure you have an up-to-date installation of PyTorch (1.4), Python (3.6) and torchvision (0.5). If you want to use GPUs, then a CUDA installation (10.1) is also required.
+Make sure you have an up-to-date installation of PyTorch (1.6), Python (3.6) and torchvision (0.7). If you want to use GPUs, then a CUDA installation (10.1) is also required.
 
 #### Installing the latest stable release
 To install Classy Vision via pip:
