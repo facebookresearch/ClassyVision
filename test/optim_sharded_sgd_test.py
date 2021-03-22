@@ -25,25 +25,29 @@ import torch.distributed as dist
 from classy_vision.optim.zero import ZeRO
 
 
-def dist_init(rank, world_size):
-    os.environ["MASTER_ADDR"] = "localhost"
-    os.environ["MASTER_PORT"] = "29500"
-    dist.init_process_group(backend=dist.Backend.GLOO, rank=rank, world_size=world_size)
+def dist_init(rank, world_size, filename):
+    dist.init_process_group(
+        init_method="file://" + filename,
+        backend=dist.Backend.GLOO,
+        rank=rank,
+        world_size=world_size,
+    )
 
 
 class TestOptimizerStateShardingIntegration(unittest.TestCase, TestOptimizer):
     @staticmethod
-    def _maybe_destro_dist():
+    def _maybe_destroy_dist():
         if dist.is_initialized():
             logging.debug("Destroy previous torch dist process group")
             dist.destroy_process_group()
 
     def setUp(self):
-        self._maybe_destro_dist()
-        dist_init(0, 1)
+        self._maybe_destroy_dist()
+        self.filename = tempfile.NamedTemporaryFile(delete=True).name
+        dist_init(0, 1, self.filename)
 
     def tearDown(self):
-        self._maybe_destro_dist()
+        self._maybe_destroy_dist()
 
     def _get_config(self):
         return {"name": "zero", "base_optimizer": {"name": "sgd"}, "num_epochs": 3}
