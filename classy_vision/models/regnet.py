@@ -447,16 +447,14 @@ class RegNet(ClassyModel):
     def __init__(self, params: RegNetParams):
         super().__init__()
 
-        if params.activation_type == ActivationType.SILU and get_torch_version() < [
-            1,
-            7,
-        ]:
-            raise RuntimeError("SiLU activation is only supported since PyTorch 1.7")
-
+        silu = None if get_torch_version() < [1, 7] else nn.SiLU()
         activation = {
             ActivationType.RELU: nn.ReLU(params.relu_in_place),
-            ActivationType.SILU: nn.SiLU(),
+            ActivationType.SILU: silu,
         }[params.activation_type]
+
+        if activation is None:
+            raise RuntimeError("SiLU activation is only supported since PyTorch 1.7")
 
         # Ad hoc stem
         self.stem = {
