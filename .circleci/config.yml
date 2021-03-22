@@ -126,9 +126,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v7-cpu-dependencies-
 
-      - <<: *install_dep
-
       - <<: *install_dev_dep
+
+      - <<: *install_dep
 
       - <<: *pip_list
 
@@ -177,9 +177,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v4-gpu-dependencies-
 
-      - <<: *install_dep
-
       - <<: *install_dev_dep
+
+      - <<: *install_dep
 
       - <<: *pip_list
 
@@ -214,9 +214,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v2-gpu-bc-dependencies-
 
-      - <<: *install_dep_bc
-
       - <<: *install_dev_dep
+
+      - <<: *install_dep_bc
 
       - <<: *pip_list
 
