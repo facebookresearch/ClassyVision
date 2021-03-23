@@ -171,7 +171,7 @@ class TensorboardPlotHook(ClassyHook):
                 global_step=phase_type_idx,
             )
 
-        loss_avg = sum(task.losses) / (batches * task.get_batchsize_per_replica())
+        loss_avg = sum(task.losses) / batches
 
         loss_key = "Losses/{phase_type}".format(phase_type=task.phase_type)
         self.tb_writer.add_scalar(loss_key, loss_avg, global_step=phase_type_idx)

@@ -50,7 +50,7 @@ class TestVisdomHook(HookTestBase):
         task.prepare()
 
         losses = [1.2, 2.3, 1.23, 2.33]
-        loss_vals = {"train": 0.8825, "test": 0.353}
+        loss_val = sum(losses) / len(losses)
 
         task.losses = losses
 
@@ -110,7 +110,7 @@ class TestVisdomHook(HookTestBase):
                 )
                 self.assertAlmostEqual(
                     visdom_hook.metrics[loss_key][-1],
-                    loss_vals[phase_type] * count,
+                    loss_val * count,
                     places=4,
                 )
 

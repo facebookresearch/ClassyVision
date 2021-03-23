@@ -69,7 +69,7 @@ class LossLrMeterLoggingHook(ClassyHook):
         batches = len(task.losses)
 
         # Loss for the phase
-        loss = sum(task.losses) / (batches * task.get_batchsize_per_replica())
+        loss = sum(task.losses) / batches
         phase_pct = batches / task.num_batches_per_phase
         msg = (
             f"{prefix}[{get_rank()}] {phase_type} phase {phase_type_idx} "
