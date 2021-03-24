@@ -71,7 +71,7 @@ class VisdomHook(ClassyHook):
             return
 
         # Loss for the phase
-        loss = sum(task.losses) / (batches * task.get_batchsize_per_replica())
+        loss = sum(task.losses) / batches
         loss_key = phase_type + "_loss"
         if loss_key not in metrics:
             metrics[loss_key] = []
