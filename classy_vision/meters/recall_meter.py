@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import Any, Dict
+from typing import Any, Dict, Sequence
 
 import torch
 from classy_vision.generic.distributed_util import all_reduce_sum
@@ -27,7 +27,7 @@ class RecallAtKMeter(ClassyMeter):
         """
         super().__init__()
 
-        assert isinstance(topk, list), "topk must be a list"
+        assert isinstance(topk, Sequence), "topk must be a sequence"
         assert len(topk) > 0, "topk list should have at least one element"
         assert [is_pos_int(x) for x in topk], "each value in topk must be >= 1"
 

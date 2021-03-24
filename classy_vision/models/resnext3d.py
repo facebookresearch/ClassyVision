@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Sequence
 
 import torch
 import torch.nn as nn
@@ -134,11 +134,11 @@ class ResNeXt3DBase(ClassyModel):
         assert is_pos_int(ret_config["stem_spatial_kernel"])
         assert type(ret_config["stem_maxpool"]) == bool
         assert is_pos_int(ret_config["stage_planes"])
-        assert type(ret_config["stage_temporal_kernel_basis"]) == list
+        assert isinstance(ret_config["stage_temporal_kernel_basis"], Sequence)
         assert all(
             is_pos_int_list(l) for l in ret_config["stage_temporal_kernel_basis"]
         )
-        assert type(ret_config["temporal_conv_1x1"]) == list
+        assert isinstance(ret_config["temporal_conv_1x1"], Sequence)
         assert is_pos_int_list(ret_config["stage_temporal_stride"])
         assert is_pos_int_list(ret_config["stage_spatial_stride"])
         assert is_pos_int(ret_config["num_groups"])

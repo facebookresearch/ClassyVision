@@ -9,7 +9,7 @@
 # dependencies:
 import math
 from collections import OrderedDict
-from typing import Any, Dict
+from typing import Any, Dict, Sequence
 
 import torch
 import torch.nn as nn
@@ -136,7 +136,7 @@ class DenseNet(ClassyModel):
         super().__init__()
 
         # assertions:
-        assert type(num_blocks) == list
+        assert isinstance(num_blocks, Sequence)
         assert all(is_pos_int(b) for b in num_blocks)
         assert num_classes is None or is_pos_int(num_classes)
         assert is_pos_int(init_planes)
