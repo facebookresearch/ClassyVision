@@ -172,7 +172,7 @@ def _layer_flops(layer: nn.Module, layer_args: List[Any], y: Any) -> int:
         flops = count1 + count2
 
     # non-linearities:
-    elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax"]:
+    elif layer_type in ["ReLU", "ReLU6", "Tanh", "Sigmoid", "Softmax", "SiLU"]:
         flops = x.numel()
 
     # 2D pooling layers:
