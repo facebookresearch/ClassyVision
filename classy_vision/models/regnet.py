@@ -208,11 +208,11 @@ class BottleneckTransform(nn.Sequential):
         bn_momentum: float,
         activation: nn.Module,
         group_width: int,
-        bot_mul: float,
+        bottleneck_multiplier: float,
         se_ratio: Optional[float],
     ):
         super().__init__()
-        w_b = int(round(width_out * bot_mul))
+        w_b = int(round(width_out * bottleneck_multiplier))
         g = w_b // group_width
 
         self.a = nn.Sequential(
@@ -255,7 +255,7 @@ class ResBottleneckBlock(nn.Module):
         bn_momentum: float,
         activation: nn.Module,
         group_width: int = 1,
-        bot_mul: float = 1.0,
+        bottleneck_multiplier: float = 1.0,
         se_ratio: Optional[float] = None,
     ):
         super().__init__()
@@ -275,7 +275,7 @@ class ResBottleneckBlock(nn.Module):
             bn_momentum,
             activation,
             group_width,
-            bot_mul,
+            bottleneck_multiplier,
             se_ratio,
         )
         self.activation = activation
@@ -304,7 +304,7 @@ class ResBottleneckLinearBlock(nn.Module):
         bn_momentum: float,
         activation: nn.Module,
         group_width: int = 1,
-        bot_mul: float = 4.0,
+        bottleneck_multiplier: float = 4.0,
         se_ratio: Optional[float] = None,
     ):
         super().__init__()
@@ -317,7 +317,7 @@ class ResBottleneckLinearBlock(nn.Module):
             bn_momentum,
             activation,
             group_width,
-            bot_mul,
+            bottleneck_multiplier,
             se_ratio,
         )
 
@@ -339,7 +339,7 @@ class AnyStage(nn.Sequential):
         block_constructor: nn.Module,
         activation: nn.Module,
         group_width: int,
-        bot_mul: float,
+        bottleneck_multiplier: float,
         params: "RegNetParams",
         stage_index: int = 0,
     ):
@@ -355,7 +355,7 @@ class AnyStage(nn.Sequential):
                 params.bn_momentum,
                 activation,
                 group_width,
-                bot_mul,
+                bottleneck_multiplier,
                 params.se_ratio,
             )
 
@@ -389,8 +389,8 @@ class RegNetParams:
         w_0: int,
         w_a: float,
         w_m: float,
-        group_w: int,
-        bot_mul: float = 1.0,
+        group_width: int,
+        bottleneck_multiplier: float = 1.0,
         stem_type: StemType = StemType.SIMPLE_STEM_IN,
         stem_width: int = 32,
         block_type: BlockType = BlockType.RES_BOTTLENECK_BLOCK,
@@ -407,8 +407,8 @@ class RegNetParams:
         self.w_0 = w_0
         self.w_a = w_a
         self.w_m = w_m
-        self.group_w = group_w
-        self.bot_mul = bot_mul
+        self.group_width = group_width
+        self.bottleneck_multiplier = bottleneck_multiplier
         self.stem_type = stem_type
         self.block_type = block_type
         self.activation = activation
@@ -465,15 +465,17 @@ class RegNetParams:
         stage_depths = np.diff([d for d, t in enumerate(splits) if t]).tolist()
 
         strides = [STRIDE] * num_stages
-        bot_muls = [self.bot_mul] * num_stages
-        group_widths = [self.group_w] * num_stages
+        bottleneck_multipliers = [self.bottleneck_multiplier] * num_stages
+        group_widths = [self.group_width] * num_stages
 
         # Adjust the compatibility of stage widths and group widths
         stage_widths, group_widths = _adjust_widths_groups_compatibilty(
-            stage_widths, bot_muls, group_widths
+            stage_widths, bottleneck_multipliers, group_widths
         )
 
-        return zip(stage_widths, strides, stage_depths, group_widths, bot_muls)
+        return zip(
+            stage_widths, strides, stage_depths, group_widths, bottleneck_multipliers
+        )
 
 
 @register_model("regnet")
@@ -524,9 +526,13 @@ class RegNet(ClassyModel):
         self.trunk_depth = 0
 
         blocks = []
-        for i, (width_out, stride, depth, group_width, bot_mul) in enumerate(
-            params.get_expanded_params()
-        ):
+        for i, (
+            width_out,
+            stride,
+            depth,
+            group_width,
+            bottleneck_multiplier,
+        ) in enumerate(params.get_expanded_params()):
             blocks.append(
                 (
                     f"block{i+1}",
@@ -538,7 +544,7 @@ class RegNet(ClassyModel):
                         block_fun,
                         activation,
                         group_width,
-                        bot_mul,
+                        bottleneck_multiplier,
                         params,
                         stage_index=i + 1,
                     ),
@@ -571,8 +577,8 @@ class RegNet(ClassyModel):
             w_0=config["w_0"],
             w_a=config["w_a"],
             w_m=config["w_m"],
-            group_w=config["group_width"],
-            bot_mul=config.get("bot_mul", 1.0),
+            group_width=config["group_width"],
+            bottleneck_multiplier=config.get("bottleneck_multiplier", 1.0),
             stem_type=StemType[config.get("stem_type", "simple_stem_in").upper()],
             stem_width=config.get("stem_width", 32),
             block_type=BlockType[
@@ -627,7 +633,7 @@ class RegNetY400mf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 440 feature maps
         super().__init__(
-            RegNetParams(depth=16, w_0=48, w_a=27.89, w_m=2.09, group_w=8, **kwargs)
+            RegNetParams(depth=16, w_0=48, w_a=27.89, w_m=2.09, group_width=8, **kwargs)
         )
 
 
@@ -636,7 +642,7 @@ class RegNetY800mf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 768 feature maps
         super().__init__(
-            RegNetParams(depth=14, w_0=56, w_a=38.84, w_m=2.4, group_w=16, **kwargs)
+            RegNetParams(depth=14, w_0=56, w_a=38.84, w_m=2.4, group_width=16, **kwargs)
         )
 
 
@@ -645,7 +651,9 @@ class RegNetY1_6gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 888 feature maps
         super().__init__(
-            RegNetParams(depth=27, w_0=48, w_a=20.71, w_m=2.65, group_w=24, **kwargs)
+            RegNetParams(
+                depth=27, w_0=48, w_a=20.71, w_m=2.65, group_width=24, **kwargs
+            )
         )
 
 
@@ -654,7 +662,9 @@ class RegNetY3_2gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 1512 feature maps
         super().__init__(
-            RegNetParams(depth=21, w_0=80, w_a=42.63, w_m=2.66, group_w=24, **kwargs)
+            RegNetParams(
+                depth=21, w_0=80, w_a=42.63, w_m=2.66, group_width=24, **kwargs
+            )
         )
 
 
@@ -663,7 +673,9 @@ class RegNetY8gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 2016 feature maps
         super().__init__(
-            RegNetParams(depth=17, w_0=192, w_a=76.82, w_m=2.19, group_w=56, **kwargs)
+            RegNetParams(
+                depth=17, w_0=192, w_a=76.82, w_m=2.19, group_width=56, **kwargs
+            )
         )
 
 
@@ -672,7 +684,9 @@ class RegNetY16gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 3024 feature maps
         super().__init__(
-            RegNetParams(depth=18, w_0=200, w_a=106.23, w_m=2.48, group_w=112, **kwargs)
+            RegNetParams(
+                depth=18, w_0=200, w_a=106.23, w_m=2.48, group_width=112, **kwargs
+            )
         )
 
 
@@ -681,7 +695,9 @@ class RegNetY32gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 3712 feature maps
         super().__init__(
-            RegNetParams(depth=20, w_0=232, w_a=115.89, w_m=2.53, group_w=232, **kwargs)
+            RegNetParams(
+                depth=20, w_0=232, w_a=115.89, w_m=2.53, group_width=232, **kwargs
+            )
         )
 
 
@@ -694,7 +710,7 @@ class RegNetX400mf(_RegNet):
                 w_0=24,
                 w_a=24.48,
                 w_m=2.54,
-                group_w=16,
+                group_width=16,
                 use_se=False,
                 **kwargs,
             )
@@ -710,7 +726,7 @@ class RegNetX800mf(_RegNet):
                 w_0=56,
                 w_a=35.73,
                 w_m=2.28,
-                group_w=16,
+                group_width=16,
                 use_se=False,
                 **kwargs,
             )
@@ -726,7 +742,7 @@ class RegNetX1_6gf(_RegNet):
                 w_0=80,
                 w_a=34.01,
                 w_m=2.25,
-                group_w=24,
+                group_width=24,
                 use_se=False,
                 **kwargs,
             )
@@ -742,7 +758,7 @@ class RegNetX3_2gf(_RegNet):
                 w_0=88,
                 w_a=26.31,
                 w_m=2.25,
-                group_w=48,
+                group_width=48,
                 use_se=False,
                 **kwargs,
             )
@@ -758,7 +774,7 @@ class RegNetX8gf(_RegNet):
                 w_0=80,
                 w_a=49.56,
                 w_m=2.88,
-                group_w=120,
+                group_width=120,
                 use_se=False,
                 **kwargs,
             )
@@ -774,7 +790,7 @@ class RegNetX16gf(_RegNet):
                 w_0=216,
                 w_a=55.59,
                 w_m=2.1,
-                group_w=128,
+                group_width=128,
                 use_se=False,
                 **kwargs,
             )
@@ -790,7 +806,7 @@ class RegNetX32gf(_RegNet):
                 w_0=320,
                 w_a=69.86,
                 w_m=2.0,
-                group_w=168,
+                group_width=168,
                 use_se=False,
                 **kwargs,
             )
@@ -808,8 +824,8 @@ class RegNetZ500mf(_RegNet):
                 w_0=16,
                 w_a=10.7,
                 w_m=2.51,
-                group_w=4,
-                bot_mul=4.0,
+                group_width=4,
+                bottleneck_multiplier=4.0,
                 block_type=BlockType.RES_BOTTLENECK_LINEAR_BLOCK,
                 activation=ActivationType.SILU,
                 **kwargs,
@@ -827,8 +843,8 @@ class RegNetZ4gf(_RegNet):
                 w_0=48,
                 w_a=14.5,
                 w_m=2.226,
-                group_w=8,
-                bot_mul=4.0,
+                group_width=8,
+                bottleneck_multiplier=4.0,
                 block_type=BlockType.RES_BOTTLENECK_LINEAR_BLOCK,
                 activation=ActivationType.SILU,
                 **kwargs,
@@ -847,7 +863,9 @@ class RegNetY64gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 2976 feature maps
         super().__init__(
-            RegNetParams(depth=20, w_0=368, w_a=102.79, w_m=2.05, group_w=496, **kwargs)
+            RegNetParams(
+                depth=20, w_0=368, w_a=102.79, w_m=2.05, group_width=496, **kwargs
+            )
         )
 
 
@@ -856,7 +874,9 @@ class RegNetY128gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 7392 feature maps
         super().__init__(
-            RegNetParams(depth=27, w_0=456, w_a=160.83, w_m=2.52, group_w=264, **kwargs)
+            RegNetParams(
+                depth=27, w_0=456, w_a=160.83, w_m=2.52, group_width=264, **kwargs
+            )
         )
 
 
@@ -865,5 +885,7 @@ class RegNetY256gf(_RegNet):
     def __init__(self, **kwargs):
         # Output size: 5088 feature maps
         super().__init__(
-            RegNetParams(depth=27, w_0=640, w_a=124.47, w_m=2.04, group_w=848, **kwargs)
+            RegNetParams(
+                depth=27, w_0=640, w_a=124.47, w_m=2.04, group_width=848, **kwargs
+            )
         )
