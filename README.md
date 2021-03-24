@@ -13,6 +13,7 @@
 
 ## What's New:
 
+- March 2021: Added [RegNetZ models](https://arxiv.org/abs/2103.06877)
 - November 2020: [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) now available, with training [recipes](https://github.com/facebookresearch/ClassyVision/tree/master/examples/vit)!
 
 <details>
