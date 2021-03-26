@@ -78,6 +78,7 @@ from .composite_scheduler import CompositeParamScheduler, IntervalScaling  # iso
 from .fvcore_schedulers import (
     ConstantParamScheduler,
     CosineParamScheduler,
+    ExponentialParamScheduler,
     LinearParamScheduler,
     MultiStepParamScheduler,
     PolynomialDecayParamScheduler,
@@ -91,6 +92,7 @@ __all__ = [
     "CompositeParamScheduler",
     "ConstantParamScheduler",
     "CosineParamScheduler",
+    "ExponentialParamScheduler",
     "LinearParamScheduler",
     "MultiStepParamScheduler",
     "PolynomialDecayParamScheduler",
