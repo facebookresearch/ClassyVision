@@ -95,7 +95,8 @@ def build_model(config):
 # automatically import any Python files in the models/ directory
 import_all_modules(FILE_ROOT, "classy_vision.models")
 
-from .classy_block import ClassyBlock  # isort:skip
+from .anynet import AnyNet  # isort:skip
+from .classy_block import ClassyBlock
 from .classy_model import (  # isort:skip
     ClassyModelWrapper,  # isort:skip
     ClassyModelHeadExecutorWrapper,  # isort:skip
@@ -113,6 +114,7 @@ from .vision_transformer import VisionTransformer  # isort:skip
 
 
 __all__ = [
+    "AnyNet",
     "ClassyBlock",
     "ClassyModel",
     "ClassyModelHeadExecutorWrapper",
