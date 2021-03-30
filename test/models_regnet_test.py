@@ -107,6 +107,20 @@ REGNET_TEST_CONFIGS = [
             "group_width": 56,
         },
     ),
+    (
+        {
+            # RegNetZ
+            "name": "regnet",
+            "block_type": "res_bottleneck_linear_block",
+            "depth": 21,
+            "w_0": 16,
+            "w_a": 10.7,
+            "w_m": 2.51,
+            "group_width": 4,
+            "bot_mul": 4.0,
+            "activation": "silu",
+        },
+    ),
 ]
 
 
@@ -128,6 +142,8 @@ REGNET_TEST_PRESET_NAMES = [
     "regnet_x_8gf",
     "regnet_x_16gf",
     "regnet_x_32gf",
+    "regnet_z_500mf",
+    "regnet_z_4gf",
 ]
 
 REGNET_TEST_PRESETS = [({"name": n},) for n in REGNET_TEST_PRESET_NAMES]
@@ -140,6 +156,10 @@ class TestRegNetModelBuild(unittest.TestCase):
         Test that the model builds using a config using either model_params or
         model_name.
         """
+        if get_torch_version() < [1, 7] and (
+            "regnet_z" in config["name"] or config.get("activation", "relu") == "silu"
+        ):
+            self.skipTest("SiLU activation is only supported since PyTorch 1.7")
         model = build_model(config)
         assert isinstance(model, RegNet)
 
@@ -195,7 +215,7 @@ class TestRegNet(unittest.TestCase):
         config = REGNET_TEST_CONFIGS[0][0]
         model_default = build_model(config)
         config = copy.deepcopy(config)
-        config["activation_type"] = "relu"
+        config["activation"] = "relu"
         model_relu = build_model(config)
 
         # both models should be the same
@@ -204,7 +224,7 @@ class TestRegNet(unittest.TestCase):
         # we don't expect any silus in the model
         self._check_no_module_cls_in_model(nn.SiLU, model_relu)
 
-        config["activation_type"] = "silu"
+        config["activation"] = "silu"
         model_silu = build_model(config)
 
         # the models should be different

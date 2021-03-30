@@ -25,6 +25,7 @@ class BlockType(Enum):
     VANILLA_BLOCK = auto()
     RES_BASIC_BLOCK = auto()
     RES_BOTTLENECK_BLOCK = auto()
+    RES_BOTTLENECK_LINEAR_BLOCK = auto()
 
 
 # The different possible Stems
@@ -206,8 +207,8 @@ class BottleneckTransform(nn.Sequential):
         bn_epsilon: float,
         bn_momentum: float,
         activation: nn.Module,
-        bot_mul: float,
         group_width: int,
+        bot_mul: float,
         se_ratio: Optional[float],
     ):
         super().__init__()
@@ -253,8 +254,8 @@ class ResBottleneckBlock(nn.Module):
         bn_epsilon: float,
         bn_momentum: float,
         activation: nn.Module,
-        bot_mul: float = 1.0,
         group_width: int = 1,
+        bot_mul: float = 1.0,
         se_ratio: Optional[float] = None,
     ):
         super().__init__()
@@ -273,8 +274,8 @@ class ResBottleneckBlock(nn.Module):
             bn_epsilon,
             bn_momentum,
             activation,
-            bot_mul,
             group_width,
+            bot_mul,
             se_ratio,
         )
         self.activation = activation
@@ -291,6 +292,41 @@ class ResBottleneckBlock(nn.Module):
         return self.activation(x)
 
 
+class ResBottleneckLinearBlock(nn.Module):
+    """Residual linear bottleneck block: x + F(x), F = bottleneck transform."""
+
+    def __init__(
+        self,
+        width_in: int,
+        width_out: int,
+        stride: int,
+        bn_epsilon: float,
+        bn_momentum: float,
+        activation: nn.Module,
+        group_width: int = 1,
+        bot_mul: float = 4.0,
+        se_ratio: Optional[float] = None,
+    ):
+        super().__init__()
+        self.has_skip = (width_in == width_out) and (stride == 1)
+        self.f = BottleneckTransform(
+            width_in,
+            width_out,
+            stride,
+            bn_epsilon,
+            bn_momentum,
+            activation,
+            group_width,
+            bot_mul,
+            se_ratio,
+        )
+
+        self.depth = self.f.depth
+
+    def forward(self, x):
+        return x + self.f(x) if self.has_skip else self.f(x)
+
+
 class AnyStage(nn.Sequential):
     """AnyNet stage (sequence of blocks w/ the same output shape)."""
 
@@ -302,8 +338,8 @@ class AnyStage(nn.Sequential):
         depth: int,
         block_constructor: nn.Module,
         activation: nn.Module,
-        bot_mul: float,
         group_width: int,
+        bot_mul: float,
         params: "RegNetParams",
         stage_index: int = 0,
     ):
@@ -318,8 +354,8 @@ class AnyStage(nn.Sequential):
                 params.bn_epsilon,
                 params.bn_momentum,
                 activation,
-                bot_mul,
                 group_width,
+                bot_mul,
                 params.se_ratio,
             )
 
@@ -354,10 +390,11 @@ class RegNetParams:
         w_a: float,
         w_m: float,
         group_w: int,
-        stem_type: StemType = "SIMPLE_STEM_IN",
+        bot_mul: float = 1.0,
+        stem_type: StemType = StemType.SIMPLE_STEM_IN,
         stem_width: int = 32,
-        block_type: BlockType = "RES_BOTTLENECK_BLOCK",
-        activation_type: ActivationType = "RELU",
+        block_type: BlockType = BlockType.RES_BOTTLENECK_BLOCK,
+        activation: ActivationType = ActivationType.RELU,
         use_se: bool = True,
         se_ratio: float = 0.25,
         bn_epsilon: float = 1e-05,
@@ -371,9 +408,10 @@ class RegNetParams:
         self.w_a = w_a
         self.w_m = w_m
         self.group_w = group_w
-        self.stem_type = StemType[stem_type]
-        self.block_type = BlockType[block_type]
-        self.activation_type = ActivationType[activation_type]
+        self.bot_mul = bot_mul
+        self.stem_type = stem_type
+        self.block_type = block_type
+        self.activation = activation
         self.stem_width = stem_width
         self.use_se = use_se
         self.se_ratio = se_ratio if use_se else None
@@ -403,7 +441,6 @@ class RegNetParams:
 
         QUANT = 8
         STRIDE = 2
-        BOT_MUL = 1.0
 
         # Compute the block widths. Each stage has one unique block width
         widths_cont = np.arange(self.depth) * self.w_a + self.w_0
@@ -428,7 +465,7 @@ class RegNetParams:
         stage_depths = np.diff([d for d, t in enumerate(splits) if t]).tolist()
 
         strides = [STRIDE] * num_stages
-        bot_muls = [BOT_MUL] * num_stages
+        bot_muls = [self.bot_mul] * num_stages
         group_widths = [self.group_w] * num_stages
 
         # Adjust the compatibility of stage widths and group widths
@@ -436,13 +473,18 @@ class RegNetParams:
             stage_widths, bot_muls, group_widths
         )
 
-        return zip(stage_widths, strides, stage_depths, bot_muls, group_widths)
+        return zip(stage_widths, strides, stage_depths, group_widths, bot_muls)
 
 
 @register_model("regnet")
 class RegNet(ClassyModel):
-    """Implementation of RegNet, a particular form of AnyNets
-    See https://arxiv.org/abs/2003.13678v1"""
+    """Implementation of RegNet, a particular form of AnyNets.
+
+    See https://arxiv.org/abs/2003.13678 for introduction to RegNets, and details about
+    RegNetX and RegNetY models.
+
+    See https://arxiv.org/abs/2103.06877 for details about RegNetZ models.
+    """
 
     def __init__(self, params: RegNetParams):
         super().__init__()
@@ -451,7 +493,7 @@ class RegNet(ClassyModel):
         activation = {
             ActivationType.RELU: nn.ReLU(params.relu_in_place),
             ActivationType.SILU: silu,
-        }[params.activation_type]
+        }[params.activation]
 
         if activation is None:
             raise RuntimeError("SiLU activation is only supported since PyTorch 1.7")
@@ -474,6 +516,7 @@ class RegNet(ClassyModel):
             BlockType.VANILLA_BLOCK: VanillaBlock,
             BlockType.RES_BASIC_BLOCK: ResBasicBlock,
             BlockType.RES_BOTTLENECK_BLOCK: ResBottleneckBlock,
+            BlockType.RES_BOTTLENECK_LINEAR_BLOCK: ResBottleneckLinearBlock,
         }[params.block_type]
 
         current_width = params.stem_width
@@ -481,7 +524,7 @@ class RegNet(ClassyModel):
         self.trunk_depth = 0
 
         blocks = []
-        for i, (width_out, stride, depth, bot_mul, group_width) in enumerate(
+        for i, (width_out, stride, depth, group_width, bot_mul) in enumerate(
             params.get_expanded_params()
         ):
             blocks.append(
@@ -494,8 +537,8 @@ class RegNet(ClassyModel):
                         depth,
                         block_fun,
                         activation,
-                        bot_mul,
                         group_width,
+                        bot_mul,
                         params,
                         stage_index=i + 1,
                     ),
@@ -529,10 +572,13 @@ class RegNet(ClassyModel):
             w_a=config["w_a"],
             w_m=config["w_m"],
             group_w=config["group_width"],
-            stem_type=config.get("stem_type", "simple_stem_in").upper(),
+            bot_mul=config.get("bot_mul", 1.0),
+            stem_type=StemType[config.get("stem_type", "simple_stem_in").upper()],
             stem_width=config.get("stem_width", 32),
-            block_type=config.get("block_type", "res_bottleneck_block").upper(),
-            activation_type=config.get("activation_type", "relu").upper(),
+            block_type=BlockType[
+                config.get("block_type", "res_bottleneck_block").upper()
+            ],
+            activation=ActivationType[config.get("activation", "relu").upper()],
             use_se=config.get("use_se", True),
             se_ratio=config.get("se_ratio", 0.25),
             bn_epsilon=config.get("bn_epsilon", 1e-05),
@@ -746,6 +792,45 @@ class RegNetX32gf(_RegNet):
                 w_m=2.0,
                 group_w=168,
                 use_se=False,
+                **kwargs,
+            )
+        )
+
+
+# note that RegNetZ models are trained with a convolutional head, i.e. the
+# fully_connected ClassyHead with conv_planes > 0.
+@register_model("regnet_z_500mf")
+class RegNetZ500mf(_RegNet):
+    def __init__(self, **kwargs):
+        super().__init__(
+            RegNetParams(
+                depth=21,
+                w_0=16,
+                w_a=10.7,
+                w_m=2.51,
+                group_w=4,
+                bot_mul=4.0,
+                block_type=BlockType.RES_BOTTLENECK_LINEAR_BLOCK,
+                activation=ActivationType.SILU,
+                **kwargs,
+            )
+        )
+
+
+# this is supposed to be trained with a resolution of 256x256
+@register_model("regnet_z_4gf")
+class RegNetZ4gf(_RegNet):
+    def __init__(self, **kwargs):
+        super().__init__(
+            RegNetParams(
+                depth=28,
+                w_0=48,
+                w_a=14.5,
+                w_m=2.226,
+                group_w=8,
+                bot_mul=4.0,
+                block_type=BlockType.RES_BOTTLENECK_LINEAR_BLOCK,
+                activation=ActivationType.SILU,
                 **kwargs,
             )
         )
