@@ -10,6 +10,7 @@ from test.generic.utils import ClassyTestCase
 
 import torch
 from classy_vision.generic.util import get_torch_version
+from classy_vision.heads import build_head
 from classy_vision.heads.fully_connected_head import FullyConnectedHead
 
 
@@ -82,3 +83,28 @@ class TestFullyConnectedHead(ClassyTestCase):
         for param_1, param_2 in zip(head_norm.parameters(), head_no_norm.parameters()):
             self.assertTorchAllClose(param_1, param_2)
             self.assertTorchAllClose(param_1.grad, param_2.grad)
+
+    def test_conv_planes(self):
+        num_classes = 10
+        in_plane = 3
+        conv_planes = 5
+        batch_size = 2
+        image_size = 4
+        head_config = {
+            "name": "fully_connected",
+            "unique_id": "asd",
+            "in_plane": in_plane,
+            "conv_planes": conv_planes,
+            "num_classes": num_classes,
+        }
+        head = build_head(head_config)
+        self.assertIsInstance(head, FullyConnectedHead)
+
+        # specify an activation
+        head_config["activation"] = "relu"
+        head = build_head(head_config)
+
+        # make sure that the head runs and returns the expected dimensions
+        input = torch.rand([batch_size, in_plane, image_size, image_size])
+        output = head(input)
+        self.assertEqual(output.shape, (batch_size, num_classes))
