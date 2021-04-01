@@ -49,8 +49,11 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
         "name" in transform_config
     ), f"name not provided for transform: {transform_config}"
     name = transform_config["name"]
-    transform_args = copy.deepcopy(transform_config)
-    del transform_args["name"]
+
+    key_list = list(transform_config.keys())
+    key_list.remove("name")
+    transform_args = {key: transform_config[key] for key in key_list}
+
     if name in TRANSFORM_REGISTRY:
         transform = TRANSFORM_REGISTRY[name].from_config(transform_args)
     else:
