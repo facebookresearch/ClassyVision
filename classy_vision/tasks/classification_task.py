@@ -1309,6 +1309,9 @@ class ClassificationTask(ClassyTask):
 
         self.log_phase_end("total")
 
+        if hasattr(self.datasets[self.phase_type], "on_phase_end"):
+            self.datasets[self.phase_type].on_phase_end()
+
     def on_end(self):
         for hook in self.hooks:
             hook.on_end(self)
