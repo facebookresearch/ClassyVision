@@ -43,15 +43,21 @@ install_python: &install_python
       command: |
         pyenv install 3.6.2
         pyenv global 3.6.2
+        which python
+        which pip
+
+upgrade_pip_setuptools: &upgrade_pip_setuptools
+  - run:
+      name: Upgrade pip and setuptools
+      working_directory: ~/
+      command: |
+        pip install --upgrade pip
+        pip install --upgrade --progress-bar off setuptools
 
 install_dep: &install_dep
   - run:
       name: Install Dependencies
       command: |
-        which python
-        which pip
-        pip install --upgrade pip
-        pip install --upgrade --progress-bar off setuptools
         pip install --progress-bar off -r requirements.txt
         pip list
 
@@ -119,6 +125,8 @@ jobs:
 
       - <<: *setup_venv
 
+      - <<: *upgrade_pip_setuptools
+
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -170,6 +178,8 @@ jobs:
 
       - <<: *setup_venv
 
+      - <<: *upgrade_pip_setuptools
+
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -206,6 +216,8 @@ jobs:
       - <<: *install_python
 
       - <<: *setup_venv
+
+      - <<: *upgrade_pip_setuptools
 
       # Download and cache dependencies
       - restore_cache:
