@@ -10,8 +10,6 @@ import tempfile
 import unittest
 import unittest.mock as mock
 from pathlib import Path
-from test.generic.config_utils import get_fast_test_task_config, get_test_model_configs
-from test.generic.utils import compare_model_state, compare_states
 
 import classy_vision.generic.util as util
 import torch
@@ -29,6 +27,8 @@ from classy_vision.generic.util import (
 from classy_vision.models import build_model
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_fast_test_task_config, get_test_model_configs
+from test.generic.utils import compare_model_state, compare_states
 
 
 ROOT = Path(__file__).parent

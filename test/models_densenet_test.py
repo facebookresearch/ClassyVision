@@ -5,10 +5,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.utils import compare_model_state
 
 import torch
 from classy_vision.models import build_model
+from test.generic.utils import compare_model_state
 
 
 MODELS = {

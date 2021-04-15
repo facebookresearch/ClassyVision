@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_model_configs
 
 import torch
 import torch.nn as nn
@@ -16,6 +15,7 @@ from classy_vision.generic.profiler import (
     get_shape,
 )
 from classy_vision.models import build_model
+from test.generic.config_utils import get_test_model_configs
 
 
 class TestModule(nn.Module):

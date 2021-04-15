@@ -5,9 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.optim_test_util import TestOptimizer
 
 from classy_vision.optim.adamw import AdamW
+from test.generic.optim_test_util import TestOptimizer
 
 
 class TestAdamWOptimizer(TestOptimizer, unittest.TestCase):

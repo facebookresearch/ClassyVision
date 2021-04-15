@@ -5,9 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_task_config
 
 from classy_vision.tasks import build_task
+from test.generic.config_utils import get_test_task_config
 
 
 class TestDataloaderLimitWrapper(unittest.TestCase):

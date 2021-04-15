@@ -8,13 +8,13 @@ import copy
 import os
 import shutil
 import tempfile
-from test.generic.config_utils import get_test_task_config
-from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.hooks import TorchscriptHook
 from classy_vision.models import ResNet
 from classy_vision.tasks import build_task
+from test.generic.config_utils import get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 
 TORCHSCRIPT_FILE = "torchscript.pt"

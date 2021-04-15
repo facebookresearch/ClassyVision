@@ -9,8 +9,6 @@ import importlib
 import os
 import shutil
 import tempfile
-from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
-from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.generic.util import load_checkpoint
@@ -19,6 +17,8 @@ from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
 from fvcore.common import file_io
 from fvcore.common.file_io import PathHandler, PathManager
+from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 
 class TestException(Exception):

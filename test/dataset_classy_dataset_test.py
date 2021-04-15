@@ -7,12 +7,12 @@
 import multiprocessing as mp
 import unittest
 import unittest.mock as mock
-from test.generic.utils import compare_batches, compare_samples
 
 import classy_vision.dataset.classy_dataset as classy_dataset
 import torch
 from classy_vision.dataset import build_dataset, register_dataset
 from classy_vision.dataset.core import ListDataset
+from test.generic.utils import compare_batches, compare_samples
 from torch.utils.data import DataLoader
 
 

@@ -5,11 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.optim_test_util import TestOptimizer
 
 import torch
 from classy_vision.optim.param_scheduler import LinearParamScheduler
 from classy_vision.optim.sgd import SGD
+from test.generic.optim_test_util import TestOptimizer
 
 
 class TestSGDOptimizer(TestOptimizer, unittest.TestCase):

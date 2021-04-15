@@ -8,12 +8,12 @@ import copy
 import math
 import unittest
 import unittest.mock as mock
-from test.generic.hook_test_utils import HookTestBase
 
 import torch
 import torch.nn as nn
 from classy_vision.hooks import ExponentialMovingAverageModelHook
 from classy_vision.models import ClassyModel
+from test.generic.hook_test_utils import HookTestBase
 
 
 class TestModel(ClassyModel):

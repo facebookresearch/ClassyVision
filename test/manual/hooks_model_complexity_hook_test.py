@@ -5,11 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_classy_task, get_test_model_configs
-from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import ModelComplexityHook
 from classy_vision.models import build_model
+from test.generic.config_utils import get_test_classy_task, get_test_model_configs
+from test.generic.hook_test_utils import HookTestBase
 
 
 class TestModelComplexityHook(HookTestBase):

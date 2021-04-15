@@ -8,13 +8,13 @@ import csv
 import os
 import shutil
 import tempfile
-from test.generic.config_utils import get_fast_test_task_config
-from test.generic.hook_test_utils import HookTestBase
 
 import torch
 from classy_vision.hooks import OutputCSVHook
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_fast_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 
 def parse_csv(file_path):

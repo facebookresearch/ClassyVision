@@ -8,11 +8,11 @@ import copy
 import unittest
 import unittest.mock as mock
 from itertools import product
-from test.generic.config_utils import get_test_task_config
-from test.generic.hook_test_utils import HookTestBase
 
 from classy_vision.hooks import VisdomHook
 from classy_vision.tasks import build_task
+from test.generic.config_utils import get_test_task_config
+from test.generic.hook_test_utils import HookTestBase
 from visdom import Visdom
 
 

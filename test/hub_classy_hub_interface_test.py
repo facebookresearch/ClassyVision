@@ -7,13 +7,13 @@
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_test_task_config
 
 import torch
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.hub import ClassyHubInterface
 from classy_vision.models import ClassyModel, build_model
 from classy_vision.tasks import ClassyTask, build_task
+from test.generic.config_utils import get_test_task_config
 from torchvision import models, transforms
 
 

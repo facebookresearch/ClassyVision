@@ -9,13 +9,6 @@ import itertools
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
-from test.generic.utils import (
-    LimitedPhaseTrainer,
-    compare_model_state,
-    compare_samples,
-    compare_states,
-)
 
 import torch
 import torch.nn as nn
@@ -28,6 +21,13 @@ from classy_vision.models import ClassyModel, build_model
 from classy_vision.optim import SGD, build_optimizer
 from classy_vision.tasks import ClassificationTask, build_task
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
+from test.generic.utils import (
+    LimitedPhaseTrainer,
+    compare_model_state,
+    compare_samples,
+    compare_states,
+)
 
 
 @register_loss("test_stateful_loss")

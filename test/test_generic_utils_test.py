@@ -4,9 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.utils import ClassyTestCase
 
 import torch
+from test.generic.utils import ClassyTestCase
 
 
 class TestClassyTestCase(unittest.TestCase):

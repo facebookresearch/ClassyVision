@@ -6,12 +6,12 @@
 
 import copy
 from functools import partial
-from test.generic.utils import ClassyTestCase
 
 import torch
 from classy_vision.generic.util import get_torch_version
 from classy_vision.heads import build_head
 from classy_vision.heads.fully_connected_head import FullyConnectedHead
+from test.generic.utils import ClassyTestCase
 
 
 class TestFullyConnectedHead(ClassyTestCase):

@@ -5,8 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import copy
-from test.generic.config_utils import get_test_mlp_task_config
-from test.generic.hook_test_utils import HookTestBase
 
 import torch
 import torch.nn as nn
@@ -14,6 +12,8 @@ from classy_vision.hooks import ClassyHook
 from classy_vision.hooks.precise_batch_norm_hook import PreciseBatchNormHook
 from classy_vision.tasks import build_task
 from classy_vision.trainer import ClassyTrainer
+from test.generic.config_utils import get_test_mlp_task_config
+from test.generic.hook_test_utils import HookTestBase
 
 
 class TestPreciseBatchNormHook(HookTestBase):

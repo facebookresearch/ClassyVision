@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import unittest
-from test.generic.config_utils import get_test_mlp_task_config
 
 from classy_vision.dataset import build_dataset
 from classy_vision.hooks import LossLrMeterLoggingHook
@@ -15,6 +14,7 @@ from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer, build_optimizer_schedulers
 from classy_vision.tasks import ClassificationTask
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_test_mlp_task_config
 
 
 class TestLocalTrainer(unittest.TestCase):

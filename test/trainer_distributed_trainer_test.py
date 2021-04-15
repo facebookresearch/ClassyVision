@@ -11,12 +11,12 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+
+import torch
 from test.generic.config_utils import (
     get_distributed_launch_cmd,
     get_test_mlp_task_config,
 )
-
-import torch
 
 
 class TestDistributedTrainer(unittest.TestCase):

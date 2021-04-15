@@ -9,7 +9,6 @@ import os
 import shutil
 import tempfile
 import unittest
-from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 
 import torch
 import torch.nn as nn
@@ -25,6 +24,7 @@ from classy_vision.models import (
 from classy_vision.models.classy_model import _ClassyModelAdapter
 from classy_vision.tasks import build_task
 from classy_vision.trainer import LocalTrainer
+from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from torchvision import models
 
 

@@ -6,10 +6,10 @@
 
 import copy
 import unittest
-from test.generic.utils import compare_model_state
 
 import torch
 from classy_vision.models import build_model
+from test.generic.utils import compare_model_state
 
 
 class TestVisionTransformer(unittest.TestCase):

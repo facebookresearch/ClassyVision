@@ -13,16 +13,16 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from test.generic.config_utils import (
-    get_distributed_launch_cmd,
-    get_fast_test_task_config,
-)
-from test.generic.optim_test_util import TestOptimizer
 
 import classy_vision.optim  # NOQA
 import torch
 import torch.distributed as dist
 from classy_vision.optim.zero import ZeRO
+from test.generic.config_utils import (
+    get_distributed_launch_cmd,
+    get_fast_test_task_config,
+)
+from test.generic.optim_test_util import TestOptimizer
 
 
 def dist_init(rank, world_size, filename):
