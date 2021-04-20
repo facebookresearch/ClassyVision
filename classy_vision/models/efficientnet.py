@@ -7,12 +7,11 @@
 import copy
 import math
 from collections import OrderedDict
-from typing import Any, Dict, NamedTuple, Optional, Tuple
+from typing import Any, Dict, NamedTuple, Optional
 
 import torch
 import torch.nn as nn
 from classy_vision.models import ClassyModel, register_model
-from torch.nn import functional as F
 
 
 class BlockParams(NamedTuple):
@@ -112,79 +111,13 @@ def scale_depth(num_repeats, depth_coefficient):
     return int(math.ceil(depth_coefficient * num_repeats))
 
 
-def calculate_output_image_size(input_image_size, stride):
+def get_same_padding_for_kernel_size(kernel_size):
     """
-    Calculates the output image size when using Conv2dSamePadding with a stride
+    Returns the required padding for "same" style convolutions
     """
-    image_height, image_width = input_image_size
-    image_height = int(math.ceil(image_height / stride))
-    image_width = int(math.ceil(image_width / stride))
-    return image_height, image_width
-
-
-class Conv2dSamePadding(nn.Conv2d):
-    """
-    Conv2d, but with 'same' convolutions like TensorFlow.
-    """
-
-    def __init__(
-        self, image_size, in_channels, out_channels, kernel_size, **kernel_wargs
-    ):
-        super().__init__(in_channels, out_channels, kernel_size, **kernel_wargs)
-
-        image_h, image_w = image_size
-        kernel_h, kernel_w = self.weight.size()[-2:]
-        stride_h, stride_w = self.stride
-        dilation_h, dilation_w = self.dilation
-        out_h, out_w = math.ceil(image_h / stride_h), math.ceil(image_w / stride_w)
-        pad_h = max(
-            (out_h - 1) * self.stride[0] + (kernel_h - 1) * dilation_h + 1 - image_h, 0
-        )
-        pad_w = max(
-            (out_w - 1) * self.stride[1] + (kernel_w - 1) * dilation_w + 1 - image_w, 0
-        )
-        self.out_h = out_h
-        self.out_w = out_w
-        self.same_padding = None
-        if pad_h > 0 or pad_w > 0:
-            self.same_padding = nn.ZeroPad2d(
-                (pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2)
-            )
-        self.image_size = image_size
-
-    def forward(self, x):
-        input_image_size = x.shape[-2:]
-        assert (
-            input_image_size == self.image_size
-        ), f"Input shape mismatch, got: {input_image_size}, expected: {self.image_size}"
-        if self.same_padding is not None:
-            x = self.same_padding(x)
-        x = F.conv2d(
-            x,
-            self.weight,
-            self.bias,
-            self.stride,
-            self.padding,
-            self.dilation,
-            self.groups,
-        )
-        return x
-
-    def flops(self, x):
-        batchsize_per_replica = x.size()[0]
-        return (
-            batchsize_per_replica
-            * self.in_channels
-            * self.out_channels
-            * self.kernel_size[0]
-            * self.kernel_size[1]
-            * self.out_h
-            * self.out_w
-            / self.groups
-        )
-
-    def activations(self, x, out):
-        return out.numel()
+    if kernel_size % 2 == 0:
+        raise ValueError(f"Only odd sized kernels are supported, got {kernel_size}")
+    return (kernel_size - 1) // 2
 
 
 class MBConvBlock(nn.Module):
@@ -194,7 +127,6 @@ class MBConvBlock(nn.Module):
 
     def __init__(
         self,
-        image_size: Tuple[int, int],
         input_filters: int,
         output_filters: int,
         expand_ratio: float,
@@ -226,12 +158,12 @@ class MBConvBlock(nn.Module):
         # Expansion phase
         expanded_filters = input_filters * expand_ratio
         if expand_ratio != 1:
-            self.expand_conv = Conv2dSamePadding(
-                image_size=image_size,
+            self.expand_conv = nn.Conv2d(
                 in_channels=input_filters,
                 out_channels=expanded_filters,
                 kernel_size=1,
                 stride=1,
+                padding=0,
                 bias=False,
             )
             self.bn0 = nn.BatchNorm2d(
@@ -242,13 +174,13 @@ class MBConvBlock(nn.Module):
             self.depth += 1
 
         # Depthwise convolution phase
-        self.depthwise_conv = Conv2dSamePadding(
-            image_size=image_size,
+        self.depthwise_conv = nn.Conv2d(
             in_channels=expanded_filters,
             out_channels=expanded_filters,
             groups=expanded_filters,
             kernel_size=kernel_size,
             stride=stride,
+            padding=get_same_padding_for_kernel_size(kernel_size),
             bias=False,
         )
         self.bn1 = nn.BatchNorm2d(
@@ -258,36 +190,34 @@ class MBConvBlock(nn.Module):
         )
         self.depth += 1
 
-        image_size = calculate_output_image_size(image_size, stride)
-
         if self.has_se:
             # Squeeze and Excitation layer
             num_reduced_filters = max(1, int(input_filters * se_ratio))
-            self.se_reduce = Conv2dSamePadding(
-                image_size=(1, 1),
+            self.se_reduce = nn.Conv2d(
                 in_channels=expanded_filters,
                 out_channels=num_reduced_filters,
                 kernel_size=1,
                 stride=1,
+                padding=0,
                 bias=True,
             )
-            self.se_expand = Conv2dSamePadding(
-                image_size=(1, 1),
+            self.se_expand = nn.Conv2d(
                 in_channels=num_reduced_filters,
                 out_channels=expanded_filters,
                 kernel_size=1,
                 stride=1,
+                padding=0,
                 bias=True,
             )
             self.depth += 2
 
         # Output phase
-        self.project_conv = Conv2dSamePadding(
-            image_size=image_size,
+        self.project_conv = nn.Conv2d(
             in_channels=expanded_filters,
             out_channels=output_filters,
             kernel_size=1,
             stride=1,
+            padding=0,
             bias=False,
         )
         self.bn2 = nn.BatchNorm2d(
@@ -364,26 +294,24 @@ class EfficientNet(ClassyModel):
         self.drop_connect_rate = drop_connect_rate
 
         # input dimensions
-        in_channels = self.input_shape[0]
-        image_size = self.input_shape[1:]
+        in_channels = 3
 
         # Stem
         out_channels = 32
         out_channels = scale_width(
             out_channels, width_coefficient, width_divisor, min_width
         )
-        self.conv_stem = Conv2dSamePadding(
-            image_size=image_size,
+        self.conv_stem = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=3,
             stride=2,
+            padding=1,
             bias=False,
         )
         self.bn0 = nn.BatchNorm2d(
             num_features=out_channels, momentum=bn_momentum, eps=bn_epsilon
         )
-        image_size = calculate_output_image_size(image_size, 2)
 
         # Build blocks
         blocks = OrderedDict()
@@ -411,7 +339,6 @@ class EfficientNet(ClassyModel):
             block_name = f"block{block_idx}-0"
             # The first block needs to take care of the stride and filter size increase
             blocks[block_name] = MBConvBlock(
-                image_size,
                 block_params.input_filters,
                 block_params.output_filters,
                 block_params.expand_ratio,
@@ -423,7 +350,6 @@ class EfficientNet(ClassyModel):
                 bn_momentum,
                 bn_epsilon,
             )
-            image_size = calculate_output_image_size(image_size, block_params.stride)
             if block_params.num_repeat > 1:
                 block_params = block_params._replace(
                     input_filters=block_params.output_filters, stride=1
@@ -431,7 +357,6 @@ class EfficientNet(ClassyModel):
             for i in range(1, block_params.num_repeat):
                 block_name = f"block{block_idx}-{i}"
                 blocks[block_name] = MBConvBlock(
-                    image_size,
                     block_params.input_filters,
                     block_params.output_filters,
                     block_params.expand_ratio,
@@ -451,12 +376,12 @@ class EfficientNet(ClassyModel):
         out_channels = scale_width(
             out_channels, width_coefficient, width_divisor, min_width
         )
-        self.conv_head = Conv2dSamePadding(
-            image_size=image_size,
+        self.conv_head = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=1,
             stride=1,
+            padding=0,
             bias=False,
         )
         self.bn1 = nn.BatchNorm2d(
