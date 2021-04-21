@@ -17,13 +17,10 @@ class ClassyBlock(nn.Module):
     def __init__(self, name, module):
         super().__init__()
         self.name = name
-        self.output = torch.zeros(0)
         self._module = module
 
     def wrapped_module(self):
         return self._module
 
     def forward(self, input):
-        output = self._module(input)
-        self.output = output
-        return output
+        return self._module(input)
