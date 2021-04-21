@@ -966,17 +966,20 @@ class ClassificationTask(ClassyTask):
         Args:
             state: Dict containing state of a task
         """
-        # some settings are different in test only
         self.train = False if self.test_only else state["train"]
-        if not self.test_only:
-            self.phase_idx = state["phase_idx"]
-            self.num_updates = state["num_updates"]
-            self.train_phase_idx = state["train_phase_idx"]
-            self.losses = state["losses"]
-            for meter, meter_state in zip(self.meters, state["meters"]):
-                meter.set_classy_state(meter_state)
-
         self.base_model.set_classy_state(state["base_model"])
+
+        if self.test_only:
+            # if we're only testing, just need the state of the model to be updated
+            return
+
+        self.phase_idx = state["phase_idx"]
+        self.num_updates = state["num_updates"]
+        self.train_phase_idx = state["train_phase_idx"]
+        self.losses = state["losses"]
+        for meter, meter_state in zip(self.meters, state["meters"]):
+            meter.set_classy_state(meter_state)
+
         if self.optimizer is not None:
             self.optimizer.set_classy_state(state["optimizer"])
         if state.get("loss") and isinstance(self.base_loss, ClassyLoss):
