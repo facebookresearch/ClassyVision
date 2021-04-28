@@ -448,11 +448,6 @@ class EfficientNet(ClassyModel):
                 nn.init.constant_(module.bias, 0)
 
     def forward(self, inputs):
-        input_shape = inputs.shape[1:]
-        assert (
-            input_shape == self.input_shape
-        ), f"Input shape mismatch, got: {input_shape}, expected: {self.input_shape}"
-
         # Stem
         outputs = self.relu_fn(self.bn0(self.conv_stem(inputs)))
 
