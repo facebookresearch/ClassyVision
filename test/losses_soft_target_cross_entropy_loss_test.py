@@ -47,6 +47,18 @@ class TestSoftTargetCrossEntropyLoss(unittest.TestCase):
         targets = torch.tensor([[-1, 0, 0, 0, 1]])
         self.assertAlmostEqual(crit(outputs, targets).item(), 5.01097918)
 
+    def test_soft_target_cross_entropy_none_reduction(self):
+        # reduction mode is "none"
+        config = self._get_config()
+        config["reduction"] = "none"
+
+        crit = SoftTargetCrossEntropyLoss.from_config(config)
+
+        outputs = torch.tensor([[1.0, 7.0, 0.0, 0.0, 2.0], [4.0, 2.0, 1.0, 6.0, 0.5]])
+        targets = torch.tensor([[1, 0, 0, 0, 1], [0, 1, 0, 1, 0]])
+        loss = crit(outputs, targets)
+        self.assertEqual(loss.numel(), outputs.size(0))
+
     def test_soft_target_cross_entropy_integer_label(self):
         config = self._get_config()
         crit = SoftTargetCrossEntropyLoss.from_config(config)
