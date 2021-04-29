@@ -27,9 +27,7 @@ Example:
                  --master_port=29500 \
                  --use_env \
                  classy_train.py \
-                 --device=gpu \
                  --config=configs/resnet50_synthetic_image_classy_config.json \
-                 --num_workers=1 \
                  --log_freq=100
 
     For other use cases, try
