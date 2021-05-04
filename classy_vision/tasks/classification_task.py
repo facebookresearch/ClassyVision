@@ -1040,8 +1040,6 @@ class ClassificationTask(ClassyTask):
 
             loss = local_loss.detach().clone()
 
-            self.check_inf_nan(loss)
-
             self.losses.append(loss.data.cpu().item())
 
             self.update_meters(output, sample)
