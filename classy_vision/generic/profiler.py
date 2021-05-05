@@ -215,7 +215,7 @@ def _layer_flops(layer: nn.Module, layer_args: List[Any], y: Any) -> int:
     elif layer_type in ["Linear"]:
         weight_ops = layer.weight.numel()
         bias_ops = layer.bias.numel() if layer.bias is not None else 0
-        flops = x.size()[0] * (weight_ops + bias_ops)
+        flops = (x.numel() / x.size(-1)) * (weight_ops + bias_ops)
 
     # batch normalization / layer normalization:
     elif layer_type in [
