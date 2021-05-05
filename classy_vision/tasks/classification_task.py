@@ -757,7 +757,7 @@ class ClassificationTask(ClassyTask):
         self.optimizer.set_param_groups(param_groups)
 
     def prepare(self):
-        """Prepares task for training, populates all derived attributes """
+        """Prepares task for training, populates all derived attributes"""
 
         self.phases = self._build_phases()
         self.train = False if self.test_only else self.train
