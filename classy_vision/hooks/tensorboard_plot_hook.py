@@ -164,16 +164,16 @@ class TensorboardPlotHook(ClassyHook):
                     f"Parameters/{name}", parameter, global_step=phase_type_idx
                 )
 
-        if torch.cuda.is_available() and task.train:
+        if torch.cuda.is_available():
             self.tb_writer.add_scalar(
-                "Memory/peak_allocated",
+                f"Memory/{phase_type}/peak_allocated",
                 torch.cuda.max_memory_allocated(),
                 global_step=phase_type_idx,
             )
 
         loss_avg = sum(task.losses) / batches
 
-        loss_key = "Losses/{phase_type}".format(phase_type=task.phase_type)
+        loss_key = f"Losses/{phase_type}"
         self.tb_writer.add_scalar(loss_key, loss_avg, global_step=phase_type_idx)
 
         # plot meters which return a dict
