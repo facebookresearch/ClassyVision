@@ -1289,7 +1289,7 @@ class ClassificationTask(ClassyTask):
         self.phase_start_time_train = time.perf_counter()
 
     def on_phase_end(self):
-        self.log_phase_end("train")
+        self.log_phase_end(self.phase_type)
 
         if self.train:
             self.optimizer.on_epoch(where=self.where)
@@ -1308,7 +1308,7 @@ class ClassificationTask(ClassyTask):
             hook.on_phase_end(self)
         self.perf_log = []
 
-        self.log_phase_end("total")
+        self.log_phase_end(f"{self.phase_type}_total")
 
         if hasattr(self.datasets[self.phase_type], "on_phase_end"):
             self.datasets[self.phase_type].on_phase_end()
@@ -1318,12 +1318,9 @@ class ClassificationTask(ClassyTask):
             hook.on_end(self)
 
     def log_phase_end(self, tag):
-        if not self.train:
-            return
-
         start_time = (
             self.phase_start_time_train
-            if tag == "train"
+            if tag == self.phase_type
             else self.phase_start_time_total
         )
         phase_duration = time.perf_counter() - start_time
@@ -1334,7 +1331,6 @@ class ClassificationTask(ClassyTask):
             {
                 "tag": tag,
                 "phase_idx": self.train_phase_idx,
-                "epoch_duration": phase_duration,
                 "im_per_sec": im_per_sec,
             }
         )
