@@ -308,15 +308,7 @@ def _layer_flops(layer: nn.Module, layer_args: List[Any], y: Any) -> int:
             batchsize_per_replica * num_channels * out_t * out_w * out_h * kernel_ops
         )
 
-    # dropout layer
-    elif layer_type in ["Dropout"]:
-        # At test time, we do not drop values but scale the feature map by the
-        # dropout ratio
-        flops = 1
-        for dim_size in x.size():
-            flops *= dim_size
-
-    elif layer_type == "Identity":
+    elif layer_type in ["Dropout", "Identity"]:
         flops = 0
 
     elif hasattr(layer, "flops"):
