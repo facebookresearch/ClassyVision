@@ -7,6 +7,7 @@
 import unittest
 
 import torch
+from classy_vision.generic.util import get_torch_version
 from classy_vision.models import ClassyModel, build_model
 
 
@@ -15,6 +16,29 @@ class TestMLPModel(unittest.TestCase):
         config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
         model = build_model(config)
         self.assertTrue(isinstance(model, ClassyModel))
+
+        tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)
+        output = model.forward(tensor)
+        self.assertEqual(output.shape, torch.Size([1, 1]))
+
+        tensor = torch.tensor([[1, 2, 3], [1, 2, 3]], dtype=torch.float)
+        output = model.forward(tensor)
+        self.assertEqual(output.shape, torch.Size([2, 1]))
+
+    @unittest.skipIf(
+        get_torch_version() < [1, 8],
+        "FX Graph Modee Quantization is only availablee from 1.8",
+    )
+    def test_quantize_model(self):
+        from torch.quantization.quantize_fx import convert_fx, prepare_fx
+
+        config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
+        model = build_model(config)
+        self.assertTrue(isinstance(model, ClassyModel))
+
+        model.eval()
+        model.mlp = prepare_fx(model.mlp, {"": torch.quantization.default_qconfig})
+        model.mlp = convert_fx(model.mlp)
 
         tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)
         output = model.forward(tensor)
