@@ -6,12 +6,12 @@
 
 import collections
 import unittest
-from test.generic.utils import compare_model_state
 
 import torch
 import torchvision.models
 from classy_vision.generic.util import get_torch_version
 from classy_vision.models import ResNeXt, build_model
+from test.generic.utils import compare_model_state
 
 
 MODELS = {
