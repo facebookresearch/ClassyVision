@@ -567,7 +567,14 @@ class ClassificationTask(ClassyTask):
         if config.get("mixup") is not None:
             assert "alpha" in config["mixup"], "key alpha is missing in mixup dict"
             mixup_transform = MixupTransform(
-                config["mixup"]["alpha"], config["mixup"].get("num_classes")
+                config["mixup"]["alpha"],
+                num_classes=config["mixup"].get("num_classes"),
+                cutmix_alpha=config["mixup"].get("cutmix_alpha", 0),
+                cutmix_minmax=config["mixup"].get("cutmix_minmax"),
+                mix_prob=config["mixup"].get("mix_prob", 1.0),
+                switch_prob=config["mixup"].get("switch_prob", 0.5),
+                mode=config["mixup"].get("mode", "batch"),
+                label_smoothing=config["mixup"].get("label_smoothing", 0.0),
             )
 
         # hooks config is optional
