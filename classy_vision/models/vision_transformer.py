@@ -76,6 +76,7 @@ class EncoderBlock(nn.Module):
         self.dropout = nn.Dropout(dropout_rate)
         self.ln_2 = LayerNorm(hidden_dim)
         self.mlp = MLPBlock(hidden_dim, mlp_dim, dropout_rate)
+        self.num_heads = num_heads
 
     def forward(self, input):
         x = self.ln_1(input)
@@ -86,6 +87,30 @@ class EncoderBlock(nn.Module):
         y = self.ln_2(x)
         y = self.mlp(y)
         return x + y
+
+    def flops(self, x):
+        flops = 0
+        seq_len, batch_size, hidden_dim = x.shape
+
+        num_elems = x.numel() // batch_size
+        flops += num_elems * 6  # ln_1 (* 2), x + input, ln_2 (* 2), x + y
+
+        # self_attention
+        # calculations are based on the fact that head_dim * num_heads = hidden_dim
+        # so we collapse (hidden_dim // num_heads) * num_heads to hidden_dim
+        flops += 3 * seq_len * (hidden_dim + 1) * hidden_dim  # projection with bias
+        flops += hidden_dim * seq_len  # scaling
+        flops += hidden_dim * seq_len * seq_len  # attention weights
+        flops += self.num_heads * seq_len * seq_len  # softmax
+        flops += hidden_dim * seq_len * seq_len  # attention application
+        flops += seq_len * (hidden_dim + 1) * hidden_dim  # out projection with bias
+
+        # mlp
+        mlp_dim = self.mlp.linear_1.out_features
+        flops += seq_len * (hidden_dim + 1) * mlp_dim  # linear_1
+        flops += seq_len * mlp_dim  # act
+        flops += seq_len * (mlp_dim + 1) * hidden_dim  # linear_2
+        return flops * batch_size
 
 
 class Encoder(nn.Module):
@@ -299,6 +324,10 @@ class VisionTransformer(ClassyModel):
             )
             state["model"]["trunk"]["encoder.pos_embedding"] = new_pos_embedding
         super().set_classy_state(state, strict=strict)
+
+    @property
+    def input_shape(self):
+        return (3, self.image_size, self.image_size)
 
 
 @register_model("vit_b_32")
