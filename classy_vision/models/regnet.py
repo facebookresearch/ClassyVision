@@ -453,7 +453,7 @@ class RegNetY64gf(_RegNet):
         # Output size: 2976 feature maps
         super().__init__(
             RegNetParams(
-                depth=20, w_0=368, w_a=102.79, w_m=2.05, group_width=496, **kwargs
+                depth=20, w_0=352, w_a=147.48, w_m=2.4, group_width=328, **kwargs
             )
         )
 
