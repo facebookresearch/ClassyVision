@@ -153,7 +153,10 @@ class TestProfilerFunctions(unittest.TestCase):
         model = TestModel()
         input_shape = (3, 10, 10)
         num_elems = 3 * 10 * 10
-        self.assertEqual(compute_activations(model, input_shape=input_shape), num_elems)
+        activations = num_elems + num_elems  # linear + conv
+        self.assertEqual(
+            compute_activations(model, input_shape=input_shape), activations
+        )
         self.assertEqual(
             compute_flops(model, input_shape=input_shape),
             num_elems

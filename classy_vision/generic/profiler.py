@@ -343,9 +343,9 @@ def _layer_activations(layer: nn.Module, layer_args: List[Any], out: Any) -> int
     """
     Computes the number of activations produced by a single layer.
 
-    Activations are counted only for convolutional layers. To override this behavior, a
-    layer can define a method to compute activations with the signature below, which
-    will be used to compute the activations instead.
+    Activations are counted only for convolutional and linear layers. To override this
+    behavior, a layer can define a method to compute activations with the signature
+    below, which will be used to compute the activations instead.
 
     Class MyModule(nn.Module):
         def activations(self, out, *layer_args):
@@ -355,7 +355,7 @@ def _layer_activations(layer: nn.Module, layer_args: List[Any], out: Any) -> int
     typestr = layer.__repr__()
     if hasattr(layer, "activations"):
         activations = layer.activations(out, *layer_args)
-    elif isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+    elif isinstance(layer, (nn.Linear, nn.Conv1d, nn.Conv2d, nn.Conv3d)):
         activations = out.numel()
     else:
         return 0
