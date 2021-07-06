@@ -112,6 +112,23 @@ class EncoderBlock(nn.Module):
         flops += seq_len * (mlp_dim + 1) * hidden_dim  # linear_2
         return flops * batch_size
 
+    def activations(self, out, x):
+        # we only count activations for matrix multiplications
+        activations = 0
+        seq_len, batch_size, hidden_dim = x.shape
+
+        # self_attention
+        activations += 3 * seq_len * hidden_dim  # projection
+        activations += self.num_heads * seq_len * seq_len  # attention weights
+        activations += hidden_dim * seq_len  # attention application
+        activations += hidden_dim * seq_len  # out projection
+
+        # mlp
+        mlp_dim = self.mlp.linear_1.out_features
+        activations += seq_len * mlp_dim  # linear_1
+        activations += seq_len * hidden_dim  # linear_2
+        return activations
+
 
 class Encoder(nn.Module):
     """Transformer Encoder."""
