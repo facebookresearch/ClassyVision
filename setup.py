@@ -57,7 +57,7 @@ if __name__ == "__main__":
                 "nbconvert==6.0.7",
                 "pre-commit",
                 "parameterized",
-                "fairscale==0.1.6",
+                "fairscale==0.3.7",
             ]
         },
         package_data={"classy_vision": ["configs/*.json", "templates"]},
