@@ -64,10 +64,10 @@ def rand_bbox(img_shape, lam, margin=0.0, count=1):
     margin_y, margin_x = int(margin * cut_h), int(margin * cut_w)
     cy = torch.randint(0 + margin_y, img_h - margin_y, (count,))
     cx = torch.randint(0 + margin_x, img_w - margin_x, (count,))
-    yl = torch.clip(cy - cut_h // 2, 0, img_h)
-    yh = torch.clip(cy + cut_h // 2, 0, img_h)
-    xl = torch.clip(cx - cut_w // 2, 0, img_w)
-    xh = torch.clip(cx + cut_w // 2, 0, img_w)
+    yl = torch.clamp(cy - cut_h // 2, 0, img_h)
+    yh = torch.clamp(cy + cut_h // 2, 0, img_h)
+    xl = torch.clamp(cx - cut_w // 2, 0, img_w)
+    xh = torch.clamp(cx + cut_w // 2, 0, img_w)
     return yl, yh, xl, xh
 
 
