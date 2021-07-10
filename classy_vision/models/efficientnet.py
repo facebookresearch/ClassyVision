@@ -11,6 +11,7 @@ from typing import Any, Dict, NamedTuple, Optional
 
 import torch
 import torch.nn as nn
+from classy_vision.generic.util import get_torch_version
 from classy_vision.models import ClassyModel, register_model
 
 
@@ -150,7 +151,7 @@ class MBConvBlock(nn.Module):
         self.input_filters = input_filters
         self.output_filters = output_filters
 
-        self.relu_fn = swish
+        self.relu_fn = swish if get_torch_version() < [1, 7] else nn.SiLU()
 
         # used to track the depth of the block
         self.depth = 0
