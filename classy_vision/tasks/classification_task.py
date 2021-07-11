@@ -1337,7 +1337,7 @@ class ClassificationTask(ClassyTask):
         self.perf_log.append(
             {
                 "tag": tag,
-                "phase_idx": self.train_phase_idx,
+                "phase_idx": self.train_phase_idx if self.train else self.eval_phase_idx,
                 "im_per_sec": im_per_sec,
             }
         )
