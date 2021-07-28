@@ -27,13 +27,13 @@ from classy_vision.generic.distributed_util import (
 from classy_vision.generic.util import (
     Timer,
     copy_model_to_gpu,
+    get_torch_version,
     load_and_broadcast_checkpoint,
     master_params,
     recursive_copy_to_gpu,
     split_batchnorm_params,
     update_classy_state,
 )
-from classy_vision.generic.util import get_torch_version
 from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
 from classy_vision.losses import ClassyLoss, build_loss
 from classy_vision.meters import ClassyMeter, build_meters
@@ -168,6 +168,7 @@ class ClassificationTask(ClassyTask):
         self.optimizer_schedulers = {}
         self.checkpoint_dict = None
         self.checkpoint_path = None
+        self.checkpoint_load_strict = True
         self.phases = []
         self.hooks = []
         self.train = True
@@ -248,6 +249,15 @@ class ClassificationTask(ClassyTask):
             directory. See :func:`load_checkpoint` for more information.
         """
         self.checkpoint_path = checkpoint_path
+        return self
+
+    def set_checkpoint_load_strict(self, checkpoint_load_strict: bool):
+        """Sets checkpoint on task.
+
+        Args:
+            checkpoint_load_strict: Whether to use load_strict when copying model weights
+        """
+        self.checkpoint_load_strict = checkpoint_load_strict
         return self
 
     def _set_checkpoint_dict(self, checkpoint_dict: Dict[str, Any]):
@@ -888,8 +898,7 @@ class ClassificationTask(ClassyTask):
                 # We use the default process group so we set the state to None.
                 process_group = None
                 self.distributed_model.register_comm_hook(
-                    process_group,
-                    ddp_comm_hooks.default_hooks.fp16_compress_hook,
+                    process_group, ddp_comm_hooks.default_hooks.fp16_compress_hook
                 )
         if (
             isinstance(self.base_loss, ClassyLoss)
@@ -1335,11 +1344,7 @@ class ClassificationTask(ClassyTask):
             self.get_global_batchsize() * self.num_batches_per_phase
         ) / phase_duration
         self.perf_log.append(
-            {
-                "tag": tag,
-                "phase_idx": self.train_phase_idx,
-                "im_per_sec": im_per_sec,
-            }
+            {"tag": tag, "phase_idx": self.train_phase_idx, "im_per_sec": im_per_sec}
         )
 
     def __repr__(self):
