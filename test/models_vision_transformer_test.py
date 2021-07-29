@@ -36,6 +36,37 @@ class TestVisionTransformer(unittest.TestCase):
             ],
         }
 
+    def get_vitc_b_16_224_config(self):
+        return {
+            "name": "vision_transformer",
+            "image_size": 224,
+            "patch_size": 16,
+            "hidden_dim": 768,
+            "mlp_dim": 3072,
+            "num_heads": 12,
+            "num_layers": 12,
+            "conv_stem_layers": [
+                {"kernel": 3, "stride": 2, "out_channels": 64},
+                {"kernel": 3, "stride": 2, "out_channels": 128},
+                {"kernel": 3, "stride": 1, "out_channels": 128},
+                {"kernel": 3, "stride": 2, "out_channels": 256},
+                {"kernel": 3, "stride": 1, "out_channels": 256},
+                {"kernel": 3, "stride": 2, "out_channels": 512},
+            ],
+            "attention_dropout_rate": 0,
+            "dropout_rate": 0.1,
+            "heads": [
+                {
+                    "name": "vision_transformer_head",
+                    "unique_id": "default_head",
+                    "num_classes": 1000,
+                    "fork_block": "trunk_output",
+                    "in_plane": 768,
+                    "hidden_dim": 3072,
+                }
+            ],
+        }
+
     def get_vit_l_32_224_config(self):
         return {
             "name": "vision_transformer",
@@ -86,6 +117,9 @@ class TestVisionTransformer(unittest.TestCase):
 
     def test_vit_b_16_224(self):
         self._test_model(self.get_vit_b_16_224_config())
+
+    def test_vitc_b_16_224(self):
+        self._test_model(self.get_vitc_b_16_224_config())
 
     def test_vit_l_32_224(self):
         # testing the forward pass is slow so we skip it
