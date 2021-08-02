@@ -7,6 +7,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+classy_vision.egg-info/
 env/
 build/
 develop-eggs/

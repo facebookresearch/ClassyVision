@@ -35,7 +35,6 @@ class OptionsView:
             if name in pg:
                 values.append(pg[name])
 
-        values = set(values)
         if len(values) == 0:
             raise AttributeError
         elif len(values) == 1:
