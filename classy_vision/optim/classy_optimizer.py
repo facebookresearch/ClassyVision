@@ -32,10 +32,12 @@ class OptionsView:
     def __getattr__(self, name):
         values = []
         for pg in self.optimizer.param_groups:
-            if name in pg:
+            if name in pg and (pg[name] not in values):
+                # we only add unique values to the view
+                # this means the length returned can vary if multiple (different)
+                # schedulers return the same value at a certain point 
                 values.append(pg[name])
 
-        values = set(values)
         if len(values) == 0:
             raise AttributeError
         elif len(values) == 1:
