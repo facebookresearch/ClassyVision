@@ -35,7 +35,7 @@ class OptionsView:
             if name in pg and (pg[name] not in values):
                 # we only add unique values to the view
                 # this means the length returned can vary if multiple (different)
-                # schedulers return the same value at a certain point 
+                # schedulers return the same value at a certain point
                 values.append(pg[name])
 
         if len(values) == 0:
