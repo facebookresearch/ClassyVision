@@ -17,6 +17,7 @@ import logging
 import math
 from collections import OrderedDict
 from functools import partial
+from typing import Dict, List, Mapping, NamedTuple, Union
 
 import torch
 import torch.nn as nn
@@ -26,6 +27,21 @@ from .lecun_normal_init import lecun_normal_init
 
 
 LayerNorm = partial(nn.LayerNorm, eps=1e-6)
+
+
+class ConvStemLayer(NamedTuple):
+    kernel: int
+    stride: int
+    out_channels: int
+
+
+def get_same_padding_for_kernel_size(kernel_size):
+    """
+    Returns the required padding for "same" style convolutions
+    """
+    if kernel_size % 2 == 0:
+        raise ValueError(f"Only odd sized kernels are supported, got {kernel_size}")
+    return (kernel_size - 1) // 2
 
 
 class MLPBlock(nn.Sequential):
@@ -185,6 +201,7 @@ class VisionTransformer(ClassyModel):
         dropout_rate=0,
         attention_dropout_rate=0,
         classifier="token",
+        conv_stem_layers: Union[List[ConvStemLayer], List[Dict], None] = None,
     ):
         super().__init__()
         assert image_size % patch_size == 0, "Input shape indivisible by patch size"
@@ -199,11 +216,40 @@ class VisionTransformer(ClassyModel):
 
         input_channels = 3
 
-        # conv_proj is a more efficient version of reshaping, permuting and projecting
-        # the input
-        self.conv_proj = nn.Conv2d(
-            input_channels, hidden_dim, kernel_size=patch_size, stride=patch_size
-        )
+        self.conv_stem_layers = conv_stem_layers
+        if conv_stem_layers is None:
+            # conv_proj is a more efficient version of reshaping, permuting and projecting
+            # the input
+            self.conv_proj = nn.Conv2d(
+                input_channels, hidden_dim, kernel_size=patch_size, stride=patch_size
+            )
+        else:
+            prev_channels = input_channels
+            self.conv_proj = nn.Sequential()
+            for i, conv_stem_layer in enumerate(conv_stem_layers):
+                if isinstance(conv_stem_layer, Mapping):
+                    conv_stem_layer = ConvStemLayer(**conv_stem_layer)
+                kernel = conv_stem_layer.kernel
+                stride = conv_stem_layer.stride
+                out_channels = conv_stem_layer.out_channels
+                padding = get_same_padding_for_kernel_size(kernel)
+                self.conv_proj.add_module(
+                    f"conv_{i}",
+                    nn.Conv2d(
+                        prev_channels,
+                        out_channels,
+                        kernel_size=kernel,
+                        stride=stride,
+                        padding=padding,
+                        bias=False,
+                    ),
+                )
+                self.conv_proj.add_module(f"bn_{i}", nn.BatchNorm2d(out_channels))
+                self.conv_proj.add_module(f"relu_{i}", nn.ReLU())
+                prev_channels = out_channels
+            self.conv_proj.add_module(
+                f"conv_{i + 1}", nn.Conv2d(prev_channels, hidden_dim, kernel_size=1)
+            )
 
         seq_length = (image_size // patch_size) ** 2
         if self.classifier == "token":
@@ -226,13 +272,14 @@ class VisionTransformer(ClassyModel):
         self.init_weights()
 
     def init_weights(self):
-        lecun_normal_init(
-            self.conv_proj.weight,
-            fan_in=self.conv_proj.in_channels
-            * self.conv_proj.kernel_size[0]
-            * self.conv_proj.kernel_size[1],
-        )
-        nn.init.zeros_(self.conv_proj.bias)
+        if self.conv_stem_layers is None:
+            lecun_normal_init(
+                self.conv_proj.weight,
+                fan_in=self.conv_proj.in_channels
+                * self.conv_proj.kernel_size[0]
+                * self.conv_proj.kernel_size[1],
+            )
+            nn.init.zeros_(self.conv_proj.bias)
 
     @classmethod
     def from_config(cls, config):
