@@ -34,7 +34,7 @@ def build_dataset(config, *args, **kwargs):
     return dataset
 
 
-def register_dataset(name):
+def register_dataset(name, bypass_checks=False):
     """Registers a :class:`ClassyDataset` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -52,21 +52,24 @@ def register_dataset(name):
     :func:`build_dataset`."""
 
     def register_dataset_cls(cls):
-        if name in DATASET_REGISTRY:
-            msg = "Cannot register duplicate dataset ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, DATASET_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyDataset):
-            raise ValueError(
-                "Dataset ({}: {}) must extend ClassyDataset".format(name, cls.__name__)
-            )
-        if cls.__name__ in DATASET_CLASS_NAMES:
-            msg = (
-                "Cannot register dataset with duplicate class name({})."
-                + "Previously registered at \n{}\n"
-            )
-            raise ValueError(
-                msg.format(cls.__name__, DATASET_CLASS_NAMES_TB[cls.__name__])
-            )
+        if not bypass_checks:
+            if name in DATASET_REGISTRY:
+                msg = "Cannot register duplicate dataset ({}). Already registered at \n{}\n"
+                raise ValueError(msg.format(name, DATASET_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyDataset):
+                raise ValueError(
+                    "Dataset ({}: {}) must extend ClassyDataset".format(
+                        name, cls.__name__
+                    )
+                )
+            if cls.__name__ in DATASET_CLASS_NAMES:
+                msg = (
+                    "Cannot register dataset with duplicate class name({})."
+                    + "Previously registered at \n{}\n"
+                )
+                raise ValueError(
+                    msg.format(cls.__name__, DATASET_CLASS_NAMES_TB[cls.__name__])
+                )
         tb = "".join(traceback.format_stack())
         DATASET_REGISTRY[name] = cls
         DATASET_CLASS_NAMES.add(cls.__name__)

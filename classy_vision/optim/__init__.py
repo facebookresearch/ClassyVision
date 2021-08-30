@@ -55,7 +55,7 @@ def build_optimizer_schedulers(config):
     return param_schedulers
 
 
-def register_optimizer(name):
+def register_optimizer(name, bypass_checks=False):
     """Registers a ClassyOptimizer subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -73,25 +73,24 @@ def register_optimizer(name):
     :func:`build_optimizer`."""
 
     def register_optimizer_cls(cls):
-        if name in OPTIMIZER_REGISTRY:
-            msg = (
-                "Cannot register duplicate optimizer ({}). Already registered at \n{}\n"
-            )
-            raise ValueError(msg.format(name, OPTIMIZER_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyOptimizer):
-            raise ValueError(
-                "Optimizer ({}: {}) must extend ClassyVisionOptimizer".format(
-                    name, cls.__name__
+        if not bypass_checks:
+            if name in OPTIMIZER_REGISTRY:
+                msg = "Cannot register duplicate optimizer ({}). Already registered at \n{}\n"
+                raise ValueError(msg.format(name, OPTIMIZER_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyOptimizer):
+                raise ValueError(
+                    "Optimizer ({}: {}) must extend ClassyVisionOptimizer".format(
+                        name, cls.__name__
+                    )
                 )
-            )
-        if cls.__name__ in OPTIMIZER_CLASS_NAMES:
-            msg = (
-                "Cannot register optimizer with duplicate class name({})."
-                + "Previously registered at \n{}\n"
-            )
-            raise ValueError(
-                msg.format(cls.__name__, OPTIMIZER_CLASS_NAMES_TB[cls.__name__])
-            )
+            if cls.__name__ in OPTIMIZER_CLASS_NAMES:
+                msg = (
+                    "Cannot register optimizer with duplicate class name({})."
+                    + "Previously registered at \n{}\n"
+                )
+                raise ValueError(
+                    msg.format(cls.__name__, OPTIMIZER_CLASS_NAMES_TB[cls.__name__])
+                )
         tb = "".join(traceback.format_stack())
         OPTIMIZER_REGISTRY[name] = cls
         OPTIMIZER_CLASS_NAMES.add(cls.__name__)

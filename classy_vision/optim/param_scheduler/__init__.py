@@ -35,7 +35,7 @@ def build_param_scheduler(config: Dict[str, Any]) -> ParamScheduler:
     return PARAM_SCHEDULER_REGISTRY[config["name"]].from_config(config)
 
 
-def register_param_scheduler(name):
+def register_param_scheduler(name, bypass_checks=False):
     """Registers a :class:`ParamScheduler` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -54,15 +54,16 @@ def register_param_scheduler(name):
     :func:`build_param_scheduler`."""
 
     def register_param_scheduler_cls(cls):
-        if name in PARAM_SCHEDULER_REGISTRY:
-            msg = "Cannot register duplicate param scheduler ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, PARAM_SCHEDULER_REGISTRY_TB[name]))
-        if not issubclass(cls, ParamScheduler):
-            raise ValueError(
-                "Param Scheduler ({}: {}) must extend ParamScheduler".format(
-                    name, cls.__name__
+        if not bypass_checks:
+            if name in PARAM_SCHEDULER_REGISTRY:
+                msg = "Cannot register duplicate param scheduler ({}). Already registered at \n{}\n"
+                raise ValueError(msg.format(name, PARAM_SCHEDULER_REGISTRY_TB[name]))
+            if not issubclass(cls, ParamScheduler):
+                raise ValueError(
+                    "Param Scheduler ({}: {}) must extend ParamScheduler".format(
+                        name, cls.__name__
+                    )
                 )
-            )
         tb = "".join(traceback.format_stack())
         PARAM_SCHEDULER_REGISTRY[name] = cls
         PARAM_SCHEDULER_REGISTRY_TB[name] = tb

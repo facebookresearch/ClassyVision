@@ -34,7 +34,7 @@ def build_meters(config):
     return [build_meter(config) for config in configs]
 
 
-def register_meter(name):
+def register_meter(name, bypass_checks=False):
     """Registers a :class:`ClassyMeter` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -52,16 +52,19 @@ def register_meter(name):
     :func:`build_meter`."""
 
     def register_meter_cls(cls):
-        if name in METER_REGISTRY:
-            msg = "Cannot register duplicate meter ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, METER_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyMeter):
-            raise ValueError(
-                "Meter ({}: {}) must extend \
-                ClassyMeter".format(
-                    name, cls.__name__
+        if not bypass_checks:
+            if name in METER_REGISTRY:
+                msg = (
+                    "Cannot register duplicate meter ({}). Already registered at \n{}\n"
                 )
-            )
+                raise ValueError(msg.format(name, METER_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyMeter):
+                raise ValueError(
+                    "Meter ({}: {}) must extend \
+                    ClassyMeter".format(
+                        name, cls.__name__
+                    )
+                )
         tb = "".join(traceback.format_stack())
         METER_REGISTRY[name] = cls
         METER_REGISTRY_TB[name] = tb

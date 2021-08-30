@@ -67,7 +67,7 @@ def build_loss(config):
     return loss
 
 
-def register_loss(name):
+def register_loss(name, bypass_checks=False):
     """Registers a ClassyLoss subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -85,13 +85,16 @@ def register_loss(name):
     :func:`build_loss`."""
 
     def register_loss_cls(cls):
-        if name in LOSS_REGISTRY:
-            msg = "Cannot register duplicate loss ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, LOSS_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyLoss):
-            raise ValueError(
-                "Loss ({}: {}) must extend ClassyLoss".format(name, cls.__name__)
-            )
+        if not bypass_checks:
+            if name in LOSS_REGISTRY:
+                msg = (
+                    "Cannot register duplicate loss ({}). Already registered at \n{}\n"
+                )
+                raise ValueError(msg.format(name, LOSS_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyLoss):
+                raise ValueError(
+                    "Loss ({}: {}) must extend ClassyLoss".format(name, cls.__name__)
+                )
         tb = "".join(traceback.format_stack())
         LOSS_REGISTRY[name] = cls
         LOSS_CLASS_NAMES.add(cls.__name__)

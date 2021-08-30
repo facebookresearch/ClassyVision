@@ -24,7 +24,7 @@ MODEL_REGISTRY_TB = {}
 MODEL_CLASS_NAMES_TB = {}
 
 
-def register_model(name):
+def register_model(name, bypass_checks=False):
     """Registers a :class:`ClassyModel` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -42,21 +42,24 @@ def register_model(name):
     :func:`build_model`."""
 
     def register_model_cls(cls):
-        if name in MODEL_REGISTRY:
-            msg = "Cannot register duplicate model ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, MODEL_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyModel):
-            raise ValueError(
-                "Model ({}: {}) must extend ClassyModel".format(name, cls.__name__)
-            )
-        if cls.__name__ in MODEL_CLASS_NAMES:
-            msg = (
-                "Cannot register model with duplicate class name({})."
-                + "Previously registered at \n{}\n"
-            )
-            raise ValueError(
-                msg.format(cls.__name__, MODEL_CLASS_NAMES_TB[cls.__name__])
-            )
+        if not bypass_checks:
+            if name in MODEL_REGISTRY:
+                msg = (
+                    "Cannot register duplicate model ({}). Already registered at \n{}\n"
+                )
+                raise ValueError(msg.format(name, MODEL_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyModel):
+                raise ValueError(
+                    "Model ({}: {}) must extend ClassyModel".format(name, cls.__name__)
+                )
+            if cls.__name__ in MODEL_CLASS_NAMES:
+                msg = (
+                    "Cannot register model with duplicate class name({})."
+                    + "Previously registered at \n{}\n"
+                )
+                raise ValueError(
+                    msg.format(cls.__name__, MODEL_CLASS_NAMES_TB[cls.__name__])
+                )
         tb = "".join(traceback.format_stack())
         MODEL_REGISTRY[name] = cls
         MODEL_CLASS_NAMES.add(cls.__name__)

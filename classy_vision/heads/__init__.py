@@ -22,7 +22,7 @@ HEAD_REGISTRY_TB = {}
 HEAD_CLASS_NAMES_TB = {}
 
 
-def register_head(name):
+def register_head(name, bypass_checks=False):
     """Registers a ClassyHead subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -40,21 +40,24 @@ def register_head(name):
     :func:`build_head`."""
 
     def register_head_cls(cls):
-        if name in HEAD_REGISTRY:
-            msg = "Cannot register duplicate head ({}). Already registered at \n{}\n"
-            raise ValueError(msg.format(name, HEAD_REGISTRY_TB[name]))
-        if not issubclass(cls, ClassyHead):
-            raise ValueError(
-                "Head ({}: {}) must extend ClassyHead".format(name, cls.__name__)
-            )
-        if cls.__name__ in HEAD_CLASS_NAMES:
-            msg = (
-                "Cannot register head with duplicate class name({})."
-                + "Previously registered at \n{}\n"
-            )
-            raise ValueError(
-                msg.format(cls.__name__, HEAD_CLASS_NAMES_TB[cls.__name__])
-            )
+        if not bypass_checks:
+            if name in HEAD_REGISTRY:
+                msg = (
+                    "Cannot register duplicate head ({}). Already registered at \n{}\n"
+                )
+                raise ValueError(msg.format(name, HEAD_REGISTRY_TB[name]))
+            if not issubclass(cls, ClassyHead):
+                raise ValueError(
+                    "Head ({}: {}) must extend ClassyHead".format(name, cls.__name__)
+                )
+            if cls.__name__ in HEAD_CLASS_NAMES:
+                msg = (
+                    "Cannot register head with duplicate class name({})."
+                    + "Previously registered at \n{}\n"
+                )
+                raise ValueError(
+                    msg.format(cls.__name__, HEAD_CLASS_NAMES_TB[cls.__name__])
+                )
         tb = "".join(traceback.format_stack())
         HEAD_REGISTRY[name] = cls
         HEAD_CLASS_NAMES.add(cls.__name__)

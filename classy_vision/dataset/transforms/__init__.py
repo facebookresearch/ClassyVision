@@ -80,7 +80,7 @@ def build_transforms(transforms_config: List[Dict[str, Any]]) -> Callable:
     return transforms.Compose(transform_list)
 
 
-def register_transform(name: str):
+def register_transform(name: str, bypass_checks=False):
     """Registers a :class:`ClassyTransform` subclass.
 
     This decorator allows Classy Vision to instantiate a subclass of
@@ -98,17 +98,16 @@ def register_transform(name: str):
     :func:`build_transform`."""
 
     def register_transform_cls(cls: Callable[..., Callable]):
-        if name in TRANSFORM_REGISTRY:
-            msg = (
-                "Cannot register duplicate transform ({}). Already registered at \n{}\n"
-            )
-            raise ValueError(msg.format(name, TRANSFORM_REGISTRY_TB[name]))
-        if hasattr(transforms, name) or hasattr(transforms_video, name):
-            raise ValueError(
-                "{} has existed in torchvision.transforms, Please change the name!".format(
-                    name
+        if not bypass_checks:
+            if name in TRANSFORM_REGISTRY:
+                msg = "Cannot register duplicate transform ({}). Already registered at \n{}\n"
+                raise ValueError(msg.format(name, TRANSFORM_REGISTRY_TB[name]))
+            if hasattr(transforms, name) or hasattr(transforms_video, name):
+                raise ValueError(
+                    "{} has existed in torchvision.transforms, Please change the name!".format(
+                        name
+                    )
                 )
-            )
         TRANSFORM_REGISTRY[name] = cls
         tb = "".join(traceback.format_stack())
         TRANSFORM_REGISTRY_TB[name] = tb
