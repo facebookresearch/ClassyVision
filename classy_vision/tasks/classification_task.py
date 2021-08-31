@@ -1129,7 +1129,7 @@ class ClassificationTask(ClassyTask):
         with ctx_mgr_model, ctx_mgr_loss:
             # Forward pass
             with torch.enable_grad(), torch_amp_context:
-                output = self.model(sample["input"])
+                output = self.compute_model(sample)
 
                 local_loss = self.compute_loss(output, sample)
                 loss = local_loss.detach().clone()
@@ -1150,6 +1150,9 @@ class ClassificationTask(ClassyTask):
             sample=sample,
             step_data={"sample_fetch_time": timer.elapsed_time},
         )
+
+    def compute_model(self, sample):
+        return self.model(sample["input"])
 
     def compute_loss(self, model_output, sample):
         return self.loss(model_output, sample["target"])
