@@ -124,6 +124,9 @@ class ClassyDataset:
         return self.transform(sample)
 
     def __len__(self):
+        if self.dataset is None:
+            assert self.num_samples
+            return self.num_samples
         assert self.num_samples is None or self.num_samples <= len(
             self.dataset
         ), "Num samples mus be less than length of base dataset"
