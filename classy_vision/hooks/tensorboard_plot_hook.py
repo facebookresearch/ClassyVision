@@ -43,7 +43,7 @@ class TensorboardPlotHook(ClassyHook):
         Args:
             tb_writer: `Tensorboard SummaryWriter <https://tensorboardx.
             readthedocs.io/en/latest/tensorboard.html#tensorboardX.
-            SummaryWriter>`_ instance or None (only on non-master replicas)
+            SummaryWriter>`_ instance or None (only on secondary replicas)
         """
         super().__init__()
         if not tb_available:

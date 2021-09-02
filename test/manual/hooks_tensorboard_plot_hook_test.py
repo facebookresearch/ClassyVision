@@ -49,11 +49,11 @@ class TestTensorboardPlotHook(HookTestBase):
         Tests that the tensorboard writer writes the correct scalars to SummaryWriter
         iff is_primary() is True.
         """
-        for phase_idx, master in product([0, 1, 2], [True, False]):
+        for phase_idx, primary in product([0, 1, 2], [True, False]):
             train, phase_type = (
                 (True, "train") if phase_idx % 2 == 0 else (False, "test")
             )
-            mock_is_primary_func.return_value = master
+            mock_is_primary_func.return_value = primary
 
             # set up the task and state
             config = get_test_task_config()
@@ -93,7 +93,7 @@ class TestTensorboardPlotHook(HookTestBase):
 
             tensorboard_plot_hook.on_phase_end(task)
 
-            if master:
+            if primary:
                 # add_scalar() should have been called with the right scalars
                 if train:
                     learning_rate_key = f"Learning Rate/{phase_type}"

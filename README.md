@@ -1,12 +1,12 @@
 <p align="center"><img width="50%" src="website/static/img/cv-logo.png" /></p>
 <p align="center">
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/LICENSE">
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/main/LICENSE">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license" />
  </a>
  <a href="https://circleci.com/gh/facebookresearch/ClassyVision">
   <img src="https://circleci.com/gh/facebookresearch/ClassyVision.svg?style=shield&circle-token=feeafa057f8d3f6c0c15dfd74db8dd596d9684c8" alt="CircleCI" />
  </a>
- <a href="https://github.com/facebookresearch/ClassyVision/blob/master/CONTRIBUTING.md">
+ <a href="https://github.com/facebookresearch/ClassyVision/blob/main/CONTRIBUTING.md">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
  </a>
 </p>
@@ -14,7 +14,7 @@
 ## What's New:
 
 - March 2021: Added [RegNetZ models](https://arxiv.org/abs/2103.06877)
-- November 2020: [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) now available, with training [recipes](https://github.com/facebookresearch/ClassyVision/tree/master/examples/vit)!
+- November 2020: [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) now available, with training [recipes](https://github.com/facebookresearch/ClassyVision/tree/main/examples/vit)!
 
 <details>
  <summary><b>
@@ -22,7 +22,7 @@
  </b></summary>
 
 #### New Features
-- Release [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) model implementation, with [recipes](https://github.com/facebookresearch/ClassyVision/tree/master/examples/vit)(#646)
+- Release [Vision Transformers](https://openreview.net/forum?id=YicbFdNTTy) model implementation, with [recipes](https://github.com/facebookresearch/ClassyVision/tree/main/examples/vit)(#646)
 - Implemented gradient clipping (#643)
 - Implemented gradient accumulation (#644)
 - Added support for [AdamW](https://arxiv.org/abs/1711.05101) (#636)
@@ -119,7 +119,7 @@ To install Classy Vision via conda (only works on linux):
 conda install -c conda-forge classy_vision
 ```
 
-#### Manual install of latest commit on master
+#### Manual install of latest commit on main
 
 Alternatively you can do a manual install.
 

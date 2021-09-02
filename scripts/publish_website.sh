@@ -19,11 +19,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORK_DIR=$(mktemp -d)
 cd "${WORK_DIR}" || exit
 
-# Clone both master & gh-pages branches                                                                                                                                                                          
-git clone git@github.com:facebookresearch/ClassyVision.git ClassyVision-master
+# Clone both main & gh-pages branches                                                                                                                                                                          
+git clone git@github.com:facebookresearch/ClassyVision.git ClassyVision-main
 git clone --branch gh-pages git@github.com:facebookresearch/ClassyVision.git ClassyVision-gh-pages
 
-cd ClassyVision-master/website || exit
+cd ClassyVision-main/website || exit
 
 # Build site, tagged with "latest" version; baseUrl set to /versions/latest/                                                                                                                                   
 yarn
@@ -36,7 +36,7 @@ cd "${WORK_DIR}" || exit
 rm -rf ClassyVision-gh-pages/*
 touch ClassyVision-gh-pages/CNAME
 echo "classyvision.ai" > ClassyVision-gh-pages/CNAME
-mv ClassyVision-master/website/build/ClassyVision/* ClassyVision-gh-pages/
+mv ClassyVision-main/website/build/ClassyVision/* ClassyVision-gh-pages/
 
 cd ClassyVision-gh-pages || exit
 git add .

@@ -227,7 +227,7 @@ def get_checkpoint_dict(
 def load_and_broadcast_checkpoint(
     checkpoint_path: str, device: torch.device = CPU_DEVICE
 ) -> Optional[Dict]:
-    """Loads a checkpoint on master and broadcasts it to all replicas.
+    """Loads a checkpoint on primary and broadcasts it to all replicas.
 
     This is a collective operation which needs to be run in sync on all replicas.
 
