@@ -33,20 +33,22 @@ class DatasetTransformsMixupTest(unittest.TestCase):
         num_classes = 3
 
         for mode in ["batch", "pair", "elem"]:
-            cutmix_transform = MixupTransform(
-                mixup_alpha,
-                num_classes,
-                cutmix_alpha=cutmix_alpha,
-                mode=mode,
-            )
-            sample = {
-                "input": torch.rand(4, 3, 224, 224, dtype=torch.float32),
-                "target": torch.as_tensor([0, 1, 2, 2], dtype=torch.int32),
-            }
-            sample_cutmix = cutmix_transform(sample)
-            self.assertTrue(sample["input"].shape == sample_cutmix["input"].shape)
-            self.assertTrue(sample_cutmix["target"].shape[0] == 4)
-            self.assertTrue(sample_cutmix["target"].shape[1] == 3)
+            for minmax in [None, (0.3, 0.7)]:
+                cutmix_transform = MixupTransform(
+                    mixup_alpha,
+                    num_classes,
+                    cutmix_alpha=cutmix_alpha,
+                    mode=mode,
+                    cutmix_minmax=minmax,
+                )
+                sample = {
+                    "input": torch.rand(4, 3, 224, 224, dtype=torch.float32),
+                    "target": torch.as_tensor([0, 1, 2, 2], dtype=torch.int32),
+                }
+                sample_cutmix = cutmix_transform(sample)
+                self.assertTrue(sample["input"].shape == sample_cutmix["input"].shape)
+                self.assertTrue(sample_cutmix["target"].shape[0] == 4)
+                self.assertTrue(sample_cutmix["target"].shape[1] == 3)
 
     def test_mixup_cutmix_transform_single_label_image_batch(self):
         mixup_alpha = 0.3
