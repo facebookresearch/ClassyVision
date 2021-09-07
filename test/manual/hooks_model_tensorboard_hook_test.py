@@ -39,8 +39,8 @@ class TestModelTensorboardHook(HookTestBase):
         task = get_test_classy_task()
         task.prepare()
 
-        for master in [False, True]:
-            mock_is_primary_func.return_value = master
+        for primary in [False, True]:
+            mock_is_primary_func.return_value = primary
             model_configs = get_test_model_configs()
 
             for model_config in model_configs:
@@ -52,7 +52,7 @@ class TestModelTensorboardHook(HookTestBase):
 
                 model_tensorboard_hook.on_start(task)
 
-                if master:
+                if primary:
                     # SummaryWriter should have been init-ed with the correct
                     # add_graph should be called once with model as the first arg
                     mock_summary_writer.add_graph.assert_called_once()

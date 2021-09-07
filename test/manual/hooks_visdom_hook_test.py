@@ -57,8 +57,8 @@ class TestVisdomHook(HookTestBase):
         visdom_server = "localhost"
         visdom_port = 8097
 
-        for master, visdom_conn in product([False, True], [False, True]):
-            mock_is_primary.return_value = master
+        for primary, visdom_conn in product([False, True], [False, True]):
+            mock_is_primary.return_value = primary
             mock_visdom.check_connection.return_value = visdom_conn
 
             # create a visdom hook
@@ -127,7 +127,7 @@ class TestVisdomHook(HookTestBase):
                     places=4,
                 )
 
-                if master and not train and visdom_conn:
+                if primary and not train and visdom_conn:
                     # visdom.line() should be called once
                     mock_visdom.line.assert_called_once()
                     mock_visdom.line.reset_mock()

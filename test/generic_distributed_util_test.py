@@ -80,7 +80,7 @@ class TestDistributedUtil(unittest.TestCase):
         for use_disk, obj in product([True, False], self._get_test_objects()):
             filename = tempfile.NamedTemporaryFile(delete=True).name
             inputs = [None] * world_size
-            inputs[0] = obj  # only the master worker has the object
+            inputs[0] = obj  # only the primary worker has the object
 
             calls = [
                 {
