@@ -19,7 +19,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORK_DIR=$(mktemp -d)
 cd "${WORK_DIR}" || exit
 
-# Clone both main & gh-pages branches                                                                                                                                                                          
+# Clone both main & gh-pages branches
 git clone git@github.com:facebookresearch/ClassyVision.git ClassyVision-main
 git clone --branch gh-pages git@github.com:facebookresearch/ClassyVision.git ClassyVision-gh-pages
 
