@@ -8,6 +8,7 @@ import math
 from collections import abc
 from typing import Any, Dict, Optional, Tuple
 
+import numpy as np
 import torch
 from torch.distributions.beta import Beta
 
@@ -85,13 +86,18 @@ def rand_bbox_minmax(img_shape, minmax, count=1):
     """
     assert len(minmax) == 2
     img_h, img_w = img_shape[-2:]
-    cut_h = torch.randint(int(img_h * minmax[0]), int(img_h * minmax[1]), (count,))
-    cut_w = torch.randint(int(img_w * minmax[0]), int(img_w * minmax[1]), (count,))
-    yl = torch.randint(0, img_h - cut_h, (count,))
-    xl = torch.randint(0, img_w - cut_w, (count,))
+    cut_h = np.random.randint(
+        int(img_h * minmax[0]), int(img_h * minmax[1]), size=count
+    )
+    cut_w = np.random.randint(
+        int(img_w * minmax[0]), int(img_w * minmax[1]), size=count
+    )
+    # torch's randint does not accept a vector of max values
+    yl = np.random.randint(0, img_h - cut_h, size=count)
+    xl = np.random.randint(0, img_w - cut_w, size=count)
     yu = yl + cut_h
     xu = xl + cut_w
-    return yl, yu, xl, xu
+    return [torch.from_numpy(a) for a in [yl, yu, xl, xu]]
 
 
 def cutmix_bbox_and_lam(img_shape, lam, ratio_minmax=None, correct_lam=True, count=1):
