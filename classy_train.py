@@ -130,6 +130,7 @@ def configure_hooks(args, config):
     if not args.skip_tensorboard:
         try:
             from torch.utils.tensorboard import SummaryWriter
+    
             os.makedirs(Path(base_folder) / "tensorboard", exist_ok=True)
             tb_writer = SummaryWriter(log_dir=Path(base_folder) / "tensorboard")
             hooks.append(TensorboardPlotHook(tb_writer))
