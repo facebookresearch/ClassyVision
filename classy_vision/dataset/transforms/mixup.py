@@ -263,7 +263,8 @@ class MixupTransform:
                     lam_batch[i] = lam
                 else:
                     x[i] = x[i] * lam + x_orig[j] * (1 - lam)
-        return torch.tensor(lam_batch, device=x.device, dtype=x.dtype).unsqueeze(1)
+
+        return lam_batch.to(x).unsqueeze(1)
 
     def _mix_pair(self, x):
         batch_size = len(x)
@@ -288,7 +289,7 @@ class MixupTransform:
                     x[j] = x[j] * lam + x_orig[i] * (1 - lam)
 
         lam_batch = torch.cat((lam_batch, lam_batch.flip(0)))
-        return torch.tensor(lam_batch, device=x.device, dtype=x.dtype).unsqueeze(1)
+        return lam_batch.to(x).unsqueeze(1)
 
     def _mix_batch(self, x):
         lam, use_cutmix = self._params_per_batch()
