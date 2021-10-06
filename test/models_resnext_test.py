@@ -88,7 +88,12 @@ def _find_block_full_path(model, block_name):
 
 
 def _post_training_quantize(model, input):
-    from torch.quantization.quantize_fx import convert_fx, prepare_fx
+    if get_torch_version() >= [1, 10]:
+        import torch.ao.quantization as tq
+        from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
+    else:
+        import torch.quantization as tq
+        from torch.quantization.quantize_fx import convert_fx, prepare_fx
 
     model.eval()
     heads = model.get_heads()
@@ -105,18 +110,14 @@ def _post_training_quantize(model, input):
     prepare_custom_config_dict["standalone_module_name"] = [
         (
             head,
-            {"": torch.quantization.default_qconfig},
+            {"": tq.default_qconfig},
             {"input_quantized_idxs": [0], "output_quantized_idxs": []},
         )
         for head in head_path_from_blocks
     ]
-    model.initial_block = prepare_fx(
-        model.initial_block, {"": torch.quantization.default_qconfig}
-    )
+    model.initial_block = prepare_fx(model.initial_block, {"": tq.default_qconfig})
     model.blocks = prepare_fx(
-        model.blocks,
-        {"": torch.quantization.default_qconfig},
-        prepare_custom_config_dict,
+        model.blocks, {"": tq.default_qconfig}, prepare_custom_config_dict
     )
     model.set_heads(heads)
 
