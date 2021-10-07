@@ -30,14 +30,19 @@ class TestMLPModel(unittest.TestCase):
         "FX Graph Modee Quantization is only availablee from 1.8",
     )
     def test_quantize_model(self):
-        from torch.quantization.quantize_fx import convert_fx, prepare_fx
+        if get_torch_version() >= [1, 10]:
+            import torch.ao.quantization as tq
+            from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
+        else:
+            import torch.quantization as tq
+            from torch.quantization.quantize_fx import convert_fx, prepare_fx
 
         config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
         model = build_model(config)
         self.assertTrue(isinstance(model, ClassyModel))
 
         model.eval()
-        model.mlp = prepare_fx(model.mlp, {"": torch.quantization.default_qconfig})
+        model.mlp = prepare_fx(model.mlp, {"": tq.default_qconfig})
         model.mlp = convert_fx(model.mlp)
 
         tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)

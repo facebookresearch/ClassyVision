@@ -90,7 +90,12 @@ class TestDensenet(unittest.TestCase):
         compare_model_state(self, state, new_state, check_heads=True)
 
     def _test_quantize_model(self, model_config):
-        from torch.quantization.quantize_fx import convert_fx, prepare_fx
+        if get_torch_version() >= [1, 10]:
+            import torch.ao.quantization as tq
+            from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
+        else:
+            import torch.quantization as tq
+            from torch.quantization.quantize_fx import convert_fx, prepare_fx
 
         # quantize model
         model = build_model(model_config)
@@ -113,17 +118,15 @@ class TestDensenet(unittest.TestCase):
         prepare_custom_config_dict["standalone_module_name"] = [
             (
                 head,
-                {"": torch.quantization.default_qconfig},
+                {"": tq.default_qconfig},
                 {"input_quantized_idxs": [0], "output_quantized_idxs": []},
             )
             for head in head_path_from_blocks
         ]
-        model.initial_block = prepare_fx(
-            model.initial_block, {"": torch.quantization.default_qconfig}
-        )
+        model.initial_block = prepare_fx(model.initial_block, {"": tq.default_qconfig})
         model.features = prepare_fx(
             model.features,
-            {"": torch.quantization.default_qconfig},
+            {"": tq.default_qconfig},
             prepare_custom_config_dict,
         )
         model.set_heads(heads)
