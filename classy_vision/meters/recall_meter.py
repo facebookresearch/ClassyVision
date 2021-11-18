@@ -139,7 +139,9 @@ class RecallAtKMeter(ClassyMeter):
         # Convert target to 0/1 encoding if isn't
         target = maybe_convert_to_one_hot(target, model_output)
 
-        _, pred_classes = model_output.topk(
+        # If Pytorch AMP is being used, model outputs are probably fp16
+        # Since .topk() is not compatible with fp16, we promote the model outputs to full precision
+        _, pred_classes = model_output.float().topk(
             max(self._topk), dim=1, largest=True, sorted=True
         )
         pred_mask_tensor = torch.zeros(target.size())
