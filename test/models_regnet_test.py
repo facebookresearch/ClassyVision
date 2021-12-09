@@ -171,7 +171,7 @@ class TestRegNetModelBuild(unittest.TestCase):
         """
         if get_torch_version() < [1, 8]:
             self.skipTest("FX Graph Modee Quantization is only availablee from 1.8")
-        if get_torch_version() >= [1, 10]:
+        if get_torch_version() >= [1, 11]:
             import torch.ao.quantization as tq
             from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
         else:

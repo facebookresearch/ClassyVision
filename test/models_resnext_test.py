@@ -88,7 +88,7 @@ def _find_block_full_path(model, block_name):
 
 
 def _post_training_quantize(model, input):
-    if get_torch_version() >= [1, 10]:
+    if get_torch_version() >= [1, 11]:
         import torch.ao.quantization as tq
         from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
     else:

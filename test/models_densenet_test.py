@@ -90,7 +90,7 @@ class TestDensenet(unittest.TestCase):
         compare_model_state(self, state, new_state, check_heads=True)
 
     def _test_quantize_model(self, model_config):
-        if get_torch_version() >= [1, 10]:
+        if get_torch_version() >= [1, 11]:
             import torch.ao.quantization as tq
             from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
         else:
