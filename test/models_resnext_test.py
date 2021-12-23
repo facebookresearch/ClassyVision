@@ -112,6 +112,7 @@ def _post_training_quantize(model, input):
             head,
             {"": tq.default_qconfig},
             {"input_quantized_idxs": [0], "output_quantized_idxs": []},
+            None,
         )
         for head in head_path_from_blocks
     ]
