@@ -134,7 +134,7 @@ class VideoClipResize(ClassyTransform):
         """
         # clip size: C x T x H x W
         if not min(clip.size()[2], clip.size()[3]) == self.size:
-            new_h, new_w = _get_rescaled_size(self.size, clip.size()[2], clip.size()[3])
+            new_h, new_w = _get_rescaled_size(self.size, *clip.size()[2:4:1])
             clip = torch.nn.functional.interpolate(
                 clip, size=(new_h, new_w), mode=self.interpolation_mode
             )
