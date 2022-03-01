@@ -8,6 +8,7 @@ import unittest
 
 import torch
 from classy_vision.losses import build_loss
+from classy_vision.generic.util import get_torch_version
 
 
 class CriterionsTest(unittest.TestCase):
@@ -29,7 +30,10 @@ class CriterionsTest(unittest.TestCase):
 
         # verify ignore index works
         if "ignore_index" in config:
-            self.assertTrue(torch.isnan(crit(output, torch.tensor([-1]))).item())
+            if get_torch_version() < [1, 11]:
+                self.assertAlmostEqual(crit(output, torch.tensor([-1])).item(), 0.0)
+            else:
+                self.assertTrue(torch.isnan(crit(output, torch.tensor([-1]))).item())
 
     def test_cross_entropy_loss(self):
         """
