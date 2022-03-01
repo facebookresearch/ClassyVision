@@ -29,7 +29,7 @@ class CriterionsTest(unittest.TestCase):
 
         # verify ignore index works
         if "ignore_index" in config:
-            self.assertAlmostEqual(crit(output, torch.tensor([-1])).item(), 0.0)
+            self.assertTrue(torch.isnan(crit(output, torch.tensor([-1]))).item())
 
     def test_cross_entropy_loss(self):
         """
