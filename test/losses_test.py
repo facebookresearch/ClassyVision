@@ -7,8 +7,8 @@
 import unittest
 
 import torch
-from classy_vision.losses import build_loss
 from classy_vision.generic.util import get_torch_version
+from classy_vision.losses import build_loss
 
 
 class CriterionsTest(unittest.TestCase):
