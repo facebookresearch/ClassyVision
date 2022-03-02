@@ -137,7 +137,6 @@ import_all_modules(FILE_ROOT, "classy_vision.dataset.transforms")
 from .lighting_transform import LightingTransform  # isort:skip
 from .util import ApplyTransformToKey  # isort:skip
 from .util import ImagenetAugmentTransform  # isort:skip
-from .util import ImagenetAugmentTransform  # isort:skip
 from .util import ImagenetNoAugmentTransform  # isort:skip
 from .util import GenericImageTransform  # isort:skip
 from .util import TupleToMapTransform  # isort:skip
