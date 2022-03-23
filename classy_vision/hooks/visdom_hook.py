@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import collections
+import collections.abc
 import logging
 from typing import Any, Dict
 
@@ -86,7 +86,7 @@ class VisdomHook(ClassyHook):
 
         # Calculate meters
         for meter in task.meters:
-            if isinstance(meter.value, collections.MutableMapping):
+            if isinstance(meter.value, collections.abc.MutableMapping):
                 flattened_meters_dict = flatten_dict(meter.value, prefix=meter.name)
                 for k, v in flattened_meters_dict.items():
                     metric_key = phase_type + "_" + k
