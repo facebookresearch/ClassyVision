@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import collections
+import collections.abc
 import contextlib
 import json
 import logging
@@ -367,7 +367,7 @@ def flatten_dict(value_dict: Dict, prefix="", sep="_") -> Dict:
     items = []
     for k, v in value_dict.items():
         key = prefix + sep + k if prefix else k
-        if isinstance(v, collections.MutableMapping):
+        if isinstance(v, collections.abc.MutableMapping):
             items.extend(flatten_dict(value_dict=v, prefix=key, sep=sep).items())
         else:
             items.append((key, v))
