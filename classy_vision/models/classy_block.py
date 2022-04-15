@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
+
 import torch
 import torch.nn as nn
 
@@ -19,11 +21,15 @@ class ClassyBlock(nn.Module):
         self.name = name
         self.output = torch.zeros(0)
         self._module = module
+        self._is_output_stateless = "STATELESS_CLASSY_OUTPUT" in os.environ
 
     def wrapped_module(self):
         return self._module
 
     def forward(self, input):
-        output = self._module(input)
-        self.output = output
-        return output
+        if self._is_output_stateless:
+            return self._module(input)
+        else:
+            output = self._module(input)
+            self.output = output
+            return output
