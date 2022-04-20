@@ -88,6 +88,22 @@ class Footer extends React.Component {
           {this.props.config.copyright && (
             <span>{this.props.config.copyright}</span>
           )}{" "}
+          <br/>
+          Legal:
+          &nbsp;
+          <a
+            href="https://opensource.facebook.com/legal/privacy/"
+            target="_blank"
+            rel="noreferrer noopener">
+            Privacy
+          </a>
+          &nbsp;
+          <a
+            href="https://opensource.facebook.com/legal/terms/"
+            target="_blank"
+            rel="noreferrer noopener">
+            Terms
+          </a>
         </section>
         {process.env.NODE_ENV !== 'development' &&
           <script dangerouslySetInnerHTML={{__html:`
@@ -109,3 +125,4 @@ class Footer extends React.Component {
 }
 
 module.exports = Footer;
+
