@@ -31,9 +31,10 @@ class ClassyBlock(nn.Module):
         return self._module
 
     def forward(self, input):
-        if self._is_output_stateless:
-            return self._module(input)
-        else:
-            output = self._module(input)
-            self.output = output
-            return output
+        if hasattr(self, "_is_output_stateless"):
+            if self._is_output_stateless:
+                return self._module(input)
+
+        output = self._module(input)
+        self.output = output
+        return output
