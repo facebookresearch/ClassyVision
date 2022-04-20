@@ -109,3 +109,20 @@ class Footer extends React.Component {
 }
 
 module.exports = Footer;
+
+<div className="footerSection">
+  <h5>Legal</h5>
+  <a
+    href="https://opensource.facebook.com/legal/privacy/"
+    target="_blank"
+    rel="noreferrer noopener">
+    Privacy
+  </a>
+  <a
+    href="https://opensource.facebook.com/legal/terms/"
+    target="_blank"
+    rel="noreferrer noopener">
+    Terms
+  </a>
+</div>
+
