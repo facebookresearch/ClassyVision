@@ -18,42 +18,37 @@
 # In[ ]:
 
 
-get_ipython().system(' git clone https://github.com/pytorch/elastic.git')
-get_ipython().system(' pip install torchelastic')
-
+! git clone https://github.com/pytorch/elastic.git
+! pip install torchelastic
 
 # Download and install Classy Vision:
 
 # In[ ]:
 
 
-get_ipython().system(' git clone https://github.com/facebookresearch/ClassyVision.git')
-get_ipython().system(' pip install classy_vision')
-
+! git clone https://github.com/facebookresearch/ClassyVision.git
+! pip install classy_vision
 
 # If needed, install Docker:
 
 # In[ ]:
 
 
-get_ipython().system(' sudo apt install docker-compose')
-
+! sudo apt install docker-compose
 
 # To run torchelastic manually you'll also need etcd:
 
 # In[ ]:
 
 
-get_ipython().system(' sudo apt install etcd-server')
-
+! sudo apt install etcd-server
 
 # Set this environment variable to your current `torchelastic` version. This tutorial only works for version >= 0.2.0:
 
 # In[ ]:
 
 
-get_ipython().system(' export VERSION=<torchelastic version>')
-
+! export VERSION=<torchelastic version>
 
 # ## 1. Single node, multi-GPU training
 # 
@@ -70,10 +65,9 @@ $ docker run --shm-size=2g --gpus=all torchelastic/examples:$VERSION
            --standalone
            --nnodes=1
            --nproc_per_node=$NUM_CUDA_DEVICES
-           workspace(/classy_vision/classy_train.py)
+           /workspace/classy_vision/classy_train.py
            --device=gpu
            --config_file /workspace/classy_vision/configs/template_config.json
-
 
 # If you don't have GPUs available, simply drop the `--gpus=all` flag. This will download and launch our example Docker container and start training on the current machine using torchelastic and Classy Vision. This is fine as a sanity check, but elasticity is really intended to help with training on multiple nodes. The next section will walk you through that.
 
@@ -85,22 +79,19 @@ $ docker run --shm-size=2g --gpus=all torchelastic/examples:$VERSION
 # In[ ]:
 
 
-get_ipython().system(' classy-project my-project')
-
+! classy-project my-project
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('cd', 'my-project')
-
+%cd my-project
 
 # Launch the etcd server:
 
 # In[ ]:
 
 
-get_ipython().system(' etcd --enable-v2 --listen-client-urls http://0.0.0.0:2379,http://127.0.0.1:4001 --advertise-client-urls http://127.0.0.1:2379')
-
+! etcd --enable-v2 --listen-client-urls http://0.0.0.0:2379,http://127.0.0.1:4001 --advertise-client-urls http://127.0.0.1:2379
 
 # This might fail if you alread have an etcd server running. torchelastic requires etcd v2 in order to work properly, so make sure to kill any etcd instances that you have running already.
 
@@ -109,8 +100,8 @@ get_ipython().system(' etcd --enable-v2 --listen-client-urls http://0.0.0.0:2379
 # In[ ]:
 
 
-get_ipython().system(' python -m torchelastic.distributed.launch --nproc_per_node=$NUM_CUDA_DEVICES --rdzv_endpoint 127.0.0.1:2379     ./classy_train.py --config configs/template_config.json --distributed_backend ddp')
-
+! python -m torchelastic.distributed.launch --nproc_per_node=$NUM_CUDA_DEVICES --rdzv_endpoint 127.0.0.1:2379 \
+    ./classy_train.py --config configs/template_config.json --distributed_backend ddp
 
 # That's it! The training script should start running with torchelastic enabled.
 # 
@@ -132,14 +123,12 @@ get_ipython().system(' python -m torchelastic.distributed.launch --nproc_per_nod
 cd $CLASSY_VISION_HOME/examples/elastic
 classy-project my_project
 
-
 # This will setup a Classy Vision project within the examples folder, which our containers will use as the training script. Now launch the containers:
 
 # In[ ]:
 
 
 docker-compose up
-
 
 # That's it! This will launch two containers: one running the etcd server, and another doing training. You should see the output from both the etcd server and from the training script in your terminal.
 

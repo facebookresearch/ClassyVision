@@ -31,12 +31,12 @@ class MyDataset(torch.utils.data.Dataset):
         self.length = 100
         
     def __getitem__(self, idx):
-        assert idx >= 0 and idx < self.length,             "Provided index {} must be in range [0, {}).".format(idx, self.length)
+        assert idx >= 0 and idx < self.length, \
+            "Provided index {} must be in range [0, {}).".format(idx, self.length)
         return torch.rand(3, 100, 100)
     
     def __len__(self):
         return self.length
-
 
 # Now for most training tasks we want to be able to configure the batchsize on the fly, transform samples, shuffle the dataset, maybe limit the number of samples to shorten a training run, and then construct an iterator for the training loop. ClassyDataset is a simple wrapper that provides this functionality.   
 
@@ -49,7 +49,6 @@ class MyClassyDataset(ClassyDataset):
     def __init__(self, batchsize_per_replica, shuffle, transform, num_samples):
         dataset = MyDataset()
         super().__init__(dataset, batchsize_per_replica, shuffle, transform, num_samples)
-
 
 # It's that easy! Later in the tutorial we will see how to use the iterator, but before moving on, let's talk about what each of these arguments does.
 # - __batchsize_per_replica__: the batchsize per trainer (so if you have 8 GPUs with 1 trainer processes and a batchsize_per_replica of 32, then your batchsize for single update is 8 * 32 = 256).
@@ -74,7 +73,6 @@ my_dataset = MyClassyDataset(
 # Note, the "train" here is the phase type.
 # It tells the task to set the model in train mode / do a backwards pass, etc, using our new dataset
 my_task = ClassificationTask().set_dataset(my_dataset, "train")
-
 
 # For more details on training a model, please see our [Getting started](https://classyvision.ai/tutorials/getting_started) tutorial.
 
@@ -107,7 +105,6 @@ class MyClassyDataset(ClassyDataset):
             num_samples=config["num_samples"],
         )
 
-
 # Now we can start using this dataset in our configurations. The string argument passed to the register_dataset is a unique identifier for this model (if you try to register two models with the same name, it will throw an error):
 # 
 
@@ -129,7 +126,6 @@ assert isinstance(my_dataset, MyClassyDataset)
 
 sample = my_dataset[0]
 print(sample.size())
-
 
 # ## 3. Iterate over the samples contained in a dataset
 # 
@@ -161,7 +157,7 @@ assert isinstance(my_dataset, MyClassyDataset)
 iterator = my_dataset.iterator(
     shuffle_seed=0,
     epoch=0,
-    num_workers=0,  # 0 indicates to do dataloading on the master process
+    num_workers=0,  # 0 indicates to do dataloading on the primary process
     pin_memory=False,
     multiprocessing_context=None,
 )
@@ -172,7 +168,6 @@ for sample in iter(iterator):
     # Do stuff with sample...
     # Note that size now has an extra dimension representing the batchsize
     assert sample.size() == torch.Size([10, 3, 100, 100])
-
 
 # You can also provide a custom iterator function if you would like to return a custom iterator or a custom sampler. Please see the ClassyDataset code for more details.
 
@@ -214,7 +209,6 @@ decl_dataset = SyntheticImageDataset(
 
 # FAILS!!!!
 # decl_dataset[0]
-
 
 # This fails! Why?
 # 
@@ -263,7 +257,6 @@ decl_dataset = SyntheticImageDataset(
 # Success!!!!
 decl_dataset[0]
 
-
 # Now let's see how to do the same thing via a config.
 
 # In[ ]:
@@ -300,7 +293,6 @@ config_dataset = build_dataset(config)
 
 # Sample should be the same as that provided by the decl_dataset
 assert torch.allclose(config_dataset[0]["input"], decl_dataset[0]["input"])
-
 
 # #### Transform example for a torchvision dataset
 # Torchvision has a different sample format using tuples for images: 
@@ -359,7 +351,6 @@ config_raw_transform = build_transforms(transform_config)
 
 # These transforms are all functionally the same
 
-
 # ## 5. Create a Classy Imagenet
 # 
 # Now, to complete this tutorial, we show our code for creating an ImageNet dataset in classy vision using the pre-existing torchvision dataset. Code very similar to this (+ some typing and helper functions) is in the datasets folder of the base Classy Vision repository.
@@ -411,7 +402,6 @@ class ExampleImageNetDataset(ClassyDataset):
             root=root,
             download=download,
         )
-
 
 # ## Conclusion
 # In this tutorial we have seen how to create a custom dataset using ClassyDataset, how to integrate this dataset with the configuration system, how to iterate over samples / use multiple workers, how to use transforms in the configuration system and finally we showed an example of how to use a torchvision dataset in Classy Vision. 
