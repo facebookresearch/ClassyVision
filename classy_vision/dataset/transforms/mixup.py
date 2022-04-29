@@ -21,8 +21,8 @@
 # Code modified from
 # https://github.com/rwightman/pytorch-image-models/blob/master/timm/data/mixup.py
 
+import collections.abc as abc
 import math
-from collections import abc
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
