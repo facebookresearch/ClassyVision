@@ -373,10 +373,10 @@ class ResNeXt3D(ResNeXt3DBase):
         )
 
         num_stages = len(num_blocks)
-        out_planes = [stage_planes * 2 ** i for i in range(num_stages)]
+        out_planes = [stage_planes * 2**i for i in range(num_stages)]
         in_planes = [stem_planes] + out_planes[:-1]
         inner_planes = [
-            num_groups * width_per_group * 2 ** i for i in range(num_stages)
+            num_groups * width_per_group * 2**i for i in range(num_stages)
         ]
 
         stages = []
