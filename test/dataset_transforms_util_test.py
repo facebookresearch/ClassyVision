@@ -17,10 +17,10 @@ from classy_vision.dataset.core.random_image_datasets import (
 )
 from classy_vision.dataset.transforms import build_transforms
 from classy_vision.dataset.transforms.util import (
+    build_field_transform_default_imagenet,
     GenericImageTransform,
     ImagenetAugmentTransform,
     ImagenetNoAugmentTransform,
-    build_field_transform_default_imagenet,
 )
 
 

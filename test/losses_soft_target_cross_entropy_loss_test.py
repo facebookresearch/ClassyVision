@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.losses import SoftTargetCrossEntropyLoss, build_loss
+from classy_vision.losses import build_loss, SoftTargetCrossEntropyLoss
 
 
 class TestSoftTargetCrossEntropyLoss(unittest.TestCase):

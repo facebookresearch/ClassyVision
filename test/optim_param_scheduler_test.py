@@ -14,8 +14,8 @@ from classy_vision.models import build_model
 from classy_vision.optim import build_optimizer, build_optimizer_schedulers
 from classy_vision.optim.param_scheduler import (
     ClassyParamScheduler,
-    UpdateInterval,
     register_param_scheduler,
+    UpdateInterval,
 )
 from classy_vision.tasks import ClassificationTask, ClassyTask
 from classy_vision.trainer import LocalTrainer

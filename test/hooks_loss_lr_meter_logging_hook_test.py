@@ -11,7 +11,7 @@ from itertools import product
 
 from classy_vision.hooks import ClassyHook, LossLrMeterLoggingHook
 from classy_vision.optim.param_scheduler import ClassyParamScheduler, UpdateInterval
-from classy_vision.tasks import ClassyTask, build_task
+from classy_vision.tasks import build_task, ClassyTask
 from classy_vision.trainer import LocalTrainer
 from test.generic.config_utils import get_test_mlp_task_config, get_test_task_config
 from test.generic.hook_test_utils import HookTestBase

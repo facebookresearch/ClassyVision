@@ -16,17 +16,17 @@ from classy_vision.dataset import build_dataset
 from classy_vision.generic.distributed_util import is_distributed_training_run
 from classy_vision.generic.util import get_checkpoint_dict, get_torch_version
 from classy_vision.hooks import CheckpointHook, LossLrMeterLoggingHook
-from classy_vision.losses import ClassyLoss, build_loss, register_loss
-from classy_vision.models import ClassyModel, build_model
-from classy_vision.optim import SGD, build_optimizer
-from classy_vision.tasks import ClassificationTask, build_task
+from classy_vision.losses import build_loss, ClassyLoss, register_loss
+from classy_vision.models import build_model, ClassyModel
+from classy_vision.optim import build_optimizer, SGD
+from classy_vision.tasks import build_task, ClassificationTask
 from classy_vision.trainer import LocalTrainer
 from test.generic.config_utils import get_fast_test_task_config, get_test_task_config
 from test.generic.utils import (
-    LimitedPhaseTrainer,
     compare_model_state,
     compare_samples,
     compare_states,
+    LimitedPhaseTrainer,
 )
 
 

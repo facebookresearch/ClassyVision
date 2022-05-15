@@ -8,7 +8,7 @@ import unittest
 
 import torch
 from classy_vision.generic.util import get_torch_version
-from classy_vision.models import ClassyModel, build_model
+from classy_vision.models import build_model, ClassyModel
 
 
 class TestMLPModel(unittest.TestCase):

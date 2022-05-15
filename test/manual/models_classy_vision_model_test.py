@@ -10,7 +10,7 @@ from collections import defaultdict
 
 import torch
 from classy_vision.heads import build_head
-from classy_vision.models import ClassyModel, build_model
+from classy_vision.models import build_model, ClassyModel
 from test.generic.config_utils import get_test_model_configs
 from test.generic.utils import compare_model_state
 

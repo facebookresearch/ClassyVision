@@ -11,7 +11,7 @@ import unittest
 import torch
 import torch.nn as nn
 from classy_vision.generic.util import get_torch_version
-from classy_vision.models import RegNet, build_model
+from classy_vision.models import build_model, RegNet
 from parameterized import parameterized
 
 

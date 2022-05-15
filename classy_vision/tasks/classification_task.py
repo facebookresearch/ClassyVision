@@ -16,7 +16,7 @@ from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import torch
 import torch.nn as nn
-from classy_vision.dataset import ClassyDataset, build_dataset
+from classy_vision.dataset import build_dataset, ClassyDataset
 from classy_vision.dataset.transforms.mixup import MixupTransform
 from classy_vision.generic.distributed_util import (
     all_reduce_mean,
@@ -25,23 +25,23 @@ from classy_vision.generic.distributed_util import (
     is_distributed_training_run,
 )
 from classy_vision.generic.util import (
-    Timer,
     copy_model_to_gpu,
     get_torch_version,
     load_and_broadcast_checkpoint,
     master_params,
     recursive_copy_to_gpu,
     split_batchnorm_params,
+    Timer,
     update_classy_state,
 )
-from classy_vision.hooks import CheckpointHook, ClassyHook, build_hooks
-from classy_vision.losses import ClassyLoss, build_loss
-from classy_vision.meters import ClassyMeter, build_meters
-from classy_vision.models import ClassyModel, build_model
+from classy_vision.hooks import build_hooks, CheckpointHook, ClassyHook
+from classy_vision.losses import build_loss, ClassyLoss
+from classy_vision.meters import build_meters, ClassyMeter
+from classy_vision.models import build_model, ClassyModel
 from classy_vision.optim import (
-    ClassyOptimizer,
     build_optimizer,
     build_optimizer_schedulers,
+    ClassyOptimizer,
 )
 from classy_vision.optim.zero import ZeRO
 from torch.distributed import broadcast

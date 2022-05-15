@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import torch
 
-from . import ClassyLoss, build_loss, register_loss
+from . import build_loss, ClassyLoss, register_loss
 
 
 @register_loss("multi_output_sum_loss")

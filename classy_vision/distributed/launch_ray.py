@@ -11,7 +11,7 @@ import socket
 import subprocess
 import sys
 import time
-from argparse import REMAINDER, ArgumentParser
+from argparse import ArgumentParser, REMAINDER
 from contextlib import closing
 
 import ray

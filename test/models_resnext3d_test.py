@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.models import ClassyModel, build_model
+from classy_vision.models import build_model, ClassyModel
 from test.generic.utils import compare_model_state
 
 

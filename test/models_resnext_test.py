@@ -10,7 +10,7 @@ import unittest
 import torch
 import torchvision.models
 from classy_vision.generic.util import get_torch_version
-from classy_vision.models import ResNeXt, build_model
+from classy_vision.models import build_model, ResNeXt
 from test.generic.utils import compare_model_state
 
 

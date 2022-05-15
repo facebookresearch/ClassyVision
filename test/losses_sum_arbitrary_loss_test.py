@@ -8,7 +8,7 @@ import copy
 import unittest
 
 import torch
-from classy_vision.losses import ClassyLoss, SumArbitraryLoss, build_loss, register_loss
+from classy_vision.losses import build_loss, ClassyLoss, register_loss, SumArbitraryLoss
 
 
 @register_loss("mock_a")

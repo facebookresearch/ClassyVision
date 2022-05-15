@@ -7,7 +7,7 @@
 from typing import Any, Callable, Dict, Optional, Union
 
 from classy_vision.dataset import ClassyDataset, register_dataset
-from classy_vision.dataset.transforms import ClassyTransform, build_transforms
+from classy_vision.dataset.transforms import build_transforms, ClassyTransform
 from torchvision.datasets.cifar import CIFAR10, CIFAR100
 
 

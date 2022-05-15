@@ -11,8 +11,8 @@ import torch
 import torchvision.transforms._transforms_video as transforms_video
 from classy_vision.dataset.core.random_video_datasets import RandomVideoDataset
 from classy_vision.dataset.transforms.util_video import (
-    VideoConstants,
     build_video_field_transform_default,
+    VideoConstants,
 )
 
 

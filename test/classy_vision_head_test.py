@@ -7,7 +7,7 @@
 import unittest
 
 import torch
-from classy_vision.heads import ClassyHead, build_head, register_head
+from classy_vision.heads import build_head, ClassyHead, register_head
 
 
 class TestClassyHead(unittest.TestCase):

@@ -11,7 +11,7 @@ import torch
 import torchvision.transforms as transforms
 import torchvision.transforms._transforms_video as transforms_video
 
-from . import ClassyTransform, build_transforms, register_transform
+from . import build_transforms, ClassyTransform, register_transform
 from .util import ApplyTransformToKey, ImagenetConstants, TupleToMapTransform
 
 

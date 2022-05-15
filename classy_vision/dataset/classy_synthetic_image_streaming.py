@@ -12,8 +12,8 @@ from classy_vision.dataset.core import RandomImageBinaryClassDataset
 from classy_vision.dataset.dataloader_async_gpu_wrapper import DataloaderAsyncGPUWrapper
 from classy_vision.dataset.dataloader_limit_wrapper import DataloaderLimitWrapper
 from classy_vision.dataset.transforms.util import (
-    ImagenetConstants,
     build_field_transform_default_imagenet,
+    ImagenetConstants,
 )
 
 

@@ -6,11 +6,11 @@
 
 import copy
 import inspect
-from typing import Dict, Any
+from typing import Any, Dict
 
 from fvcore.common import param_scheduler
 
-from . import register_param_scheduler, ClassyParamScheduler, UpdateInterval
+from . import ClassyParamScheduler, register_param_scheduler, UpdateInterval
 
 
 """

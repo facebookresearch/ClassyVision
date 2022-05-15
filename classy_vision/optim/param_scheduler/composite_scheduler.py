@@ -4,16 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from enum import Enum, auto
+from enum import auto, Enum
 from typing import Any, Dict, Sequence, Union
 
 from fvcore.common import param_scheduler
 
-from . import (
-    UpdateInterval,
-    build_param_scheduler,
-    register_param_scheduler,
-)
+from . import build_param_scheduler, register_param_scheduler, UpdateInterval
 
 
 class IntervalScaling(Enum):
