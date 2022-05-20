@@ -113,21 +113,32 @@ class TestDensenet(unittest.TestCase):
             _find_block_full_path(model.features, block_name)
             for block_name in heads.keys()
         ]
+        # TODO[quant-example-inputs]: The dimension here is random, if we need to
+        # use dimension/rank in the future we'd need to get the correct dimensions
+        standalone_example_inputs = (torch.randn(1, 3, 3, 3),)
         # we need to keep the modules used in head standalone since
         # it will be accessed with path name directly in execution
         prepare_custom_config_dict["standalone_module_name"] = [
             (
                 head,
                 {"": tq.default_qconfig},
+                standalone_example_inputs,
                 {"input_quantized_idxs": [0], "output_quantized_idxs": []},
                 None,
             )
             for head in head_path_from_blocks
         ]
-        model.initial_block = prepare_fx(model.initial_block, {"": tq.default_qconfig})
+        # TODO[quant-example-inputs]: The dimension here is random, if we need to
+        # use dimension/rank in the future we'd need to get the correct dimensions
+        example_inputs = (torch.randn(1, 3, 3, 3),)
+        model.initial_block = prepare_fx(
+            model.initial_block, {"": tq.default_qconfig}, example_inputs
+        )
+
         model.features = prepare_fx(
             model.features,
             {"": tq.default_qconfig},
+            example_inputs,
             prepare_custom_config_dict,
         )
         model.set_heads(heads)
@@ -148,8 +159,8 @@ class TestDensenet(unittest.TestCase):
         self._test_model(MODELS["small_densenet"])
 
     @unittest.skipIf(
-        get_torch_version() < [1, 8],
-        "FX Graph Modee Quantization is only availablee from 1.8",
+        get_torch_version() < [1, 13],
+        "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13",
     )
     def test_quantized_small_densenet(self):
         self._test_quantize_model(MODELS["small_densenet"])
