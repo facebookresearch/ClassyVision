@@ -169,19 +169,18 @@ class TestRegNetModelBuild(unittest.TestCase):
         Test that the model builds using a config using either model_params or
         model_name and calls fx graph mode quantization apis
         """
-        if get_torch_version() < [1, 8]:
-            self.skipTest("FX Graph Modee Quantization is only availablee from 1.8")
-        if get_torch_version() >= [1, 11]:
-            import torch.ao.quantization as tq
-            from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
-        else:
-            import torch.quantization as tq
-            from torch.quantization.quantize_fx import convert_fx, prepare_fx
+        if get_torch_version() < [1, 13]:
+            self.skipTest(
+                "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13"
+            )
+        import torch.ao.quantization as tq
+        from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
 
         model = build_model(config)
         assert isinstance(model, RegNet)
         model.eval()
-        model.stem = prepare_fx(model.stem, {"": tq.default_qconfig})
+        example_inputs = (torch.rand(1, 3, 3, 3),)
+        model.stem = prepare_fx(model.stem, {"": tq.default_qconfig}, example_inputs)
         model.stem = convert_fx(model.stem)
 
 

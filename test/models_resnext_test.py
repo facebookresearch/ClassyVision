@@ -107,18 +107,29 @@ def _post_training_quantize(model, input):
     ]
     # we need to keep the modules used in head standalone since
     # it will be accessed with path name directly in execution
+    # TODO[quant-example-inputs]: Fix the shape if it is needed in quantization
+    standalone_example_inputs = (torch.rand(1, 3, 3, 3),)
     prepare_custom_config_dict["standalone_module_name"] = [
         (
             head,
             {"": tq.default_qconfig},
+            standalone_example_inputs,
             {"input_quantized_idxs": [0], "output_quantized_idxs": []},
             None,
         )
         for head in head_path_from_blocks
     ]
-    model.initial_block = prepare_fx(model.initial_block, {"": tq.default_qconfig})
+    # TODO[quant-example-inputs]: Fix the shape if it is needed in quantization
+    example_inputs = (torch.rand(1, 3, 3, 3),)
+    model.initial_block = prepare_fx(
+        model.initial_block, {"": tq.default_qconfig}, example_inputs
+    )
+
     model.blocks = prepare_fx(
-        model.blocks, {"": tq.default_qconfig}, prepare_custom_config_dict
+        model.blocks,
+        {"": tq.default_qconfig},
+        example_inputs,
+        prepare_custom_config_dict,
     )
     model.set_heads(heads)
 
@@ -222,8 +233,8 @@ class TestResnext(unittest.TestCase):
         self._test_model(MODELS["small_resnext"])
 
     @unittest.skipIf(
-        get_torch_version() < [1, 8],
-        "FX Graph Modee Quantization is only availablee from 1.8",
+        get_torch_version() < [1, 13],
+        "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13",
     )
     def test_quantized_small_resnext(self):
         self._test_quantize_model(MODELS["small_resnext"])
@@ -232,8 +243,8 @@ class TestResnext(unittest.TestCase):
         self._test_model(MODELS["small_resnet"])
 
     @unittest.skipIf(
-        get_torch_version() < [1, 8],
-        "FX Graph Modee Quantization is only availablee from 1.8",
+        get_torch_version() < [1, 13],
+        "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13",
     )
     def test_quantized_small_resnet(self):
         self._test_quantize_model(MODELS["small_resnet"])
@@ -242,8 +253,8 @@ class TestResnext(unittest.TestCase):
         self._test_model(MODELS["small_resnet_se"])
 
     @unittest.skipIf(
-        get_torch_version() < [1, 8],
-        "FX Graph Modee Quantization is only availablee from 1.8",
+        get_torch_version() < [1, 13],
+        "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13",
     )
     def test_quantized_small_resnet_se(self):
         self._test_quantize_model(MODELS["small_resnet_se"])
