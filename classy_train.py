@@ -54,7 +54,7 @@ from classy_vision.hooks import (
     TensorboardPlotHook,
     VisdomHook,
 )
-from classy_vision.tasks import FineTuningTask, build_task
+from classy_vision.tasks import build_task, FineTuningTask
 from classy_vision.trainer import DistributedTrainer, LocalTrainer
 from torchvision import set_image_backend, set_video_backend
 

@@ -13,7 +13,7 @@ from . import register_dataset
 from .classy_dataset import ClassyDataset
 from .core import RandomImageBinaryClassDataset
 from .transforms import build_transforms
-from .transforms.util import ImagenetConstants, build_field_transform_default_imagenet
+from .transforms.util import build_field_transform_default_imagenet, ImagenetConstants
 
 
 @register_dataset("synthetic_image")

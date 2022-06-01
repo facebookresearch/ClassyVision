@@ -16,9 +16,9 @@ from classy_vision.generic.util import load_checkpoint
 from classy_vision.heads import FullyConnectedHead, IdentityHead
 from classy_vision.hooks import CheckpointHook
 from classy_vision.models import (
+    build_model,
     ClassyModel,
     ClassyModelWrapper,
-    build_model,
     register_model,
 )
 from classy_vision.models.classy_model import _ClassyModelAdapter

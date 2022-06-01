@@ -9,11 +9,7 @@ from typing import Any, Callable, Dict, Optional
 
 from classy_vision.generic.util import log_class_usage
 
-from .param_scheduler import (
-    ParamScheduler,
-    ConstantParamScheduler,
-    UpdateInterval,
-)
+from .param_scheduler import ConstantParamScheduler, ParamScheduler, UpdateInterval
 
 
 class OptionsView:

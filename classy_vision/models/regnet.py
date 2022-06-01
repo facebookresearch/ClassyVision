@@ -13,12 +13,12 @@ import torch.nn as nn
 from classy_vision.models import register_model
 
 from .anynet import (
+    ActivationType,
     AnyNet,
     AnyNetParams,
-    StemType,
     BlockType,
-    ActivationType,
     RELU_IN_PLACE,
+    StemType,
 )
 
 

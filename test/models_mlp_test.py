@@ -8,7 +8,7 @@ import unittest
 
 import torch
 from classy_vision.generic.util import get_torch_version
-from classy_vision.models import ClassyModel, build_model
+from classy_vision.models import build_model, ClassyModel
 
 
 class TestMLPModel(unittest.TestCase):
@@ -26,23 +26,20 @@ class TestMLPModel(unittest.TestCase):
         self.assertEqual(output.shape, torch.Size([2, 1]))
 
     @unittest.skipIf(
-        get_torch_version() < [1, 8],
-        "FX Graph Modee Quantization is only availablee from 1.8",
+        get_torch_version() < [1, 13],
+        "This test is using a new api of FX Graph Mode Quantization which is only available after 1.13",
     )
     def test_quantize_model(self):
-        if get_torch_version() >= [1, 11]:
-            import torch.ao.quantization as tq
-            from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
-        else:
-            import torch.quantization as tq
-            from torch.quantization.quantize_fx import convert_fx, prepare_fx
+        import torch.ao.quantization as tq
+        from torch.ao.quantization.quantize_fx import convert_fx, prepare_fx
 
         config = {"name": "mlp", "input_dim": 3, "output_dim": 1, "hidden_dims": [2]}
         model = build_model(config)
         self.assertTrue(isinstance(model, ClassyModel))
 
         model.eval()
-        model.mlp = prepare_fx(model.mlp, {"": tq.default_qconfig})
+        example_inputs = (torch.rand(1, 3),)
+        model.mlp = prepare_fx(model.mlp, {"": tq.default_qconfig}, example_inputs)
         model.mlp = convert_fx(model.mlp)
 
         tensor = torch.tensor([[1, 2, 3]], dtype=torch.float)

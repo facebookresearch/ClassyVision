@@ -310,7 +310,7 @@ class ResNeXt(ClassyModel):
         self._make_initial_block(small_input, init_planes, basic_layer)
 
         # compute number of planes at each spatial resolution:
-        out_planes = [init_planes * 2 ** i * reduction for i in range(len(num_blocks))]
+        out_planes = [init_planes * 2**i * reduction for i in range(len(num_blocks))]
         in_planes = [init_planes] + out_planes[:-1]
 
         # create subnetworks for each spatial resolution:
@@ -319,7 +319,7 @@ class ResNeXt(ClassyModel):
             mid_planes_and_cardinality = None
             if base_width_and_cardinality is not None:
                 w, c = base_width_and_cardinality
-                mid_planes_and_cardinality = (w * 2 ** idx, c)
+                mid_planes_and_cardinality = (w * 2**idx, c)
             new_block = self._make_resolution_block(
                 in_planes[idx],
                 out_planes[idx],

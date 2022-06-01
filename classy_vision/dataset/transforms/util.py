@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torchvision.transforms as transforms
 
-from . import ClassyTransform, build_transforms, register_transform
+from . import build_transforms, ClassyTransform, register_transform
 
 
 class ImagenetConstants:

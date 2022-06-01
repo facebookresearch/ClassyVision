@@ -7,7 +7,7 @@
 import copy
 import unittest
 
-from classy_vision.hooks import ClassyHook, build_hook, build_hooks, register_hook
+from classy_vision.hooks import build_hook, build_hooks, ClassyHook, register_hook
 
 
 @register_hook("test_hook")

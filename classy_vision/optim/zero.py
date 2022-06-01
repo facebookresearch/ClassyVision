@@ -9,7 +9,7 @@ from typing import Any
 
 import torch.distributed as dist
 from classy_vision.generic.distributed_util import get_primary_rank
-from classy_vision.optim import ClassyOptimizer, build_optimizer, register_optimizer
+from classy_vision.optim import build_optimizer, ClassyOptimizer, register_optimizer
 
 
 try:

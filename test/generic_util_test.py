@@ -16,11 +16,11 @@ import torch
 import torch.nn as nn
 from classy_vision.generic.util import (
     CHECKPOINT_FILE,
-    Timer,
     get_torch_version,
     load_checkpoint,
     save_checkpoint,
     split_batchnorm_params,
+    Timer,
     update_classy_model,
     update_classy_state,
 )

@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 import torch
 from torch import Tensor
 
-from . import ClassyLoss, build_loss, register_loss
+from . import build_loss, ClassyLoss, register_loss
 
 
 @register_loss("sum_arbitrary")

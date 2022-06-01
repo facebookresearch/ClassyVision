@@ -11,8 +11,8 @@ import unittest
 import torch
 from classy_vision.dataset.transforms import ClassyTransform
 from classy_vision.hub import ClassyHubInterface
-from classy_vision.models import ClassyModel, build_model
-from classy_vision.tasks import ClassyTask, build_task
+from classy_vision.models import build_model, ClassyModel
+from classy_vision.tasks import build_task, ClassyTask
 from test.generic.config_utils import get_test_task_config
 from torchvision import models, transforms
 

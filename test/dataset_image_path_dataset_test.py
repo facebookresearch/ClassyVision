@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 import torch
-from classy_vision.dataset import ClassyDataset, build_dataset
+from classy_vision.dataset import build_dataset, ClassyDataset
 from classy_vision.dataset.image_path_dataset import ImagePathDataset
 from torchvision import transforms
 

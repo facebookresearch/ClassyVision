@@ -7,7 +7,7 @@
 import unittest
 
 import torch
-from classy_vision.models import EfficientNet, build_model
+from classy_vision.models import build_model, EfficientNet
 
 
 class TestEfficientNetModel(unittest.TestCase):

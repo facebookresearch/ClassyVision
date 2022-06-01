@@ -114,6 +114,7 @@ from .zero import ZeRO  # isort:skip
 __all__ = [
     "Adam",
     "AdamW",
+    "AdamWMT",
     "ClassyOptimizer",
     "RMSProp",
     "RMSPropTF",

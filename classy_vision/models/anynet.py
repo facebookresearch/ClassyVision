@@ -6,7 +6,7 @@
 
 import math
 from collections import OrderedDict
-from enum import Enum, auto
+from enum import auto, Enum
 from typing import Any, Dict, Optional, Sequence
 
 import torch.nn as nn

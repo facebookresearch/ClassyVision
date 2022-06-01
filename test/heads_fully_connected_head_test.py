@@ -57,7 +57,7 @@ class TestFullyConnectedHead(ClassyTestCase):
             if get_torch_version() >= [1, 7]
             else partial(torch.norm, p=2)
         )
-        norms = norm_func(input, dim=[1, 2, 3])
+        norms = norm_func(input.view(batch_size, -1), dim=1)
         normalized_input = torch.clone(input)
         for i in range(batch_size):
             normalized_input[i] /= norms[i]

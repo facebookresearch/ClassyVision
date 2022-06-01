@@ -145,9 +145,9 @@ class TestProfilerFunctions(unittest.TestCase):
             model_configs, expected_m_flops, expected_m_params, expected_m_activations
         ):
             model = build_model(model_config)
-            self.assertEqual(compute_activations(model) // 10 ** 6, m_activations)
-            self.assertEqual(compute_flops(model) // 10 ** 6, m_flops)
-            self.assertEqual(count_params(model) // 10 ** 6, m_params)
+            self.assertEqual(compute_activations(model) // 10**6, m_activations)
+            self.assertEqual(compute_flops(model) // 10**6, m_flops)
+            self.assertEqual(count_params(model) // 10**6, m_params)
 
     def test_complexity_calculation(self) -> None:
         model = TestModel()

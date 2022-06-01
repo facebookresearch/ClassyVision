@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import torchvision.transforms as transforms
-import torchvision.transforms._transforms_video as transforms_video
 from classy_vision.generic.registry_utils import import_all_modules
 from classy_vision.generic.util import log_class_usage
 
@@ -23,6 +22,16 @@ FILE_ROOT = Path(__file__).parent
 
 TRANSFORM_REGISTRY = {}
 TRANSFORM_REGISTRY_TB = {}
+
+TRANSFORM_VIDEO = [
+    "RandomCropVideo",
+    "RandomResizedCropVideo",
+    "CenterCropVideo",
+    "NormalizeVideo",
+    "ToTensorVideo",
+    "Totensorvideo",
+    "RandomHorizontalFlipVideo",
+]
 
 
 def build_transform(transform_config: Dict[str, Any]) -> Callable:
@@ -58,16 +67,20 @@ def build_transform(transform_config: Dict[str, Any]) -> Callable:
         # the name should be available in torchvision.transforms
         # if users specify the torchvision transform name in snake case,
         # we need to convert it to title case.
-        if not (hasattr(transforms, name) or hasattr(transforms_video, name)):
+
+        if not (hasattr(transforms, name) or (name in TRANSFORM_VIDEO)):
             name = name.title().replace("_", "")
-        assert hasattr(transforms, name) or hasattr(transforms_video, name), (
+        assert hasattr(transforms, name) or (name in TRANSFORM_VIDEO), (
             f"{name} isn't a registered tranform"
             ", nor is it available in torchvision.transforms"
         )
         if hasattr(transforms, name):
             transform = getattr(transforms, name)(**transform_args)
         else:
+            import torchvision.transforms._transforms_video as transforms_video
+
             transform = getattr(transforms_video, name)(**transform_args)
+
     log_class_usage("Transform", transform.__class__)
     return transform
 
@@ -102,12 +115,14 @@ def register_transform(name: str, bypass_checks=False):
             if name in TRANSFORM_REGISTRY:
                 msg = "Cannot register duplicate transform ({}). Already registered at \n{}\n"
                 raise ValueError(msg.format(name, TRANSFORM_REGISTRY_TB[name]))
-            if hasattr(transforms, name) or hasattr(transforms_video, name):
+
+            if hasattr(transforms, name) or (name in TRANSFORM_VIDEO):
                 raise ValueError(
                     "{} has existed in torchvision.transforms, Please change the name!".format(
                         name
                     )
                 )
+
         TRANSFORM_REGISTRY[name] = cls
         tb = "".join(traceback.format_stack())
         TRANSFORM_REGISTRY_TB[name] = tb
@@ -121,7 +136,6 @@ import_all_modules(FILE_ROOT, "classy_vision.dataset.transforms")
 
 from .lighting_transform import LightingTransform  # isort:skip
 from .util import ApplyTransformToKey  # isort:skip
-from .util import ImagenetAugmentTransform  # isort:skip
 from .util import ImagenetAugmentTransform  # isort:skip
 from .util import ImagenetNoAugmentTransform  # isort:skip
 from .util import GenericImageTransform  # isort:skip

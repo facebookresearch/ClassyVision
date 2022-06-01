@@ -8,9 +8,9 @@ import unittest
 
 import torch
 from classy_vision.losses import (
+    build_loss,
     ClassyLoss,
     MultiOutputSumLoss,
-    build_loss,
     register_loss,
 )
 

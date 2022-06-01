@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 from classy_vision.generic.util import get_checkpoint_dict
 from classy_vision.losses import ClassyLoss, register_loss
-from classy_vision.tasks import FineTuningTask, build_task
+from classy_vision.tasks import build_task, FineTuningTask
 from classy_vision.trainer import LocalTrainer
 from test.generic.config_utils import get_fast_test_task_config
 from test.generic.utils import compare_model_state

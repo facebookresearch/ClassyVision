@@ -30,11 +30,9 @@
 # https://github.com/DeepVoltaire/AutoAugment/blob/master/autoaugment.py
 
 import random
-import random
-from enum import Enum, auto
+from enum import auto, Enum
 from functools import partial
-from typing import Any
-from typing import Tuple, Any, NamedTuple, Sequence, Callable
+from typing import Any, Callable, NamedTuple, Sequence, Tuple
 
 import numpy as np
 from classy_vision.dataset.transforms import ClassyTransform, register_transform

@@ -9,8 +9,8 @@ import unittest
 import torch
 import torchvision.transforms as transforms
 from classy_vision.dataset.transforms import (
-    ClassyTransform,
     build_transforms,
+    ClassyTransform,
     register_transform,
 )
 from classy_vision.dataset.transforms.util import ImagenetNoAugmentTransform

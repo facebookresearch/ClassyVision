@@ -12,7 +12,7 @@ from classy_vision.dataset.core.random_image_datasets import (
     RandomImageBinaryClassDataset,
     SampleType,
 )
-from classy_vision.dataset.transforms import ClassyTransform, build_transforms
+from classy_vision.dataset.transforms import build_transforms, ClassyTransform
 
 
 @register_dataset("my_dataset")

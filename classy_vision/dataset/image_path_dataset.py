@@ -11,7 +11,7 @@ from torchvision import datasets, transforms
 
 from . import ClassyDataset, register_dataset
 from .core import ListDataset
-from .transforms import ClassyTransform, TupleToMapTransform, build_transforms
+from .transforms import build_transforms, ClassyTransform, TupleToMapTransform
 
 
 def _is_torchvision_imagefolder(image_folder):
