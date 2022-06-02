@@ -96,6 +96,14 @@ def _post_training_quantize(model, input):
         from torch.quantization.quantize_fx import convert_fx, prepare_fx
 
     model.eval()
+    # running
+    model(*(input,))
+    fqn_to_example_inputs = None
+    if get_torch_version() >= [1, 13]:
+        from torch.ao.quantization.utils import get_fqn_to_example_inputs
+
+        fqn_to_example_inputs = get_fqn_to_example_inputs(model, (input,))
+
     heads = model.get_heads()
     # since prepare changes the code of ClassyBlock we need to clear head first
     # and reattach it later to avoid caching
@@ -105,26 +113,41 @@ def _post_training_quantize(model, input):
     head_path_from_blocks = [
         _find_block_full_path(model.blocks, block_name) for block_name in heads.keys()
     ]
+
     # we need to keep the modules used in head standalone since
     # it will be accessed with path name directly in execution
-    # TODO[quant-example-inputs]: Fix the shape if it is needed in quantization
-    standalone_example_inputs = (torch.rand(1, 3, 3, 3),)
-    prepare_custom_config_dict["standalone_module_name"] = [
-        (
-            head,
-            {"": tq.default_qconfig},
-            standalone_example_inputs,
-            {"input_quantized_idxs": [0], "output_quantized_idxs": []},
-            None,
-        )
-        for head in head_path_from_blocks
-    ]
-    # TODO[quant-example-inputs]: Fix the shape if it is needed in quantization
+    if get_torch_version() >= [1, 13]:
+        prepare_custom_config_dict["standalone_module_name"] = [
+            (
+                head,
+                {"": tq.default_qconfig},
+                fqn_to_example_inputs["blocks." + head],
+                {"input_quantized_idxs": [0], "output_quantized_idxs": []},
+                None,
+            )
+            for head in head_path_from_blocks
+        ]
+    else:
+        standalone_example_inputs = (torch.rand(1, 3, 3, 3),)
+        prepare_custom_config_dict["standalone_module_name"] = [
+            (
+                head,
+                {"": tq.default_qconfig},
+                standalone_example_inputs,
+                {"input_quantized_idxs": [0], "output_quantized_idxs": []},
+                None,
+            )
+            for head in head_path_from_blocks
+        ]
     example_inputs = (torch.rand(1, 3, 3, 3),)
+    if get_torch_version() >= [1, 13]:
+        example_inputs = fqn_to_example_inputs["initial_block"]
     model.initial_block = prepare_fx(
         model.initial_block, {"": tq.default_qconfig}, example_inputs
     )
 
+    if get_torch_version() >= [1, 13]:
+        example_inputs = fqn_to_example_inputs["blocks"]
     model.blocks = prepare_fx(
         model.blocks,
         {"": tq.default_qconfig},
