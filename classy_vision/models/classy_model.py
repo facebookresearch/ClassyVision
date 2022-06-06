@@ -90,6 +90,12 @@ class ClassyModelWrapper:
         else:
             super().__setattr__(name, value)
 
+    def __delattr__(self, name):
+        if name != "classy_model" and hasattr(self, "classy_model"):
+            delattr(self.classy_model, name)
+        else:
+            return super().__delattr__(name)
+
     def forward(self, *args, **kwargs):
         return self.classy_model(*args, **kwargs)
 

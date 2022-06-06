@@ -163,6 +163,18 @@ class TestClassyModel(unittest.TestCase):
             self.assertTrue(torch.allclose(expected_output, model(input)))
             self.assertTrue(torch.allclose(expected_output, jitted_model(input)))
 
+    def test_classy_model_wrapper_attr(self):
+        model = MyTestModel2()
+        model.test_attr = 123
+        model_wrapper = ClassyModelWrapper(model)
+        self.assertTrue(hasattr(model_wrapper, "test_attr"))
+        self.assertEqual(model_wrapper.test_attr, 123)
+
+        # delete the attr
+        delattr(model_wrapper, "test_attr")
+        self.assertFalse(hasattr(model_wrapper, "test_attr"))
+        self.assertFalse(hasattr(model, "test_attr"))
+
     def test_classy_model_set_state_strict(self):
         model_1 = build_model(self.get_model_config(use_head=True))
         model_state_1 = model_1.get_classy_state(deep_copy=True)
