@@ -24,7 +24,7 @@ class BasicTransformation(nn.Module):
         inplace_relu=True,
         bn_eps=1e-5,
         bn_mmt=0.1,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -110,7 +110,7 @@ class BasicR2Plus1DTransformation(BasicTransformation):
         inplace_relu=True,
         bn_eps=1e-5,
         bn_mmt=0.1,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -201,7 +201,7 @@ class PostactivatedBottleneckTransformation(nn.Module):
         inplace_relu=True,
         bn_eps=1e-5,
         bn_mmt=0.1,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -309,7 +309,7 @@ class PreactivatedBottleneckTransformation(nn.Module):
         bn_eps=1e-5,
         bn_mmt=0.1,
         disable_pre_activation=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -421,7 +421,7 @@ class PostactivatedShortcutTransformation(nn.Module):
         spatial_stride,
         bn_eps=1e-5,
         bn_mmt=0.1,
-        **kwargs
+        **kwargs,
     ):
         super(PostactivatedShortcutTransformation, self).__init__()
         # Use skip connection with projection if dim or spatial/temporal res change.
@@ -456,7 +456,7 @@ class PreactivatedShortcutTransformation(nn.Module):
         bn_eps=1e-5,
         bn_mmt=0.1,
         disable_pre_activation=False,
-        **kwargs
+        **kwargs,
     ):
         super(PreactivatedShortcutTransformation, self).__init__()
         # Use skip connection with projection if dim or spatial/temporal res change.
