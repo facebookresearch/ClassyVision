@@ -118,7 +118,7 @@ def _post_training_quantize(model, input):
         prepare_custom_config_dict["standalone_module_name"] = [
             (
                 head,
-                {"": tq.default_qconfig},
+                tq.get_default_qconfig_mapping("fbgemm"),
                 fqn_to_example_inputs["blocks." + head],
                 {"input_quantized_idxs": [0], "output_quantized_idxs": []},
                 None,
@@ -141,14 +141,14 @@ def _post_training_quantize(model, input):
     if get_torch_version() >= [1, 13]:
         example_inputs = fqn_to_example_inputs["initial_block"]
     model.initial_block = prepare_fx(
-        model.initial_block, {"": tq.default_qconfig}, example_inputs
+        model.initial_block, tq.get_default_qconfig_mapping("fbgemm"), example_inputs
     )
 
     if get_torch_version() >= [1, 13]:
         example_inputs = fqn_to_example_inputs["blocks"]
     model.blocks = prepare_fx(
         model.blocks,
-        {"": tq.default_qconfig},
+        tq.get_default_qconfig_mapping("fbgemm"),
         example_inputs,
         prepare_custom_config_dict,
     )
