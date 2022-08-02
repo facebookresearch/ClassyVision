@@ -24,6 +24,9 @@ class FullyConvolutionalLinear(nn.Module):
             self.act = nn.Softmax(dim=4)
         elif act_func == "sigmoid":
             self.act = nn.Sigmoid()
+        elif act_func == "identity":
+            # for some tasks eg. regression, we don't want an activation function
+            self.act = nn.Identity()
         else:
             raise NotImplementedError(
                 "{} is not supported as an activation" "function.".format(act_func)
