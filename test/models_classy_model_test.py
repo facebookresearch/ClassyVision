@@ -83,6 +83,21 @@ class TestClassyModel(unittest.TestCase):
             ]
         return config
 
+    def test_model_bad_name(self):
+        config = self.get_model_config(use_head=True)
+        test_bad_name = "__test_bad_name__"
+        config["name"] = test_bad_name
+
+        try:
+            _ = build_model(config)
+        except AssertionError as e:
+            self.assertTrue(
+                test_bad_name in str(e),
+                f"expected {test_bad_name} in error message, got {str(e)}",
+            )
+            return
+        self.assertTrue(False, "expected an AssertionError to be thrown")
+
     def test_from_checkpoint(self):
         config = get_test_task_config()
         for use_head in [True, False]:

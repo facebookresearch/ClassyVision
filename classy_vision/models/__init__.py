@@ -78,7 +78,7 @@ def build_model(config):
     "foo": "bar"}` will find a class that was registered as "my_model"
     (see :func:`register_model`) and call .from_config on it."""
 
-    assert config["name"] in MODEL_REGISTRY, "unknown model"
+    assert config["name"] in MODEL_REGISTRY, f"unknown model: {config['name']}"
     model = MODEL_REGISTRY[config["name"]].from_config(config)
     if "heads" in config:
         heads = defaultdict(list)
