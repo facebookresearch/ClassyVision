@@ -8,7 +8,7 @@ import os
 from typing import Any, Callable, Dict, List, Optional
 
 import torch
-from torchvision.datasets.kinetics import Kinetics400
+from torchvision.datasets.kinetics import Kinetics
 
 from . import register_dataset
 from .classy_video_dataset import ClassyVideoDataset
@@ -25,7 +25,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
     We assume videos are already trimmed to 10-second clip, and are stored in a
     folder.
 
-    It is built on top of `Kinetics400 <https://github.com/pytorch/vision/blob/
+    It is built on top of `Kinetics <https://github.com/pytorch/vision/blob/
     master/torchvision/datasets/kinetics.py#L7/>`_ dataset class in TorchVision.
 
     """
@@ -91,9 +91,10 @@ class Kinetics400Dataset(ClassyVideoDataset):
                 metadata_filepath, video_dir=video_dir, update_file_path=True
             )
 
-        dataset = Kinetics400(
+        dataset = Kinetics(
             video_dir,
             frames_per_clip,
+            num_classes="400",
             step_between_clips=step_between_clips,
             frame_rate=frame_rate,
             _precomputed_metadata=metadata,
@@ -104,6 +105,7 @@ class Kinetics400Dataset(ClassyVideoDataset):
             _video_min_dimension=video_min_dimension,
             _audio_samples=audio_samples,
             _audio_channels=audio_channels,
+            _legacy=True,
         )
         metadata = dataset.metadata
         if metadata and not os.path.exists(metadata_filepath):
