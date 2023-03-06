@@ -2,25 +2,45 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-version: 2
+version: 2.1
 
 # -------------------------------------------------------------------------------------
 # Environments to run the jobs in
 # -------------------------------------------------------------------------------------
 cpu: &cpu
-  environment:
-    TERM: xterm
   machine:
     image: default
   resource_class: medium
 
 gpu: &gpu
-  environment:
-    CUDA_VERSION: "10.2"
-    TERM: xterm
   machine:
-    image: ubuntu-1604:202104-01
+    image: linux-cuda-11:2023.02.1
   resource_class: gpu.nvidia.small.multi  # NVIDIA Tesla T4 2 GPU 4 vCPUs 15 GB RAM (2 GPUs)
+
+
+
+version_parameters: &version_parameters
+  parameters:
+    pytorch_index:
+      type: string
+      # use test wheels index to have access to RC wheels
+      # https://download.pytorch.org/whl/test/torch_test.html
+      default: "https://download.pytorch.org/whl/torch_stable.html"
+    python_version: # NOTE: only affects linux
+      type: string
+      default: '3.10.6'
+    cuda_version:
+      type: string
+      default: '11.6'
+    TERM:
+      type: string
+      default: 'xterm'
+
+  environment:
+    PYTORCH_INDEX: << parameters.pytorch_index >>
+    PYTHON_VERSION: << parameters.python_version>>
+    CUDA_VERSION: << parameters.cuda_version >>
+    TERM: << parameters.TERM >>
 
 # -------------------------------------------------------------------------------------
 # Re-usable commands
@@ -41,8 +61,8 @@ install_python: &install_python
       name: Install Python
       working_directory: ~/
       command: |
-        pyenv install 3.6.2
-        pyenv global 3.6.2
+        pyenv install << parameters.python_version >>
+        pyenv global << parameters.python_version >>
         which python
         which pip
 
@@ -74,6 +94,12 @@ setup_cuda: &setup_cuda
         time sudo /bin/bash ~/nvidia-downloads/NVIDIA-Linux-x86_64-440.64.run --no-drm -q --ui=none
         time sudo dpkg -i ~/nvidia-downloads/cuda-repo-ubuntu1604-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
         nvidia-smi
+
+select_cuda: &select_cuda
+  - run:
+      name: Select CUDA
+      command: |
+        sudo update-alternatives --set cuda /usr/local/cuda-<< parameters.cuda_version >>
 
 check_cuda_available: &check_cuda_available
   - run:
@@ -115,6 +141,7 @@ run_tests: &run_tests
 jobs:
   cpu_tests:
     <<: *cpu
+    <<: *version_parameters
 
     working_directory: ~/ClassyVision
 
@@ -166,13 +193,16 @@ jobs:
 
   gpu_tests:
     <<: *gpu
+    <<: *version_parameters
+
 
     working_directory: ~/ClassyVision
 
     steps:
       - checkout
 
-      - <<: *setup_cuda
+      # - <<: *setup_cuda
+      - <<: *select_cuda
 
       - <<: *install_python
 
@@ -205,13 +235,15 @@ jobs:
 
   gpu_tests_bc:
     <<: *gpu
+    <<: *version_parameters
 
     working_directory: ~/ClassyVision
 
     steps:
       - checkout
 
-      - <<: *setup_cuda
+      # - <<: *setup_cuda
+      - <<: *select_cuda
 
       - <<: *install_python
 
