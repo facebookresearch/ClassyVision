@@ -8,19 +8,45 @@ version: 2
 # Environments to run the jobs in
 # -------------------------------------------------------------------------------------
 cpu: &cpu
-  environment:
-    TERM: xterm
   machine:
     image: default
   resource_class: medium
 
 gpu: &gpu
-  environment:
-    CUDA_VERSION: "11.6"
-    TERM: xterm
   machine:
     image: linux-cuda-11:2023.02.1
   resource_class: gpu.nvidia.small.multi  # NVIDIA Tesla T4 2 GPU 4 vCPUs 15 GB RAM (2 GPUs)
+
+
+
+version_parameters: &version_parameters
+  parameters:
+    pytorch_version:
+      type: string
+    torchvision_version:
+      type: string
+    pytorch_index:
+      type: string
+      # use test wheels index to have access to RC wheels
+      # https://download.pytorch.org/whl/test/torch_test.html
+      default: "https://download.pytorch.org/whl/torch_stable.html"
+    python_version: # NOTE: only affects linux
+      type: string
+      default: '3.10.6'
+    cuda_version:
+      type: string
+      default: '11.6'
+    TERM:
+      type: string
+      default: 'xterm'
+
+  environment:
+    PYTORCH_VERSION: << parameters.pytorch_version >>
+    TORCHVISION_VERSION: << parameters.torchvision_version >>
+    PYTORCH_INDEX: << parameters.pytorch_index >>
+    PYTHON_VERSION: << parameters.python_version>>
+    CUDA_VERSION: << parameters.cuda_version >>
+    TERM: << parameters.TERM >>
 
 # -------------------------------------------------------------------------------------
 # Re-usable commands
@@ -41,8 +67,8 @@ install_python: &install_python
       name: Install Python
       working_directory: ~/
       command: |
-        pyenv install 3.10.6
-        pyenv global 3.10.6
+        pyenv install -<< parameters.python_version >>
+        pyenv global -<< parameters.python_version >>
         which python
         which pip
 
@@ -79,7 +105,7 @@ select_cuda: &select_cuda
   - run:
       name: Select CUDA
       command: |
-        sudo update-alternatives --set cuda /usr/local/cuda-<< environment.cuda_version >>
+        sudo update-alternatives --set cuda /usr/local/cuda-<< parameters.cuda_version >>
 
 check_cuda_available: &check_cuda_available
   - run:
@@ -121,6 +147,7 @@ run_tests: &run_tests
 jobs:
   cpu_tests:
     <<: *cpu
+    <<: *version_parameters
 
     working_directory: ~/ClassyVision
 
@@ -172,6 +199,8 @@ jobs:
 
   gpu_tests:
     <<: *gpu
+    <<: *version_parameters
+
 
     working_directory: ~/ClassyVision
 
@@ -212,6 +241,7 @@ jobs:
 
   gpu_tests_bc:
     <<: *gpu
+    <<: *version_parameters
 
     working_directory: ~/ClassyVision
 
