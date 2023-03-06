@@ -155,6 +155,11 @@ jobs:
       - <<: *upgrade_pip_setuptools
 
       # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v10-cpu-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v10-cpu-dependencies-
 
       - <<: *install_dev_dep
 
@@ -165,7 +170,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v9-cpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v10-cpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -206,6 +211,11 @@ jobs:
       - <<: *upgrade_pip_setuptools
 
       # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v7-gpu-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v7-gpu-dependencies-
 
       - <<: *install_dev_dep
 
@@ -218,7 +228,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v6-gpu-dependencies-{{ checksum "requirements.txt" }}
+          key: v7-gpu-dependencies-{{ checksum "requirements.txt" }}
 
       - <<: *run_tests
 
@@ -242,6 +252,11 @@ jobs:
       - <<: *upgrade_pip_setuptools
 
       # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v4-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v4-gpu-bc-dependencies-
 
       - <<: *install_dev_dep
 
@@ -254,7 +269,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v3-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
+          key: v4-gpu-bc-dependencies-{{ checksum "requirements_test_bc.txt" }}
 
       - <<: *run_tests
 
