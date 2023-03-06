@@ -21,10 +21,6 @@ gpu: &gpu
 
 version_parameters: &version_parameters
   parameters:
-    pytorch_version:
-      type: string
-    torchvision_version:
-      type: string
     pytorch_index:
       type: string
       # use test wheels index to have access to RC wheels
