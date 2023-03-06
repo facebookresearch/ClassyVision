@@ -6,10 +6,10 @@
 
 import unittest
 import unittest.mock as mock
-
-from classy_vision.hooks import ProfilerHook
 from test.generic.config_utils import get_test_classy_task, get_test_classy_video_task
 from test.generic.hook_test_utils import HookTestBase
+
+from classy_vision.hooks import ProfilerHook
 
 
 class TestProfilerHook(HookTestBase):
@@ -23,7 +23,7 @@ class TestProfilerHook(HookTestBase):
             config=config, hook_type=ProfilerHook, hook_registry_name="profiler"
         )
 
-    @mock.patch("torch.autograd.profiler.profile", auto_spec=True)
+    @mock.patch("torch.autograd.profiler.profile", autospec=True)
     @mock.patch("classy_vision.hooks.profiler_hook.summarize_profiler_info")
     def test_profiler(
         self,

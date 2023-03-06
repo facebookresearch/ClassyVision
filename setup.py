@@ -13,8 +13,8 @@ from setuptools import find_namespace_packages, find_packages, setup
 
 
 if __name__ == "__main__":
-    if sys.version_info < (3, 6):
-        sys.exit("Sorry, Python >=3.6 is required for Classy Vision.")
+    if sys.version_info < (3, 8):
+        sys.exit("Sorry, Python >=3.8 is required for Classy Vision.")
 
     # get version string from module
     with open(
@@ -43,21 +43,21 @@ if __name__ == "__main__":
             "Source": "https://github.com/facebookresearch/ClassyVision",
         },
         license="MIT License",
-        python_requires=">=3.6",
+        python_requires=">=3.8",
         packages=find_packages(exclude=("tests",))
         + find_namespace_packages(include=["hydra_plugins.*"]),
         install_requires=reqs.strip().split("\n"),
         extras_require={
             "dev": [
                 "GitPython",
-                "black==19.3b0",
+                "black>=23.1.0",
                 "sphinx",
-                "isort==5.2.2",
+                "isort>=5.12.0",
                 "bs4",
-                "nbconvert==6.0.7",
+                "nbconvert>=7.2.9",
                 "pre-commit",
                 "parameterized",
-                "fairscale==0.3.7",
+                "fairscale>=0.4.13",
             ]
         },
         package_data={"classy_vision": ["configs/*.json", "templates"]},
@@ -68,7 +68,9 @@ if __name__ == "__main__":
         keywords=["deep learning", "pytorch", "AI"],
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
             "Development Status :: 4 - Beta",

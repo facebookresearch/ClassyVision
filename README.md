@@ -106,7 +106,7 @@ Classy Vision is beta software. The project is under active development and our 
 ## Installation
 
 #### Installation Requirements
-Make sure you have an up-to-date installation of PyTorch (1.6), Python (3.6) and torchvision (0.7). If you want to use GPUs, then a CUDA installation (10.1) is also required.
+Make sure you have an up-to-date installation of PyTorch (1.12), Python (3.8) and torchvision (0.13). If you want to use GPUs, then a CUDA installation (11.6) is also required.
 
 #### Installing the latest stable release
 To install Classy Vision via pip:
