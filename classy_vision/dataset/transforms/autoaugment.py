@@ -30,7 +30,7 @@
 # https://github.com/DeepVoltaire/AutoAugment/blob/master/autoaugment.py
 
 import random
-from enum import auto, Enum
+from enum import Enum, auto
 from functools import partial
 from typing import Any, Callable, NamedTuple, Sequence, Tuple
 
