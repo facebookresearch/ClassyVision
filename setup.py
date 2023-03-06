@@ -13,8 +13,8 @@ from setuptools import find_namespace_packages, find_packages, setup
 
 
 if __name__ == "__main__":
-    if sys.version_info < (3, 7):
-        sys.exit("Sorry, Python >=3.7 is required for Classy Vision.")
+    if sys.version_info < (3, 8):
+        sys.exit("Sorry, Python >=3.8 is required for Classy Vision.")
 
     # get version string from module
     with open(
@@ -43,7 +43,7 @@ if __name__ == "__main__":
             "Source": "https://github.com/facebookresearch/ClassyVision",
         },
         license="MIT License",
-        python_requires=">=3.7",
+        python_requires=">=3.8",
         packages=find_packages(exclude=("tests",))
         + find_namespace_packages(include=["hydra_plugins.*"]),
         install_requires=reqs.strip().split("\n"),
@@ -68,7 +68,6 @@ if __name__ == "__main__":
         keywords=["deep learning", "pytorch", "AI"],
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",

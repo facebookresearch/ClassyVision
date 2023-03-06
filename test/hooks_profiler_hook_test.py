@@ -23,7 +23,7 @@ class TestProfilerHook(HookTestBase):
             config=config, hook_type=ProfilerHook, hook_registry_name="profiler"
         )
 
-    @mock.patch("torch.autograd.profiler.profile", auto_spec=True)
+    @mock.patch("torch.autograd.profiler.profile", autospec=True)
     @mock.patch("classy_vision.hooks.profiler_hook.summarize_profiler_info")
     def test_profiler(
         self,
