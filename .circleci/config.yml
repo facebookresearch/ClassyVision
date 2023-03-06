@@ -37,8 +37,6 @@ version_parameters: &version_parameters
       default: 'xterm'
 
   environment:
-    PYTORCH_VERSION: << parameters.pytorch_version >>
-    TORCHVISION_VERSION: << parameters.torchvision_version >>
     PYTORCH_INDEX: << parameters.pytorch_index >>
     PYTHON_VERSION: << parameters.python_version>>
     CUDA_VERSION: << parameters.cuda_version >>
