@@ -1,5 +1,5 @@
 fvcore>=0.1.3
-setuptools<58
+setuptools>=67.5.0
 torch>=1.6
 torchvision>=0.7
 wheel

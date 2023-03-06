@@ -43,21 +43,21 @@ if __name__ == "__main__":
             "Source": "https://github.com/facebookresearch/ClassyVision",
         },
         license="MIT License",
-        python_requires=">=3.8",
+        python_requires=">=3.7",
         packages=find_packages(exclude=("tests",))
         + find_namespace_packages(include=["hydra_plugins.*"]),
         install_requires=reqs.strip().split("\n"),
         extras_require={
             "dev": [
                 "GitPython",
-                "black==23.1.0",
+                "black>=23.1.0",
                 "sphinx",
-                "isort==5.12.0",
+                "isort>=5.12.0",
                 "bs4",
-                "nbconvert==7.2.9",
+                "nbconvert>=7.2.9",
                 "pre-commit",
                 "parameterized",
-                "fairscale==0.4.13",
+                "fairscale>=0.4.13",
             ]
         },
         package_data={"classy_vision": ["configs/*.json", "templates"]},
