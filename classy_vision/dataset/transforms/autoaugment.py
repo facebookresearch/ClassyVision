@@ -165,7 +165,7 @@ def get_image_op_settings(
         ImageOp.ROTATE: ImageOpSetting(np.linspace(0, 30, 10), rotate_with_fill),
         ImageOp.COLOR: ImageOpSetting(np.linspace(0.0, 0.9, 10), color),
         ImageOp.POSTERIZE: ImageOpSetting(
-            np.round(np.linspace(8, 4, 10), 0).astype(np.int), posterize
+            np.round(np.linspace(8, 4, 10), 0).astype(np.int64), posterize
         ),
         ImageOp.SOLARIZE: ImageOpSetting(np.linspace(256, 0, 10), solarize),
         ImageOp.CONTRAST: ImageOpSetting(np.linspace(0.0, 0.9, 10), contrast),
