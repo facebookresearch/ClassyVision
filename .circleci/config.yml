@@ -61,8 +61,8 @@ install_python: &install_python
       name: Install Python
       working_directory: ~/
       command: |
-        pyenv install -<< parameters.python_version >>
-        pyenv global -<< parameters.python_version >>
+        pyenv install << parameters.python_version >>
+        pyenv global << parameters.python_version >>
         which python
         which pip
 
