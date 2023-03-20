@@ -11,6 +11,10 @@
  </a>
 </p>
 
+## Classy Vision is not longer actively maintained.
+
+The latest stable version is 0.7.0 and is available on pip, and has been tested to work with Pytorch 2.0.
+
 ## What's New:
 
 - March 2021: Added [RegNetZ models](https://arxiv.org/abs/2103.06877)
