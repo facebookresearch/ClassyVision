@@ -1,3 +1,0 @@
-torch==1.6
-torchvision==0.7
-fvcore>=0.1.3
