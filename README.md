@@ -8,7 +8,7 @@
  </a>
 </p>
 
-## Classy Vision is not longer actively maintained.
+## Classy Vision is no longer actively maintained.
 
 The latest stable version is 0.7.0 and is available on pip, and has been tested to work with Pytorch 2.0.
 
