@@ -47,6 +47,7 @@ from classy_vision.generic.registry_utils import import_all_packages_from_direct
 from classy_vision.generic.util import load_json
 from classy_vision.hooks import (
     CheckpointHook,
+    ExponentialMovingAverageModelHook,
     LossLrMeterLoggingHook,
     ModelComplexityHook,
     ProfilerHook,
@@ -151,6 +152,8 @@ def configure_hooks(args, config):
         hooks.append(ProgressBarHook())
     if args.visdom_server != "":
         hooks.append(VisdomHook(args.visdom_server, args.visdom_port))
+    if args.ema_decay > 0:
+        hooks.append(ExponentialMovingAverageModelHook(args.ema_decay))
 
     return hooks
 
