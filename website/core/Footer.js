@@ -109,7 +109,8 @@ class Footer extends React.Component {
           <script dangerouslySetInnerHTML={{__html:`
             (function() {
               var BAD_BASE = '/classyvision/';
-              if (window.location.origin !== '${this.props.config.url}') {
+              if (window.location.origin !== '${this.props.config.url}'
+                && window.location.origin !== 'https://staticdocs.thefacebook.com') {
                 var pathname = window.location.pathname;
                 var newPathname = pathname.slice(pathname.indexOf(BAD_BASE) === 0 ? BAD_BASE.length : 1);
                 var newLocation = '${this.props.config.url}${this.props.config.baseUrl}' + newPathname;

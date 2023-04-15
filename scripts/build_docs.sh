@@ -7,24 +7,28 @@
 # run this script from the project root using `./scripts/build_docs.sh`
 
 usage() {
-  echo "Usage: $0 [-b]"
+  echo "Usage: $0 [-b | -n]"
   echo ""
   echo "Build Classy Vision documentation."
   echo ""
   echo "  -b   Build static version of documentation (otherwise start server)"
+  echo "  -n   Skip the docusaurus build/start step"
   echo ""
   exit 1
 }
 
 BUILD_STATIC=false
 
-while getopts 'hb' flag; do
+while getopts 'hbn' flag; do
   case "${flag}" in
     h)
       usage
       ;;
     b)
       BUILD_STATIC=true
+      ;;
+    n)
+      SKIP_DOCUSAURUS=true
       ;;
     *)
       usage
@@ -82,6 +86,13 @@ mkdir -p "website/static/files"
 python scripts/parse_tutorials.py -w "${cwd}"
 
 cd website || exit
+
+if [[ $SKIP_DOCUSAURUS == true ]]; then
+  echo "-----------------------------------"
+  echo "Skipping docusaurus build because -n flag was provided"
+  echo "-----------------------------------"
+  exit 0
+fi
 
 if [[ $BUILD_STATIC == true ]]; then
   echo "-----------------------------------"
