@@ -4,6 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import logging
 from typing import Any, Iterable, Iterator
 
 from .dataloader_wrapper import DataloaderWrapper
@@ -18,6 +19,7 @@ class DataloaderSkipNoneWrapper(DataloaderWrapper):
 
     def __init__(self, dataloader: Iterable) -> None:
         super().__init__(dataloader)
+        self.batch_count = 0
 
     def __iter__(self) -> Iterator[Any]:
         self._iter = iter(self.dataloader)
@@ -30,4 +32,22 @@ class DataloaderSkipNoneWrapper(DataloaderWrapper):
         next_batch = None
         while next_batch is None:
             next_batch = next(self._iter)
+
+        self.batch_count += 1
         return next_batch
+
+    def __len__(self) -> int:
+        # since we do not know the total dataset length ahead of time, we count the
+        # batch data as they come in from wrapped dataloader. We expect __len__() is
+        # only called after DataloaderSkipNoneWrapper is exhausted.
+
+        try:
+            next(self._iter)
+            raise AssertionError(
+                "Do not call __len__() when the wrapped dataloader is not exhausted yet"
+            )
+        except StopIteration:
+            # Make sure we have exhausted the wrapper dataloader
+            logging.info("Return the batch count as the length of dataloader")
+
+        return self.batch_count
