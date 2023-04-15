@@ -215,8 +215,15 @@ def recursive_unpack(batch):
     raise TypeError("Unexpected type %s passed to unpack" % type(batch))
 
 
-def compare_model_state(test_fixture, state, state2, check_heads=True):
+def compare_model_state(
+    test_fixture, state, state2, check_heads=True, state_changed_params=()
+):
     for k in state["model"]["trunk"].keys():
+        if k in state_changed_params:
+            test_fixture.assertFalse(
+                torch.allclose(state["model"]["trunk"][k], state2["model"]["trunk"][k])
+            )
+            continue
         if not torch.allclose(state["model"]["trunk"][k], state2["model"]["trunk"][k]):
             print(k, state["model"]["trunk"][k], state2["model"]["trunk"][k])
         test_fixture.assertTrue(
