@@ -59,7 +59,7 @@ class _ClassyModelMethod:
         return ret_val
 
 
-class ClassyModelWrapper:
+class ClassyModelWrapper(torch.nn.Module):
     """Base ClassyModel wrapper class.
 
     This class acts as a thin pass through wrapper which lets users modify the behavior
@@ -68,9 +68,8 @@ class ClassyModelWrapper:
     accessed by the `classy_model` attribute.
     """
 
-    # TODO: Make this torchscriptable by inheriting from nn.Module / ClassyModel
-
     def __init__(self, classy_model):
+        super().__init__()
         self.classy_model = classy_model
 
     def __getattr__(self, name):
